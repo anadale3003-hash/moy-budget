@@ -180,6 +180,10 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .month-strip .month-buttons button{width:40px;height:36px;flex:none;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-size:24px;line-height:1}
 .month-strip .month-buttons button:active{transform:scale(.96)}
 .month-strip #monthName{flex:1;text-align:center;font-size:15px!important;font-weight:750!important;min-width:0!important}
+
+/* v1.5.11: убираем лишнюю пустоту над сводкой на iPhone, оставляя отступ для строки состояния. */
+.hero{padding-top:max(38px, calc(env(safe-area-inset-top) - 10px))}
+.hero .hero-overview{margin-top:0}
 </style></head><body>
 <div class="app"><header class="hero"><div class="hero-overview"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div><div class="brand hero-brand">Мой бюджет</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini"><span>Накопления</span><b id="heroSavings">—</b></div><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
