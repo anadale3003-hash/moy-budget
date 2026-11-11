@@ -184,10 +184,31 @@ input[type=number]{font-variant-numeric:tabular-nums}
 /* v1.5.11: убираем лишнюю пустоту над сводкой на iPhone, оставляя отступ для строки состояния. */
 .hero{padding-top:max(38px, calc(env(safe-area-inset-top) - 10px))}
 .hero .hero-overview{margin-top:0}
+
+/* v1.5.12 — единое выравнивание раскрывающихся операций на iPhone. */
+#v-expense .operation-disclosure{width:100%;min-width:0}
+#v-expense .operation-disclosure > summary{
+  display:grid;grid-template-columns:minmax(0,1fr) auto 14px;
+  align-items:center;column-gap:10px;min-height:43px;padding:10px 13px;
+  line-height:1.3;font-size:12px;font-weight:700;
+}
+#v-expense .operation-disclosure > summary .disclosure-title{min-width:0;display:block;line-height:1.35;overflow-wrap:anywhere}
+#v-expense .operation-disclosure > summary .disclosure-count{
+  grid-column:2;min-width:20px;min-height:23px;padding:2px 7px;
+  display:inline-flex;align-items:center;justify-content:center;
+  border-radius:10px;color:var(--muted);background:var(--panel);
+  font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;
+}
+#v-expense .operation-disclosure > summary:after{
+  grid-column:3;justify-self:center;align-self:center;line-height:1;
+  margin:0;font-size:16px;
+}
+#v-expense .operation-disclosure > summary:not(:has(.disclosure-count)) .disclosure-title{grid-column:1 / 3}
+#v-expense .operation-disclosure .card{margin-top:0}
 </style></head><body>
 <div class="app"><header class="hero"><div class="hero-overview"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div><div class="brand hero-brand">Мой бюджет</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini"><span>Накопления</span><b id="heroSavings">—</b></div><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
-<section class="view active" id="v-home"><div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div><div class="section-heading"><h2>Мои конверты</h2><span class="quiet">План − расходы</span></div><div id="envelopes"></div><div class="actions"><button class="btn" data-go="expense">＋ Добавить покупку</button><button class="btn secondary" data-go="plan">Расчёт выплат</button><button class="btn secondary" id="quickIncome" type="button">＋ Доход</button><button class="btn secondary" id="quickEarly" type="button">↗ Погасить долг</button></div><div class="section-heading" style="margin-top:24px"><h2>Обязательства</h2></div><div id="obligations"></div></section>
+<section class="view active" id="v-home"><div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div><div class="section-heading"><h2>Мои конверты</h2><span class="quiet">План − расходы</span></div><div id="envelopes"></div><div class="actions"><button class="btn" data-go="expense">＋ Добавить расход</button><button class="btn secondary" data-go="plan">Расчёт выплат</button><button class="btn secondary" id="quickIncome" type="button">＋ Доход</button><button class="btn secondary" id="quickEarly" type="button">↗ Погасить долг</button></div><div class="section-heading" style="margin-top:24px"><h2>Обязательства</h2></div><div id="obligations"></div></section>
 <section class="view" id="v-plan"><div class="section-heading"><h2>Аванс и зарплата</h2><span class="pill">Авторасчёт</span></div><div class="card payment-inputs">
 <div class="payment-grid">
 <div class="payment-receipt"><label class="field payment-field" for="advance"><span>Аванс, ₽</span><input id="advance" inputmode="decimal" type="number" min="0" step="100" placeholder="Сумма аванса"></label><button class="btn full receipt-button" id="receiveAdvance" type="button">✓ Аванс поступил</button><div class="receipt-note" id="advanceReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoAdvance" type="button">↶ Отменить зачисление</button></div>
@@ -221,14 +242,14 @@ input[type=number]{font-variant-numeric:tabular-nums}
 </div></details>
 <details id="earlyHistoryPanel" class="compact-disclosure"><summary>История досрочных погашений <span id="earlyCount"></span></summary><div class="card" id="earlyHistory"></div></details>
 </section>
-<section class="view" id="v-expense"><div class="section-heading"><h2>Учёт покупок</h2><span class="pill">Фактические траты</span></div><div class="card"><form id="expenseForm"><div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure" id="transferPanel"><summary>⇄ Перевести между категориями</summary><div class="card"><form id="transferForm">
+<section class="view" id="v-expense"><div class="section-heading"><h2>Учёт расходов</h2><span class="pill">Фактические траты</span></div><div class="card"><form id="expenseForm"><div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
 <div class="two"><label class="field"><span>Откуда</span><select id="transferFrom"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Куда</span><select id="transferTo"><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label></div>
 <div class="two"><label class="field"><span>Сумма, ₽</span><input id="transferAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 5000"></label><label class="field"><span>Дата перевода</span><input id="transferDate" type="date" required></label></div>
 <label class="field"><span>Примечание (необязательно)</span><input id="transferNote" maxlength="120" placeholder="Остаток коммуналки"></label>
 <div class="foot" id="transferAvailable"></div><div class="foot">Перевод меняет только остатки категорий. Не учитывается как доход или расход. Делай запись после фактического перевода денег.</div><button type="submit" class="btn full">Перевести деньги</button>
 </form></div></details>
-<details class="compact-disclosure" id="transferHistoryPanel"><summary>История переводов <span id="transferCount"></span></summary><div class="card" id="transferList"></div></details>
-<details class="compact-disclosure income-disclosure" id="incomePanel"><summary>＋ Записать дополнительный доход</summary>
+<details class="compact-disclosure operation-disclosure" id="transferHistoryPanel"><summary><span class="disclosure-title">История переводов</span><span class="disclosure-count" id="transferCount">0</span></summary><div class="card" id="transferList"></div></details>
+<details class="compact-disclosure income-disclosure operation-disclosure" id="incomePanel"><summary><span class="disclosure-title">＋ Записать дополнительный доход</span></summary>
 <div class="card">
 <form id="incomeForm">
 <div class="two">
@@ -245,14 +266,14 @@ input[type=number]{font-variant-numeric:tabular-nums}
 <div class="foot">Записывай только фактически полученные деньги. Переводы между своими счетами не являются доходом. Премию, внесённую здесь, не учитывай второй раз в зарплате.</div>
 <button class="btn full" type="submit">Зачислить доход</button>
 </form></div></details>
-<details class="compact-disclosure" id="incomeHistoryPanel"><summary>История дополнительных доходов <span id="incomeCount"></span></summary><div class="card" id="incomeList"></div></details>
-<div class="card"><div class="row"><b>История за месяц</b><span class="quiet" id="expenseCount"></span></div><div id="expenseList"></div></div></section>
+<details class="compact-disclosure operation-disclosure" id="incomeHistoryPanel"><summary><span class="disclosure-title">История дополнительных доходов</span><span class="disclosure-count" id="incomeCount">0</span></summary><div class="card" id="incomeList"></div></details>
+</section>
 <section class="view" id="v-analytics">
 <div class="section-heading"><h2>Аналитика расходов</h2><span class="pill">Фактические траты</span></div>
 <div class="card compact-summary"><div class="row"><div><div class="quiet">Потрачено за месяц</div><div id="analyticsTotal" class="metric">0 ₽</div></div><div class="right"><div class="quiet">К прошлому месяцу</div><b id="analyticsChange">—</b></div></div><div class="tinyline"><span id="analyticsCount">0 покупок</span><span id="analyticsDaily">0 ₽ в день</span></div></div>
 <div class="card compact-summary"><div class="row"><div><div class="quiet">Получено за месяц</div><div id="analyticsIncomeTotal" class="metric">0 ₽</div></div><div class="right"><div class="quiet">Дополнительные доходы</div><b id="analyticsExtraIncome">0 ₽</b></div></div><div class="tinyline"><span>Зарплата, аванс и другие поступления</span><span id="analyticsNet">Баланс 0 ₽</span></div></div>
 <div class="card analytics-card"><div class="row"><b>Основные категории</b><span class="quiet">Доля расходов</span></div><div id="analyticsCategories"></div></div>
-<div class="card analytics-card"><div class="row"><b>На что уходят деньги</b><span class="quiet">По видам покупок</span></div><div id="analyticsTypes"></div></div>
+<div class="card analytics-card"><div class="row"><b>На что уходят деньги</b><span class="quiet">По видам расходов</span></div><div id="analyticsTypes"></div></div>
 <details class="compact-disclosure"><summary>Сравнение месяцев и полная детализация</summary><div class="card"><b>Последние 6 месяцев</b><div id="analyticsMonths"></div><div class="divider"></div><b>Все виды расходов</b><div id="analyticsAllTypes"></div></div></details>
 </section>
 <section class="view" id="v-settings">
@@ -501,15 +522,15 @@ const earlyRows=(data.earlyRepayments||[]).filter(x=>x.date?.startsWith(month)).
 $('earlyCount').textContent='· '+earlyRows.length;
 $('earlyHistory').innerHTML=earlyRows.length?earlyRows.map(x=>`<div class="transaction"><div><b>${x.target==='credit'?'Кредитная карта':'Ипотека'}</b><small>${esc(x.date)} · Из накоплений${x.note?' · '+esc(x.note):''}</small></div><div class="row"><b>${rub(x.amount)}</b><button class="delete" type="button" data-del-early="${esc(x.id)}" title="Удалить запись">✕</button></div></div>`).join(''):'<div class="empty">Нет досрочных погашений за месяц</div>';
 const transferRows=(data.transfers||[]).filter(t=>t.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
-$('transferCount').textContent='· '+transferRows.length;
+$('transferCount').textContent=String(transferRows.length);
 $('transferList').innerHTML=transferRows.length?transferRows.map(t=>{const from=cats.find(c=>c.id===t.from)?.name||'Категория',to=cats.find(c=>c.id===t.to)?.name||'Категория';return `<div class="transaction"><div><b>${esc(from)} → ${esc(to)}</b><small>${esc(t.date)}${t.note?' · '+esc(t.note):''}</small></div><div class="row"><b>${rub(t.amount)}</b><button type="button" class="delete" data-del-transfer="${esc(t.id)}" title="Отменить перевод">✕</button></div></div>`}).join(''):'<div class="empty">За этот месяц переводов нет</div>';
 const incomeRows=data.extraIncomes.filter(i=>i.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
-$('incomeCount').textContent='· '+incomeRows.length;
+$('incomeCount').textContent=String(incomeRows.length);
 $('incomeList').innerHTML=incomeRows.length?incomeRows.map(i=>{
  const cat=cats.find(c=>c.id===i.destination),dest=cat?.name||(i.destination==='mortgage'?'Ипотека':'Кредитная карта');
  return `<div class="transaction"><div><b>${esc(i.source)}</b><small>${esc(i.date)} · ${esc(dest)}${i.note?' · '+esc(i.note):''}</small></div><div class="row"><b style="color:var(--green)">+${rub(i.amount)}</b><button type="button" class="delete" data-del-income="${esc(i.id)}" title="Удалить доход">✕</button></div></div>`;
 }).join(''):'<div class="empty">Пока нет дополнительных доходов за месяц</div>';
-const rows=data.expenses.filter(e=>e.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));$('expenseCount').textContent=rows.length+' операций';$('expenseList').innerHTML=rows.length?rows.map(e=>{const c=cats.find(c=>c.id===e.category);return `<div class="transaction"><div><b>${esc(e.note||e.type||c?.name||'Покупка')}</b><small>${esc(e.date)} · ${esc(c?.name||'Категория')}${e.type?' · '+esc(e.type):''}</small></div><div class="row"><b>${rub(e.amount)}</b><button class="delete" data-del="${esc(e.id)}" title="Удалить">✕</button></div></div>`}).join(''):'<div class="empty">Пока нет покупок за выбранный месяц</div>';}
+const rows=data.expenses.filter(e=>e.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));$('expenseCount').textContent=String(rows.length);$('expenseList').innerHTML=rows.length?rows.map(e=>{const c=cats.find(c=>c.id===e.category);return `<div class="transaction"><div><b>${esc(e.note||e.type||c?.name||'Покупка')}</b><small>${esc(e.date)} · ${esc(c?.name||'Категория')}${e.type?' · '+esc(e.type):''}</small></div><div class="row"><b>${rub(e.amount)}</b><button class="delete" data-del="${esc(e.id)}" title="Удалить">✕</button></div></div>`}).join(''):'<div class="empty">Пока нет расходов за выбранный месяц</div>';}
 
 function analyticsRender(){
 const rows=data.expenses.filter(e=>e.date?.startsWith(month));const total=rows.reduce((s,e)=>s+num(e.amount),0);
@@ -521,7 +542,7 @@ const allIncome=extraIncome+wagesReceived;
 $('analyticsIncomeTotal').textContent=rub(allIncome);
 $('analyticsExtraIncome').textContent=rub(extraIncome);
 $('analyticsNet').textContent='Доходы − расходы: '+rub(allIncome-total);
-$('analyticsTotal').textContent=rub(total);$('analyticsCount').textContent=rows.length+' покупок';
+$('analyticsTotal').textContent=rub(total);$('analyticsCount').textContent=rows.length+' расходов';
 const isCurrent=month===currentMonth;const denominator=isCurrent?today.getDate():new Date(y,m,0).getDate();
 $('analyticsDaily').textContent=rub(total/Math.max(1,denominator))+' в день';
 $('analyticsChange').textContent=!previous?'Нет данных':(total>=previous?'+':'−')+Math.abs(Math.round((total-previous)/previous*100))+'%';
@@ -541,7 +562,7 @@ const wrap=(el,label)=>{if(!el||el.parentElement?.tagName==='DETAILS')return;con
 const byView=(view,index,label)=>wrap(document.querySelectorAll('#v-'+view+' > .card')[index],label);
 byView('plan',2,'Изменить пропорции распределения');
 byView('card',1,'График всех платежей');
-byView('expense',1,'История покупок за месяц');
+// История расходов уже оформлена раскрывающейся секцией сразу после формы.
 
 const settings=[...document.querySelectorAll('#v-settings > .card')];
 // Match panels by their own heading, not by their order: the salary settings card
@@ -658,7 +679,7 @@ let type=$('expenseType').value;if(type==='__new__'){type=$('newExpenseType').va
 if(!type){alert('Выбери вид расхода');return;}
 const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===type.toLocaleLowerCase('ru'));if(existing)type=existing;else data.expenseTypes[category].push(type);
 data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);renderAll()};
-$('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b||!confirm('Удалить эту покупку?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
+$('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b||!confirm('Удалить этот расход?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
