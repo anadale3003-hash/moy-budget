@@ -238,8 +238,12 @@ input[type=number]{font-variant-numeric:tabular-nums}
 </style></head><body>
 <div class="app"><header class="hero"><div class="hero-overview"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div><div class="brand hero-brand">Мой бюджет</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini"><span>Накопления</span><b id="heroSavings">—</b></div><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
-<section class="view active" id="v-home"><div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div><div class="section-heading"><h2>Мои конверты</h2><span class="quiet">План − расходы</span></div><div id="envelopes"></div><div class="actions"><button class="btn" data-go="expense">＋ Добавить расход</button><button class="btn secondary" data-go="plan">Расчёт выплат</button><button class="btn secondary" id="quickIncome" type="button">＋ Доход</button><button class="btn secondary" id="quickEarly" type="button">↗ Погасить долг</button></div><div class="section-heading" style="margin-top:24px"><h2>Обязательства</h2></div><div id="obligations"></div></section>
-<section class="view" id="v-plan"><div class="section-heading"><h2>Аванс и зарплата</h2><span class="pill">Авторасчёт</span></div><div class="card payment-inputs">
+<section class="view active" id="v-home">
+
+<div class="section-heading" style="margin-top:20px"><h2>Ближайшие обязательства</h2></div><div id="obligations"></div>
+<div class="home-envelopes-visible" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты и остатки</h2><span class="quiet">План − расходы</span></div><div id="envelopes"></div></div>
+</section>
+<section class="view" id="v-plan"><div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div><div class="section-heading"><h2>Аванс и зарплата</h2><span class="pill">Авторасчёт</span></div><div class="card payment-inputs">
 <div class="payment-grid">
 <div class="payment-receipt"><label class="field payment-field" for="advance"><span>Аванс, ₽</span><input id="advance" inputmode="decimal" type="number" min="0" step="100" placeholder="Сумма аванса"></label><button class="btn full receipt-button" id="receiveAdvance" type="button">✓ Аванс поступил</button><div class="receipt-note" id="advanceReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoAdvance" type="button">↶ Отменить зачисление</button></div>
 <div class="payment-receipt"><label class="field payment-field" for="salary"><span>Зарплата (факт), ₽</span><input id="salary" inputmode="decimal" type="number" min="0" step="100" placeholder="Когда будет известна"></label><button class="btn full receipt-button secondary" id="receiveSalary" type="button">✓ Зарплата поступила</button><div class="receipt-note" id="salaryReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoSalary" type="button">↶ Отменить зачисление</button></div>
@@ -646,7 +650,7 @@ for(const id of ['debt','reserved'])$(id).addEventListener('input',e=>{data[id]=
 $('deadline').addEventListener('change',e=>{data.deadline=e.target.value;render();save()});
 for(const c of cats)$('weight-'+c.id).addEventListener('input',e=>{data.weights[c.id]=num(e.target.value);render();save()});
 $('earlyDate').value=iso(today);
-$('quickEarly').addEventListener('click',()=>{go('card');$('earlyPanel').open=true;});
+
 $('earlyForm').addEventListener('submit',e=>{
  e.preventDefault();
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках.');go('settings');return;}
@@ -699,7 +703,7 @@ $('transferList').addEventListener('click',e=>{
  data.transfers=data.transfers.filter(t=>t.id!==b.dataset.delTransfer);renderAll();
 });
 $('incomeDate').value=iso(today);
-$('quickIncome').addEventListener('click',()=>{go('expense');$('incomePanel').open=true;setTimeout(()=>$('incomeAmount').focus(),0);});
+
 $('incomeForm').addEventListener('submit',e=>{
  e.preventDefault();
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках, чтобы правильно учитывать доходы.');go('settings');return;}
@@ -727,7 +731,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.6';
+const APP_VERSION='1.5.14';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
