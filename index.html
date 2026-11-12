@@ -1023,6 +1023,7 @@ function setup(){
   // Credit form follows its heading in the original source.
   const creditField=document.getElementById('debt');
   const creditCard=creditField?.closest('.card');
+  if(pay)section.insertBefore(pay,section.firstElementChild);
   if(pay)group(section,'Фактическая оплата',[pay],'credit-payments-group');
   if(mortgage)group(section,'Ипотека',[mortgage],'credit-mortgage-group');
   if(creditCard){creditCard.classList.add('credit-basic-card');group(section,'Кредитка',[creditCard],'credit-balance-group')}
