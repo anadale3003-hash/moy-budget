@@ -1678,6 +1678,31 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
  button.budget-action-saved:not(:disabled){animation:none}
  .budget-save-toast.is-visible .budget-save-symbol path{stroke-dashoffset:0}
 }
+
+/* v1.5.41: prominently visible confirmation on iPhone and in overlay dialogs. */
+.budget-save-toast{
+ top:42%!important;bottom:auto!important;
+ min-width:min(230px,calc(100vw - 40px));max-width:calc(100vw - 32px);
+ min-height:66px;padding:12px 19px 12px 14px;
+ gap:12px;border-radius:20px;
+ font-size:16px;font-weight:820;letter-spacing:-.15px;
+ background:color-mix(in srgb,var(--card) 88%,#22ab7d 12%);
+ border:2px solid color-mix(in srgb,#24a87c 58%,var(--line));
+ box-shadow:0 16px 50px #00000042,0 5px 15px #00000020;
+}
+.budget-save-toast .budget-save-symbol{
+ width:42px;height:42px;flex:0 0 42px;
+ box-shadow:0 0 0 4px color-mix(in srgb,#219d76 20%,transparent);
+}
+.budget-save-toast .budget-save-symbol svg{width:26px;height:26px}
+@media(orientation:landscape){
+ .budget-save-toast{top:36%!important;bottom:auto!important;min-height:54px;padding:8px 13px}
+ .budget-save-toast .budget-save-symbol{width:36px;height:36px;flex-basis:36px}
+ .budget-save-toast .budget-save-symbol svg{width:23px;height:23px}
+}
+@media(max-height:570px) and (orientation:portrait){
+ .budget-save-toast{top:30%!important}
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -2091,12 +2116,18 @@ const SAVE_CHANGE_MESSAGES={
  advanceDate:'Дата аванса сохранена',
  salaryDate:'Дата зарплаты сохранена'
 };
-let saveFeedbackIntent=null,saveFeedbackHideTimer=null;
+let saveFeedbackIntent=null,saveFeedbackHideTimer=null,saveFeedbackFinishTimer=null,saveFeedbackClearTimer=null;
 function stageSaveFeedback(message,button){
  const intent={message,button};
  saveFeedbackIntent=intent;
- // Only synchronous operations in the original click/submit/change count.
- Promise.resolve().then(()=>{if(saveFeedbackIntent===intent)saveFeedbackIntent=null});
+ // Do not use a Promise microtask here: Safari can run a microtask checkpoint
+ // BETWEEN document capture listeners and the form/button's own handler.
+ // Clear an unused intent only after the entire user action has finished.
+ if(saveFeedbackClearTimer!==null)clearTimeout(saveFeedbackClearTimer);
+ saveFeedbackClearTimer=setTimeout(()=>{
+  if(saveFeedbackIntent===intent)saveFeedbackIntent=null;
+  saveFeedbackClearTimer=null;
+ },0);
 }
 document.addEventListener('click',e=>{
  const button=e.target.closest?.('button');
@@ -2119,16 +2150,21 @@ document.addEventListener('change',e=>{
 function showSaveFeedback(message,button){
  const toast=$('budgetSaveToast'),label=$('budgetSaveLabel');
  if(!toast||!label)return;
- if(saveFeedbackHideTimer)clearTimeout(saveFeedbackHideTimer);
+ if(saveFeedbackHideTimer!==null)clearTimeout(saveFeedbackHideTimer);
+ if(saveFeedbackFinishTimer!==null)clearTimeout(saveFeedbackFinishTimer);
  label.textContent=message||'Сохранено';
  toast.hidden=false;
  toast.classList.remove('is-visible');
+ // Start immediately after a forced style flush; no reliance on a potentially
+ // throttled iOS requestAnimationFrame after a sheet or keyboard closes.
  void toast.offsetWidth;
- requestAnimationFrame(()=>toast.classList.add('is-visible'));
+ toast.classList.add('is-visible');
  saveFeedbackHideTimer=setTimeout(()=>{
    toast.classList.remove('is-visible');
-   setTimeout(()=>{if(!toast.classList.contains('is-visible'))toast.hidden=true},300);
- },2200);
+   saveFeedbackFinishTimer=setTimeout(()=>{
+     if(!toast.classList.contains('is-visible'))toast.hidden=true;
+   },350);
+ },2350);
  if(button?.classList&&button.isConnected){
    button.classList.remove('budget-action-saved');
    void button.offsetWidth;
@@ -2141,10 +2177,12 @@ function save(){
    localStorage.setItem(KEY,JSON.stringify(data));
    const intent=saveFeedbackIntent;
    saveFeedbackIntent=null;
+   if(saveFeedbackClearTimer!==null){clearTimeout(saveFeedbackClearTimer);saveFeedbackClearTimer=null;}
    if(intent)showSaveFeedback(intent.message,intent.button);
    return true;
  }catch(_){
    saveFeedbackIntent=null;
+   if(saveFeedbackClearTimer!==null){clearTimeout(saveFeedbackClearTimer);saveFeedbackClearTimer=null;}
    alert('Не удалось сохранить данные. Сделай резервную копию.');
    return false;
  }
@@ -2910,7 +2948,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.40 · тест';
+const APP_VERSION='1.5.41 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
