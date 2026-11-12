@@ -3440,7 +3440,7 @@ function analyticsModalOpen(page){
    stats:['analyticsModalStats','Детали операций']};
  if(!map[page])return;
  for(const key of Object.keys(map))$(map[key][0]).hidden=page!==key;
- $('analyticsSheetTitle').textContent=map[page][1];
+ $('analyticsSheetTitle').textContent=page==='stats'?'Детали · '+$('operationsMonthName').textContent:map[page][1];
  if(page==='transfer'||page==='economy'||page==='capital')ladderRender();
  if(page==='stats')analyticsReportRender();
  if(page==='plan')savingsPlanOpen();
