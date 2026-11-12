@@ -943,6 +943,29 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  #v-plan.active .payment-receipt .receipt-button{min-height:28px!important}
  #v-card.active .design-group>.card{padding:5px 7px!important}
 }
+
+/* v1.5.24 TEST: safe top clearance for scrollable Expenses, Analytics, Settings.
+   Keep scrolling available for long forms / reports; Home, Payouts and Credits unchanged. */
+.app:has(#v-expense.active)>.main,
+.app:has(#v-analytics.active)>.main,
+.app:has(#v-settings.active)>.main{
+  padding-top:calc(max(10px,env(safe-area-inset-top)) + 10px)!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:contain;
+}
+#v-expense.active,
+#v-analytics.active,
+#v-settings.active{
+  overflow:visible!important;
+  height:auto!important;
+  min-height:100%!important;
+}
+#v-expense.active>.design-group:first-child,
+#v-analytics.active>.design-group:first-child,
+#v-settings.active>.design-group:first-child{
+  margin-top:0!important;
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1753,7 +1776,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.23 · тест';
+const APP_VERSION='1.5.24 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
