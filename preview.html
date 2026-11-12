@@ -2799,9 +2799,10 @@ const wagesReceived=data.receipts.filter(r=>r.date?.startsWith(month)).reduce((a
 const allIncome=extraIncome+wagesReceived;
 const wageRows=data.receipts.filter(r=>r.date?.startsWith(month));
 const incomeRows=data.extraIncomes.filter(r=>r.date?.startsWith(month));
-$('operationsMonthName').textContent=new Date(y,m-1,1).toLocaleDateString('ru-RU',{month:'short',year:'numeric'}).replace(/\.$/,'');
-$('operationsExpenseItems').textContent=rows.length+' '+(rows.length===1?'запись расхода':'записей расходов');
-$('operationsIncomeItems').textContent=(wageRows.length+incomeRows.length)+' поступлений';
+$('operationsMonthName').textContent=new Date(y,m-1,1).toLocaleDateString('ru-RU',{month:'short'}).replace(/\.$/,'')+' '+y;
+$('operationsExpenseItems').textContent=rows.length+' '+(rows.length%10===1&&rows.length%100!==11?'запись':rows.length%10>=2&&rows.length%10<=4&&(rows.length%100<12||rows.length%100>14)?'записи':'записей')+' расходов';
+const incomeCount=wageRows.length+incomeRows.length;
+$('operationsIncomeItems').textContent=incomeCount+' '+(incomeCount%10===1&&incomeCount%100!==11?'поступление':incomeCount%10>=2&&incomeCount%10<=4&&(incomeCount%100<12||incomeCount%100>14)?'поступления':'поступлений');
 $('analyticsCount').textContent=(wageRows.length+incomeRows.length)+' поступлений';
 $('opsModalExpense').textContent=rub(total);
 $('opsModalIncome').textContent=rub(allIncome);
