@@ -1392,6 +1392,19 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  .analytics-bottom-link{display:none}
 }
 @media(max-height:560px){.analytics-sheet-head{padding:7px 12px}.analytics-sheet-page{padding:8px 12px;gap:6px}.analytics-sheet-page .field{margin:3px 0}.analytics-sheet-page input,.analytics-sheet-page select{min-height:35px;padding:6px 8px}.analytics-sheet-page .btn.full{min-height:35px}.analytics-full-list .analytics-economy-row{padding:6px}.analytics-stats-block .analytics-line{margin-top:5px}}
+
+/* Prevent the previous landscape app-level scrolling rule from overriding
+   the new Analytics single-screen grid. The navigation remains fixed. */
+@media(orientation:landscape){
+ .app:has(#v-analytics.active){
+   padding:0!important;max-height:100dvh!important;height:100dvh!important;
+   overflow:hidden!important;
+ }
+ .app:has(#v-analytics.active)>.main{
+   box-sizing:border-box!important;height:100dvh!important;max-height:100dvh!important;
+   overflow:hidden!important;
+ }
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
