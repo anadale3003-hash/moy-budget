@@ -1243,6 +1243,39 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 @media (orientation: portrait){
  .app,.app>.main{scroll-behavior:auto!important;overflow-anchor:none}
 }
+
+/* v1.5.31 TEST — capital ladder, savings comparison, guarded manual transfer */
+#v-analytics .ladder-group{padding:10px!important;margin:12px 0 16px!important}
+#v-analytics .ladder-group>.section-heading{margin:3px 2px 10px!important;gap:7px}
+#v-analytics .ladder-group>.section-heading h2{font-size:17px!important}
+#v-analytics .ladder-group .pill{white-space:nowrap}
+.ladder-card{padding:14px!important;margin:0 0 12px!important;min-width:0}
+.ladder-card:last-child{margin-bottom:0!important}
+.ladder-top{display:grid;grid-template-columns:1.2fr 1fr;gap:7px;align-items:end}
+.ladder-top>div{min-width:0}
+.ladder-top strong{display:block;font-size:clamp(16px,4.2vw,21px);margin-top:6px;white-space:nowrap;font-variant-numeric:tabular-nums;line-height:1.2}
+.ladder-top .ladder-total{font-size:clamp(22px,5.6vw,29px)}
+.ladder-goal{text-align:right}
+.ladder-track{height:12px;background:var(--panel);border:1px solid var(--line);overflow:hidden;border-radius:20px;margin:15px 0 8px}
+.ladder-track>div{height:100%;width:0%;background:var(--blue);border-radius:20px;transition:width .2s ease}
+.ladder-breakdown{padding:9px 10px;margin:12px 0;background:var(--panel);border-radius:12px}
+.ladder-breakdown>div{display:flex;justify-content:space-between;gap:8px;padding:4px 0;font-size:12px;align-items:center}
+.ladder-breakdown b{font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ladder-settings{border:1px solid var(--line);border-radius:12px;margin-top:12px}
+.ladder-settings summary{padding:11px;font-size:13px;cursor:pointer}
+.ladder-settings form{padding:0 12px 13px}
+.ladder-check{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.3;margin:10px 0}
+.ladder-check input{width:18px;height:18px;flex:0 0 18px;margin:0}
+.ladder-card>.row{gap:7px;align-items:baseline}
+.ladder-card>.row .quiet{font-size:11px;text-align:right}
+.ladder-card .field{margin:12px 0}
+.ladder-card .field>span{font-size:13px}
+.ladder-card input[type=number],.ladder-card select{font-size:16px!important;min-height:44px;box-sizing:border-box;width:100%;min-width:0}
+.ladder-saving{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:11px;background:var(--panel);border-radius:12px;font-size:13px;margin:11px 0}
+.ladder-saving strong{font-size:clamp(17px,4.8vw,23px);white-space:nowrap;font-variant-numeric:tabular-nums}
+.ladder-card .btn.full{min-height:44px;margin:10px 0}
+.ladder-card .btn:disabled{opacity:.5}
+@media(max-width:370px){.ladder-card{padding:11px!important}.ladder-top strong{font-size:15px}.ladder-top .ladder-total{font-size:20px}.ladder-card>.row{display:block}}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1335,6 +1368,37 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 <div class="card analytics-card"><div class="row"><b>Основные категории</b><span class="quiet">Доля расходов</span></div><div id="analyticsCategories"></div></div>
 <div class="card analytics-card"><div class="row"><b>На что уходят деньги</b><span class="quiet">По видам расходов</span></div><div id="analyticsTypes"></div></div>
 <details class="compact-disclosure"><summary>Сравнение месяцев и полная детализация</summary><div class="card"><b>Последние 6 месяцев</b><div id="analyticsMonths"></div><div class="divider"></div><b>Все виды расходов</b><div id="analyticsAllTypes"></div></div></details>
+<div class="design-group ladder-group" id="ladderPanel">
+ <div class="section-heading"><h2>🎯 Лестница капитала</h2><span class="pill" id="ladderBadge">Цель: 1 млн ₽</span></div>
+ <div class="card ladder-card">
+  <div class="ladder-top"><div><span class="quiet">Уже накоплено</span><strong class="ladder-total" id="ladderTotal">—</strong></div><div class="ladder-goal"><span class="quiet">Следующая ступень</span><strong id="ladderGoal">1 000 000 ₽</strong></div></div>
+  <div class="ladder-track" role="progressbar" aria-label="Прогресс накоплений" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ladderTrack"><div id="ladderFill"></div></div>
+  <div class="foot" id="ladderRemaining">До цели осталось —</div>
+  <div class="ladder-breakdown"><div><span>🛡 Неприкосновенная подушка</span><b id="ladderReserve">500 000 ₽</b></div><div><span>🏦 Сверх подушки</span><b id="ladderExtra">—</b></div></div>
+  <div class="foot" id="ladderNote"></div>
+  <details class="compact-disclosure ladder-settings"><summary>⚙ Настроить подушку</summary>
+    <form id="ladderSettingsForm">
+     <label class="field"><span>Размер подушки, ₽</span><input id="ladderReserveInput" type="number" inputmode="decimal" step="100" min="0" required value="500000"></label>
+     <label class="ladder-check"><input id="ladderIncluded" type="checkbox"><span>Подушка уже входит в остаток категории «Накопления»</span></label>
+     <p class="foot">Если подушка уже учтена в накоплениях, включи переключатель, чтобы не посчитать её дважды.</p>
+     <button class="btn secondary full" type="submit">Сохранить настройки цели</button>
+    </form>
+  </details>
+ </div>
+ <div class="card ladder-card">
+  <div class="row"><b>💡 Найденная экономия</b><span class="quiet" id="ladderPeriod">По сравнению с прошлым месяцем</span></div>
+  <p class="foot">Это снижение записанных расходов, а не дополнительный доход. Переносить можно только свободный остаток.</p>
+  <label class="field"><span>Категория</span><select id="ladderSource"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label>
+  <div class="ladder-saving"><span>Расходы сократились на</span><strong id="ladderSaving">—</strong></div>
+  <div class="foot" id="ladderCompare">Для сравнения нужна история расходов.</div>
+  <form id="ladderTransferForm">
+   <label class="field"><span>Перевести в «Накопления», ₽</span><input id="ladderTransferAmount" type="number" inputmode="decimal" step="0.01" min="0.01" placeholder="Сумма" required></label>
+   <div class="foot" id="ladderTransferLimit"></div>
+   <button class="btn full" id="ladderTransferButton" type="submit" disabled>Перевести экономию в накопления</button>
+  </form>
+  <p class="foot">Сначала переведи деньги в банке, затем запиши перевод здесь. Ипотечные и кредитные резервы не используются.</p>
+ </div>
+</div>
 </section>
 <section class="view" id="v-settings">
 <div class="section-heading"><h2>Настройки</h2><span class="pill">v1.5.0</span></div>
@@ -1484,6 +1548,7 @@ if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];
 if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];
 if(!Array.isArray(data.transfers))data.transfers=[];
 if(!Array.isArray(data.regularPayments))data.regularPayments=[];
+if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
 if(!data.salaryConfig||typeof data.salaryConfig!=='object')data.salaryConfig={base:0,mode:'gross',taxRate:13};
 if(data.salaryConfig.taxRate===undefined)data.salaryConfig.taxRate=13;
 if(typeof data.paidMortgageMonth!=='string')data.paidMortgageMonth='';
@@ -1819,6 +1884,64 @@ $('incomeList').innerHTML=incomeRows.length?incomeRows.map(i=>{
 }).join(''):'<div class="empty">Пока нет дополнительных доходов за месяц</div>';
 const rows=data.expenses.filter(e=>e.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));$('expenseCount').textContent=String(rows.length);$('expenseList').innerHTML=rows.length?rows.map(e=>{const c=cats.find(c=>c.id===e.category);return `<div class="transaction"><div><b>${esc(e.note||e.type||c?.name||'Покупка')}</b><small>${esc(e.date)} · ${esc(c?.name||'Категория')}${e.type?' · '+esc(e.type):''}</small></div><div class="row"><b>${rub(e.amount)}</b><button class="delete" data-del="${esc(e.id)}" title="Удалить">✕</button></div></div>`}).join(''):'<div class="empty">Пока нет расходов за выбранный месяц</div>';}
 
+
+/* Capital goals use the existing savings category, plus any external protected deposit. */
+function ladderSettings(){
+ if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
+ return data.ladder;
+}
+function ladderEconomy(source){
+ const todayISO=iso(new Date()),selected=month;
+ if(selected>currentMonth)return {error:'Этот месяц ещё не наступил.',max:0};
+ const [y,m]=selected.split('-').map(Number),prev=iso(new Date(y,m-2,1)).slice(0,7);
+ const limit=selected===currentMonth?new Date().getDate():31;
+ const previousLimit=selected===currentMonth?Math.min(limit,new Date(y,m-1,0).getDate()):31;
+ const prevRows=data.expenses.filter(x=>x.category===source&&x.date?.startsWith(prev)&&Number(x.date.slice(8,10))<=previousLimit);
+ if(!prevRows.length)return {error:'Нет записей за сопоставимый период прошлого месяца.',max:0};
+ const last=prevRows.reduce((v,x)=>v+num(x.amount),0);
+ const now=data.expenses.filter(x=>x.category===source&&x.date?.startsWith(selected)&&Number(x.date.slice(8,10))<=limit).reduce((v,x)=>v+num(x.amount),0);
+ const saved=(data.transfers||[]).filter(t=>t.kind==='economy'&&t.from===source&&t.to==='savings'&&t.period===selected).reduce((v,x)=>v+num(x.amount),0);
+ const delta=Math.max(0,Math.round((last-now)*100)/100);
+ const remaining=Math.max(0,Math.round((delta-saved)*100)/100);
+ const balance=categoryBalanceAt(source,todayISO);
+ const max=selected===currentMonth&&balance!==null?Math.max(0,Math.floor(Math.min(remaining,balance)*100)/100):0;
+ return {last,now,delta,saved,remaining,balance,max};
+}
+function ladderRender(){
+ const settings=ladderSettings(),reserve=num(settings.reserve);
+ const current=categoryBalanceAt('savings',iso(new Date()));
+ const booked=current===null?0:Math.max(0,current);
+ const extra=settings.included?Math.max(0,booked-reserve):booked;
+ const total=reserve+extra,goal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
+ const base=total<1000000?0:goal-500000;
+ const progress=Math.max(0,Math.min(100,Math.round((total-base)/(goal-base)*100)));
+ $('ladderTotal').textContent=rub(total);
+ $('ladderGoal').textContent=rub(goal);
+ $('ladderBadge').textContent='Цель: '+rub(goal);
+ $('ladderReserve').textContent=rub(reserve);
+ $('ladderExtra').textContent=current===null?'—':rub(extra);
+ $('ladderRemaining').textContent='До цели осталось '+rub(goal-total)+' · '+progress+'%';
+ $('ladderFill').style.width=progress+'%';
+ $('ladderTrack').setAttribute('aria-valuenow',progress);
+ $('ladderNote').textContent=current===null?'Дополнительные накопления появятся после ввода стартовых остатков.':
+   settings.included?'Подушка уже включена в конверт — повторно её не прибавляем.':
+   'Подушка считается отдельно. Если она уже в конверте «Накопления», включи переключатель ниже.';
+ if(document.activeElement!==$('ladderReserveInput'))$('ladderReserveInput').value=reserve;
+ $('ladderIncluded').checked=!!settings.included;
+ const e=ladderEconomy($('ladderSource').value);
+ $('ladderPeriod').textContent=month===currentMonth?'Те же дни месяца':'Полные месяцы';
+ $('ladderSaving').textContent=e.error?'—':rub(e.delta);
+ $('ladderCompare').textContent=e.error?e.error:
+   'Прошлый месяц: '+rub(e.last)+' · выбранный: '+rub(e.now)+(e.saved?' · уже переведено: '+rub(e.saved):'');
+ $('ladderTransferLimit').textContent=month!==currentMonth?'Перевод возможен только из текущего месяца.':
+   e.error?e.error:current===null?'Сначала укажи стартовые остатки.':
+   'Максимум '+rub(e.max)+' · доступно в исходной категории '+rub(Math.max(0,e.balance||0))+'. Можно оставить часть на будущие покупки.';
+ $('ladderTransferButton').disabled=!e.max;
+ $('ladderTransferAmount').max=String(e.max);
+ if(!Number($('ladderTransferAmount').value)||Number($('ladderTransferAmount').value)>e.max)
+   $('ladderTransferAmount').value=e.max?String(e.max):'';
+}
+
 function analyticsRender(){
 const rows=data.expenses.filter(e=>e.date?.startsWith(month));const total=rows.reduce((s,e)=>s+num(e.amount),0);
 const y=Number(month.slice(0,4)),m=Number(month.slice(5,7));const prev=iso(new Date(y,m-2,1)).slice(0,7);
@@ -1842,6 +1965,7 @@ $('analyticsTypes').innerHTML=ordered.length?ordered.slice(0,3).map(x=>bar(x.nam
 $('analyticsAllTypes').innerHTML=ordered.length?ordered.map(x=>`<div class="lineitem"><span>${esc(x.name)}</span><span>${rub(x.amount)}</span></div>`).join(''):'<div class="empty">Пока нет данных</div>';
 const vals=[];for(let i=5;i>=0;i--){const key=iso(new Date(y,m-1-i,1)).slice(0,7);const v=data.expenses.filter(e=>e.date?.startsWith(key)).reduce((s,e)=>s+num(e.amount),0);vals.push({key,v});}
 const peak=Math.max(1,...vals.map(x=>x.v));$('analyticsMonths').innerHTML=vals.map(x=>bar(new Date(x.key+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'short',year:'2-digit'}),x.v,peak)).join('');
+ladderRender();
 }
 function setupCompactPanels(){
 // Hide secondary information behind disclosure, keep key controls directly visible.
@@ -2053,7 +2177,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.30 · тест';
+const APP_VERSION='1.5.31 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -2325,6 +2449,39 @@ $('applyUpdate').addEventListener('click',async()=>{
     if(reg){await reg.update();pendingWorker=reg.waiting||reg.installing;if(pendingWorker?.state==='installed')pendingWorker.postMessage({type:'SKIP_WAITING'});}
   }
   location.replace('./index.html?refresh='+Date.now());
+});
+
+
+$('ladderSettingsForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const n=Number($('ladderReserveInput').value);
+ if(!Number.isFinite(n)||n<0){alert('Укажи корректную сумму подушки.');return;}
+ const settings=ladderSettings();
+ settings.reserve=Math.round(n*100)/100;settings.included=$('ladderIncluded').checked;
+ renderAll();alert('Настройки накоплений сохранены.');
+});
+$('ladderSource').addEventListener('change',()=>{
+ $('ladderTransferAmount').value='';ladderRender();
+});
+$('ladderTransferForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ if(month!==currentMonth){alert('Выбери текущий месяц.');return;}
+ if(!data.startBalances||data.startBalances.date>iso(new Date())){alert('Сначала укажи стартовые остатки.');return;}
+ const source=$('ladderSource').value,amount=Number($('ladderTransferAmount').value);
+ if(!['family','utilities','other'].includes(source)||!Number.isFinite(amount)||amount<=0)return;
+ const estimate=ladderEconomy(source);
+ if(amount>estimate.max+0.001){alert('Недостаточно свободного остатка или экономии.');ladderRender();return;}
+ const name=cats.find(x=>x.id===source).name;
+ if(!confirm('Записать перевод '+rub(amount)+' из «'+name+'» в «Накопления»?\n\nПриложение не переводит деньги в банке. Сначала выполни реальный перевод.'))return;
+ const fresh=ladderEconomy(source);
+ if(amount>fresh.max+0.001){alert('Остаток изменился. Проверь сумму.');ladderRender();return;}
+ data.transfers.push({
+   id:'tr-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
+   from:source,to:'savings',date:iso(new Date()),
+   amount:Math.round(amount*100)/100,note:'Экономия за '+month,kind:'economy',period:month
+ });
+ $('ladderTransferAmount').value='';renderAll();
+ alert('Перевод записан в истории операций.');
 });
 
 setupCompactPanels();initTheme();renderAll();
