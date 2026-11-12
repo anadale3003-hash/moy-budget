@@ -1733,11 +1733,11 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
 #v-expense .operations-quick button:first-child{background:color-mix(in srgb,var(--card) 84%,#ed8575)}
 #v-expense .operations-quick button:nth-child(2){background:color-mix(in srgb,var(--card) 84%,#4db78c)}
 #v-expense .operations-quick button:nth-child(3){background:color-mix(in srgb,var(--card) 87%,#758db8)}
-#v-expense .operations-period-tools{display:flex;align-items:center;gap:5px;min-width:0;margin:0 0 3px}
-#v-expense .operations-period-tools span{font-size:11px;font-weight:700;color:var(--muted);margin-right:auto}
-#v-expense .operations-period-tools button{padding:4px 9px;min-height:27px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:9px;font-size:11px;font-weight:750}
-#v-expense .operations-period-tools button.active{border-color:var(--blue);background:var(--selected);color:var(--blue)}
-#v-expense .operations-period-status{font-size:10px;color:var(--muted);line-height:1.2;margin-bottom:4px}
+
+
+
+
+
 #analyticsModalStats .operations-modal-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 #analyticsModalStats .operations-modal-totals>div{border-radius:10px;border:1px solid var(--line);background:var(--card);padding:7px 5px;min-width:0}
 #analyticsModalStats .operations-modal-totals span{display:block;font-size:10px;color:var(--muted);white-space:nowrap}
@@ -1754,7 +1754,7 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
  #v-expense .operations-hub .analytics-mini-card{padding:6px 8px}
  #v-expense .operations-head{min-height:28px}
  #v-expense .operations-quick button{min-height:28px}
- #v-expense .operations-period-status{display:none}
+ 
  #analyticsModalStats .operations-modal-totals>div{padding:5px 5px}
 }
 @media(max-width:360px){
@@ -1835,8 +1835,7 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
  <div class="operations-quick" role="group" aria-label="Быстрые действия"><button type="button" data-ops-open="expense">＋ Расход</button><button type="button" data-ops-open="income">＋ Доход</button><button type="button" data-ops-open="history">▤ История</button></div>
 </div>
 <div class="card"><form id="expenseForm">
- <div class="operations-period-tools" role="group" aria-label="Период учёта расходов"><span>Суммы за период</span><button type="button" data-ops-period="first">1–15</button><button type="button" data-ops-period="second">16–конец</button></div>
- <div class="operations-period-status" id="operationsPeriodStatus">Для записи итогов из банка выбери половину месяца.</div><div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
+ <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
 <div class="two"><label class="field"><span>Откуда</span><select id="transferFrom"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Куда</span><select id="transferTo"><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label></div>
 <div class="two"><label class="field"><span>Сумма, ₽</span><input id="transferAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 5000"></label><label class="field"><span>Дата перевода</span><input id="transferDate" type="date" required></label></div>
 <label class="field"><span>Примечание (необязательно)</span><input id="transferNote" maxlength="120" placeholder="Остаток коммуналки"></label>
@@ -2924,13 +2923,9 @@ function renderAll(){syncInputs();refreshTypes();updateStartFields();render();an
 function go(page){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));document.querySelector('.app').classList.toggle('home-active',page==='home');const main=document.querySelector('.main');if(main)main.scrollTop=0;}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 
-let operationsBatchNote='';
 function changeOperationsMonth(step){
  const [y,m]=month.split('-').map(Number);
  month=iso(new Date(y,m-1+step,1)).slice(0,7);
- operationsBatchNote='';
- document.querySelectorAll('[data-ops-period]').forEach(button=>button.classList.remove('active'));
- $('operationsPeriodStatus').textContent='Для записи итогов из банка выбери половину месяца.';
  renderAll();
 }
 $('operationsMonthPrev').addEventListener('click',()=>changeOperationsMonth(-1));
@@ -2943,25 +2938,7 @@ document.querySelectorAll('[data-ops-open]').forEach(button=>button.addEventList
  if(target?.scrollIntoView)target.scrollIntoView({behavior:'smooth',block:'center'});
  if(action!=='history')target?.focus?.({preventScroll:true});
 }));
-document.querySelectorAll('[data-ops-period]').forEach(button=>button.addEventListener('click',()=>{
- const [y,m]=month.split('-').map(Number);
- const first=button.dataset.opsPeriod==='first',last=new Date(y,m,0).getDate();
- const from=first?1:16,to=first?15:last;
- const date=iso(new Date(y,m-1,to)),now=iso(new Date());
- const chosen=date>now?now:date;
- if(chosen<iso(new Date(y,m-1,from))){
-  alert('Этот период ещё не наступил. Выбери прошедшие даты.');return;
- }
- $('expenseDate').value=chosen;
- const title=new Date(y,m-1,1).toLocaleDateString('ru-RU',{month:'long'});
- const actualTo=Number(chosen.slice(8));
- const note='За '+from+'–'+actualTo+' '+title;
- if(!$('expenseNote').value.trim()||$('expenseNote').value===operationsBatchNote)
-  $('expenseNote').value=note;
- operationsBatchNote=note;
- $('operationsPeriodStatus').textContent='Внеси сумму по категории за '+from+'–'+actualTo+'. Дата записи: '+chosen+'.';
- document.querySelectorAll('[data-ops-period]').forEach(b=>b.classList.toggle('active',b===button));
-}));
+
 
 $('monthPrev').onclick=()=>{let [y,m]=month.split('-').map(Number);month=iso(new Date(y,m-2,1)).slice(0,7);renderAll()};$('monthNext').onclick=()=>{let [y,m]=month.split('-').map(Number);month=iso(new Date(y,m,1)).slice(0,7);renderAll()};
 for(const id of ['advance','salary'])$(id).addEventListener('input',e=>{monthData()[id]=num(e.target.value);render();save()});
@@ -3077,12 +3054,12 @@ $('expenseForm').onsubmit=e=>{e.preventDefault();const amount=num($('expenseAmou
 let type=$('expenseType').value;if(type==='__new__'){type=$('newExpenseType').value.trim().replace(/\s+/g,' ');if(!type){alert('Введи название нового вида расхода');$('newExpenseType').focus();return;}if(type.length>50)return;}
 if(!type){alert('Выбери вид расхода');return;}
 const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===type.toLocaleLowerCase('ru'));if(existing)type=existing;else data.expenseTypes[category].push(type);
-data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value=operationsBatchNote;refreshTypes(type);renderAll()};
+data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);renderAll()};
 $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b||!confirm('Удалить этот расход?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.44 · тест';
+const APP_VERSION='1.5.45 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
