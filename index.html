@@ -1037,6 +1037,7 @@ function setup(){
   if(!first)return;
   const content=Array.from(first.children);
   const items=content.filter(el=>el.classList.contains('card')||el.matches('details.compact-disclosure'));
+  let insertionPoint=first;
   items.slice(1).forEach((el,i)=>{
    const wrap=document.createElement('div');wrap.className='design-group';
    const isDetails=el.matches('details');
@@ -1048,8 +1049,8 @@ function setup(){
     if(id==='v-settings'){const b=el.querySelector('.row>b');if(b)b.remove()}
     if(id==='v-analytics'&&i>=1){const b=el.querySelector('.row>b');if(b)b.remove()}
    }
-   first.parentElement.insertBefore(wrap,first.nextElementSibling);
-   wrap.appendChild(el);
+   first.parentElement.insertBefore(wrap,insertionPoint.nextElementSibling);
+   wrap.appendChild(el);insertionPoint=wrap;
   });
  }
  ['v-expense','v-analytics','v-settings'].forEach(separateItems);
