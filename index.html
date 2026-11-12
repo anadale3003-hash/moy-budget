@@ -519,6 +519,272 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 #v-plan>.payment-obligations>.payment-grid{margin-top:0}
 #v-plan>.payment-obligations>#regularPaymentHistory{margin-top:10px}
 #v-plan>.payment-obligations>.foot{margin:10px 0 0;line-height:1.45}
+
+/* Preview: optional envelope funding in the payment confirmation sheet. */
+#creditPaymentFunding{padding:8px 0 2px}
+#creditPaymentFunding .field{margin-top:10px}
+#creditPaymentFunding select{width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--input);color:var(--ink);font-size:16px;padding:9px 11px}
+#creditPaymentFunding .foot{margin:5px 0}
+
+/* Credits screen hosts the confirmation panel after migration from payouts. */
+#v-card>.mortgage-monthly-settings{margin-bottom:14px}
+#v-card>.mortgage-monthly-settings>.field{margin-top:12px}
+#v-card>.payment-obligations{box-sizing:border-box;width:auto;padding:12px 13px 14px;margin:0 0 16px;border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--card)}
+#v-card>.payment-obligations>.row{margin-bottom:10px}
+#v-card>.payment-obligations>.payment-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+#v-card>.payment-obligations>.payment-grid>.payment-confirm{display:flex;flex-direction:column;gap:7px;padding:10px;min-width:0;justify-content:center}
+#v-card .payment-confirm-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;margin-bottom:8px}
+#v-card .payment-confirm-heading>b{white-space:nowrap;font-size:15px}
+#v-card .payment-confirm-heading .receipt-note{min-width:0;text-align:right;font-size:11px;line-height:1.35;margin:0}
+#v-card .payment-confirm>input[hidden]{display:none!important}
+#v-card .payment-confirm .btn{width:100%;min-height:40px;margin-top:3px}
+#v-card>.payment-obligations>#regularPaymentHistory{margin-top:10px}
+#v-card>.payment-obligations>.foot{margin:10px 0 0;line-height:1.45}
+@media(max-width:370px){#v-card .payment-confirm-heading{display:block}#v-card .payment-confirm-heading .receipt-note{text-align:left;margin-top:3px}}
+
+/* Preview: payouts use one non-scrolling phone screen; secondary controls float
+   above the plan instead of pushing its content downward. */
+.app:has(#v-plan.active)>.main{overflow-y:hidden!important;padding-top:max(15px,env(safe-area-inset-top));padding-bottom:calc(66px + env(safe-area-inset-bottom))!important}
+#v-plan.active{height:100%;min-height:0;display:flex!important;flex-direction:column;gap:0;overflow:hidden}
+#v-plan>.section-heading{flex:0 0 auto;margin:4px 0 3px}
+#v-plan>.section-heading:first-child{margin-top:8px;margin-bottom:7px}
+#v-plan>.section-heading h2{font-size:clamp(12px,3.6vw,15px);line-height:1.2}
+#v-plan>.section-heading .quiet,#v-plan>.section-heading .pill{font-size:10px}
+#v-plan>.payroll-preview{flex:0 0 auto;margin:0 0 4px;padding:7px 10px;border-radius:12px}
+#v-plan>.payroll-preview .payroll-grid{margin:0;gap:8px}
+#v-plan>.payroll-preview .payroll-grid b{font-size:clamp(15px,4.2vw,19px);line-height:1.1;margin:1px 0}
+#v-plan>.payroll-preview .payroll-grid .quiet{font-size:10px}
+#v-plan #salaryForecastNote{display:none}
+#v-plan>.month-strip{flex:0 0 auto;margin:0 0 4px;padding:3px 5px;min-height:32px}
+#v-plan>.month-strip .month-buttons{min-height:27px}
+#v-plan>.payment-inputs{flex:0 0 auto!important;min-height:0!important;overflow:visible!important;padding:7px 8px;margin:0 0 5px}
+#v-plan>.payment-inputs .payment-grid{gap:7px}
+#v-plan .payment-receipt{padding:3px 4px}
+#v-plan .payment-receipt>.receipt-action-label{font-size:11px;line-height:1.1;margin:0 0 4px}
+#v-plan .payment-receipt .receipt-button{font-size:11px;min-height:33px;padding:5px 4px;border-radius:9px}
+#v-plan .payment-receipt .receipt-note{font-size:10px;line-height:1.15;margin:4px 0 0}
+#v-plan .payment-receipt .receipt-undo{font-size:10px;margin:3px 0 0;padding:3px 0}
+#v-plan .payment-dates-note{display:none}
+#v-plan>.payout-destinations{display:flex;flex-direction:column;flex:0 0 auto;min-height:0;overflow:hidden;padding:5px 8px 6px;margin:0 0 5px;border-radius:12px}
+#v-plan #planTable{flex:0 1 auto;min-height:0;overflow:hidden}
+#v-plan #planTable table{width:100%;table-layout:fixed;font-size:clamp(9px,2.65vw,11px);border-collapse:collapse}
+#v-plan #planTable th,#v-plan #planTable td{padding:clamp(2px,.5dvh,4px) 2px;line-height:1.15}
+#v-plan #planTable th:first-child,#v-plan #planTable td:first-child{width:38%}
+#v-plan #planWarnings{flex:0 0 auto;max-height:43px;overflow:hidden}
+#v-plan #planWarnings .hint,#v-plan #planWarnings .warning{font-size:9px;line-height:1.2;padding:3px 6px;margin:3px 0}
+#v-plan>details.compact-disclosure{flex:0 0 auto;min-height:33px;border-radius:11px;margin:0}
+#v-plan>details.compact-disclosure>summary{font-size:11px;min-height:32px;padding:6px 11px}
+#v-plan>details.compact-disclosure[open]{position:fixed;inset:0;z-index:95;display:flex!important;align-items:center;justify-content:center;flex-direction:column;padding:max(12px,env(safe-area-inset-top)) 14px max(18px,env(safe-area-inset-bottom));background:rgba(4,12,25,.63);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:0;border-radius:0;margin:0}
+#v-plan>details.compact-disclosure[open]>summary{width:min(100%,520px);background:var(--card);border-radius:15px 15px 0 0;padding:13px 16px;font-size:15px;min-height:48px;box-sizing:border-box}
+#v-plan>details.compact-disclosure[open]>summary:after{content:'✕'}
+#v-plan>details.compact-disclosure[open]>.card{width:min(100%,520px);max-height:min(65dvh,500px);flex:0 1 auto;overflow-y:auto;min-height:0;margin:0;background:var(--card);padding:12px 15px 18px;border:0;border-radius:0 0 15px 15px;box-shadow:0 20px 50px #0004}
+@media(max-height:730px){
+ #v-plan>.section-heading{margin:2px 0}
+ #v-plan>.payroll-preview{padding:5px 9px;margin-bottom:3px}
+ #v-plan>.month-strip{min-height:28px}
+ #v-plan>.payment-inputs{padding:5px 7px;margin-bottom:3px}
+ #v-plan .payment-receipt .receipt-button{min-height:29px}
+ #v-plan #planTable th,#v-plan #planTable td{padding:2px}
+ #v-plan #planWarnings{max-height:30px}
+}
+
+/* Preview: balanced full-height payouts dashboard (no dead space below).
+   Allow the meaningful contents of every card to grow with the screen. */
+#v-plan.active{justify-content:stretch;gap:0}
+#v-plan>.section-heading{margin-top:clamp(5px,.7dvh,10px);margin-bottom:clamp(5px,.65dvh,9px)}
+#v-plan>.section-heading:first-child{margin-top:clamp(10px,1.4dvh,18px);margin-bottom:clamp(6px,.8dvh,11px)}
+#v-plan>.section-heading h2{font-size:clamp(14px,3.8vw,18px)}
+#v-plan>.section-heading .quiet,#v-plan>.section-heading .pill{font-size:clamp(10px,2.6vw,12px)}
+#v-plan>.payroll-preview{
+ flex:.55 1 0;min-height:68px;
+ display:flex;flex-direction:column;justify-content:center;
+ padding:clamp(11px,1.5dvh,18px) clamp(12px,2vw,20px);
+ margin-bottom:clamp(6px,.9dvh,11px);border-radius:16px
+}
+#v-plan>.payroll-preview .payroll-grid{width:100%;gap:14px}
+#v-plan>.payroll-preview .payroll-grid .quiet{font-size:clamp(12px,3vw,15px)}
+#v-plan>.payroll-preview .payroll-grid b{font-size:clamp(21px,5.3vw,27px);margin-top:5px;line-height:1.2}
+#v-plan>.month-strip{
+ flex:.4 1 0;min-height:44px;
+ display:flex;align-items:center;padding:5px 9px;
+ margin-bottom:clamp(6px,.8dvh,10px);border-radius:16px
+}
+#v-plan>.month-strip .month-buttons{width:100%;min-height:39px}
+#v-plan>.month-strip .month-buttons button{min-width:39px;min-height:39px}
+#v-plan>.payment-inputs{
+ flex:1.2 1 0!important;min-height:115px!important;
+ display:flex!important;align-items:center;
+ padding:clamp(12px,1.6dvh,20px) clamp(11px,1.6vw,17px);
+ margin-bottom:clamp(6px,.8dvh,10px);border-radius:16px
+}
+#v-plan>.payment-inputs>.payment-grid{width:100%;gap:10px}
+#v-plan .payment-receipt{padding:5px 3px}
+#v-plan .payment-receipt>.receipt-action-label{font-size:clamp(13px,3.2vw,16px);margin-bottom:clamp(7px,1dvh,12px)}
+#v-plan .payment-receipt .receipt-button{font-size:clamp(11px,3vw,14px);min-height:clamp(39px,5dvh,53px);padding:8px 6px}
+#v-plan .payment-receipt .receipt-note{font-size:clamp(10px,2.6vw,12px);line-height:1.3;margin-top:7px}
+#v-plan .payment-receipt .receipt-undo{font-size:11px;margin-top:5px}
+#v-plan>.payout-destinations{
+ flex:2.5 1 0;min-height:275px;
+ display:flex;flex-direction:column;justify-content:stretch;
+ padding:clamp(10px,1.35dvh,16px) 12px;
+ margin-bottom:clamp(7px,.9dvh,12px);border-radius:16px
+}
+#v-plan #planTable{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#v-plan #planTable table{height:100%;width:100%;table-layout:fixed;font-size:clamp(11px,3vw,14px)}
+#v-plan #planTable th,#v-plan #planTable td{padding:clamp(5px,.8dvh,10px) 3px;line-height:1.23}
+#v-plan #planWarnings{flex:0 0 auto;max-height:92px;overflow:visible}
+#v-plan #planWarnings .hint,#v-plan #planWarnings .warning{font-size:clamp(10px,2.5vw,12px);padding:5px 8px;line-height:1.25}
+#v-plan>details.compact-disclosure:not([open]){
+ flex:.4 1 0;min-height:42px;max-height:68px;
+ display:flex;align-items:stretch;margin:0;border-radius:14px
+}
+#v-plan>details.compact-disclosure:not([open])>summary{
+ flex:1;display:flex;align-items:center;padding:9px 13px;
+ font-size:clamp(12px,3.2vw,15px)
+}
+@media(max-height:760px){
+ #v-plan>.section-heading{margin:3px 0 4px}
+ #v-plan>.section-heading:first-child{margin-top:6px}
+ #v-plan>.payroll-preview{min-height:59px;padding:6px 11px;margin-bottom:4px}
+ #v-plan>.payroll-preview .payroll-grid b{font-size:clamp(18px,4.6vw,23px);margin-top:2px}
+ #v-plan>.month-strip{min-height:36px;padding:3px 6px;margin-bottom:4px}
+ #v-plan>.month-strip .month-buttons,#v-plan>.month-strip .month-buttons button{min-height:30px}
+ #v-plan>.payment-inputs{min-height:94px!important;padding:7px 10px;margin-bottom:4px}
+ #v-plan .payment-receipt>.receipt-action-label{margin-bottom:3px}
+ #v-plan .payment-receipt .receipt-button{min-height:33px}
+ #v-plan>.payout-destinations{min-height:229px;padding:6px 10px;margin-bottom:4px}
+ #v-plan #planTable th,#v-plan #planTable td{padding:3px 2px}
+ #v-plan>details.compact-disclosure:not([open]){min-height:36px}
+}
+
+/* Preview: remove the marked excess padding in the income card; keep forecast
+   and distribution description readable above the bottom navigation. */
+#v-plan>.payment-inputs{
+ flex:0 0 auto!important;
+ min-height:0!important;
+ height:auto!important;
+ align-items:stretch;
+ padding:9px 11px 10px!important;
+ margin-bottom:7px;
+}
+#v-plan>.payment-inputs>.payment-grid{align-items:start}
+#v-plan .payment-receipt{padding:0 2px!important}
+#v-plan .payment-receipt>.receipt-action-label{
+ display:flex;align-items:center;gap:5px;
+ font-size:clamp(13px,3.2vw,16px);
+ line-height:1.2;margin:0 0 7px!important
+}
+#v-plan .payout-small-icon{display:inline-flex;align-items:center;justify-content:center;font-size:16px;line-height:1;flex:none}
+#v-plan .payment-receipt .receipt-button{min-height:38px;padding:7px 5px}
+#v-plan .payment-receipt .receipt-note{margin:6px 0 0;line-height:1.25}
+#v-plan .payment-receipt .receipt-undo{margin-top:3px}
+#v-plan>.payroll-preview{flex:0 0 auto;min-height:0;padding:11px 14px;margin-bottom:7px}
+#v-plan>.payout-destinations{
+ flex:1 1 auto;min-height:0;
+ padding:11px 12px 13px;
+ display:flex;flex-direction:column
+}
+#v-plan #planTable{flex:1 1 auto;min-height:0}
+#v-plan #planTable table{height:100%}
+#v-plan #planWarnings{flex:0 0 auto;max-height:none;overflow:visible;padding-bottom:1px}
+#v-plan>details.compact-disclosure:not([open]){flex:0 0 auto;min-height:42px;max-height:none}
+@media(max-height:760px){
+ #v-plan>.payment-inputs{padding:6px 9px 7px!important;margin-bottom:4px}
+ #v-plan .payment-receipt>.receipt-action-label{margin-bottom:4px!important}
+ #v-plan .payment-receipt .receipt-button{min-height:32px}
+ #v-plan>.payroll-preview{padding:7px 11px;margin-bottom:4px}
+ #v-plan>.payout-destinations{padding:7px 10px 8px}
+ #v-plan>details.compact-disclosure:not([open]){min-height:36px}
+}
+
+/* Preview: preserve all payout rows above the bottom navigation on iPhone.
+   Shorter forecast and natural-height allocation table avoid clipped totals. */
+#v-plan>.payroll-preview{
+ flex:0 0 auto!important;
+ min-height:0!important;
+ padding:5px 12px 6px!important;
+ margin-bottom:4px!important;
+}
+#v-plan>.payroll-preview .payroll-grid b{
+ margin-top:2px!important;
+ line-height:1.08!important;
+ font-size:clamp(19px,4.9vw,25px)!important;
+}
+#v-plan>.payroll-preview .payroll-grid .quiet{font-size:clamp(11px,2.8vw,13px)}
+#v-plan>.section-heading:first-child{margin-top:6px!important;margin-bottom:4px!important}
+#v-plan>.payout-destinations{
+ flex:0 0 auto!important;
+ height:auto!important;
+ min-height:0!important;
+ overflow:visible!important;
+ padding:7px 11px 8px!important;
+ margin-bottom:5px!important;
+}
+#v-plan #planTable{flex:0 0 auto!important;overflow:visible!important;display:block!important}
+#v-plan #planTable table{
+ height:auto!important;
+ font-size:clamp(10px,2.85vw,13px)!important;
+}
+#v-plan #planTable th,#v-plan #planTable td{
+ padding:clamp(3px,.55dvh,6px) 3px!important;
+ line-height:1.2!important;
+}
+#v-plan>details.compact-disclosure:not([open]){min-height:38px!important}
+@media(max-height:760px){
+ #v-plan>.payroll-preview{padding:4px 10px 5px!important}
+ #v-plan #planTable th,#v-plan #planTable td{padding:3px 2px!important}
+ #v-plan>.payout-destinations{padding:5px 9px 6px!important}
+}
+
+/* Preview: month selector must stay compact; distribution card takes the
+   remaining height with a small clearance above the fixed bottom navigation. */
+#v-plan>.month-strip{
+ flex:0 0 auto!important;
+ height:58px!important;
+ min-height:58px!important;
+ max-height:58px!important;
+ padding:5px 9px!important;
+ margin:0 0 7px!important;
+}
+#v-plan>.month-strip .month-buttons{height:46px!important;min-height:46px!important}
+#v-plan>.month-strip .month-buttons button{min-height:42px!important}
+#v-plan>.payout-destinations{
+ flex:1 1 auto!important;
+ height:auto!important;
+ min-height:0!important;
+ overflow:hidden!important;
+ display:flex!important;
+ flex-direction:column;
+ padding:8px 11px 10px!important;
+ margin:0 0 10px!important;
+}
+#v-plan #planTable{
+ flex:1 1 auto!important;
+ display:flex!important;
+ flex-direction:column;
+ min-height:0!important;
+ overflow:hidden!important;
+}
+#v-plan #planTable table{
+ width:100%!important;
+ height:100%!important;
+ table-layout:fixed;
+}
+#v-plan #planTable th,#v-plan #planTable td{
+ padding:clamp(3px,.6dvh,7px) 3px!important;
+}
+#v-plan>details.compact-disclosure:not([open]){
+ flex:0 0 auto!important;
+ min-height:40px!important;
+ margin:0!important;
+}
+@media(max-height:760px){
+ #v-plan>.month-strip{height:48px!important;min-height:48px!important;max-height:48px!important;padding:3px 7px!important;margin-bottom:4px!important}
+ #v-plan>.month-strip .month-buttons{height:40px!important;min-height:40px!important}
+ #v-plan>.month-strip .month-buttons button{min-height:36px!important}
+ #v-plan>.payout-destinations{padding:5px 9px 7px!important;margin-bottom:6px!important}
+ #v-plan #planTable th,#v-plan #planTable td{padding:2px 2px!important}
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -534,8 +800,8 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 <div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div>
 <div class="section-heading"><h2>Аванс и зарплата</h2><span class="pill">Авторасчёт</span></div><div class="card payment-inputs">
 <div class="payment-grid">
-<div class="payment-receipt"><input id="advance" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label">Аванс</div><button class="btn full receipt-button" id="receiveAdvance" type="button">✓ Аванс поступил</button><div class="receipt-note" id="advanceReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoAdvance" type="button">↶ Отменить зачисление</button></div>
-<div class="payment-receipt"><input id="salary" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label">Зарплата</div><button class="btn full receipt-button secondary" id="receiveSalary" type="button">✓ Зарплата поступила</button><div class="receipt-note" id="salaryReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoSalary" type="button">↶ Отменить зачисление</button></div>
+<div class="payment-receipt"><input id="advance" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💵</span> Аванс</div><button class="btn full receipt-button" id="receiveAdvance" type="button">✓ Аванс поступил</button><div class="receipt-note" id="advanceReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoAdvance" type="button">↶ Отменить зачисление</button></div>
+<div class="payment-receipt"><input id="salary" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💰</span> Зарплата</div><button class="btn full receipt-button secondary" id="receiveSalary" type="button">✓ Зарплата поступила</button><div class="receipt-note" id="salaryReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoSalary" type="button">↶ Отменить зачисление</button></div>
 </div>
 <div class="payment-dates-note">
 <input id="advanceDate" type="date" hidden aria-hidden="true" tabindex="-1">
@@ -543,6 +809,10 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 <div class="foot">Плановые даты выплат учитывают выходные и праздники РФ (календарь 2026–2027). Фактические дату и сумму укажи при нажатии «Аванс поступил» или «Зарплата поступила».</div>
 </div>
 </div><!-- End: advance and salary card -->
+<div class="section-heading"><h2>Куда перевести деньги</h2><span class="quiet">с каждой выплаты</span></div>
+<div class="card payout-destinations"><div id="planTable"></div><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two"><label class="field"><span>Семейные нужды</span><input id="weight-family" type="number" min="0" step="0.5"></label><label class="field"><span>Коммуналка</span><input id="weight-utilities" type="number" min="0" step="0.5"></label><label class="field"><span>Накопления</span><input id="weight-savings" type="number" min="0" step="0.5"></label><label class="field"><span>Остальное</span><input id="weight-other" type="number" min="0" step="0.5"></label></div><div class="foot">Это относительные веса, а не проценты от всего дохода. По умолчанию 50 : 7,5 : 7,5 : 7,5.</div></div></section>
+<section class="view" id="v-card"><div class="section-heading"><h2>Кредиты</h2></div>
+<div class="card mortgage-monthly-settings"><b>🏠 Ипотека</b><label class="field"><span>Ежемесячный платёж по ипотеке, ₽</span><input id="mortgage" type="number" min="0" step="100" inputmode="decimal"></label><div id="mortgageMonthlyStatus" class="foot">Изменение платежа применяется к будущим неподтверждённым поступлениям.</div></div>
 <div class="section-heading"><h2>Ипотека и кредитка</h2></div>
 <div class="card payment-confirm-card payment-obligations">
   <div class="row"><b>Фактическая оплата</b><span class="quiet">после перевода в банк</span></div>
@@ -561,9 +831,7 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
   <div id="regularPaymentHistory"></div>
   <p class="foot">Ипотека и кредитка уже исключены из доступного бюджета. Отмечай оплату только после реального списания банком. Повторно из бюджета деньги не вычитаются.</p>
 </div>
-<div class="section-heading"><h2>Куда перевести деньги</h2><span class="quiet">с каждой выплаты</span></div>
-<div class="card payout-destinations"><div id="planTable"></div><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two"><label class="field"><span>Семейные нужды</span><input id="weight-family" type="number" min="0" step="0.5"></label><label class="field"><span>Коммуналка</span><input id="weight-utilities" type="number" min="0" step="0.5"></label><label class="field"><span>Накопления</span><input id="weight-savings" type="number" min="0" step="0.5"></label><label class="field"><span>Остальное</span><input id="weight-other" type="number" min="0" step="0.5"></label></div><div class="foot">Это относительные веса, а не проценты от всего дохода. По умолчанию 50 : 7,5 : 7,5 : 7,5.</div></div></section>
-<section class="view" id="v-card"><div class="section-heading"><h2>Кредитная карта</h2><span class="pill">Без просрочки</span></div><div class="card"><label class="field"><span>Общий долг, ₽</span><input id="debt" type="number" min="0" step="100" inputmode="decimal"></label><label class="field"><span>Уже отложено на погашение, ₽</span><input id="reserved" type="number" min="0" step="100" inputmode="decimal"></label><label class="field"><span>Погасить не позднее</span><input id="deadline" type="date"></label><div class="divider"></div><div class="label">Ещё нужно накопить</div><div class="metric" id="debtRemaining"></div><div class="lineitem"><span>Оставшихся выплат до срока</span><span id="payCount"></span></div><div class="lineitem"><span>Откладывать с каждой выплаты</span><span id="perPay"></span></div><div id="debtAlert"></div></div><div class="card"><b>График погашения</b><div id="debtSchedule"></div><div class="foot">Расчёт без процентов, комиссий и новых покупок. Проверяй точную дату окончания льготного периода в банке. Досрочные погашения учитываются отдельно от накопленного резерва.</div></div>
+<div class="section-heading"><h2>Кредитная карта</h2><span class="pill">Без просрочки</span></div><div class="card"><label class="field"><span>Общий долг, ₽</span><input id="debt" type="number" min="0" step="100" inputmode="decimal"></label><label class="field"><span>Уже отложено на погашение, ₽</span><input id="reserved" type="number" min="0" step="100" inputmode="decimal"></label><label class="field"><span>Погасить не позднее</span><input id="deadline" type="date"></label><div class="divider"></div><div class="label">Ещё нужно накопить</div><div class="metric" id="debtRemaining"></div><div class="lineitem"><span>Оставшихся выплат до срока</span><span id="payCount"></span></div><div class="lineitem"><span>Откладывать с каждой выплаты</span><span id="perPay"></span></div><div id="debtAlert"></div></div><div class="card"><b>График погашения</b><div id="debtSchedule"></div><div class="foot">Расчёт без процентов, комиссий и новых покупок. Проверяй точную дату окончания льготного периода в банке. Досрочные погашения учитываются отдельно от накопленного резерва.</div></div>
 <details id="earlyPanel" class="compact-disclosure"><summary>↗ Досрочное погашение из накоплений</summary>
 <div class="card"><div class="foot">Учитывай только фактически выполненный платёж. Деньги будут вычтены из «Накоплений». Обычным расходом или новым доходом операция не считается.</div>
 <form id="earlyForm">
@@ -620,12 +888,12 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 <div class="foot">Для расчёта используется пятидневная рабочая неделя и календарь РФ на 2026–2027 годы. При другом графике, отпуске, премии или повышенной ставке НДФЛ скорректируй расчёт вручную. Прогноз не является гарантированной выплатой.</div>
 <div class="two"><label class="field"><span>Рабочих дней в месяце (необязательно)</span><input id="manualDaysTotal" type="number" min="1" max="31" step="1" placeholder="Автоматически"></label><label class="field"><span>Из них с 1 по 15 (необязательно)</span><input id="manualDaysFirst" type="number" min="0" max="15" step="1" placeholder="Автоматически"></label></div>
 <div id="salaryCalendarInfo" class="hint"></div></div>
-<div class="card"><b>Старт с текущих остатков</b><p class="foot">Установи реальные деньги на счетах. Старые покупки до даты старта не будут вычтены ещё раз. Плановые зарплаты не считаются полученными.</p><label class="field"><span>Дата начала учёта</span><input id="startDate" type="date"></label><div class="two"><label class="field"><span>Семейные нужды, ₽</span><input id="start-family" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Коммуналка, ₽</span><input id="start-utilities" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Накопления, ₽</span><input id="start-savings" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Остальное, ₽</span><input id="start-other" type="number" min="0" inputmode="decimal"></label></div><label class="field"><span>Ежемесячный платёж по ипотеке, ₽</span><input id="mortgage" type="number" min="0" step="100" inputmode="decimal"></label><label class="field"><span>Уже отложено на следующую ипотеку, ₽</span><input id="startMortgageFund" type="number" min="0" inputmode="decimal"></label><label class="field"><span>За какой месяц ипотека уже оплачена</span><input id="paidMortgageMonth" type="month"></label><button class="btn full" id="saveStart" type="button">Сохранить стартовые остатки</button><div id="startStatus" class="foot"></div></div>
-<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion">1.5.19</strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
+<div class="card"><b>Старт с текущих остатков</b><p class="foot">Установи реальные деньги на счетах. Старые покупки до даты старта не будут вычтены ещё раз. Плановые зарплаты не считаются полученными.</p><label class="field"><span>Дата начала учёта</span><input id="startDate" type="date"></label><div class="two"><label class="field"><span>Семейные нужды, ₽</span><input id="start-family" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Коммуналка, ₽</span><input id="start-utilities" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Накопления, ₽</span><input id="start-savings" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Остальное, ₽</span><input id="start-other" type="number" min="0" inputmode="decimal"></label></div><label class="field"><span>Уже отложено на следующую ипотеку, ₽</span><input id="startMortgageFund" type="number" min="0" inputmode="decimal"></label><label class="field"><span>За какой месяц ипотека уже оплачена</span><input id="paidMortgageMonth" type="month"></label><button class="btn full" id="saveStart" type="button">Сохранить стартовые остатки</button><div id="startStatus" class="foot"></div></div>
+<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion">1.5.20</strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
 <div class="card"><b>Резервная копия</b><p class="foot">Сохрани данные перед обновлением или переносом на другой телефон.</p><div class="actions"><button class="btn secondary" id="exportData" type="button">Сохранить копию</button><button class="btn light" id="importClick" type="button">Восстановить</button></div><input type="file" id="importData" accept="application/json,.json" style="display:none"></div>
 <div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
 <div class="hint">Финансовые данные остаются в хранилище браузера на этом устройстве. Не очищай данные сайта, если не сохранил резервную копию.</div>
-</section></main><nav class="nav" aria-label="Разделы"><button class="tab active" data-go="home"><span>⌂</span>Главная</button><button class="tab" data-go="plan"><span>▤</span>Выплаты</button><button class="tab" data-go="card"><span>▣</span>Кредитка</button><button class="tab" data-go="expense"><span>＋</span>Расходы</button><button class="tab" data-go="analytics"><span>◴</span>Аналитика</button><button class="tab" data-go="settings"><span>⚙</span>Настройки</button></nav></div>
+</section></main><nav class="nav" aria-label="Разделы"><button class="tab active" data-go="home"><span>⌂</span>Главная</button><button class="tab" data-go="plan"><span>▤</span>Выплаты</button><button class="tab" data-go="card"><span>▣</span>Кредиты</button><button class="tab" data-go="expense"><span>＋</span>Расходы</button><button class="tab" data-go="analytics"><span>◴</span>Аналитика</button><button class="tab" data-go="settings"><span>⚙</span>Настройки</button></nav></div>
 <div class="receipt-entry-overlay" id="receiptEntryOverlay" hidden>
  <section class="receipt-entry-sheet" role="dialog" aria-modal="true" aria-labelledby="receiptEntryTitle">
   <div class="receipt-entry-header"><h2 id="receiptEntryTitle">Подтверждение поступления</h2><button id="receiptEntryClose" class="envelope-history-close" type="button" aria-label="Закрыть">×</button></div>
@@ -646,6 +914,11 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
   <form id="paymentEntryForm">
    <label class="field"><span>Сумма оплаты, ₽</span><input id="paymentEntryAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Сумма списания"></label>
    <label class="field"><span>Дата списания банком</span><input id="paymentEntryDate" type="date" required></label>
+   <div id="creditPaymentFunding" class="credit-funding" hidden>
+    <div class="foot" id="creditPaymentFundingSummary"></div>
+    <label class="field" id="creditPaymentSourceWrap" hidden><span>Недостающую сумму списать из конверта</span><select id="creditPaymentSource"><option value="">Выбери конверт…</option></select></label>
+    <div class="foot" id="creditPaymentSourceAvailable"></div>
+   </div>
    <div class="receipt-entry-error" id="paymentEntryError" role="alert" hidden></div>
    <button class="btn full" type="submit">✓ Подтвердить оплату</button>
    <button class="btn secondary full" type="button" id="paymentEntryCancel">Отмена</button>
@@ -693,8 +966,8 @@ function countWorkdays(key){
  }
  return {total,first,official:y===2026||y===2027};
 }
-function payrollForecast(m){
- const cfg=data.salaryConfig,base=num(cfg.base),work=countWorkdays(month);
+function payrollForecast(m,key=month){
+ const cfg=data.salaryConfig,base=num(cfg.base),work=countWorkdays(key);
  const overrideTotal=Number(m.manualDaysTotal),overrideFirst=Number(m.manualDaysFirst);
  const total=m.manualDaysTotal!==undefined&&m.manualDaysTotal!==''&&overrideTotal>0?Math.min(31,overrideTotal):work.total;
  const first=m.manualDaysFirst!==undefined&&m.manualDaysFirst!==''&&overrideFirst>=0?Math.min(total,overrideFirst):work.first;
@@ -704,15 +977,15 @@ function payrollForecast(m){
  // A cancelled unusually large advance from older builds can leave m.advance
  // populated without a matching receipt. Do not let that orphaned value zero out
  // the salary forecast; keep existing ordinary manual plans intact.
- const advanceReceipt=(data.receipts||[]).find(r=>r.month===month&&r.type==='advance');
+ const advanceReceipt=(data.receipts||[]).find(r=>r.month===key&&r.type==='advance');
  const savedAdvance=num(m.advance);
  const actualAdvance=!advanceReceipt&&net>0&&savedAdvance>=net?0:savedAdvance;
  const advancePlan=actualAdvance||advanceForecast;
  const salaryForecast=Math.max(0,net-advancePlan);
  return {net,advanceForecast,advancePlan,salaryForecast,total,first,official:work.official,configured:base>0};
 }
-function plannedAdvance(m){return payrollForecast(m).configured?payrollForecast(m).advancePlan:num(m.advance)}
-function plannedSalary(m){return num(m.salary)>0?num(m.salary):(payrollForecast(m).configured?payrollForecast(m).salaryForecast:0)}
+function plannedAdvance(m,key=month){return payrollForecast(m,key).configured?payrollForecast(m,key).advancePlan:num(m.advance)}
+function plannedSalary(m,key=month){return num(m.salary)>0?num(m.salary):(payrollForecast(m,key).configured?payrollForecast(m,key).salaryForecast:0)}
 function isForecast(m){return !num(m.salary)&&payrollForecast(m).configured}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(_){alert('Не удалось сохранить данные. Сделай резервную копию.') }}
 function num(n){return Math.max(0,Number(n)||0)}
@@ -779,7 +1052,76 @@ function nextPaydays(){
   return arr.sort((a,b)=>a.date-b.date);
 }
 function credit(){const debt=Math.max(0,num(data.debt)-num(data.reserved)-incomeAmountFor('credit')-repaymentTotal('credit')-regularPaymentSum('credit'));const due=fromISO(data.deadline);const pays=nextPaydays();const per=pays.length?Math.ceil(debt/pays.length*100)/100:0;return {debt,due,pays,per}}
-function allocation(){const m=monthData(),salaryPlan=plannedSalary(m),advancePlan=plannedAdvance(m),total=advancePlan+salaryPlan,mortgage=Math.min(num(m.mortgage),total);const aMort=total?mortgage*advancePlan/total:0;const bMort=mortgage-aMort;const cc=credit();const creditForMonth=cc.pays.filter(p=>p.month===month);const ac=Math.min(cc.debt,creditForMonth.filter(p=>p.type==='advance').length*cc.per,Math.max(0,advancePlan-aMort));const bc=Math.min(Math.max(0,cc.debt-ac),creditForMonth.filter(p=>p.type==='salary').length*cc.per,Math.max(0,salaryPlan-bMort));const weightTotal=cats.reduce((s,c)=>s+num(data.weights[c.id]),0);const remainA=Math.max(0,advancePlan-aMort-ac),remainB=Math.max(0,salaryPlan-bMort-bc);const rows=[{name:'Ипотека',a:aMort,b:bMort},{name:'Кредитная карта',a:ac,b:bc}];for(const c of cats){let w=weightTotal?num(data.weights[c.id])/weightTotal:(c.id==='other'?1:0);rows.push({name:c.name,id:c.id,a:remainA*w,b:remainB*w})}return {rows,total,mortgage,credit:ac+bc,deficit:Math.max(0,num(m.mortgage)+ac+bc-total),unfundedMortgage:Math.max(0,num(m.mortgage)-total),weightTotal}}
+// Mortgage top-ups from envelopes are already paid. Offset only the EXTRA
+// funding from subsequent UNCONFIRMED wage distributions, in payment order.
+// Past receipts retain their original confirmed allocations.
+function mortgageDistributionBase(key){
+ const m=data.months[key]||{advance:0,salary:0,mortgage:data.mortgageMonthly===undefined?55000:data.mortgageMonthly};
+ const advance=plannedAdvance(m,key),salary=plannedSalary(m,key),total=advance+salary;
+ const monthly=num(m.mortgage===undefined?(data.mortgageMonthly===undefined?55000:data.mortgageMonthly):m.mortgage);
+ const due=Math.min(monthly,total);
+ return {advance:total?due*advance/total:0,salary:total?due*salary/total:0};
+}
+function mortgageDistributionOffsets(targetMonth){
+ const result={advance:0,salary:0};
+ const extras=(data.regularPayments||[]).filter(p=>p.target==='mortgage'&&num(p.extraAmount)>0&&p.date)
+  .sort((a,b)=>a.date.localeCompare(b.date));
+ if(!extras.length)return result;
+ const firstMonth=extras[0].date.slice(0,7);
+ const earliest=firstMonth<targetMonth?firstMonth:targetMonth;
+ const [y,m]=earliest.split('-').map(Number);
+ const slots=[];
+ const [ty,tm]=targetMonth.split('-').map(Number);
+ const count=(ty-y)*12+tm-m;
+ if(count<0)return result;
+ for(let i=0;i<=count;i++){
+  const d=new Date(y,m-1+i,1),key=iso(d).slice(0,7);
+  const base=mortgageDistributionBase(key);
+  for(const type of ['advance','salary']){
+   const salaryInNextMonth=type==='salary'&&Number(data.payDays.salary)<=Number(data.payDays.advance);
+   const payMonth=new Date(d.getFullYear(),d.getMonth()+(salaryInNextMonth?1:0),1);
+   const when=plannedPayday(iso(payMonth).slice(0,7),Number(data.payDays[type])||1);
+   slots.push({key,type,date:iso(when),base:num(base[type])});
+  }
+ }
+ slots.sort((a,b)=>a.date.localeCompare(b.date)||(a.type==='advance'?-1:1));
+ let carry=0,index=0;
+ const confirmed=new Set((data.receipts||[]).filter(r=>r.amounts&&Object.keys(r.amounts).length>0).map(r=>r.month+'-'+r.type));
+ for(const slot of slots){
+  while(index<extras.length&&extras[index].date<=slot.date){carry+=num(extras[index].extraAmount);index++;}
+  if(confirmed.has(slot.key+'-'+slot.type))continue;
+  const offset=Math.min(slot.base,carry);
+  carry=Math.max(0,carry-offset);
+  if(slot.key===targetMonth)result[slot.type]=Math.round(offset*100)/100;
+ }
+ return result;
+}
+function allocation(){
+ const m=monthData(),salaryPlan=plannedSalary(m),advancePlan=plannedAdvance(m),total=advancePlan+salaryPlan;
+ const base=mortgageDistributionBase(month),offsets=mortgageDistributionOffsets(month);
+ const receipts={
+  advance:data.receipts.find(r=>r.id===month+'-advance'&&r.amounts&&Object.keys(r.amounts).length>0),
+  salary:data.receipts.find(r=>r.id===month+'-salary'&&r.amounts&&Object.keys(r.amounts).length>0)
+ };
+ const mortgageA=receipts.advance?num(receipts.advance.amounts?.mortgage):Math.max(0,base.advance-offsets.advance);
+ const mortgageB=receipts.salary?num(receipts.salary.amounts?.mortgage):Math.max(0,base.salary-offsets.salary);
+ const cc=credit(),creditForMonth=cc.pays.filter(p=>p.month===month);
+ const ac=receipts.advance?num(receipts.advance.amounts?.credit):Math.min(cc.debt,creditForMonth.filter(p=>p.type==='advance').length*cc.per,Math.max(0,advancePlan-mortgageA));
+ const bc=receipts.salary?num(receipts.salary.amounts?.credit):Math.min(Math.max(0,cc.debt-ac),creditForMonth.filter(p=>p.type==='salary').length*cc.per,Math.max(0,salaryPlan-mortgageB));
+ const weightTotal=cats.reduce((sum,c)=>sum+num(data.weights[c.id]),0);
+ const remainA=Math.max(0,advancePlan-mortgageA-ac),remainB=Math.max(0,salaryPlan-mortgageB-bc);
+ const rows=[{name:'Ипотека',a:mortgageA,b:mortgageB},{name:'Кредитная карта',a:ac,b:bc}];
+ for(const c of cats){
+  const weight=weightTotal?num(data.weights[c.id])/weightTotal:(c.id==='other'?1:0);
+  rows.push({name:c.name,id:c.id,
+   a:receipts.advance?num(receipts.advance.amounts?.[c.id]):remainA*weight,
+   b:receipts.salary?num(receipts.salary.amounts?.[c.id]):remainB*weight});
+ }
+ const due=Math.min(num(m.mortgage),total);
+ const mortgage=mortgageA+mortgageB;
+ const deficit=Math.max(0,mortgage+ac+bc-total);
+ return {rows,total,mortgage,credit:ac+bc,deficit,unfundedMortgage:Math.max(0,due-(base.advance+base.salary)),weightTotal,offsets};
+}
 function esc(s){return String(s||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 function sumExpenses(id){return data.expenses.filter(e=>e.date?.startsWith(month)&&e.category===id).reduce((a,e)=>a+num(e.amount),0)}
 function incomeAmountFor(destination,fromDate=null){
@@ -798,9 +1140,10 @@ function categoryBalanceAt(id,date){
  const spent=data.expenses.filter(e=>e.date>=start&&e.date<=date&&e.category===id).reduce((a,e)=>a+num(e.amount),0);
  const income=data.extraIncomes.filter(i=>i.destination===id&&i.date>=start&&i.date<=date).reduce((a,i)=>a+num(i.amount),0);
  const early=id==='savings'?(data.earlyRepayments||[]).filter(x=>x.date>=start&&x.date<=date).reduce((a,x)=>a+num(x.amount),0):0;
- return base+received+income-spent-early+transferDelta(id,start,date);
+ const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start&&p.date<=date).reduce((a,p)=>a+num(p.extraAmount),0);
+ return base+received+income-spent-early-creditExtra+transferDelta(id,start,date);
 }
-function realBalance(id){if(!data.startBalances)return null;const start=data.startBalances.date;const base=num(data.startBalances.balances[id]);const received=data.receipts.filter(r=>r.date>=start).reduce((a,r)=>a+num(r.amounts?.[id]),0);const spent=data.expenses.filter(e=>e.date>=start&&e.category===id).reduce((a,e)=>a+num(e.amount),0);return base+received+incomeAmountFor(id,start)-spent-(id==='savings'?repaymentSavingsSpent(start):0)+transferDelta(id,start)}
+function realBalance(id){if(!data.startBalances)return null;const start=data.startBalances.date;const base=num(data.startBalances.balances[id]);const received=data.receipts.filter(r=>r.date>=start).reduce((a,r)=>a+num(r.amounts?.[id]),0);const spent=data.expenses.filter(e=>e.date>=start&&e.category===id).reduce((a,e)=>a+num(e.amount),0);const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start).reduce((a,p)=>a+num(p.extraAmount),0);return base+received+incomeAmountFor(id,start)-spent-(id==='savings'?repaymentSavingsSpent(start):0)-creditExtra+transferDelta(id,start)}
 // Фактический остаток на сегодня, без планируемых и датированных будущим операций.
 // Бюджетные конверты, ипотечный резерв и резерв кредитки не пересекаются.
 function actualMoneyToday(){
@@ -810,7 +1153,7 @@ function actualMoneyToday(){
  const mortgage=num(data.startBalances.mortgage)
    +data.receipts.filter(r=>r.date>=data.startBalances.date&&r.date<=asOf).reduce((a,r)=>a+num(r.amounts?.mortgage),0)
    +data.extraIncomes.filter(i=>i.destination==='mortgage'&&i.date>=data.startBalances.date&&i.date<=asOf).reduce((a,i)=>a+num(i.amount),0)
-   -regularPaymentSum('mortgage',data.startBalances.date,asOf);
+   -mortgageReserveSpent(data.startBalances.date,asOf);
  // data.reserved includes manual credit-card reserves and reserves from received wages.
  // Exclude future-dated receipt allocations if any exist.
  const futureCredit=data.receipts.filter(r=>r.date>asOf).reduce((a,r)=>a+num(r.amounts?.credit),0);
@@ -821,8 +1164,8 @@ function actualMoneyToday(){
  const reserve=mortgage+creditReserve;
  return {envelopes,savings,available,reserve,mortgage,creditReserve,total:envelopes+reserve};
 }
-function mortgageFund(){if(!data.startBalances)return null;return num(data.startBalances.mortgage)+data.receipts.filter(r=>r.date>=data.startBalances.date).reduce((a,r)=>a+num(r.amounts?.mortgage),0)+incomeAmountFor('mortgage',data.startBalances.date)-regularPaymentSum('mortgage',data.startBalances.date)}
-function updateStartFields(){const x=data.startBalances||{date:iso(today),balances:{},mortgage:0};$('startDate').value=x.date;$('mortgage').value=data.mortgageMonthly===undefined?num(data.months[month]?.mortgage??55000):num(data.mortgageMonthly);$('startMortgageFund').value=x.mortgage||0;for(const c of cats)$('start-'+c.id).value=x.balances?.[c.id]||0;$('paidMortgageMonth').value=data.paidMortgageMonth||'';}
+function mortgageFund(){if(!data.startBalances)return null;return num(data.startBalances.mortgage)+data.receipts.filter(r=>r.date>=data.startBalances.date).reduce((a,r)=>a+num(r.amounts?.mortgage),0)+incomeAmountFor('mortgage',data.startBalances.date)-mortgageReserveSpent(data.startBalances.date)}
+function updateStartFields(){const x=data.startBalances||{date:iso(today),balances:{},mortgage:0};$('startDate').value=x.date;$('startMortgageFund').value=x.mortgage||0;for(const c of cats)$('start-'+c.id).value=x.balances?.[c.id]||0;$('paidMortgageMonth').value=data.paidMortgageMonth||'';}
 function regularPaidForMonth(target,key){return (data.regularPayments||[]).filter(p=>p.target===target&&p.month===key).reduce((a,p)=>a+num(p.amount),0)}
 function regularCreditAvailable(date){
  if(!data.startBalances)return 0;
@@ -831,9 +1174,13 @@ function regularCreditAvailable(date){
  // data.reserved already excludes confirmed credit-card payments.
  return num(data.reserved)-futureCredit+incomeAmountFor('credit',data.startBalances.date)-extraFuture+(data.regularPayments||[]).filter(p=>p.target==='credit'&&p.date>date).reduce((a,p)=>a+num(p.amount),0);
 }
+function mortgageReserveSpent(fromDate=null,toDate=null){
+ return (data.regularPayments||[]).filter(p=>p.target==='mortgage'&&(!fromDate||p.date>=fromDate)&&(!toDate||p.date<=toDate))
+  .reduce((sum,p)=>sum+num(p.reserveUsed===undefined?p.amount:p.reserveUsed),0);
+}
 function regularMortgageAvailable(date){
  if(!data.startBalances)return 0;
- return num(data.startBalances.mortgage)+data.receipts.filter(r=>r.date>=data.startBalances.date&&r.date<=date).reduce((a,r)=>a+num(r.amounts?.mortgage),0)+data.extraIncomes.filter(x=>x.destination==='mortgage'&&x.date>=data.startBalances.date&&x.date<=date).reduce((a,x)=>a+num(x.amount),0)-regularPaymentSum('mortgage',data.startBalances.date,date);
+ return num(data.startBalances.mortgage)+data.receipts.filter(r=>r.date>=data.startBalances.date&&r.date<=date).reduce((a,r)=>a+num(r.amounts?.mortgage),0)+data.extraIncomes.filter(x=>x.destination==='mortgage'&&x.date>=data.startBalances.date&&x.date<=date).reduce((a,x)=>a+num(x.amount),0)-mortgageReserveSpent(data.startBalances.date,date);
 }
 function paymentInfo(){
  const todayKey=iso(new Date());
@@ -851,7 +1198,7 @@ function paymentInfo(){
   if(!amount.value&&available>0)amount.placeholder=rub(Math.min(due||available,available));
  }
  const rows=(data.regularPayments||[]).filter(p=>p.month===month).sort((a,b)=>b.date.localeCompare(a.date));
- $('regularPaymentHistory').innerHTML=rows.length?'<div class="foot"><b>Подтверждённые платежи</b></div>'+rows.map(p=>`<div class="transaction"><div><b>${p.target==='mortgage'?'🏠 Ипотека':'💳 Кредитка'}</b><small>${esc(p.date)} · подтверждено</small></div><div class="row"><b>${rub(p.amount)}</b><button class="delete" type="button" data-undo-regular="${esc(p.id)}" title="Отменить подтверждение">↶</button></div></div>`).join(''):'<div class="foot">Подтверждённых платежей за выбранный месяц пока нет.</div>';
+ $('regularPaymentHistory').innerHTML=rows.length?'<div class="foot"><b>Подтверждённые платежи</b></div>'+rows.map(p=>`<div class="transaction"><div><b>${p.target==='mortgage'?'🏠 Ипотека':'💳 Кредитка'}</b><small>${esc(p.date)} · подтверждено${num(p.extraAmount)>0?' · из конверта '+esc(cats.find(c=>c.id===p.extraSource)?.name||'—')+' '+rub(p.extraAmount):''}</small></div><div class="row"><b>${rub(p.amount)}</b><button class="delete" type="button" data-undo-regular="${esc(p.id)}" title="Отменить подтверждение">↶</button></div></div>`).join(''):'<div class="foot">Подтверждённых платежей за выбранный месяц пока нет.</div>';
 }
 function receiptInfo(){
  for(const type of ['advance','salary']){
@@ -870,7 +1217,7 @@ function receiptInfo(){
 function refreshTypes(preferred){const category=$('expenseCategory').value;const types=data.expenseTypes[category]||[];const old=preferred??$('expenseType').value;const options=types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');$('expenseType').innerHTML='<option value="">Выбери вид расхода</option>'+options+'<option value="__new__">＋ Добавить новый…</option>';
 $('expenseType').value=types.includes(old)||old==='__new__'?old:'';toggleNewType();}
 function toggleNewType(){$('newTypeWrap').style.display=$('expenseType').value==='__new__'?'block':'none';if($('expenseType').value!=='__new__')$('newExpenseType').value='';}
-function syncInputs(){const m=monthData();$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=data.debt;$('reserved').value=data.reserved;$('deadline').value=data.deadline;for(const c of cats)$('weight-'+c.id).value=data.weights[c.id]??0;}
+function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=data.debt;$('reserved').value=data.reserved;$('deadline').value=data.deadline;for(const c of cats)$('weight-'+c.id).value=data.weights[c.id]??0;}
 // Fit the label and amount to the actual available tile width, including large balances.
 function fitTotalMoneyTile(){
  const tile=document.querySelector('.hero-overview .hero-all');
@@ -903,8 +1250,9 @@ const cc=credit();const state=cc.debt===0?'Погашение обеспечен
 $('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс</th><th>Зарплата</th></tr></thead><tbody>'+calc.rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(calc.rows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(calc.rows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
 $('planWarnings').innerHTML=(!plannedAdvance(m)||!plannedSalary(m))
  ? '<div class="hint">Укажи оклад в настройках или фактические выплаты для полного расчёта.</div>'
- : (isForecast(m)?'<div class="hint">Предварительный план: сумма зарплаты прогнозная. Не переводи деньги с зарплаты, пока она не поступила.</div>':'')
+ : ''
  + (calc.unfundedMortgage?`<div class="warning">Не хватает ${rub(calc.unfundedMortgage)} на ипотеку. Нужно покрыть разницу другим источником.</div>`:'')
+ + ((calc.offsets.advance||calc.offsets.salary)?`<div class="hint">Учтена дополнительная оплата ипотеки из конвертов: меньше отложить с аванса на ${rub(calc.offsets.advance)}, с зарплаты на ${rub(calc.offsets.salary)}. Уже подтверждённые поступления не меняются.</div>`:'')
  + (calc.deficit?`<div class="warning">Ипотека и кредитка превышают доход месяца на ${rub(calc.deficit)}. Отложить требуемую сумму полностью не получится.</div>`:'')
  + (!calc.weightTotal?'<div class="warning">Укажи хотя бы один положительный вес для распределения остатка.</div>':'');
 
@@ -960,7 +1308,19 @@ const proportionCard=[...document.querySelectorAll('#v-plan > .card')].find(el=>
  el.querySelector(':scope > .row > b')?.textContent?.trim()==='Пропорции остатка'
 );
 wrap(proportionCard,'Изменить пропорции распределения');
-byView('card',1,'График всех платежей');
+const payoutPopup=proportionCard?.parentElement;
+if(payoutPopup?.tagName==='DETAILS'){
+ payoutPopup.addEventListener('click',event=>{
+  if(event.target===payoutPopup)payoutPopup.open=false;
+ });
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&payoutPopup.open){payoutPopup.open=false;payoutPopup.querySelector('summary')?.focus();}
+ });
+}
+const scheduleCard=[...document.querySelectorAll('#v-card > .card')].find(el=>
+ el.querySelector(':scope > b')?.textContent?.trim()==='График погашения'
+);
+wrap(scheduleCard,'График всех платежей');
 // История расходов уже оформлена раскрывающейся секцией сразу после формы.
 
 const settings=[...document.querySelectorAll('#v-settings > .card')];
@@ -1051,6 +1411,20 @@ for(const id of ['manualDaysTotal','manualDaysFirst'])$(id).addEventListener('in
 for(const id of ['advanceDate','salaryDate'])$(id).addEventListener('change',e=>{const d=fromISO(e.target.value);if(!d)return;data.payDays[id==='advanceDate'?'advance':'salary']=d.getDate();render();save()});
 for(const id of ['debt','reserved'])$(id).addEventListener('input',e=>{data[id]=num(e.target.value);render();save()});
 $('deadline').addEventListener('change',e=>{data.deadline=e.target.value;render();save()});
+$('mortgage').addEventListener('change',e=>{
+ const raw=e.target.value.trim(),monthly=Number(raw);
+ if(!raw||!Number.isFinite(monthly)||monthly<=0){
+  e.target.value=data.mortgageMonthly===undefined?55000:num(data.mortgageMonthly);
+  $('mortgageMonthlyStatus').textContent='Платёж не изменён: введи сумму больше нуля.';
+  return;
+ }
+ data.mortgageMonthly=monthly;
+ for(const [key,m] of Object.entries(data.months)){
+  if(!(data.receipts||[]).some(r=>r.month===key))m.mortgage=monthly;
+ }
+ $('mortgageMonthlyStatus').textContent='Платёж сохранён. Месяцы с подтверждёнными поступлениями не изменены.';
+ renderAll();
+});
 for(const c of cats)$('weight-'+c.id).addEventListener('input',e=>{data.weights[c.id]=num(e.target.value);render();save()});
 $('earlyDate').value=iso(today);
 
@@ -1134,7 +1508,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.19';
+const APP_VERSION='1.5.20';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -1143,19 +1517,10 @@ $('saveStart').addEventListener('click',()=>{
  if(!fromISO(date)){alert('Укажи корректную дату начала учёта');return;}
  const balances={};for(const c of cats)balances[c.id]=num($('start-'+c.id).value);
  const mortgage=num($('startMortgageFund').value);
- const monthlyRaw=$('mortgage').value.trim(),monthly=Number(monthlyRaw);
- if(monthlyRaw===''||!Number.isFinite(monthly)||monthly<=0){alert('Укажи ежемесячный платёж по ипотеке больше нуля.');return;}
  if(data.startBalances&&!confirm('Изменение стартовых остатков пересчитает текущие остатки. Продолжить?'))return;
  data.startBalances={date,balances,mortgage};
  data.paidMortgageMonth=$('paidMortgageMonth').value||'';
- data.mortgageMonthly=monthly;
- // Only update months without confirmed income allocations: historical payments
- // and recorded distributions must never be silently recalculated.
- const fromMonth=date.slice(0,7);
- for(const [key,m] of Object.entries(data.months)){
-  if(key>=fromMonth&&!(data.receipts||[]).some(r=>r.month===key))m.mortgage=monthly;
- }
- renderAll();$('startStatus').textContent='Стартовые остатки и ежемесячная ипотека сохранены. Платёж действует для новых месяцев; месяцы с учтёнными поступлениями не изменены.';
+ renderAll();$('startStatus').textContent='Стартовые остатки сохранены. Старые покупки до '+date+' не списываются.';
 });
 let receiptEntryType=null;
 let receiptEntryMonth=null;
@@ -1252,18 +1617,42 @@ function closePaymentEntry(){
  paymentEntryTarget=null;paymentEntryMonth=null;
  if(paymentEntryTrigger?.focus)paymentEntryTrigger.focus();
 }
-function confirmRegularPayment(target,amount,date){
+function paymentFunding(target,amount,date){
+ const available=target==='mortgage'?regularMortgageAvailable(date):regularCreditAvailable(date);
+ const reserve=Math.max(0,Math.round(available*100)/100);
+ const reserveUsed=Math.min(amount,reserve);
+ const extraAmount=Math.max(0,Math.round((amount-reserveUsed)*100)/100);
+ return {reserveUsed,extraAmount};
+}
+function updateCreditPaymentFunding(){
+ const visible=paymentEntryTarget==='credit'||paymentEntryTarget==='mortgage';
+ $('creditPaymentFunding').hidden=!visible;
+ if(!visible)return;
+ const amount=Math.max(0,Number($('paymentEntryAmount').value)||0);
+ const date=$('paymentEntryDate').value;
+ const {reserveUsed,extraAmount}=paymentFunding(paymentEntryTarget,amount,date);
+ $('creditPaymentFundingSummary').textContent='Из отложенных: '+rub(reserveUsed)+(extraAmount>0?' · Дополнительно из конверта: '+rub(extraAmount):' · Доплата из конверта не требуется');
+ $('creditPaymentSourceWrap').hidden=extraAmount<=0;
+ const source=$('creditPaymentSource').value;
+ const available=fromISO(date)&&source?Math.max(0,categoryBalanceAt(source,date)||0):null;
+ $('creditPaymentSourceAvailable').textContent=extraAmount>0&&source?'Доступно в конверте на дату списания: '+rub(available):'';
+}
+function confirmRegularPayment(target,amount,date,extraSource=''){
  if(!data.startBalances)return 'Сначала укажи стартовые остатки в настройках.';
- const isMortgage=target==='mortgage';
  if(!Number.isFinite(amount)||amount<=0||!fromISO(date)||date>iso(new Date())||date<data.startBalances.date)return 'Проверь сумму и дату. Платёж должен быть после начала учёта и не позже сегодня.';
- const available=isMortgage?regularMortgageAvailable(date):regularCreditAvailable(date);
- if(amount>available+0.001)return 'Недостаточно отложенных денег на дату платежа: '+rub(Math.max(0,available))+'. Уточни остатки и дату.';
- if(!isMortgage){
+ if(target==='credit'){
   const outstanding=Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
   if(amount>outstanding+0.001)return 'Платёж превышает оставшийся учтённый долг: '+rub(outstanding);
  }
- data.regularPayments.push({id:'payment-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),month,target,amount,date});
- if(!isMortgage)data.reserved=Math.max(0,num(data.reserved)-amount);
+ const {reserveUsed,extraAmount}=paymentFunding(target,amount,date);
+ if(extraAmount>0){
+  if(!cats.some(c=>c.id===extraSource))return 'Выбери конверт, из которого списать дополнительные '+rub(extraAmount)+'.';
+  const categoryBalance=categoryBalanceAt(extraSource,date);
+  if(categoryBalance===null||categoryBalance+0.001<extraAmount)return 'В выбранном конверте недостаточно денег на дату списания. Доступно: '+rub(Math.max(0,categoryBalance||0))+'.';
+ }
+ data.regularPayments.push({id:'payment-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
+  month,target,amount,date,reserveUsed,extraSource:extraAmount>0?extraSource:'',extraAmount});
+ if(target==='credit')data.reserved=Math.max(0,Math.round((num(data.reserved)-reserveUsed)*100)/100);
  closePaymentEntry();renderAll();
  return null;
 }
@@ -1273,7 +1662,7 @@ function openPaymentEntry(target){
  paymentEntryTarget=target;paymentEntryMonth=month;
  paymentEntryTrigger=$(isMortgage?'confirmMortgagePayment':'confirmCreditPayment');
  $('paymentEntryTitle').textContent=isMortgage?'Оплата ипотеки':'Оплата кредитки';
- $('paymentEntryHint').textContent='Укажи реальную сумму и дату списания банком. Деньги списываются из ранее отложенных средств, а не повторно из бюджета.';
+ $('paymentEntryHint').textContent='Укажи сумму и дату. Сначала используются отложенные деньги; если их не хватает, выбери конверт для доплаты.';
  const todayKey=iso(new Date());
  const available=Math.max(0,isMortgage?regularMortgageAvailable(todayKey):regularCreditAvailable(todayKey));
  const due=isMortgage?Math.max(0,num(monthData().mortgage)-regularPaidForMonth('mortgage',month)):Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
@@ -1283,16 +1672,20 @@ function openPaymentEntry(target){
  $('paymentEntryDate').max=todayKey;
  $('paymentEntryDate').value=todayKey;
  $('paymentEntryError').hidden=true;
+ $('creditPaymentSource').innerHTML='<option value="">Выбери конверт…</option>'+cats.map(c=>'<option value="'+c.id+'">'+c.icon+' '+c.name+'</option>').join('');
+ updateCreditPaymentFunding();
  $('paymentEntryOverlay').hidden=false;
  $('paymentEntryAmount').focus();
 }
+for(const id of ['paymentEntryAmount','paymentEntryDate'])$(id).addEventListener('input',updateCreditPaymentFunding);
+$('creditPaymentSource').addEventListener('change',updateCreditPaymentFunding);
 $('confirmMortgagePayment').addEventListener('click',()=>openPaymentEntry('mortgage'));
 $('confirmCreditPayment').addEventListener('click',()=>openPaymentEntry('credit'));
 $('paymentEntryForm').addEventListener('submit',e=>{
  e.preventDefault();
  if(!paymentEntryTarget||paymentEntryMonth!==month)return;
  const amount=Number($('paymentEntryAmount').value),date=$('paymentEntryDate').value;
- const error=confirmRegularPayment(paymentEntryTarget,amount,date);
+ const error=confirmRegularPayment(paymentEntryTarget,amount,date,$('creditPaymentSource').value);
  if(error){$('paymentEntryError').textContent=error;$('paymentEntryError').hidden=false;}
 });
 $('paymentEntryClose').addEventListener('click',closePaymentEntry);
@@ -1302,9 +1695,10 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('paymentEntryOve
 $('regularPaymentHistory').addEventListener('click',e=>{
  const button=e.target.closest('[data-undo-regular]');if(!button)return;
  const record=data.regularPayments.find(x=>x.id===button.dataset.undoRegular);if(!record)return;
- if(!confirm('Отменить подтверждение оплаты '+rub(record.amount)+'? Деньги вернутся в отложенные средства, а по кредитке восстановится расчёт долга.'))return;
+ const extraDescription=num(record.extraAmount)>0?' и '+rub(record.extraAmount)+' в конверт «'+(cats.find(c=>c.id===record.extraSource)?.name||'источник')+'»':'';
+ if(!confirm('Отменить подтверждение оплаты '+rub(record.amount)+'? Израсходованные средства вернутся в резерв'+extraDescription+', а учёт платежа восстановится.'))return;
  data.regularPayments=data.regularPayments.filter(x=>x.id!==record.id);
- if(record.target==='credit')data.reserved=num(data.reserved)+num(record.amount);
+ if(record.target==='credit')data.reserved=num(data.reserved)+num(record.reserveUsed===undefined?record.amount:record.reserveUsed);
  renderAll();
 });
 $('receiveAdvance').addEventListener('click',()=>receive('advance'));
