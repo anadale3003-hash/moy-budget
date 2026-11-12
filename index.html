@@ -242,6 +242,61 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .app:not(.home-active)>.main{padding-top:max(12px, env(safe-area-inset-top))}
 .app>.main{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding-bottom:calc(76px + env(safe-area-inset-bottom));scroll-padding-bottom:calc(85px + env(safe-area-inset-bottom))}
 .app>.nav{position:absolute;left:0;right:0;bottom:0;transform:none;width:100%;margin:0;z-index:30;flex:0 0 auto}
+
+/* v1.5.16: non-scrolling Home; other sections still scroll independently. */
+.app.home-active>.main{
+  overflow:hidden!important;
+  padding:7px 12px calc(66px + env(safe-area-inset-bottom));
+  overscroll-behavior:none;
+  touch-action:pan-x;
+}
+.app.home-active #v-home{
+  height:100%!important;min-height:0!important;
+  display:flex;flex-direction:column;gap:5px;
+  overflow:hidden!important;
+}
+#v-home>.section-heading{flex:0 0 auto;margin:0 0 2px!important}
+#v-home>#obligations{flex:0 0 auto;min-height:0}
+#v-home>#obligations .card{padding:7px 10px}
+#v-home>#obligations .lineitem{padding:3px 0;line-height:1.28;font-size:12px}
+#v-home>#obligations .sub{margin-top:5px!important;line-height:1.25}
+#homeEnvelopesPanel{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow:hidden}
+#homeEnvelopesPanel>.section-heading{flex:0 0 auto;margin:2px 0 5px!important}
+#homeEnvelopesPanel #envelopes{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  flex:1 1 auto;min-height:0;gap:7px;
+}
+#homeEnvelopesPanel #envelopes>.card{
+  display:flex;flex-direction:column;justify-content:center;
+  min-height:0;overflow:hidden;padding:7px 9px;
+}
+#homeEnvelopesPanel #envelopes>.card .row{flex:0 0 auto}
+#homeEnvelopesPanel #envelopes>.card .row-title{min-width:0}
+#homeEnvelopesPanel #envelopes>.card .name{overflow-wrap:anywhere}
+#homeEnvelopesPanel #envelopes>.card .number{font-size:clamp(14px,4.5vw,22px)}
+#homeEnvelopesPanel #envelopes>.card .track{flex:0 0 auto}
+#homeEnvelopesPanel #envelopes>.card .tinyline{flex:0 0 auto}
+@media(max-height:800px){
+ .app.home-active>.hero{padding-top:max(30px,calc(env(safe-area-inset-top) - 12px));padding-bottom:7px}
+ .app.home-active .hero-overview{gap:8px}
+ .app.home-active .hero-brand{padding-top:5px}
+ .app.home-active .payday-counter{margin-top:5px;padding:6px 9px}
+ .app.home-active .payday-per-day{font-size:16px;margin-top:2px}
+ .app.home-active .payday-explain{font-size:10px;line-height:1.25}
+ .app.home-active #v-home>.section-heading h2,
+ .app.home-active #homeEnvelopesPanel>.section-heading h2{font-size:14px}
+ #homeEnvelopesPanel #envelopes>.card .sub{font-size:9px}
+ #homeEnvelopesPanel #envelopes>.card .tinyline{font-size:9px}
+}
+@media(max-height:680px){
+ .app.home-active .hero-overview #heroLabel{display:none}
+ .app.home-active .payday-explain{display:none}
+ .app.home-active #v-home>#obligations .sub{display:none}
+ #homeEnvelopesPanel #envelopes>.card .track,
+ #homeEnvelopesPanel #envelopes>.card .tinyline{display:none}
+ #homeEnvelopesPanel #envelopes>.card .emoji{width:22px;height:22px;font-size:13px}
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div><div class="brand hero-brand">Мой бюджет</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini"><span>Накопления</span><b id="heroSavings">—</b></div><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -738,7 +793,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.15';
+const APP_VERSION='1.5.16';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
