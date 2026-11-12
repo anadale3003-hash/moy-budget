@@ -966,6 +966,61 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 #v-settings.active>.design-group:first-child{
   margin-top:0!important;
 }
+
+/* v1.5.25 test: redesigned Operations landing, compact action tiles and sheets. */
+#v-expense.active{display:block!important;min-height:100%!important;overflow:visible!important}
+#v-expense>.ops-action-group{padding:12px!important;margin-bottom:11px!important}
+#v-expense>.ops-history-group{padding:11px!important}
+#v-expense .ops-action-group>.section-heading,
+#v-expense .ops-history-group>.section-heading{margin:0 0 10px!important}
+#v-expense .ops-action-group>.section-heading h2,
+#v-expense .ops-history-group>.section-heading h2{font-size:16px}
+.ops-action-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.ops-action-tile{appearance:none;min-width:0;aspect-ratio:1/1;border-radius:17px;
+ background:var(--card);color:var(--ink);border:1px solid var(--line);
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ gap:9px;padding:7px 3px;cursor:pointer;font:inherit;box-shadow:0 3px 12px #0000000b;
+ touch-action:manipulation}
+.ops-action-tile:active{transform:scale(.975);filter:brightness(.985)}
+.ops-action-tile:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.ops-action-tile .ops-action-icon{display:grid;place-items:center;
+ border-radius:14px;width:44px;height:44px;font-size:26px;font-weight:750;line-height:1;
+ background:color-mix(in srgb,var(--blue) 11%,var(--card));color:var(--blue)}
+.ops-action-tile[data-ops-action="income"] .ops-action-icon{background:color-mix(in srgb,var(--green) 13%,var(--card));color:var(--green)}
+.ops-action-tile[data-ops-action="transfer"] .ops-action-icon{background:color-mix(in srgb,var(--teal) 13%,var(--card));color:var(--teal)}
+.ops-action-tile strong{font-size:13px;font-weight:750;line-height:1.2}
+.ops-history-group>.compact-disclosure{margin:0 0 7px}
+.ops-history-group>.compact-disclosure:last-child{margin-bottom:0}
+.ops-history-group>.compact-disclosure>summary{font-size:13px;padding:10px 11px;min-height:41px}
+.ops-history-group>.compact-disclosure[open]>.card{margin:0;padding:9px 10px}
+.ops-sheet-overlay[hidden]{display:none!important}
+.ops-sheet-overlay{position:fixed;inset:0;z-index:145;display:flex;align-items:flex-end;
+ justify-content:center;background:rgba(5,13,28,.67);
+ -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.ops-sheet{width:min(100%,600px);max-height:calc(100dvh - max(45px,env(safe-area-inset-top)));
+ display:flex;flex-direction:column;min-height:0;background:var(--bg);color:var(--ink);
+ border-radius:22px 22px 0 0;border:1px solid var(--line);
+ box-shadow:0 -15px 45px #0004;overflow:hidden}
+.ops-sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;
+ flex:0 0 auto;padding:12px 16px 10px;border-bottom:1px solid var(--line)}
+.ops-sheet-head h2{margin:0;font-size:18px;line-height:1.2}
+.ops-sheet-close{display:grid;place-items:center;width:36px;height:36px;flex:0 0 36px;
+ border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);
+ font-size:23px;cursor:pointer}
+.ops-sheet-body{padding:9px 15px calc(15px + env(safe-area-inset-bottom));
+ flex:1 1 auto;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+ overscroll-behavior-y:contain}
+.ops-sheet-body>.ops-form-card{padding:3px 0 0!important;margin:0!important;
+ border:0!important;box-shadow:none!important;background:transparent!important}
+.ops-sheet-body>.ops-form-card[hidden]{display:none!important}
+.ops-sheet .field{margin:11px 0}
+.ops-sheet .field input,.ops-sheet .field select{font-size:16px;padding:11px 12px}
+.ops-sheet .btn.full{margin-top:7px}
+.ops-sheet .foot{font-size:11px;line-height:1.35}
+@media(max-width:370px){.ops-action-grid{gap:6px}
+ .ops-action-tile{border-radius:14px;gap:5px}
+ .ops-action-tile .ops-action-icon{width:39px;height:39px;font-size:23px}
+ .ops-action-tile strong{font-size:12px}}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1074,7 +1129,7 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 <div class="card"><b>Резервная копия</b><p class="foot">Сохрани данные перед обновлением или переносом на другой телефон.</p><div class="actions"><button class="btn secondary" id="exportData" type="button">Сохранить копию</button><button class="btn light" id="importClick" type="button">Восстановить</button></div><input type="file" id="importData" accept="application/json,.json" style="display:none"></div>
 <div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
 <div class="hint">Финансовые данные остаются в хранилище браузера на этом устройстве. Не очищай данные сайта, если не сохранил резервную копию.</div>
-</section></main><nav class="nav" aria-label="Разделы"><button class="tab active" data-go="home"><span>⌂</span>Главная</button><button class="tab" data-go="plan"><span>▤</span>Выплаты</button><button class="tab" data-go="card"><span>▣</span>Кредиты</button><button class="tab" data-go="expense"><span>＋</span>Расходы</button><button class="tab" data-go="analytics"><span>◴</span>Аналитика</button><button class="tab" data-go="settings"><span>⚙</span>Настройки</button></nav></div>
+</section></main><nav class="nav" aria-label="Разделы"><button class="tab active" data-go="home"><span>⌂</span>Главная</button><button class="tab" data-go="plan"><span>▤</span>Выплаты</button><button class="tab" data-go="card"><span>▣</span>Кредиты</button><button class="tab" data-go="expense"><span>⊞</span>Операции</button><button class="tab" data-go="analytics"><span>◴</span>Аналитика</button><button class="tab" data-go="settings"><span>⚙</span>Настройки</button></nav></div>
 <div class="receipt-entry-overlay" id="receiptEntryOverlay" hidden>
  <section class="receipt-entry-sheet" role="dialog" aria-modal="true" aria-labelledby="receiptEntryTitle">
   <div class="receipt-entry-header"><h2 id="receiptEntryTitle">Подтверждение поступления</h2><button id="receiptEntryClose" class="envelope-history-close" type="button" aria-label="Закрыть">×</button></div>
@@ -1776,7 +1831,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.24 · тест';
+const APP_VERSION='1.5.25 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -2054,5 +2109,77 @@ setupCompactPanels();initTheme();renderAll();
 if('ResizeObserver' in window){new ResizeObserver(()=>fitTotalMoneyTile()).observe(document.querySelector('.hero-overview .hero-all'));}
 window.addEventListener('resize',fitTotalMoneyTile);
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
+</script>
+<script>
+/* Operations screen renovation: purely DOM presentation, existing form IDs and handlers reused. */
+(function(){
+ function initOperations(){
+  const section=document.getElementById('v-expense');
+  if(!section || document.getElementById('opsActions'))return;
+  const parts={
+   expense:document.getElementById('expenseForm')?.closest('.card'),
+   income:document.getElementById('incomeForm')?.closest('.card'),
+   transfer:document.getElementById('transferForm')?.closest('.card')
+  };
+  if(!parts.expense||!parts.income||!parts.transfer)return;
+  const histories=[
+   document.getElementById('expenseHistoryPanel'),
+   document.getElementById('incomeHistoryPanel'),
+   document.getElementById('transferHistoryPanel')
+  ].filter(Boolean);
+  // The existing grouping script has run; remove only wrappers, never the forms or history content.
+  const intro=document.createElement('div');intro.className='design-group ops-action-group';intro.id='opsActions';
+  const introTitle=document.createElement('div');introTitle.className='section-heading';
+  introTitle.innerHTML='<h2>Операции</h2>';intro.append(introTitle);
+  const grid=document.createElement('div');grid.className='ops-action-grid';
+  const actions=[
+   ['expense','Расход','↘'],['income','Доход','↗'],['transfer','Перевод','⇄']
+  ];
+  for(const [type,label,symbol] of actions){
+   const button=document.createElement('button');button.type='button';button.className='ops-action-tile';
+   button.dataset.opsAction=type;button.setAttribute('aria-label','Новая операция: '+label);
+   const pic=document.createElement('span');pic.className='ops-action-icon';pic.textContent=symbol;pic.setAttribute('aria-hidden','true');
+   const name=document.createElement('strong');name.textContent=label;
+   button.append(pic,name);grid.append(button);
+  }
+  intro.append(grid);
+  const historyGroup=document.createElement('div');historyGroup.className='design-group ops-history-group';
+  const historyTitle=document.createElement('div');historyTitle.className='section-heading';historyTitle.innerHTML='<h2>История операций</h2>';historyGroup.append(historyTitle);
+  for(const panel of histories){panel.open=false;historyGroup.append(panel)}
+  // Keep all 3 forms in one accessible overlay, instead of 3 stacked forms on the page.
+  const overlay=document.createElement('div');overlay.className='ops-sheet-overlay';overlay.id='opsSheet';overlay.hidden=true;
+  const sheet=document.createElement('div');sheet.className='ops-sheet';sheet.setAttribute('role','dialog');
+  sheet.setAttribute('aria-modal','true');sheet.setAttribute('aria-labelledby','opsSheetTitle');
+  const head=document.createElement('div');head.className='ops-sheet-head';
+  const title=document.createElement('h2');title.id='opsSheetTitle';
+  const close=document.createElement('button');close.type='button';close.className='ops-sheet-close';
+  close.setAttribute('aria-label','Закрыть');close.textContent='×';
+  head.append(title,close);
+  const body=document.createElement('div');body.className='ops-sheet-body';
+  Object.values(parts).forEach(card=>{card.classList.add('ops-form-card');card.hidden=true;body.append(card)});
+  sheet.append(head,body);overlay.append(sheet);document.body.append(overlay);
+  // Unneeded containers are removed after IDs of the three forms were safely reparented.
+  section.replaceChildren(intro,historyGroup);
+  let trigger=null;
+  const closeSheet=()=>{
+   overlay.hidden=true;document.documentElement.classList.remove('ops-sheet-shown');
+   if(trigger&&trigger.isConnected)trigger.focus({preventScroll:true});
+  };
+  const showSheet=type=>{
+   if(!parts[type])return;trigger=grid.querySelector('[data-ops-action="'+type+'"]');
+   Object.entries(parts).forEach(([name,card])=>{card.hidden=name!==type});
+   title.textContent=type==='expense'?'Новый расход':type==='income'?'Новый доход':'Новый перевод';
+   overlay.hidden=false;body.scrollTop=0;
+  };
+  grid.addEventListener('click',event=>{
+   const button=event.target.closest('[data-ops-action]');if(button)showSheet(button.dataset.opsAction);
+  });
+  close.addEventListener('click',closeSheet);
+  overlay.addEventListener('click',event=>{if(event.target===overlay)closeSheet()});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!overlay.hidden)closeSheet()});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initOperations,{once:true});
+ else initOperations();
 })();
 </script></body></html>
