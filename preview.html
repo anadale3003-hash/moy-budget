@@ -1823,6 +1823,80 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
  #v-analytics .analytics-economy-peek>.foot{font-size:11px}
  #v-analytics .analytics-capital-card{padding:8px 10px!important}
 }
+
+/* Preview 1.5.48 — compact three-card savings goal, on Analytics dashboard. */
+#v-analytics .analytics-goal-overview{
+ flex:0 0 auto;display:flex;flex-direction:column;gap:8px;min-width:0;
+}
+#v-analytics .analytics-goal-top{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-width:0;
+}
+#v-analytics .analytics-goal-tile,
+#v-analytics .analytics-goal-rest{
+ min-width:0;box-sizing:border-box;border-radius:14px;
+ border:1px solid color-mix(in srgb,var(--line) 50%,#9877db 50%);
+ background:color-mix(in srgb,var(--card) 79%,#9877db 21%);
+ box-shadow:inset 0 2px 0 color-mix(in srgb,#9877db 57%,transparent);
+}
+#v-analytics .analytics-goal-tile{padding:11px 12px 12px}
+#v-analytics .analytics-goal-tile>span,
+#v-analytics .analytics-goal-rest>span{
+ color:var(--muted);font-size:12px;line-height:1.3;display:block;
+}
+#v-analytics .analytics-goal-tile>strong{
+ display:block;margin-top:5px;color:var(--ink);font-weight:820;
+ font-size:clamp(18px,5.4vw,24px);line-height:1.13;letter-spacing:-.55px;
+ font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#v-analytics .analytics-goal-rest{
+ min-height:58px;padding:9px 12px;
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+#v-analytics .analytics-goal-rest>span{min-width:0}
+#v-analytics .analytics-goal-rest>strong{
+ font-size:clamp(20px,6.3vw,29px);font-weight:820;color:var(--ink);
+ line-height:1.1;letter-spacing:-.5px;white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+#v-analytics .analytics-goal-settings{
+ flex:0 0 auto;min-height:41px;
+ background:color-mix(in srgb,var(--card) 84%,#9877db 16%)!important;
+ border-color:color-mix(in srgb,var(--line) 58%,#9877db 42%)!important;
+ font-size:13px;
+}
+@media (orientation:portrait){
+ #v-analytics .analytics-goal-overview{gap:7px}
+ #v-analytics .analytics-one-screen{padding-bottom:10px}
+ /* Keep the goal/settings reachable on shorter iPhones instead of clipping. */
+ .app:has(#v-analytics.active)>.main{
+  overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;
+  -webkit-overflow-scrolling:touch;
+ }
+ #v-analytics.active{height:auto!important;min-height:100%!important;max-height:none!important;overflow:visible!important}
+}
+@media (orientation:portrait) and (max-height:750px){
+ #v-analytics .analytics-goal-tile{padding:8px 9px 9px}
+ #v-analytics .analytics-goal-tile>span{font-size:11px}
+ #v-analytics .analytics-goal-tile>strong{margin-top:3px;font-size:clamp(16px,5vw,21px)}
+ #v-analytics .analytics-goal-rest{min-height:47px;padding:7px 9px}
+ #v-analytics .analytics-goal-rest>strong{font-size:clamp(19px,5.9vw,26px)}
+ #v-analytics .analytics-goal-settings{min-height:35px;font-size:12px}
+}
+@media (orientation:landscape){
+ #v-analytics .analytics-one-screen{
+  grid-template-rows:auto auto minmax(0,1fr) auto!important;
+ }
+ #v-analytics .analytics-goal-overview{
+  grid-column:1;grid-row:2;min-height:0;gap:4px;
+ }
+ #v-analytics .analytics-goal-top{gap:4px}
+ #v-analytics .analytics-goal-tile{padding:6px 7px}
+ #v-analytics .analytics-goal-tile>span,
+ #v-analytics .analytics-goal-rest>span{font-size:10px}
+ #v-analytics .analytics-goal-tile>strong{font-size:clamp(13px,2.6vw,17px);margin-top:2px}
+ #v-analytics .analytics-goal-rest{min-height:30px;padding:4px 7px}
+ #v-analytics .analytics-goal-rest>strong{font-size:clamp(15px,3vw,18px)}
+ #v-analytics .analytics-goal-settings{display:flex!important;grid-column:1;grid-row:4;min-height:30px;padding:5px 9px}
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1940,7 +2014,14 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
    <div class="ladder-track" role="progressbar" aria-label="Прогресс накоплений" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ladderTrack"><div id="ladderFill"></div></div>
    <div class="analytics-capital-note" id="ladderRemaining">До следующей ступени —</div>
   </div>
-  <button class="analytics-bottom-link" type="button" data-anal-open="plan">🧮 Сколько откладывать в месяц? <span>›</span></button>
+  <div class="analytics-goal-overview" aria-label="Сводка цели накоплений">
+   <div class="analytics-goal-top">
+    <div class="analytics-goal-tile"><span>Следующая цель</span><strong id="analyticsGoalAmount">—</strong></div>
+    <div class="analytics-goal-tile"><span>Уже накоплено</span><strong id="analyticsGoalCurrent">—</strong></div>
+   </div>
+   <div class="analytics-goal-rest"><span>Осталось накопить</span><strong id="analyticsGoalRemaining">—</strong></div>
+  </div>
+  <button class="analytics-bottom-link analytics-goal-settings" type="button" data-anal-open="plan">⚙️ Настроить цель и срок <span>›</span></button>
  </div>
  
 </section>
@@ -2797,6 +2878,9 @@ function ladderRender(){
  const base=automatic&&total>=1000000?goal-500000:0;
  const progress=Math.max(0,Math.min(100,goal>base?Math.round((total-base)/(goal-base)*100):100));
  $('ladderTotal').textContent=rub(total);
+ $('analyticsGoalAmount').textContent=rub(goal);
+ $('analyticsGoalCurrent').textContent=rub(total);
+ $('analyticsGoalRemaining').textContent=rub(Math.max(0,goal-total));
  $('ladderGoal').textContent=rub(goal);
  $('ladderBadge').textContent='Цель: '+rub(goal);
  $('ladderReserve').textContent=rub(reserve);
@@ -3123,7 +3207,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.47 · тест';
+const APP_VERSION='1.5.48 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
