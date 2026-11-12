@@ -785,13 +785,74 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  #v-plan>.payout-destinations{padding:5px 9px 7px!important;margin-bottom:6px!important}
  #v-plan #planTable th,#v-plan #planTable td{padding:2px 2px!important}
 }
+
+/* Unified outer cards 1.5.21 — the three Home frames follow the annotated layout. */
+.dashboard-frame,.design-group{
+  border:1px solid var(--line);border-radius:19px;
+  background:color-mix(in srgb,var(--card) 15%,transparent);
+  padding:9px 11px;min-width:0;
+}
+.app.home-active .hero-overview.dashboard-frame{
+  border-color:rgba(185,207,236,.23);
+  background:rgba(205,223,250,.045);
+  padding:10px 11px;
+}
+#v-home>.dashboard-obligations{flex:0 0 auto;min-height:0}
+#v-home>.dashboard-obligations>.section-heading{margin:0 0 7px!important}
+#v-home>.dashboard-obligations #obligations .card{margin:0;box-shadow:none}
+#homeEnvelopesPanel.dashboard-frame{padding:8px 10px 10px}
+#homeEnvelopesPanel.dashboard-frame>.section-heading{margin:0 0 7px!important}
+#homeEnvelopesPanel.dashboard-frame #envelopes>.card{margin-bottom:0;box-shadow:none}
+.design-group{margin:0 0 10px}
+.design-group>.section-heading{margin:0 0 8px!important}
+.design-group>.section-heading h2{font-size:clamp(14px,3.6vw,17px);line-height:1.25}
+.design-group>.card:last-child,.design-group>.compact-disclosure:last-child{margin-bottom:0}
+.design-group>.card{box-shadow:none}
+.design-group>details.compact-disclosure{margin:0}
+#v-card .design-group{padding:11px}
+#v-card .payment-confirm-card .row:first-child{display:none}
+#v-card .payment-confirm-card>p.foot{display:none}
+#v-card .mortgage-monthly-settings>b:first-child{display:none}
+#v-card .credit-basic-card .field:nth-child(2),
+#v-card .credit-basic-card .divider,
+#v-card .credit-basic-card .label,
+#v-card .credit-basic-card .metric,
+#v-card .credit-basic-card .lineitem,
+#v-card .credit-basic-card #debtAlert{display:none!important}
+#v-card .legacy-credit-extras{display:none!important}
+#v-card .payment-obligations{padding:9px}
+#v-card .payment-grid{gap:7px}
+#v-card .payment-confirm{min-width:0}
+#v-card .payment-confirm-heading{font-size:12px}
+#v-card .design-group .field{margin:7px 0}
+#v-card .design-group .foot{font-size:10px}
+#v-card.active{padding-bottom:0;overflow:hidden;display:flex;flex-direction:column;gap:3px;height:100%;min-height:0}
+#v-card.active>.design-group{flex:0 0 auto}
+.app:has(#v-card.active)>.main{overflow:hidden!important;touch-action:pan-x}
+#v-plan.active{overflow-y:auto!important;display:block!important;padding-bottom:24px}
+#v-plan.active>.design-group{display:block!important}
+#v-plan .design-group>.month-strip{margin-bottom:7px}
+#v-plan .design-group>.payout-destinations{height:auto!important;overflow:visible!important}
+#v-plan .design-group #planTable{overflow:visible!important}
+#v-plan .design-group #planTable table{height:auto!important}
+#v-settings .design-group,#v-expense .design-group,#v-analytics .design-group{margin-bottom:10px}
+@media(max-height:760px){
+ .app.home-active .hero-overview.dashboard-frame{padding:6px 8px}
+ #v-home>.dashboard-obligations{padding:6px 8px}
+ #homeEnvelopesPanel.dashboard-frame{padding:6px 8px 7px}
+ #homeEnvelopesPanel.dashboard-frame>.section-heading{margin-bottom:4px!important}
+ .design-group{padding:8px}
+ #v-card .design-group{padding:7px 9px}
+ #v-card .design-group>.section-heading{margin-bottom:4px!important}
+ #v-card .design-group>.card{padding:7px 9px}
+}
 </style></head><body>
-<div class="app home-active"><header class="hero"><div class="hero-overview"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
+<div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
 <section class="view active" id="v-home">
 
-<div class="section-heading" style="margin-top:20px"><h2>Ближайшие обязательства</h2></div><div id="obligations"></div>
-<div class="home-envelopes-visible" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты и остатки</h2><span class="quiet">План − расходы</span></div><div id="envelopes"></div></div>
+<div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайшие обязательства</h2></div><div id="obligations"></div></div>
+<div class="home-envelopes-visible dashboard-frame" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты и остатки</h2><span class="quiet">План − расходы</span></div><div id="envelopes"></div></div>
 </section>
 <section class="view" id="v-plan">
 <div class="section-heading"><h2>Прогноз по окладу</h2><span class="quiet" id="salaryForecastBadge">Предварительно</span></div>
@@ -926,6 +987,54 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  </section>
 </div>
 <div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
+
+<script>
+/* Layout-only grouping. IDs/forms remain intact so accounting calculations and saved data are unchanged. */
+(function(){
+function group(section,title,nodes,extra){
+ const outer=document.createElement('div');outer.className='design-group'+(extra?' '+extra:'');
+ const heading=document.createElement('div');heading.className='section-heading';
+ const h=document.createElement('h2');h.textContent=title;heading.appendChild(h);
+ section.insertBefore(outer,nodes[0]);outer.appendChild(heading);
+ nodes.forEach(n=>outer.appendChild(n));return outer;
+}
+function groupHeadings(id){
+ const section=document.getElementById(id);if(!section)return;
+ const children=Array.from(section.children);let start=-1;
+ for(let i=0;i<children.length;i++){
+  if(children[i].classList.contains('section-heading')){
+   if(start>=0){const nodes=children.slice(start,i);if(nodes.length>1)groupExisting(section,nodes)}
+   start=i;
+  }
+ }
+ if(start>=0){const nodes=children.slice(start);if(nodes.length>1)groupExisting(section,nodes)}
+}
+function groupExisting(section,nodes){
+ const outer=document.createElement('div');outer.className='design-group';
+ section.insertBefore(outer,nodes[0]);nodes.forEach(n=>outer.appendChild(n));
+}
+function setup(){
+ const section=document.getElementById('v-card');
+ if(section){
+  Array.from(section.querySelectorAll(':scope > .section-heading')).forEach(h=>h.remove());
+  const pay=section.querySelector('.payment-obligations');
+  const mortgage=section.querySelector('.mortgage-monthly-settings');
+  const credit=pay?.nextElementSibling?.classList.contains('card')?pay.nextElementSibling:null;
+  // Credit form follows its heading in the original source.
+  const creditField=document.getElementById('debt');
+  const creditCard=creditField?.closest('.card');
+  if(pay)group(section,'Фактическая оплата',[pay],'credit-payments-group');
+  if(mortgage)group(section,'Ипотека',[mortgage],'credit-mortgage-group');
+  if(creditCard){creditCard.classList.add('credit-basic-card');group(section,'Кредитка',[creditCard],'credit-balance-group')}
+  const all=Array.from(section.children);
+  all.filter(n=>!n.classList.contains('design-group')).forEach(n=>n.classList.add('legacy-credit-extras'));
+ }
+ ['v-plan','v-expense','v-analytics','v-settings'].forEach(groupHeadings);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});
+else setup();
+})();
+</script>
 <script>
 (function(){'use strict';
 const THEMES={"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY='my-budget-v1';const fmt=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});const rub=n=>fmt.format(Math.round(n||0))+' ₽';const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
@@ -1508,7 +1617,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.20';
+const APP_VERSION='1.5.21';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
