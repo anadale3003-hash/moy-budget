@@ -1714,19 +1714,6 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
 #paymentEntryOverlay .receipt-entry-sheet{max-height:min(92dvh,850px)}
 @media(max-height:660px){#paymentEntryForm .payment-split-choices{margin:6px 0 3px}#paymentEntryForm .payment-split-choice{min-height:50px;padding:5px 4px}#paymentEntryForm .field{margin:10px 0 7px}}
 
-/* Analytics: compact economy, savings overview before goal settings. */
-#v-analytics .analytics-economy-card{flex:0 0 auto;gap:5px;padding:9px 12px}
-#v-analytics .analytics-economy-peek{flex:0 0 auto;max-height:66px;overflow:hidden}
-#v-analytics .analytics-economy-total>strong{font-size:21px}
-#v-analytics .analytics-economy-cta{min-height:31px!important;padding:6px!important;font-size:12px!important}
-.analytics-goal-overview{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:10px 12px;display:flex;flex-direction:column;gap:7px}
-.analytics-goal-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-.analytics-goal-grid>div{background:var(--panel);border-radius:9px;padding:8px;min-width:0}
-.analytics-goal-grid span,.analytics-goal-month span{display:block;color:var(--muted);font-size:11px}
-.analytics-goal-grid strong{display:block;font-size:17px;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
-.analytics-goal-month{display:flex;align-items:center;justify-content:space-between;gap:7px;background:var(--selected);padding:8px;border-radius:9px}
-.analytics-goal-month strong{font-size:19px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.analytics-goal-deadline{font-size:11px;color:var(--muted)}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1833,16 +1820,7 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
    <div class="ladder-track" role="progressbar" aria-label="Прогресс накоплений" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ladderTrack"><div id="ladderFill"></div></div>
    <div class="analytics-capital-note" id="ladderRemaining">До следующей ступени —</div>
   </div>
-  <div class="analytics-goal-overview" aria-label="План накопления">
-   <div class="analytics-panel-top"><b>🧮 План накопления</b><button type="button" class="analytics-text-button" data-anal-open="plan">Подробнее ›</button></div>
-   <div class="analytics-goal-grid">
-    <div><span>Уже накоплено</span><strong id="analyticsGoalCurrent">—</strong></div>
-    <div><span>Осталось до цели</span><strong id="analyticsGoalRemaining">—</strong></div>
-   </div>
-   <div class="analytics-goal-month"><span>Откладывать в месяц</span><strong id="analyticsGoalMonthly">—</strong></div>
-   <div class="analytics-goal-deadline" id="analyticsGoalDeadline">Укажи срок для расчёта</div>
-  </div>
-  <button class="analytics-bottom-link" type="button" data-anal-open="plan">⚙️ Настройки цели <span>›</span></button>
+  <button class="analytics-bottom-link" type="button" data-anal-open="plan">🧮 Сколько откладывать в месяц? <span>›</span></button>
  </div>
  <div class="analytics-overlay" id="analyticsOverlay" hidden>
   <section class="analytics-sheet" role="dialog" aria-modal="true" aria-labelledby="analyticsSheetTitle">
@@ -2691,16 +2669,7 @@ function savingsPlanOpen(){
   remaining<=0?'Прошлый срок уже завершился — выбери новый.':'Срок сохранён. При новых накоплениях сумма в месяц пересчитается.';
  savingsPlanRender();
 }
-function analyticsGoalOverviewRender(){
- const info=capitalSnapshot();
- const months=savingsPlanMonthsLeft(ladderSettings().targetMonth);
- $('analyticsGoalCurrent').textContent=rub(info.total);
- $('analyticsGoalRemaining').textContent=rub(info.remaining);
- $('analyticsGoalMonthly').textContent=months!==null&&months>0?rub(Math.ceil(info.remaining/months)):'—';
- $('analyticsGoalDeadline').textContent=months===null?'Укажи срок в настройках цели':months<=0?'Срок цели истёк — обнови его в настройках':'До срока цели: '+months+' мес.';
-}
 function ladderRender(){
- analyticsGoalOverviewRender();
  const {settings,reserve,savings,extra,total,goal,automatic}=capitalSnapshot();
  const base=automatic&&total>=1000000?goal-500000:0;
  const progress=Math.max(0,Math.min(100,goal>base?Math.round((total-base)/(goal-base)*100):100));
