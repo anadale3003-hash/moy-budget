@@ -2948,7 +2948,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.41 · тест';
+const APP_VERSION='1.5.42 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -3097,18 +3097,44 @@ function confirmRegularPayment(target,amount,date,extraSource=''){
  closePaymentEntry();renderAll();
  return null;
 }
+// Suggest a payment from the BUDGET calculation, not only the existing reserve.
+// Reserve funds are checked independently in paymentFunding() when confirming.
+function calculatedPaymentAmount(target,date){
+ if(target==='mortgage'){
+  const paid=regularPaidForMonth('mortgage',month);
+  if(data.paidMortgageMonth===month&&paid===0)return 0;
+  return Math.round(Math.max(0,num(monthData().mortgage)-paid)*100)/100;
+ }
+ const outstanding=Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
+ if(!outstanding)return 0;
+ const reserved=Math.max(0,regularCreditAvailable(date));
+ const scheduled=credit();
+ const row=allocation().rows.find(r=>r.name==='Кредитная карта');
+ const planned=num(row?.a)+num(row?.b);
+ // When the remaining balance is already funded, use the amount saved.
+ // Otherwise use the calculated allocations for this cycle; if these are
+ // empty, the per-payday schedule is the fallback, then outstanding debt.
+ const calculated=Math.max(reserved,planned,num(scheduled.per));
+ return Math.round(Math.min(outstanding,calculated>0?calculated:outstanding)*100)/100;
+}
 function openPaymentEntry(target){
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках.');return;}
  const isMortgage=target==='mortgage';
  paymentEntryTarget=target;paymentEntryMonth=month;
  paymentEntryTrigger=$(isMortgage?'confirmMortgagePayment':'confirmCreditPayment');
  $('paymentEntryTitle').textContent=isMortgage?'Оплата ипотеки':'Оплата кредитки';
- $('paymentEntryHint').textContent='Укажи сумму и дату. Сначала используются отложенные деньги; если их не хватает, выбери конверт для доплаты.';
  const todayKey=iso(new Date());
  const available=Math.max(0,isMortgage?regularMortgageAvailable(todayKey):regularCreditAvailable(todayKey));
- const due=isMortgage?Math.max(0,num(monthData().mortgage)-regularPaidForMonth('mortgage',month)):Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
- const suggested=Math.min(available,due);
- $('paymentEntryAmount').value=suggested>0?Math.round(suggested*100)/100:'';
+ const suggested=calculatedPaymentAmount(target,todayKey);
+ const missing=Math.max(0,Math.round((suggested-available)*100)/100);
+ $('paymentEntryHint').textContent=
+  (suggested>0?'По расчёту: '+rub(suggested)+'. ':'')+
+  'Отложено: '+rub(available)+'. '+
+  (missing>0?'Недостающие '+rub(missing)+' можно списать из конверта. ':'')+
+  'Проверь фактическую сумму и дату списания.';
+ const amountField=$('paymentEntryAmount');
+ amountField.value=suggested>0?String(suggested):'';
+ amountField.defaultValue='';
  $('paymentEntryDate').min=data.startBalances.date;
  $('paymentEntryDate').max=todayKey;
  $('paymentEntryDate').value=todayKey;
@@ -3116,7 +3142,8 @@ function openPaymentEntry(target){
  $('creditPaymentSource').innerHTML='<option value="">Выбери конверт…</option>'+cats.map(c=>'<option value="'+c.id+'">'+c.icon+' '+c.name+'</option>').join('');
  updateCreditPaymentFunding();
  $('paymentEntryOverlay').hidden=false;
- $('paymentEntryAmount').focus();
+ amountField.focus();
+ try{amountField.select()}catch(_){/* iOS may not select number inputs */}
 }
 for(const id of ['paymentEntryAmount','paymentEntryDate'])$(id).addEventListener('input',updateCreditPaymentFunding);
 $('creditPaymentSource').addEventListener('change',updateCreditPaymentFunding);
