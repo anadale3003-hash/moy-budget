@@ -1761,7 +1761,21 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
  #v-expense .operations-head>strong{font-size:15px}
  #v-expense .operations-month span{min-width:56px;font-size:10px}
  #v-expense .operations-details-link{padding:4px 6px;font-size:11px}
-}</style></head><body>
+}
+/* Preview 1.5.46: monthly totals survive the legacy Operations DOM rebuild. */
+#v-expense>.ops-stats-group{
+ box-sizing:border-box;padding:10px 12px!important;margin-bottom:11px!important;
+ border-color:color-mix(in srgb,var(--line) 58%,#4f88d4 42%);
+ background:color-mix(in srgb,var(--card) 18%,#4678c5 7%);
+}
+#v-expense>.ops-stats-group .operations-head>strong{font-size:16px}
+#v-expense>.ops-stats-group .operations-hub{gap:6px}
+#v-expense>.ops-stats-group .operations-mini-stats{margin:0}
+@media(max-width:375px){
+ #v-expense>.ops-stats-group{padding:9px 10px!important}
+ #v-expense>.ops-stats-group .operations-head{gap:5px}
+}
+</style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
 <section class="view active" id="v-home">
@@ -3059,7 +3073,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.45 · тест';
+const APP_VERSION='1.5.46 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -3573,8 +3587,21 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
   const body=document.createElement('div');body.className='ops-sheet-body';
   Object.values(parts).forEach(card=>{card.classList.add('ops-form-card');card.hidden=true;body.append(card)});
   sheet.append(head,body);overlay.append(sheet);document.body.append(overlay);
-  // Unneeded containers are removed after IDs of the three forms were safely reparented.
-  section.replaceChildren(intro,historyGroup);
+  // Keep the monthly Operations summary when rebuilding the legacy landing.
+  // The old section.replaceChildren(intro,historyGroup) silently detached
+  // analyticsTotal, analyticsIncomeTotal and the Details/month controls.
+  const overview=section.querySelector(':scope > .operations-hub');
+  if(overview){
+   // The existing three large tiles are the action entry points. Remove only
+   // duplicated quick buttons; keep the summary and its existing event listeners.
+   overview.querySelector('.operations-quick')?.remove();
+   const heading=overview.querySelector('.operations-head > strong');
+   if(heading)heading.textContent='Статистика';
+   overview.classList.add('design-group','ops-stats-group');
+   section.replaceChildren(intro,overview,historyGroup);
+  }else{
+   section.replaceChildren(intro,historyGroup);
+  }
   let trigger=null;
   const closeSheet=()=>{
    overlay.hidden=true;document.documentElement.classList.remove('ops-sheet-shown');
