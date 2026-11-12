@@ -240,10 +240,8 @@ input[type=number]{font-variant-numeric:tabular-nums}
 <main class="main">
 <section class="view active" id="v-home">
 
-<div class="actions"><button class="btn" data-go="expense">＋ Добавить расход</button><button class="btn secondary" id="quickIncome" type="button">＋ Доход</button></div>
 <div class="section-heading" style="margin-top:20px"><h2>Ближайшие обязательства</h2></div><div id="obligations"></div>
 <div class="home-envelopes-visible" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты и остатки</h2><span class="quiet">План − расходы</span></div><div id="envelopes"></div></div>
-<details class="compact-disclosure" id="homeMorePanel"><summary><span class="disclosure-title">Другие действия</span></summary><div class="actions"><button class="btn secondary" data-go="plan">Расчёт выплат</button><button class="btn secondary" id="quickEarly" type="button">↗ Погасить долг</button></div></details>
 </section>
 <section class="view" id="v-plan"><div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div><div class="section-heading"><h2>Аванс и зарплата</h2><span class="pill">Авторасчёт</span></div><div class="card payment-inputs">
 <div class="payment-grid">
@@ -652,7 +650,6 @@ for(const id of ['debt','reserved'])$(id).addEventListener('input',e=>{data[id]=
 $('deadline').addEventListener('change',e=>{data.deadline=e.target.value;render();save()});
 for(const c of cats)$('weight-'+c.id).addEventListener('input',e=>{data.weights[c.id]=num(e.target.value);render();save()});
 $('earlyDate').value=iso(today);
-$('quickEarly').addEventListener('click',()=>{go('card');$('earlyPanel').open=true;});
 $('earlyForm').addEventListener('submit',e=>{
  e.preventDefault();
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках.');go('settings');return;}
@@ -705,7 +702,6 @@ $('transferList').addEventListener('click',e=>{
  data.transfers=data.transfers.filter(t=>t.id!==b.dataset.delTransfer);renderAll();
 });
 $('incomeDate').value=iso(today);
-$('quickIncome').addEventListener('click',()=>{go('expense');$('incomePanel').open=true;setTimeout(()=>$('incomeAmount').focus(),0);});
 $('incomeForm').addEventListener('submit',e=>{
  e.preventDefault();
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках, чтобы правильно учитывать доходы.');go('settings');return;}
