@@ -1610,6 +1610,33 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  #analyticsModalPlan .analytics-plan-hint{display:none}
  #analyticsModalPlan .analytics-plan-status{font-size:10px}
 }
+
+/* 1.5.36: custom capital goal, compact on iPhone without dashboard scrolling. */
+#analyticsModalCapital #ladderTargetInput,
+#analyticsModalPlan #savingsPlanTargetAmount{font-size:16px!important;min-height:40px}
+#analyticsModalPlan .analytics-plan-summary>div:first-child{background:color-mix(in srgb,var(--card) 86%,#9877db 14%)}
+@media(max-height:720px){
+ #analyticsModalPlan{gap:5px}
+ #analyticsModalPlan .analytics-plan-summary>div{padding:6px 9px}
+ #analyticsModalPlan .analytics-plan-summary>.analytics-plan-left{padding:6px 9px}
+ #analyticsModalPlan .analytics-plan-input{margin:1px 0 0}
+ #analyticsModalPlan #savingsPlanMonths,
+ #analyticsModalPlan #savingsPlanTargetAmount{min-height:35px;padding:5px 8px}
+ #analyticsModalPlan .analytics-plan-presets button{padding:5px 2px}
+ #analyticsModalPlan .analytics-plan-result{padding:8px 9px}
+ #analyticsModalPlan .analytics-plan-result>strong{font-size:26px;margin:2px 0}
+ #analyticsModalPlan .analytics-plan-save{min-height:35px}
+}
+@media(max-height:650px){
+ #analyticsModalPlan .analytics-plan-summary>div:first-child{display:none}
+ #analyticsModalPlan .analytics-plan-summary{grid-template-columns:1fr}
+ #analyticsModalPlan .analytics-plan-summary>div:nth-child(2){display:flex;align-items:center;justify-content:space-between;gap:6px}
+ #analyticsModalPlan .analytics-plan-summary>div:nth-child(2) strong{margin:0}
+ #analyticsModalPlan .analytics-plan-hint{display:none}
+}
+@media(max-height:540px){
+ #analyticsModalPlan{overflow-y:auto;overscroll-behavior:contain}
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1745,6 +1772,7 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
      <p class="foot" id="ladderNote"></p>
      <form id="ladderSettingsForm">
       <label class="field"><span>Размер подушки, ₽</span><input id="ladderReserveInput" type="number" inputmode="decimal" step="100" min="0" required value="500000"></label>
+      <label class="field"><span>Моя цель, ₽ (вместе с подушкой)</span><input id="ladderTargetInput" type="number" inputmode="numeric" step="1000" min="0" max="1000000000" required value="1000000"></label>
       <label class="analytics-utilities-check"><input id="ladderIncluded" type="checkbox"><span>Подушка уже входит в остаток категории «Накопления»</span></label>
       <button class="btn full" type="submit">Сохранить параметры цели</button>
      </form>
@@ -1756,12 +1784,13 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
       <div><span>Уже накоплено</span><strong id="savingsPlanCurrent">—</strong></div>
       <div class="analytics-plan-left"><span>Осталось накопить</span><strong id="savingsPlanRemaining">—</strong></div>
      </div>
+     <label class="field analytics-plan-input"><span>Моя цель, ₽ (включая подушку)</span><input id="savingsPlanTargetAmount" type="number" inputmode="numeric" min="0" max="1000000000" step="1000" required value="1000000"></label>
      <label class="field analytics-plan-input"><span>За сколько месяцев накопить?</span><input id="savingsPlanMonths" type="number" inputmode="numeric" min="1" max="120" step="1" value="12"></label>
      <div class="analytics-plan-presets" aria-label="Выбрать срок">
       <button type="button" data-savings-months="6">6 мес.</button>
-      <button type="button" data-savings-months="12">12 мес.</button>
+      <button type="button" data-savings-months="12">1 год</button>
       <button type="button" data-savings-months="18">18 мес.</button>
-      <button type="button" data-savings-months="24">24 мес.</button>
+      <button type="button" data-savings-months="24">2 года</button>
      </div>
      <div class="analytics-plan-result" aria-live="polite">
       <span>Нужно откладывать в месяц</span>
@@ -1769,8 +1798,8 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
       <small id="savingsPlanDeadline">—</small>
      </div>
      <div class="analytics-plan-paydays" id="savingsPlanSplit">—</div>
-     <p class="foot analytics-plan-hint">Расчёт по текущей сумме накоплений, без будущих процентов и премий. Деление на аванс и зарплату — пример поровну.</p>
-     <button class="btn full analytics-plan-save" type="button" id="savingsPlanSave">Сохранить срок цели</button>
+     <p class="foot analytics-plan-hint">Цель включает подушку. Например, при 500 000 ₽ резерва цель 600 000 ₽ — это ещё 100 000 ₽. Проценты и премии не прогнозируются; аванс и зарплата делятся поровну.</p>
+     <button class="btn full analytics-plan-save" type="button" id="savingsPlanSave">Сохранить цель и срок</button>
      <div class="foot analytics-plan-status" id="savingsPlanStatus" aria-live="polite"></div>
     </div>
     <div class="analytics-sheet-page" id="analyticsModalStats" hidden>
@@ -2385,14 +2414,20 @@ function analyticsReportRender(){
 }
 
 /* v1.5.35: capital goal planner. Same reserve accounting as the ladder above. */
-function capitalSnapshot(){
+function capitalSnapshot(goalOverride){
  const settings=ladderSettings(),reserve=num(settings.reserve);
  const savings=categoryBalanceAt('savings',iso(new Date()));
  const booked=savings===null?0:Math.max(0,savings);
  const extra=settings.included?Math.max(0,booked-reserve):booked;
  const total=reserve+extra;
- const goal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
- return {settings,reserve,savings,extra,total,goal,remaining:Math.max(0,goal-total)};
+ const automaticGoal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
+ const userGoal=typeof settings.targetAmount==='number'&&Number.isFinite(settings.targetAmount)
+   &&settings.targetAmount>=reserve&&settings.targetAmount<=1000000000;
+ const override=typeof goalOverride==='number'&&Number.isInteger(goalOverride)
+   &&goalOverride>=reserve&&goalOverride<=1000000000;
+ const goal=override?goalOverride:(userGoal?settings.targetAmount:automaticGoal);
+ return {settings,reserve,savings,extra,total,goal,automatic:!override&&!userGoal,
+   remaining:Math.max(0,goal-total)};
 }
 function savingsPlanTarget(months){
  const now=new Date(),d=new Date(now.getFullYear(),now.getMonth()+months-1,1);
@@ -2406,18 +2441,25 @@ function savingsPlanMonthsLeft(targetMonth){
 function savingsPlanRender(){
  const input=$('savingsPlanMonths');
  const parsed=Number(input.value);
- const valid=Number.isInteger(parsed)&&parsed>=1&&parsed<=120;
- const info=capitalSnapshot();
- $('savingsPlanGoal').textContent=rub(info.goal);
+ const validMonths=input.value.trim()!==''&&Number.isInteger(parsed)&&parsed>=1&&parsed<=120;
+ const targetInput=$('savingsPlanTargetAmount');
+ const proposedGoal=Number(targetInput.value);
+ const snapshot=capitalSnapshot();
+ const validGoal=targetInput.value.trim()!==''&&Number.isInteger(proposedGoal)
+   &&proposedGoal>=snapshot.reserve&&proposedGoal<=1000000000;
+ const info=validGoal?capitalSnapshot(proposedGoal):snapshot;
+ $('savingsPlanGoal').textContent=validGoal?rub(info.goal):'—';
  $('savingsPlanCurrent').textContent=rub(info.total);
- $('savingsPlanRemaining').textContent=rub(info.remaining);
- $('savingsPlanSave').disabled=!valid;
+ $('savingsPlanRemaining').textContent=validGoal?rub(info.remaining):'—';
+ $('savingsPlanSave').disabled=!(validMonths&&validGoal);
  document.querySelectorAll('[data-savings-months]').forEach(btn=>{
-   btn.classList.toggle('active',valid&&Number(btn.dataset.savingsMonths)===parsed);
+   btn.classList.toggle('active',validMonths&&Number(btn.dataset.savingsMonths)===parsed);
  });
- if(!valid){
+ if(!validMonths||!validGoal){
    $('savingsPlanPerMonth').textContent='—';
-   $('savingsPlanDeadline').textContent='Выбери срок от 1 до 120 месяцев';
+   $('savingsPlanDeadline').textContent=!validGoal
+     ?'Цель должна быть не ниже подушки: '+rub(info.reserve)
+     :'Выбери срок от 1 до 120 месяцев';
    $('savingsPlanSplit').textContent='—';
    return;
  }
@@ -2434,21 +2476,23 @@ function savingsPlanRender(){
 function savingsPlanOpen(){
  const settings=ladderSettings();
  const remaining=savingsPlanMonthsLeft(settings.targetMonth);
+ $('savingsPlanTargetAmount').value=String(capitalSnapshot().goal);
  $('savingsPlanMonths').value=String(remaining===null?12:Math.max(1,Math.min(120,remaining)));
  $('savingsPlanStatus').textContent=remaining===null?'Выбери срок и сохрани его, чтобы план запомнился.':
   remaining<=0?'Прошлый срок уже завершился — выбери новый.':'Срок сохранён. При новых накоплениях сумма в месяц пересчитается.';
  savingsPlanRender();
 }
 function ladderRender(){
- const {settings,reserve,savings,extra,total,goal}=capitalSnapshot();
- const base=total<1000000?0:goal-500000;
- const progress=Math.max(0,Math.min(100,Math.round((total-base)/(goal-base)*100)));
+ const {settings,reserve,savings,extra,total,goal,automatic}=capitalSnapshot();
+ const base=automatic&&total>=1000000?goal-500000:0;
+ const progress=Math.max(0,Math.min(100,goal>base?Math.round((total-base)/(goal-base)*100):100));
  $('ladderTotal').textContent=rub(total);
  $('ladderGoal').textContent=rub(goal);
  $('ladderBadge').textContent='Цель: '+rub(goal);
  $('ladderReserve').textContent=rub(reserve);
  $('ladderExtra').textContent=savings===null?'—':rub(extra);
- $('ladderRemaining').textContent='До следующей ступени '+rub(Math.max(0,goal-total))+' · '+progress+'%';
+ $('ladderRemaining').textContent=total>=goal?'Цель достигнута! · 100%':
+   'До цели осталось '+rub(Math.max(0,goal-total))+' · '+progress+'%';
  $('ladderFill').style.width=progress+'%';
  $('ladderTrack').setAttribute('aria-valuenow',progress);
  $('ladderNote').textContent=savings===null
@@ -2456,6 +2500,7 @@ function ladderRender(){
    :settings.included?'Подушка уже внутри категории «Накопления». Повторно не учитываем.'
    :'Подушка считается отдельно. Если она уже есть в остатке «Накоплений», включи переключатель.';
  if(document.activeElement!==$('ladderReserveInput'))$('ladderReserveInput').value=reserve;
+ if(document.activeElement!==$('ladderTargetInput'))$('ladderTargetInput').value=String(goal);
  if(document.activeElement!==$('ladderIncluded'))$('ladderIncluded').checked=!!settings.included;
  const auto=analyticsEconomy();
  $('ladderSaving').textContent=auto.comparable?rub(auto.total):'—';
@@ -2731,7 +2776,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.35 · тест';
+const APP_VERSION='1.5.36 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -3028,21 +3073,31 @@ document.querySelectorAll('[data-anal-open]').forEach(button=>{
 });
 
 $('savingsPlanMonths').addEventListener('input',()=>{
- $('savingsPlanStatus').textContent='Сохрани срок, если хочешь использовать его дальше.';
+ $('savingsPlanStatus').textContent='Сохрани цель и срок, чтобы использовать их дальше.';
+ savingsPlanRender();
+});
+$('savingsPlanTargetAmount').addEventListener('input',()=>{
+ $('savingsPlanStatus').textContent='Сохрани цель и срок, чтобы использовать их дальше.';
  savingsPlanRender();
 });
 document.querySelectorAll('[data-savings-months]').forEach(btn=>btn.addEventListener('click',()=>{
  $('savingsPlanMonths').value=btn.dataset.savingsMonths;
- $('savingsPlanStatus').textContent='Сохрани срок, если хочешь использовать его дальше.';
+ $('savingsPlanStatus').textContent='Сохрани цель и срок, чтобы использовать их дальше.';
  savingsPlanRender();
 }));
 $('savingsPlanSave').addEventListener('click',()=>{
  const months=Number($('savingsPlanMonths').value);
+ const targetInput=$('savingsPlanTargetAmount');
+ const goal=Number(targetInput.value),reserve=num(ladderSettings().reserve);
  if(!Number.isInteger(months)||months<1||months>120){alert('Выбери срок от 1 до 120 месяцев.');return;}
+ if(targetInput.value.trim()===''||!Number.isInteger(goal)||goal<reserve||goal>1000000000){
+   alert('Цель должна быть не меньше защищённой подушки: '+rub(reserve)+'.');return;
+ }
  const settings=ladderSettings();
+ settings.targetAmount=goal;
  settings.targetMonth=savingsPlanTarget(months);
- save();
- $('savingsPlanStatus').textContent='Срок сохранён. План автоматически пересчитывается при новых накоплениях.';
+ renderAll();
+ $('savingsPlanStatus').textContent='Цель и срок сохранены. При новых накоплениях сумма в месяц пересчитается.';
  savingsPlanRender();
 });
 $('analyticsSheetClose').addEventListener('click',analyticsModalClose);
@@ -3065,13 +3120,18 @@ window.addEventListener('resize',()=>{
 $('ladderSettingsForm').addEventListener('submit',event=>{
  event.preventDefault();
  const raw=Number($('ladderReserveInput').value);
+ const input=$('ladderTargetInput'),goal=Number(input.value);
  if(!Number.isFinite(raw)||raw<0){alert('Укажи корректный размер подушки.');return;}
+ if(input.value.trim()===''||!Number.isInteger(goal)||goal<raw||goal>1000000000){
+   alert('Цель должна быть не ниже подушки: '+rub(raw)+'.');return;
+ }
  const setting=ladderSettings();
  setting.reserve=Math.round(raw*100)/100;
+ setting.targetAmount=goal;
  setting.included=$('ladderIncluded').checked;
  renderAll();
  analyticsModalClose();
- alert('Параметры подушки сохранены.');
+ alert('Цель и параметры подушки сохранены.');
 });
 $('ladderSource').addEventListener('change',()=>{
  $('ladderTransferAmount').value='';
