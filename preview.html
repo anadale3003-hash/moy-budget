@@ -2954,11 +2954,12 @@ document.querySelectorAll('[data-ops-period]').forEach(button=>button.addEventLi
  }
  $('expenseDate').value=chosen;
  const title=new Date(y,m-1,1).toLocaleDateString('ru-RU',{month:'long'});
- const note='За '+from+'–'+to+' '+title;
+ const actualTo=Number(chosen.slice(8));
+ const note='За '+from+'–'+actualTo+' '+title;
  if(!$('expenseNote').value.trim()||$('expenseNote').value===operationsBatchNote)
   $('expenseNote').value=note;
  operationsBatchNote=note;
- $('operationsPeriodStatus').textContent='Внеси сумму по категории за '+from+'–'+to+'. Дата записи: '+chosen+'.';
+ $('operationsPeriodStatus').textContent='Внеси сумму по категории за '+from+'–'+actualTo+'. Дата записи: '+chosen+'.';
  document.querySelectorAll('[data-ops-period]').forEach(b=>b.classList.toggle('active',b===button));
 }));
 
