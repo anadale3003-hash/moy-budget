@@ -846,6 +846,103 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  #v-card .design-group>.section-heading{margin-bottom:4px!important}
  #v-card .design-group>.card{padding:7px 9px}
 }
+
+/* v1.5.23: keep the two compact screens inside the visible iPhone viewport. */
+.app:has(#v-plan.active)>.main,
+.app:has(#v-card.active)>.main{
+ overflow:hidden!important;
+ padding-top:calc(max(10px,env(safe-area-inset-top)) + 10px)!important;
+ padding-bottom:calc(64px + env(safe-area-inset-bottom))!important;
+ touch-action:pan-x;
+}
+#v-plan.active,#v-card.active{
+ display:flex!important;flex-direction:column;gap:3px;
+ height:100%!important;min-height:0!important;
+ overflow:hidden!important;padding:0!important;
+}
+#v-plan.active>.design-group,
+#v-card.active>.design-group{min-width:0;margin:0!important;flex:0 0 auto}
+#v-plan.active>.design-group{
+ padding:5px 8px!important;
+}
+#v-plan.active>.design-group:nth-child(3){flex:1 1 auto!important;min-height:0;display:flex!important;flex-direction:column;overflow:hidden}
+#v-plan.active .design-group>.section-heading,
+#v-card.active .design-group>.section-heading{margin:0 0 3px!important}
+#v-plan.active .design-group>.section-heading h2,
+#v-card.active .design-group>.section-heading h2{font-size:clamp(12px,3.6vw,15px)}
+#v-plan.active .design-group>.payroll-preview{
+ padding:4px 9px!important;margin:0 0 4px!important;
+ border-radius:11px;
+}
+#v-plan.active .design-group>.payroll-preview .payroll-grid b{font-size:18px!important;line-height:1.08}
+#v-plan.active .design-group>.month-strip{
+ height:38px!important;min-height:38px!important;max-height:38px!important;
+ padding:2px 6px!important;margin:0!important;
+}
+#v-plan.active .design-group>.month-strip .month-buttons{
+ height:32px!important;min-height:32px!important;
+}
+#v-plan.active .design-group>.month-strip .month-buttons button{min-height:30px!important}
+#v-plan.active .design-group>.payment-inputs{
+ padding:5px 8px!important;margin:0!important;min-height:0!important;
+}
+#v-plan.active .payment-receipt{padding:2px 3px!important}
+#v-plan.active .payment-receipt .receipt-action-label{margin-bottom:3px!important}
+#v-plan.active .payment-receipt .receipt-button{min-height:31px!important;padding:4px!important}
+#v-plan.active .payment-receipt .receipt-note{margin-top:2px!important}
+#v-plan.active .payment-receipt .receipt-undo{margin-top:0!important}
+#v-plan.active .design-group>.payout-destinations{
+ display:flex!important;flex-direction:column;
+ flex:1 1 auto!important;min-height:0!important;
+ height:auto!important;overflow:hidden!important;
+ padding:5px 7px!important;margin:0!important;
+}
+#v-plan.active #planTable{
+ display:flex!important;flex-direction:column;flex:1 1 auto!important;
+ min-height:0!important;overflow:hidden!important;
+}
+#v-plan.active #planTable table{height:100%!important;font-size:clamp(9px,2.7vw,11px)!important}
+#v-plan.active #planTable th,#v-plan.active #planTable td{
+ padding:2px 2px!important;line-height:1.12!important;
+}
+#v-plan.active .plan-weights-disclosure{
+ flex:0 0 auto!important;min-height:0!important;margin:4px 0 0!important;
+ border-radius:10px;
+}
+#v-plan.active .plan-weights-disclosure>summary{padding:5px 9px!important;min-height:26px!important;font-size:11px}
+#v-plan.active .plan-weights-disclosure[open]{
+ position:absolute;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));
+ z-index:35;background:var(--card);box-shadow:0 8px 35px #0005;
+ max-height:min(65dvh,490px);overflow-y:auto;
+}
+#v-plan.active .plan-weights-disclosure>.card{margin:0;padding:9px}
+#v-card.active>.design-group{padding:6px 8px!important}
+#v-card.active .design-group>.card{padding:6px 8px!important;margin:0!important}
+#v-card.active .design-group .field{margin:5px 0!important}
+#v-card.active .design-group .field span{margin-bottom:3px!important}
+#v-card.active .design-group .field input{padding:7px 9px!important;min-height:36px}
+#v-card.active .payment-grid{gap:7px!important}
+#v-card.active .payment-confirm{padding:6px!important}
+#v-card.active .payment-confirm .btn{padding:7px 4px!important;min-height:34px;font-size:clamp(10px,2.65vw,12px)}
+#v-card.active #regularPaymentHistory{max-height:36vh;overflow-y:auto}
+#v-card.active .credit-history-disclosure{margin:4px 0 0}
+#v-card.active .credit-history-disclosure>summary{min-height:26px;padding:5px 8px;font-size:11px}
+#v-card.active .credit-history-disclosure[open]{
+ position:absolute;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));
+ z-index:35;background:var(--card);box-shadow:0 8px 35px #0005;
+ padding:8px;max-height:60dvh;overflow-y:auto;
+}
+#v-card.active .design-group .receipt-note{font-size:10px;line-height:1.15}
+#v-card.active .mortgage-monthly-settings .foot{display:none}
+@media(max-height:740px){
+ #v-plan.active,#v-card.active{gap:3px}
+ #v-plan.active>.design-group,#v-card.active>.design-group{padding:5px 7px!important}
+ #v-plan.active .design-group>.payroll-preview{padding:3px 7px!important}
+ #v-plan.active .design-group>.month-strip{height:34px!important;min-height:34px!important;max-height:34px!important}
+ #v-plan.active .design-group>.month-strip .month-buttons{height:29px!important;min-height:29px!important}
+ #v-plan.active .payment-receipt .receipt-button{min-height:28px!important}
+ #v-card.active .design-group>.card{padding:5px 7px!important}
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1031,6 +1128,21 @@ function setup(){
   all.filter(n=>!n.classList.contains('design-group')).forEach(n=>n.classList.add('legacy-credit-extras'));
  }
  ['v-plan','v-expense','v-analytics','v-settings'].forEach(groupHeadings);
+ // Compress only the payouts section: advanced weights stay available in a closed disclosure.
+ const plan=document.getElementById('v-plan');
+ const distribution=plan?.querySelector('.payout-destinations');
+ const weightCard=plan?.querySelector('#weight-family')?.closest('.card');
+ if(distribution&&weightCard){
+   const fold=document.createElement('details');fold.className='compact-disclosure plan-weights-disclosure';
+   const summary=document.createElement('summary');summary.textContent='Пропорции остатка';
+   fold.appendChild(summary);distribution.parentElement.insertBefore(fold,weightCard);fold.appendChild(weightCard);
+ }
+ const history=document.getElementById('regularPaymentHistory');
+ if(history){
+   const fold=document.createElement('details');fold.className='compact-disclosure credit-history-disclosure';
+   const summary=document.createElement('summary');summary.textContent='История оплат';
+   history.parentElement.insertBefore(fold,history);fold.appendChild(summary);fold.appendChild(history);
+ }
  // Separate history, charts and settings into individually framed groups.
  function separateItems(id){
   const section=document.getElementById(id),first=section?.querySelector(':scope > .design-group');
@@ -1641,7 +1753,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.21';
+const APP_VERSION='1.5.23';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
