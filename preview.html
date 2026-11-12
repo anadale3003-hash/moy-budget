@@ -1562,6 +1562,54 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  background:color-mix(in srgb,var(--card) 93%,#879cba 7%)!important;
 }
 /* No heights, font sizes, gaps, paddings or layouts altered by this color pass. */
+
+/* v1.5.35 TEST — compact goal-contribution planner in the bottom analytics action. */
+#v-analytics .analytics-bottom-link[data-anal-open="plan"]{
+ background:color-mix(in srgb,var(--card) 86%,#9778d5 14%)!important;
+ border-color:color-mix(in srgb,var(--line) 58%,#9778d5 42%)!important;
+}
+#analyticsModalPlan{gap:8px}
+.analytics-plan-summary{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;
+}
+.analytics-plan-summary>div{
+ min-width:0;padding:10px 11px;background:color-mix(in srgb,var(--card) 91%,#9778d5 9%);
+ border:1px solid var(--line);border-radius:11px;
+}
+.analytics-plan-summary>div span{display:block;color:var(--muted);font-size:11px;line-height:1.25}
+.analytics-plan-summary>div strong{display:block;font-size:clamp(17px,5vw,22px);font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:3px;line-height:1.2}
+.analytics-plan-summary>.analytics-plan-left{grid-column:1/-1;padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:color-mix(in srgb,var(--card) 82%,#9778d5 18%)}
+.analytics-plan-summary>.analytics-plan-left strong{font-size:clamp(20px,6vw,26px);color:var(--ink);margin:0}
+#analyticsModalPlan .analytics-plan-input{margin:4px 0 0}
+#analyticsModalPlan .analytics-plan-input span{font-weight:700}
+#analyticsModalPlan #savingsPlanMonths{font-size:16px!important;min-height:40px}
+.analytics-plan-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.analytics-plan-presets button{
+ border:1px solid var(--line);background:var(--card);color:var(--ink);
+ border-radius:9px;padding:8px 2px;font:inherit;font-weight:700;font-size:12px;min-width:0;
+}
+.analytics-plan-presets button.active{background:color-mix(in srgb,var(--card) 77%,#9778d5 23%);border-color:#9778d5}
+.analytics-plan-result{
+ text-align:center;padding:12px 9px;background:color-mix(in srgb,var(--card) 79%,#20a98d 21%);
+ border:1px solid color-mix(in srgb,var(--line) 65%,#20a98d 35%);border-radius:14px;
+}
+.analytics-plan-result>span{display:block;font-size:12px;color:var(--muted);font-weight:700}
+.analytics-plan-result>strong{display:block;font-size:clamp(27px,8.5vw,36px);letter-spacing:-.7px;line-height:1.2;white-space:nowrap;font-variant-numeric:tabular-nums;margin:4px 0}
+.analytics-plan-result>small{display:block;font-size:11px;color:var(--muted)}
+.analytics-plan-paydays{text-align:center;font-size:12px;line-height:1.25;font-weight:650}
+#analyticsModalPlan .analytics-plan-hint{margin:0!important;font-size:11px;line-height:1.35}
+#analyticsModalPlan .analytics-plan-save{margin:0!important;flex:0 0 auto}
+#analyticsModalPlan .analytics-plan-status{min-height:0;margin:0!important;font-size:11px;line-height:1.25}
+@media(max-height:650px){
+ #analyticsModalPlan{gap:5px}
+ .analytics-plan-summary>div{padding:6px 8px}
+ .analytics-plan-summary>.analytics-plan-left{padding:6px 8px}
+ .analytics-plan-presets button{padding:5px 2px}
+ .analytics-plan-result{padding:8px 7px}
+ .analytics-plan-result>strong{font-size:25px;margin:2px 0}
+ #analyticsModalPlan .analytics-plan-hint{display:none}
+ #analyticsModalPlan .analytics-plan-status{font-size:10px}
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1668,7 +1716,7 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
    <div class="ladder-track" role="progressbar" aria-label="Прогресс накоплений" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ladderTrack"><div id="ladderFill"></div></div>
    <div class="analytics-capital-note" id="ladderRemaining">До следующей ступени —</div>
   </div>
-  <button class="analytics-bottom-link" type="button" data-anal-open="stats">▤ Категории, виды расходов и история <span>›</span></button>
+  <button class="analytics-bottom-link" type="button" data-anal-open="plan">🧮 Сколько откладывать в месяц? <span>›</span></button>
  </div>
  <div class="analytics-overlay" id="analyticsOverlay" hidden>
   <section class="analytics-sheet" role="dialog" aria-modal="true" aria-labelledby="analyticsSheetTitle">
@@ -1700,6 +1748,30 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
       <label class="analytics-utilities-check"><input id="ladderIncluded" type="checkbox"><span>Подушка уже входит в остаток категории «Накопления»</span></label>
       <button class="btn full" type="submit">Сохранить параметры цели</button>
      </form>
+    </div>
+    
+    <div class="analytics-sheet-page" id="analyticsModalPlan" hidden>
+     <div class="analytics-plan-summary">
+      <div><span>Следующая цель</span><strong id="savingsPlanGoal">—</strong></div>
+      <div><span>Уже накоплено</span><strong id="savingsPlanCurrent">—</strong></div>
+      <div class="analytics-plan-left"><span>Осталось накопить</span><strong id="savingsPlanRemaining">—</strong></div>
+     </div>
+     <label class="field analytics-plan-input"><span>За сколько месяцев накопить?</span><input id="savingsPlanMonths" type="number" inputmode="numeric" min="1" max="120" step="1" value="12"></label>
+     <div class="analytics-plan-presets" aria-label="Выбрать срок">
+      <button type="button" data-savings-months="6">6 мес.</button>
+      <button type="button" data-savings-months="12">12 мес.</button>
+      <button type="button" data-savings-months="18">18 мес.</button>
+      <button type="button" data-savings-months="24">24 мес.</button>
+     </div>
+     <div class="analytics-plan-result" aria-live="polite">
+      <span>Нужно откладывать в месяц</span>
+      <strong id="savingsPlanPerMonth">—</strong>
+      <small id="savingsPlanDeadline">—</small>
+     </div>
+     <div class="analytics-plan-paydays" id="savingsPlanSplit">—</div>
+     <p class="foot analytics-plan-hint">Расчёт по текущей сумме накоплений, без будущих процентов и премий. Деление на аванс и зарплату — пример поровну.</p>
+     <button class="btn full analytics-plan-save" type="button" id="savingsPlanSave">Сохранить срок цели</button>
+     <div class="foot analytics-plan-status" id="savingsPlanStatus" aria-live="polite"></div>
     </div>
     <div class="analytics-sheet-page" id="analyticsModalStats" hidden>
      <div class="analytics-stats-tabs" role="group" aria-label="Раздел статистики"><button type="button" data-anal-stats="categories" class="active">Категории</button><button type="button" data-anal-stats="types">Виды</button><button type="button" data-anal-stats="months">6 месяцев</button></div>
@@ -2311,12 +2383,64 @@ function analyticsReportRender(){
  $('analyticsTypesNext').disabled=analyticsTypePage>=pages-1;
  $('analyticsTypesPageLabel').textContent=arr.length?'Страница '+(analyticsTypePage+1)+' из '+pages:'Нет записей';
 }
-function ladderRender(){
+
+/* v1.5.35: capital goal planner. Same reserve accounting as the ladder above. */
+function capitalSnapshot(){
  const settings=ladderSettings(),reserve=num(settings.reserve);
  const savings=categoryBalanceAt('savings',iso(new Date()));
  const booked=savings===null?0:Math.max(0,savings);
  const extra=settings.included?Math.max(0,booked-reserve):booked;
- const total=reserve+extra,goal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
+ const total=reserve+extra;
+ const goal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
+ return {settings,reserve,savings,extra,total,goal,remaining:Math.max(0,goal-total)};
+}
+function savingsPlanTarget(months){
+ const d=new Date(today.getFullYear(),today.getMonth()+months-1,1);
+ return iso(d).slice(0,7);
+}
+function savingsPlanMonthsLeft(targetMonth){
+ if(!/^\\d{4}-(0[1-9]|1[0-2])$/.test(targetMonth||''))return null;
+ const [year,m]=targetMonth.split('-').map(Number);
+ return (year-today.getFullYear())*12+m-(today.getMonth()+1)+1;
+}
+function savingsPlanRender(){
+ const input=$('savingsPlanMonths');
+ const parsed=Number(input.value);
+ const valid=Number.isInteger(parsed)&&parsed>=1&&parsed<=120;
+ const info=capitalSnapshot();
+ $('savingsPlanGoal').textContent=rub(info.goal);
+ $('savingsPlanCurrent').textContent=rub(info.total);
+ $('savingsPlanRemaining').textContent=rub(info.remaining);
+ $('savingsPlanSave').disabled=!valid;
+ document.querySelectorAll('[data-savings-months]').forEach(btn=>{
+   btn.classList.toggle('active',valid&&Number(btn.dataset.savingsMonths)===parsed);
+ });
+ if(!valid){
+   $('savingsPlanPerMonth').textContent='—';
+   $('savingsPlanDeadline').textContent='Выбери срок от 1 до 120 месяцев';
+   $('savingsPlanSplit').textContent='—';
+   return;
+ }
+ const perMonth=Math.ceil(info.remaining/parsed);
+ const fromAdvance=Math.floor(perMonth/2);
+ const fromSalary=perMonth-fromAdvance;
+ const deadline=savingsPlanTarget(parsed);
+ const [y,m]=deadline.split('-').map(Number);
+ const displayDate=new Date(y,m-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+ $('savingsPlanPerMonth').textContent=rub(perMonth);
+ $('savingsPlanDeadline').textContent='Плановая цель — '+displayDate+' · '+parsed+' мес. включая текущий';
+ $('savingsPlanSplit').textContent='Поровну: с аванса '+rub(fromAdvance)+' · с зарплаты '+rub(fromSalary);
+}
+function savingsPlanOpen(){
+ const settings=ladderSettings();
+ const remaining=savingsPlanMonthsLeft(settings.targetMonth);
+ $('savingsPlanMonths').value=String(remaining===null?12:Math.max(1,Math.min(120,remaining)));
+ $('savingsPlanStatus').textContent=remaining===null?'Выбери срок и сохрани его, чтобы план запомнился.':
+  remaining<=0?'Прошлый срок уже завершился — выбери новый.':'Срок сохранён. При новых накоплениях сумма в месяц пересчитается.';
+ savingsPlanRender();
+}
+function ladderRender(){
+ const {settings,reserve,savings,extra,total,goal}=capitalSnapshot();
  const base=total<1000000?0:goal-500000;
  const progress=Math.max(0,Math.min(100,Math.round((total-base)/(goal-base)*100)));
  $('ladderTotal').textContent=rub(total);
@@ -2607,7 +2731,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.34 · тест';
+const APP_VERSION='1.5.35 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -2888,17 +3012,38 @@ function analyticsModalOpen(page){
  const map={economy:['analyticsModalEconomy','Где нашлась экономия'],
    transfer:['analyticsModalTransfer','Перевод в накопления'],
    capital:['analyticsModalCapital','Лестница капитала'],
+   plan:['analyticsModalPlan','План накоплений'],
    stats:['analyticsModalStats','Подробная статистика']};
  if(!map[page])return;
  for(const key of Object.keys(map))$(map[key][0]).hidden=page!==key;
  $('analyticsSheetTitle').textContent=map[page][1];
  if(page==='transfer'||page==='economy'||page==='capital')ladderRender();
  if(page==='stats')analyticsReportRender();
+ if(page==='plan')savingsPlanOpen();
  $('analyticsOverlay').hidden=false;
 }
 function analyticsModalClose(){$('analyticsOverlay').hidden=true}
 document.querySelectorAll('[data-anal-open]').forEach(button=>{
  button.addEventListener('click',()=>analyticsModalOpen(button.dataset.analOpen));
+});
+
+$('savingsPlanMonths').addEventListener('input',()=>{
+ $('savingsPlanStatus').textContent='Сохрани срок, если хочешь использовать его дальше.';
+ savingsPlanRender();
+});
+document.querySelectorAll('[data-savings-months]').forEach(btn=>btn.addEventListener('click',()=>{
+ $('savingsPlanMonths').value=btn.dataset.savingsMonths;
+ $('savingsPlanStatus').textContent='Сохрани срок, если хочешь использовать его дальше.';
+ savingsPlanRender();
+}));
+$('savingsPlanSave').addEventListener('click',()=>{
+ const months=Number($('savingsPlanMonths').value);
+ if(!Number.isInteger(months)||months<1||months>120){alert('Выбери срок от 1 до 120 месяцев.');return;}
+ const settings=ladderSettings();
+ settings.targetMonth=savingsPlanTarget(months);
+ save();
+ $('savingsPlanStatus').textContent='Срок сохранён. План автоматически пересчитывается при новых накоплениях.';
+ savingsPlanRender();
 });
 $('analyticsSheetClose').addEventListener('click',analyticsModalClose);
 $('analyticsOverlay').addEventListener('click',e=>{
