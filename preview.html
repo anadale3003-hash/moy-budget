@@ -1456,6 +1456,112 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 @media(prefers-reduced-motion:reduce){
  .app>.nav .tab,.app>.nav .tab .tab-icon{transition:none}
 }
+
+/* v1.5.34 TEST — semantic colored blocks across all tabs, geometry unchanged.
+   Tints blend with the chosen theme card color to preserve dark-mode legibility. */
+#v-plan>.design-group,
+#v-card>.design-group,
+#v-settings>.design-group,
+#v-expense>.ops-action-group,
+#v-expense>.ops-history-group{
+ --block-accent:#788aa7;
+ background:color-mix(in srgb,var(--card) 85%,var(--block-accent) 15%)!important;
+ border-color:color-mix(in srgb,var(--line) 64%,var(--block-accent) 36%)!important;
+ box-shadow:inset 3px 0 0 color-mix(in srgb,var(--block-accent) 75%,transparent);
+}
+#v-plan>.design-group:has(.payroll-preview),
+#v-plan>.design-group:has(.payment-inputs){--block-accent:#528fe6}
+#v-plan>.design-group:has(.payout-destinations){--block-accent:#20a99f}
+#v-card>.credit-payments-group{--block-accent:#9873d9}
+#v-card>.credit-mortgage-group{--block-accent:#e1a53d}
+#v-card>.credit-balance-group{--block-accent:#e07865}
+#v-expense>.ops-action-group{--block-accent:#648bd1}
+#v-expense>.ops-history-group{--block-accent:#9872c8}
+#v-settings>.design-group:has(#themeSelect){--block-accent:#8a80cc}
+#v-settings>.design-group:has(#salarySettingsCard){--block-accent:#528fe6}
+#v-settings>.design-group:has(#startDate){--block-accent:#24a78b}
+#v-settings>.design-group:has(#checkUpdate){--block-accent:#cb9b45}
+#v-settings>.design-group:has(#exportData){--block-accent:#9876ce}
+#v-settings>.design-group:has(#importClick){--block-accent:#9876ce}
+#v-settings>.design-group:has(#themeSelect)>.card,
+#v-settings>.design-group:has(#salarySettingsCard)>.card,
+#v-settings>.design-group:has(#startDate)>.card,
+#v-settings>.design-group:has(#checkUpdate)>.card,
+#v-settings>.design-group:has(#exportData)>.card,
+#v-plan>.design-group:has(.payroll-preview)>.payroll-preview,
+#v-plan>.design-group:has(.payment-inputs)>.payment-inputs,
+#v-plan>.design-group:has(.payout-destinations)>.payout-destinations,
+#v-card>.credit-payments-group>.card,
+#v-card>.credit-mortgage-group>.card,
+#v-card>.credit-balance-group>.card{
+ background:color-mix(in srgb,var(--card) 90%,var(--block-accent) 10%)!important;
+ border-color:color-mix(in srgb,var(--line) 78%,var(--block-accent) 22%);
+}
+#v-plan>.design-group:has(.payment-inputs) .payment-receipt{
+ background:color-mix(in srgb,var(--card) 86%,#528fe6 14%)!important;
+ border-color:color-mix(in srgb,var(--line) 60%,#528fe6 40%)!important;
+}
+#v-plan>.design-group:has(.payout-destinations) .plan-weights-disclosure>summary{
+ background:color-mix(in srgb,var(--card) 83%,#20a99f 17%);
+ border-radius:inherit;
+}
+#v-card>.credit-payments-group .payment-confirm:first-child{
+ background:color-mix(in srgb,var(--card) 83%,#e1a53d 17%)!important;
+ border-color:color-mix(in srgb,var(--line) 65%,#e1a53d 35%)!important;
+}
+#v-card>.credit-payments-group .payment-confirm:nth-child(2){
+ background:color-mix(in srgb,var(--card) 83%,#e07865 17%)!important;
+ border-color:color-mix(in srgb,var(--line) 65%,#e07865 35%)!important;
+}
+/* Home: obligations and savings categories are immediately recognizable. */
+#v-home>.dashboard-obligations{
+ background:color-mix(in srgb,var(--card) 87%,#d79f3b 13%)!important;
+ border-color:color-mix(in srgb,var(--line) 66%,#d79f3b 34%)!important;
+ box-shadow:inset 3px 0 0 color-mix(in srgb,#d79f3b 70%,transparent);
+}
+#v-home>.dashboard-obligations #obligations .card{
+ background:color-mix(in srgb,var(--card) 89%,#d79f3b 11%)!important;
+}
+#homeEnvelopesPanel{
+ background:color-mix(in srgb,var(--card) 90%,#319f97 10%)!important;
+ border-color:color-mix(in srgb,var(--line) 70%,#319f97 30%)!important;
+}
+#homeEnvelopesPanel #envelopes>.envelope-button{--envelope-accent:#6286bd}
+#homeEnvelopesPanel #envelopes>.envelope-button[data-envelope="family"]{--envelope-accent:#4e8ce3}
+#homeEnvelopesPanel #envelopes>.envelope-button[data-envelope="utilities"]{--envelope-accent:#d8a144}
+#homeEnvelopesPanel #envelopes>.envelope-button[data-envelope="savings"]{--envelope-accent:#2baa86}
+#homeEnvelopesPanel #envelopes>.envelope-button[data-envelope="other"]{--envelope-accent:#a77bd5}
+#homeEnvelopesPanel #envelopes>.envelope-button{
+ background:color-mix(in srgb,var(--card) 84%,var(--envelope-accent) 16%)!important;
+ border-color:color-mix(in srgb,var(--line) 55%,var(--envelope-accent) 45%)!important;
+ box-shadow:inset 0 3px 0 color-mix(in srgb,var(--envelope-accent) 56%,transparent);
+}
+/* Operations: expense, income and transfer action blocks each use their own hue. */
+#v-expense .ops-action-tile{--operation-accent:#d97865}
+#v-expense .ops-action-tile[data-ops-action="income"]{--operation-accent:#24a880}
+#v-expense .ops-action-tile[data-ops-action="transfer"]{--operation-accent:#5a91da}
+#v-expense .ops-action-tile{
+ background:color-mix(in srgb,var(--card) 83%,var(--operation-accent) 17%)!important;
+ border-color:color-mix(in srgb,var(--line) 55%,var(--operation-accent) 45%)!important;
+}
+#v-expense .ops-action-tile .ops-action-icon{
+ color:var(--operation-accent)!important;
+ background:color-mix(in srgb,var(--card) 68%,var(--operation-accent) 32%)!important;
+}
+/* Analytics: red expenses, green income, teal economy, purple capital. */
+#v-analytics .analytics-mini-card:first-child{--analytics-accent:#da7969}
+#v-analytics .analytics-mini-card:nth-child(2){--analytics-accent:#20a882}
+#v-analytics .analytics-economy-card{--analytics-accent:#32a89c}
+#v-analytics .analytics-capital-card{--analytics-accent:#9877db}
+#v-analytics :is(.analytics-mini-card,.analytics-economy-card,.analytics-capital-card){
+ background:color-mix(in srgb,var(--card) 83%,var(--analytics-accent) 17%)!important;
+ border-color:color-mix(in srgb,var(--line) 60%,var(--analytics-accent) 40%)!important;
+ box-shadow:inset 0 3px 0 color-mix(in srgb,var(--analytics-accent) 65%,transparent);
+}
+#v-analytics .analytics-bottom-link{
+ background:color-mix(in srgb,var(--card) 93%,#879cba 7%)!important;
+}
+/* No heights, font sizes, gaps, paddings or layouts altered by this color pass. */
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -2501,7 +2607,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.33 · тест';
+const APP_VERSION='1.5.34 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
