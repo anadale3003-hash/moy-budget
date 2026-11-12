@@ -2037,27 +2037,114 @@ function ladderSettings(){
  if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
  return data.ladder;
 }
+
+/* v1.5.32: automatic, conservative economy discovery from recorded expenses.
+   Only comparable categories with expenses in both periods are used;
+   growth elsewhere offsets reductions, and transfers never exceed recorded funds. */
+function analyticsEconomy(){
+ const selected=month,nowDay=iso(new Date());
+ const [year,m]=selected.split('-').map(Number);
+ const previous=iso(new Date(year,m-2,1)).slice(0,7);
+ const isCurrent=selected===currentMonth;
+ const cutoff=isCurrent?new Date().getDate():31;
+ const previousCutoff=isCurrent?Math.min(cutoff,new Date(year,m-1,0).getDate()):31;
+ const groups=[],sources=['family','utilities','other'];
+ const match=(entry,key,day)=>entry.date?.startsWith(key)&&Number(entry.date.slice(8,10))<=day;
+ for(const id of sources){
+   const past=data.expenses.filter(e=>e.category===id&&match(e,previous,previousCutoff));
+   const present=data.expenses.filter(e=>e.category===id&&match(e,selected,cutoff));
+   // Missing current records may mean purchases have not yet been entered.
+   if(!past.length||!present.length)continue;
+   const pastTotal=past.reduce((a,e)=>a+num(e.amount),0);
+   const presentTotal=present.reduce((a,e)=>a+num(e.amount),0);
+   const signed=pastTotal-presentTotal;
+   const saved=(data.transfers||[]).filter(t=>t.kind==='economy'&&t.to==='savings'&&t.from===id&&t.period===selected)
+    .reduce((a,t)=>a+num(t.amount),0);
+   const balance=categoryBalanceAt(id,nowDay);
+   const pastTypes=new Map(),presentTypes=new Map();
+   for(const e of past){const key=String(e.type||'Без вида').trim()||'Без вида';pastTypes.set(key,(pastTypes.get(key)||0)+num(e.amount))}
+   for(const e of present){const key=String(e.type||'Без вида').trim()||'Без вида';presentTypes.set(key,(presentTypes.get(key)||0)+num(e.amount))}
+   const types=[...pastTypes.entries()].map(([name,value])=>({
+     name,delta:Math.max(0,Math.round((value-(presentTypes.get(name)||0))*100)/100)
+   })).filter(t=>t.delta>0).sort((x,y)=>y.delta-x.delta);
+   groups.push({id,name:cats.find(c=>c.id===id)?.name||id,past:pastTotal,present:presentTotal,
+     signed,decline:Math.max(0,signed),saved,balance,types,allocated:0,max:0});
+ }
+ const grossReduction=Math.max(0,Math.round(groups.reduce((a,g)=>a+g.signed,0)*100)/100);
+ // Distribute the actual net improvement, not a sum of isolated reductions.
+ const sorted=[...groups].sort((a,b)=>b.decline-a.decline);
+ let uncovered=grossReduction;
+ for(const group of sorted){
+   group.allocated=Math.min(uncovered,group.decline);
+   uncovered=Math.max(0,Math.round((uncovered-group.allocated)*100)/100);
+ }
+ const previouslyTransferred=groups.reduce((a,g)=>a+g.saved,0);
+ let transferLeft=Math.max(0,Math.round((grossReduction-previouslyTransferred)*100)/100);
+ const todayMonth=isCurrent;
+ for(const group of sorted){
+   const categoryRemaining=Math.max(0,group.allocated-group.saved);
+   group.max=todayMonth&&group.balance!==null
+     ?Math.max(0,Math.floor(Math.min(transferLeft,categoryRemaining,group.balance)*100)/100):0;
+   transferLeft=Math.max(0,Math.round((transferLeft-group.max)*100)/100);
+ }
+ // Assign explanatory type declines only up to their category's allocated net savings.
+ const lines=[];
+ for(const group of sorted){
+   let cap=group.allocated;
+   for(const t of group.types){
+     const value=Math.min(cap,t.delta);
+     if(value>0.009)lines.push({category:group.id,label:group.name+' · '+t.name,amount:value});
+     cap=Math.max(0,Math.round((cap-value)*100)/100);
+     if(cap<0.01)break;
+   }
+ }
+ lines.sort((x,y)=>y.amount-x.amount);
+ return {selected,previous,cutoff,isCurrent,groups,lines,total:grossReduction,
+   available:groups.reduce((a,g)=>a+g.max,0),comparable:groups.length,
+   previousSaved:previouslyTransferred};
+}
 function ladderEconomy(source){
- const todayISO=iso(new Date()),selected=month;
- if(selected>currentMonth)return {error:'Этот месяц ещё не наступил.',max:0};
- const [y,m]=selected.split('-').map(Number),prev=iso(new Date(y,m-2,1)).slice(0,7);
- const limit=selected===currentMonth?new Date().getDate():31;
- const previousLimit=selected===currentMonth?Math.min(limit,new Date(y,m-1,0).getDate()):31;
- const prevRows=data.expenses.filter(x=>x.category===source&&x.date?.startsWith(prev)&&Number(x.date.slice(8,10))<=previousLimit);
- if(!prevRows.length)return {error:'Нет записей за сопоставимый период прошлого месяца.',max:0};
- const last=prevRows.reduce((v,x)=>v+num(x.amount),0);
- const now=data.expenses.filter(x=>x.category===source&&x.date?.startsWith(selected)&&Number(x.date.slice(8,10))<=limit).reduce((v,x)=>v+num(x.amount),0);
- const saved=(data.transfers||[]).filter(t=>t.kind==='economy'&&t.from===source&&t.to==='savings'&&t.period===selected).reduce((v,x)=>v+num(x.amount),0);
- const delta=Math.max(0,Math.round((last-now)*100)/100);
- const remaining=Math.max(0,Math.round((delta-saved)*100)/100);
- const balance=categoryBalanceAt(source,todayISO);
- const max=selected===currentMonth&&balance!==null?Math.max(0,Math.floor(Math.min(remaining,balance)*100)/100):0;
- return {last,now,delta,saved,remaining,balance,max};
+ const auto=analyticsEconomy(),found=auto.groups.find(g=>g.id===source);
+ if(!found)return {error:'Для этой категории пока недостаточно записей в обоих месяцах.',max:0};
+ return {last:found.past,now:found.present,delta:found.allocated,saved:found.saved,
+   remaining:Math.max(0,found.allocated-found.saved),balance:found.balance,max:found.max};
+}
+let analyticsEconomyPage=0,analyticsTypePage=0,analyticsStatsTab='categories';
+function analyticsPageSize(){return window.matchMedia('(orientation:landscape)').matches?3:4}
+function analyticsBreakdownRender(auto){
+ const list=$('analyticsEconomyFullList'),per=analyticsPageSize();
+ const count=Math.max(1,Math.ceil(auto.lines.length/per));
+ analyticsEconomyPage=Math.max(0,Math.min(analyticsEconomyPage,count-1));
+ const items=auto.lines.slice(analyticsEconomyPage*per,(analyticsEconomyPage+1)*per);
+ list.innerHTML=items.length?items.map(x=>
+   '<div class="analytics-economy-row"><span>'+esc(x.label)+'</span><b>−'+rub(x.amount)+'</b></div>'
+ ).join(''):'<div class="foot">Пока нет подтверждённого сравнения по видам расходов.</div>';
+ $('analyticsEconomyPrev').disabled=analyticsEconomyPage===0;
+ $('analyticsEconomyNext').disabled=analyticsEconomyPage>=count-1;
+ $('analyticsEconomyPageLabel').textContent=auto.lines.length?'Страница '+(analyticsEconomyPage+1)+' из '+count:'Нет находок';
+}
+function analyticsReportRender(){
+ const views={categories:'analyticsStatsCategories',types:'analyticsStatsTypes',months:'analyticsStatsMonths'};
+ for(const key of Object.keys(views))$(views[key]).hidden=key!==analyticsStatsTab;
+ document.querySelectorAll('[data-anal-stats]').forEach(b=>b.classList.toggle('active',b.dataset.analStats===analyticsStatsTab));
+ const totals=new Map();
+ data.expenses.filter(e=>e.date?.startsWith(month)).forEach(e=>{
+   const type=String(e.type||cats.find(c=>c.id===e.category)?.name||'Без вида').trim()||'Без вида';
+   totals.set(type,(totals.get(type)||0)+num(e.amount));
+ });
+ const arr=[...totals].sort((a,b)=>b[1]-a[1]),per=4,pages=Math.max(1,Math.ceil(arr.length/per));
+ analyticsTypePage=Math.max(0,Math.min(analyticsTypePage,pages-1));
+ $('analyticsPagedTypes').innerHTML=arr.length?arr.slice(analyticsTypePage*per,(analyticsTypePage+1)*per)
+   .map(([label,value])=>'<div class="lineitem"><span>'+esc(label)+'</span><span>'+rub(value)+'</span></div>').join('')
+   :'<div class="foot">В этом месяце пока нет расходов.</div>';
+ $('analyticsTypesPrev').disabled=analyticsTypePage===0;
+ $('analyticsTypesNext').disabled=analyticsTypePage>=pages-1;
+ $('analyticsTypesPageLabel').textContent=arr.length?'Страница '+(analyticsTypePage+1)+' из '+pages:'Нет записей';
 }
 function ladderRender(){
  const settings=ladderSettings(),reserve=num(settings.reserve);
- const current=categoryBalanceAt('savings',iso(new Date()));
- const booked=current===null?0:Math.max(0,current);
+ const savings=categoryBalanceAt('savings',iso(new Date()));
+ const booked=savings===null?0:Math.max(0,savings);
  const extra=settings.included?Math.max(0,booked-reserve):booked;
  const total=reserve+extra,goal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
  const base=total<1000000?0:goal-500000;
@@ -2066,27 +2153,53 @@ function ladderRender(){
  $('ladderGoal').textContent=rub(goal);
  $('ladderBadge').textContent='Цель: '+rub(goal);
  $('ladderReserve').textContent=rub(reserve);
- $('ladderExtra').textContent=current===null?'—':rub(extra);
- $('ladderRemaining').textContent='До цели осталось '+rub(goal-total)+' · '+progress+'%';
+ $('ladderExtra').textContent=savings===null?'—':rub(extra);
+ $('ladderRemaining').textContent='До следующей ступени '+rub(Math.max(0,goal-total))+' · '+progress+'%';
  $('ladderFill').style.width=progress+'%';
  $('ladderTrack').setAttribute('aria-valuenow',progress);
- $('ladderNote').textContent=current===null?'Дополнительные накопления появятся после ввода стартовых остатков.':
-   settings.included?'Подушка уже включена в конверт — повторно её не прибавляем.':
-   'Подушка считается отдельно. Если она уже в конверте «Накопления», включи переключатель ниже.';
+ $('ladderNote').textContent=savings===null
+   ?'Дополнительные накопления появятся после ввода стартовых остатков. Подушка указана отдельно.'
+   :settings.included?'Подушка уже внутри категории «Накопления». Повторно не учитываем.'
+   :'Подушка считается отдельно. Если она уже есть в остатке «Накоплений», включи переключатель.';
  if(document.activeElement!==$('ladderReserveInput'))$('ladderReserveInput').value=reserve;
- $('ladderIncluded').checked=!!settings.included;
- const e=ladderEconomy($('ladderSource').value);
- $('ladderPeriod').textContent=month===currentMonth?'Те же дни месяца':'Полные месяцы';
- $('ladderSaving').textContent=e.error?'—':rub(e.delta);
- $('ladderCompare').textContent=e.error?e.error:
-   'Прошлый месяц: '+rub(e.last)+' · выбранный: '+rub(e.now)+(e.saved?' · уже переведено: '+rub(e.saved):'');
- $('ladderTransferLimit').textContent=month!==currentMonth?'Перевод возможен только из текущего месяца.':
-   e.error?e.error:current===null?'Сначала укажи стартовые остатки.':
-   'Максимум '+rub(e.max)+' · доступно в исходной категории '+rub(Math.max(0,e.balance||0))+'. Можно оставить часть на будущие покупки.';
- $('ladderTransferButton').disabled=!e.max;
- $('ladderTransferAmount').max=String(e.max);
- if(!Number($('ladderTransferAmount').value)||Number($('ladderTransferAmount').value)>e.max)
-   $('ladderTransferAmount').value=e.max?String(e.max):'';
+ if(document.activeElement!==$('ladderIncluded'))$('ladderIncluded').checked=!!settings.included;
+ const auto=analyticsEconomy();
+ $('ladderSaving').textContent=auto.comparable?rub(auto.total):'—';
+ $('ladderPeriod').textContent=auto.isCurrent?'За те же дни прошлого месяца':'Сравнение полных месяцев';
+ const preview=auto.lines.slice(0,2);
+ $('analyticsEconomyPreview').innerHTML=preview.length?preview.map(x=>
+   '<div class="analytics-economy-row"><span>'+esc(x.label)+'</span><b>−'+rub(x.amount)+'</b></div>'
+ ).join(''):'<div class="foot">'+(auto.comparable?'Снижение расходов пока не найдено.':'Нужны записи расходов в обоих месяцах.')+'</div>';
+ $('analyticsEconomyNote').textContent=auto.comparable
+   ?'Сравниваем '+auto.comparable+' катег. · '+(auto.available?('доступно для перевода '+rub(auto.available)):'пока нет подтверждённо свободных денег')
+   :'Сравнение появится после внесения расходов за оба периода';
+ $('analyticsEconomyToSavings').disabled=!(auto.available>0);
+ $('analyticsEconomyOpenTransfer').disabled=!(auto.available>0);
+ $('analyticsEconomyExplanation').textContent='Поиск по всем видам. Сокращение затрат учитывается только после роста других трат.';
+ $('ladderCompare').textContent='Найдено '+(auto.comparable?rub(auto.total):'—')+
+   '. Уже переведено '+rub(auto.previousSaved)+
+   '. Сумма предварительная: неоплаченные покупки и счета могут изменить результат.';
+ analyticsBreakdownRender(auto);
+ const select=$('ladderSource'),prior=select.value;
+ const eligible=auto.groups.filter(g=>g.allocated>0.009);
+ select.innerHTML=eligible.length
+   ?eligible.map(g=>'<option value="'+g.id+'">'+esc(g.name)+' · '+rub(g.allocated)+'</option>').join('')
+   :'<option value="">Нет доступной экономии</option>';
+ if(eligible.some(g=>g.id===prior))select.value=prior;
+ else if(eligible.length)select.value=(eligible.find(g=>g.max>0)||eligible[0]).id;
+ const choice=auto.groups.find(g=>g.id===select.value),max=choice?.max||0;
+ $('ladderTransferLimit').textContent=!auto.isCurrent?'Перевести можно только из текущего месяца.':
+   !data.startBalances?'Сначала укажи стартовые остатки.':
+   !choice?'Пока нет сравнимой экономии.':
+   'Доступно в '+choice.name+': '+rub(Math.max(0,choice.balance||0))+
+   '. Безопасный предел записи: '+rub(max)+'.';
+ $('ladderTransferButton').disabled=!(max>0);
+ const amountInput=$('ladderTransferAmount');
+ amountInput.max=String(max);
+ if(!amountInput.value||Number(amountInput.value)>max||Number(amountInput.value)<=0)
+   amountInput.value=max>0?String(Math.round(max*100)/100):'';
+ $('analyticsUtilitiesWrap').hidden=select.value!=='utilities';
+ analyticsReportRender();
 }
 
 function analyticsRender(){
@@ -2599,36 +2712,82 @@ $('applyUpdate').addEventListener('click',async()=>{
 });
 
 
-$('ladderSettingsForm').addEventListener('submit',e=>{
- e.preventDefault();
- const n=Number($('ladderReserveInput').value);
- if(!Number.isFinite(n)||n<0){alert('Укажи корректную сумму подушки.');return;}
- const settings=ladderSettings();
- settings.reserve=Math.round(n*100)/100;settings.included=$('ladderIncluded').checked;
- renderAll();alert('Настройки накоплений сохранены.');
+
+/* Analytics modal interactions; no dashboard scroll. */
+function analyticsModalOpen(page){
+ const map={economy:['analyticsModalEconomy','Где нашлась экономия'],
+   transfer:['analyticsModalTransfer','Перевод в накопления'],
+   capital:['analyticsModalCapital','Лестница капитала'],
+   stats:['analyticsModalStats','Подробная статистика']};
+ if(!map[page])return;
+ for(const key of Object.keys(map))$(map[key][0]).hidden=page!==key;
+ $('analyticsSheetTitle').textContent=map[page][1];
+ if(page==='transfer'||page==='economy'||page==='capital')ladderRender();
+ if(page==='stats')analyticsReportRender();
+ $('analyticsOverlay').hidden=false;
+}
+function analyticsModalClose(){$('analyticsOverlay').hidden=true}
+document.querySelectorAll('[data-anal-open]').forEach(button=>{
+ button.addEventListener('click',()=>analyticsModalOpen(button.dataset.analOpen));
+});
+$('analyticsSheetClose').addEventListener('click',analyticsModalClose);
+$('analyticsOverlay').addEventListener('click',e=>{
+ if(e.target===$('analyticsOverlay'))analyticsModalClose();
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&!$('analyticsOverlay').hidden)analyticsModalClose();
+});
+$('analyticsEconomyPrev').addEventListener('click',()=>{analyticsEconomyPage--;analyticsBreakdownRender(analyticsEconomy())});
+$('analyticsEconomyNext').addEventListener('click',()=>{analyticsEconomyPage++;analyticsBreakdownRender(analyticsEconomy())});
+document.querySelectorAll('[data-anal-stats]').forEach(button=>button.addEventListener('click',()=>{
+ analyticsStatsTab=button.dataset.analStats;analyticsTypePage=0;analyticsReportRender();
+}));
+$('analyticsTypesPrev').addEventListener('click',()=>{analyticsTypePage--;analyticsReportRender()});
+$('analyticsTypesNext').addEventListener('click',()=>{analyticsTypePage++;analyticsReportRender()});
+window.addEventListener('resize',()=>{
+ if(!$('analyticsOverlay').hidden)analyticsBreakdownRender(analyticsEconomy());
+});
+$('ladderSettingsForm').addEventListener('submit',event=>{
+ event.preventDefault();
+ const raw=Number($('ladderReserveInput').value);
+ if(!Number.isFinite(raw)||raw<0){alert('Укажи корректный размер подушки.');return;}
+ const setting=ladderSettings();
+ setting.reserve=Math.round(raw*100)/100;
+ setting.included=$('ladderIncluded').checked;
+ renderAll();
+ analyticsModalClose();
+ alert('Параметры подушки сохранены.');
 });
 $('ladderSource').addEventListener('change',()=>{
- $('ladderTransferAmount').value='';ladderRender();
+ $('ladderTransferAmount').value='';
+ $('analyticsUtilitiesPaid').checked=false;
+ ladderRender();
 });
-$('ladderTransferForm').addEventListener('submit',e=>{
- e.preventDefault();
- if(month!==currentMonth){alert('Выбери текущий месяц.');return;}
+$('ladderTransferForm').addEventListener('submit',event=>{
+ event.preventDefault();
+ if(month!==currentMonth){alert('Для перевода открой текущий месяц.');return;}
  if(!data.startBalances||data.startBalances.date>iso(new Date())){alert('Сначала укажи стартовые остатки.');return;}
  const source=$('ladderSource').value,amount=Number($('ladderTransferAmount').value);
  if(!['family','utilities','other'].includes(source)||!Number.isFinite(amount)||amount<=0)return;
+ if(source==='utilities'&&!$('analyticsUtilitiesPaid').checked){
+   alert('Для коммуналки сначала подтверди, что обязательные счета оплачены.');return;
+ }
  const estimate=ladderEconomy(source);
- if(amount>estimate.max+0.001){alert('Недостаточно свободного остатка или экономии.');ladderRender();return;}
+ if(amount>estimate.max+0.001){alert('Экономия или доступный остаток уменьшились. Проверь сумму.');ladderRender();return;}
  const name=cats.find(x=>x.id===source).name;
- if(!confirm('Записать перевод '+rub(amount)+' из «'+name+'» в «Накопления»?\n\nПриложение не переводит деньги в банке. Сначала выполни реальный перевод.'))return;
- const fresh=ladderEconomy(source);
- if(amount>fresh.max+0.001){alert('Остаток изменился. Проверь сумму.');ladderRender();return;}
+ if(!confirm('Записать перевод '+rub(amount)+' из «'+name+'» в «Накопления»?\n\nЭто запись в бюджете, не перевод в банке. Сначала переведи деньги фактически.'))return;
+ const fresh=ladderEconomy(source),balance=categoryBalanceAt(source,iso(new Date()));
+ if(amount>fresh.max+0.001||balance===null||amount>balance+0.001){alert('Остаток изменился. Проверь сумму.');ladderRender();return;}
  data.transfers.push({
    id:'tr-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
-   from:source,to:'savings',date:iso(new Date()),
-   amount:Math.round(amount*100)/100,note:'Экономия за '+month,kind:'economy',period:month
+   from:source,to:'savings',date:iso(new Date()),amount:Math.round(amount*100)/100,
+   note:'Экономия за '+month,kind:'economy',period:month
  });
- $('ladderTransferAmount').value='';renderAll();
- alert('Перевод записан в истории операций.');
+ $('ladderTransferAmount').value='';
+ $('analyticsUtilitiesPaid').checked=false;
+ renderAll();
+ analyticsModalClose();
+ alert('Перевод в «Накопления» записан и появится в истории операций.');
 });
 
 setupCompactPanels();initTheme();renderAll();
