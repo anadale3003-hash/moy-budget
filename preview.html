@@ -1239,6 +1239,10 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
    max-height:calc(100dvh - 15px)!important;
  }
 }
+/* iOS portrait return: suppress scroll anchoring during orientation reflow. */
+@media (orientation: portrait){
+ .app,.app>.main{scroll-behavior:auto!important;overflow-anchor:none}
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -2049,7 +2053,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.29 · тест';
+const APP_VERSION='1.5.30 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -2402,70 +2406,64 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 })();
 </script>
 <script>
-/* v1.5.29: iOS PWA may keep the landscape scroll offset after going portrait.
-   Restore BOTH nested scroll surfaces, again after visual viewport finishes resizing.
-   Keep the current view, modal and unsaved fields intact. */
+/* v1.5.30: restore the portrait scroll position during reflow, without
+   repeated delayed scroll resets that can produce a visible jump on iOS. */
 (function(){
  const orientation=window.matchMedia('(orientation: landscape)');
  const app=document.querySelector('.app');
  const main=document.querySelector('.app>.main');
  const nav=document.querySelector('.app>.nav');
- let wasLandscape=orientation.matches;
- let recoveryDeadline=0;
- let recoveryTimers=[];
- function cancelRecovery(){
-   recoveryTimers.forEach(clearTimeout);
-   recoveryTimers=[];
-   recoveryDeadline=0;
- }
+ let lastLandscape=orientation.matches;
+ let settleUntil=0;
+ let settleTimer=null;
+ let framePending=false;
+
  function resetPortraitScroll(){
    if(orientation.matches)return;
-   if(app){app.scrollTop=0;app.scrollLeft=0}
-   if(main){main.scrollTop=0;main.scrollLeft=0}
-   if(document.scrollingElement)document.scrollingElement.scrollTop=0;
-   if(document.body)document.body.scrollTop=0;
-   if(window.scrollY)window.scrollTo(0,0);
+   if(app && (app.scrollTop || app.scrollLeft)){app.scrollTop=0;app.scrollLeft=0}
+   if(main && (main.scrollTop || main.scrollLeft)){main.scrollTop=0;main.scrollLeft=0}
+   const root=document.scrollingElement;
+   if(root && root.scrollTop)root.scrollTop=0;
+   if(document.body && document.body.scrollTop)document.body.scrollTop=0;
+   if(window.scrollY)window.scrollTo({top:0,left:0,behavior:'instant'});
  }
- function schedulePortraitRecovery(){
-   cancelRecovery();
-   recoveryDeadline=performance.now()+1200;
-   resetPortraitScroll();
-   // Safari may restore a stale offset more than one frame after the rotation.
-   [0,60,160,300,520,850,1100].forEach(delay=>{
-     recoveryTimers.push(setTimeout(()=>{
-       if(!orientation.matches){
-         resetPortraitScroll();
-         requestAnimationFrame(resetPortraitScroll);
-       }
-     },delay));
+ function settleOnNextFrame(){
+   if(framePending)return;
+   framePending=true;
+   requestAnimationFrame(function(){
+     framePending=false;
+     resetPortraitScroll();
    });
  }
- function viewportChanged(){
+ function orientationChanged(){
    const landscape=orientation.matches;
-   if(landscape!==wasLandscape){
-     wasLandscape=landscape;
-     if(landscape)cancelRecovery();
-     else schedulePortraitRecovery();
-   }else if(!landscape && recoveryDeadline && performance.now()<recoveryDeadline){
-     requestAnimationFrame(resetPortraitScroll);
+   if(landscape!==lastLandscape){
+     lastLandscape=landscape;
+     if(settleTimer)clearTimeout(settleTimer);
+     if(landscape){settleUntil=0;return}
+     // Reset at the first possible opportunity, then only when Safari reports a resize.
+     settleUntil=performance.now()+380;
+     resetPortraitScroll();
+     settleOnNextFrame();
+     settleTimer=setTimeout(function(){settleUntil=0;},390);
+   }else if(!landscape && settleUntil && performance.now()<settleUntil){
+     settleOnNextFrame();
    }
  }
- if(nav){
-   nav.addEventListener('click',function(event){
-     if(orientation.matches && event.target.closest('[data-go]')){
-       requestAnimationFrame(function(){
-         if(app)app.scrollTop=0;
-         if(main)main.scrollTop=0;
-       });
-     }
-   });
- }
- if(orientation.addEventListener)orientation.addEventListener('change',viewportChanged);
- else if(orientation.addListener)orientation.addListener(viewportChanged);
- window.addEventListener('orientationchange',viewportChanged,{passive:true});
- window.addEventListener('resize',viewportChanged,{passive:true});
+ if(nav)nav.addEventListener('click',function(event){
+   if(orientation.matches && event.target.closest('[data-go]')){
+     requestAnimationFrame(function(){
+       if(app)app.scrollTop=0;
+       if(main)main.scrollTop=0;
+     });
+   }
+ });
+ if(orientation.addEventListener)orientation.addEventListener('change',orientationChanged);
+ else if(orientation.addListener)orientation.addListener(orientationChanged);
+ window.addEventListener('orientationchange',orientationChanged,{passive:true});
+ window.addEventListener('resize',orientationChanged,{passive:true});
  if(window.visualViewport)
-   window.visualViewport.addEventListener('resize',viewportChanged,{passive:true});
+   window.visualViewport.addEventListener('resize',orientationChanged,{passive:true});
 })();
 </script>
 </body></html>
