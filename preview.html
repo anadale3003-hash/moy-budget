@@ -1117,6 +1117,128 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  #v-expense .ops-history-group .transaction>.row>.delete{width:24px!important}
  #v-expense .ops-history-group>.compact-disclosure[open]>.card{padding:9px!important}
 }
+
+/* v1.5.28 — landscape iPhone layout. Portrait CSS is left untouched.
+   Landscape uses the entire width and a single scroll surface, preserving forms and tabs. */
+@media (orientation: landscape) {
+ html,body{height:100%;width:100%;overflow:hidden!important}
+ body{margin:0}
+ .app,.app.home-active{
+   box-sizing:border-box;
+   width:100%!important;max-width:none!important;min-width:0!important;
+   height:100dvh!important;max-height:100dvh!important;
+   min-height:0!important;margin:0!important;padding:0 0 calc(68px + env(safe-area-inset-bottom))!important;
+   display:block!important;
+   overflow-x:hidden!important;overflow-y:auto!important;
+   -webkit-overflow-scrolling:touch!important;
+   overscroll-behavior-y:contain;touch-action:pan-y;
+ }
+ .app>.main,.app.home-active>.main,.app:not(.home-active)>.main,
+ .app:has(#v-plan.active)>.main,.app:has(#v-card.active)>.main,
+ .app:has(#v-expense.active)>.main,.app:has(#v-analytics.active)>.main,
+ .app:has(#v-settings.active)>.main {
+   box-sizing:border-box;
+   display:block!important;width:100%!important;max-width:none!important;
+   height:auto!important;min-height:0!important;max-height:none!important;
+   flex:none!important;
+   overflow:visible!important;
+   padding:12px max(16px,env(safe-area-inset-left)) 10px max(16px,env(safe-area-inset-right))!important;
+   touch-action:pan-y!important;overscroll-behavior-y:auto!important;
+ }
+ .app>.nav{
+   position:fixed!important;left:0!important;right:0!important;bottom:0!important;
+   width:100%!important;max-width:none!important;transform:none!important;
+   margin:0!important;
+   display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;
+   padding:4px max(12px,env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))!important;
+   min-height:46px!important;z-index:50!important;
+ }
+ .app>.nav .tab{font-size:11px!important;min-width:0!important;gap:2px!important;padding:3px!important}
+ .app>.nav .tab span{font-size:18px!important}
+ .app.home-active>.hero {
+   width:100%!important;box-sizing:border-box;
+   height:auto!important;min-height:0!important;max-height:none!important;
+   padding:max(10px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) 11px max(16px,env(safe-area-inset-left))!important;
+   border-radius:0 0 16px 16px!important;
+ }
+ .app.home-active .hero-overview.dashboard-frame{
+   margin:0!important;grid-template-columns:minmax(0,1.35fr) minmax(170px,.8fr)!important;
+   gap:12px!important;padding:8px 14px!important;
+ }
+ .app.home-active .hero-grid{display:flex!important}
+ .app.home-active .hero-overview .hero-amount{display:block!important}
+ .app.home-active .hero-overview #heroLabel{display:block!important;max-width:none!important}
+ .app.home-active .hero-overview .hero-breakdown{display:flex!important}
+ .app.home-active .payday-counter{margin-top:7px!important;padding:6px 12px!important}
+ .app.home-active .payday-explain{display:block!important}
+ #v-home.active,#v-plan.active,#v-card.active,
+ #v-expense.active,#v-analytics.active,#v-settings.active {
+   display:block!important;height:auto!important;min-height:0!important;
+   max-height:none!important;overflow:visible!important;
+   padding:0!important;
+ }
+ #v-home.active>.dashboard-obligations{display:block!important;margin:0 0 9px!important}
+ #homeEnvelopesPanel.dashboard-frame{
+   display:block!important;height:auto!important;min-height:0!important;
+   flex:none!important;overflow:visible!important;margin:0!important;
+ }
+ #homeEnvelopesPanel #envelopes{
+   display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;
+   grid-template-rows:auto!important;gap:10px!important;
+   height:auto!important;min-height:0!important;max-height:none!important;
+   overflow:visible!important;
+ }
+ #homeEnvelopesPanel #envelopes>.card{
+   min-height:120px!important;height:auto!important;
+   padding:10px 12px!important;overflow:visible!important;
+ }
+ #homeEnvelopesPanel #envelopes>.card .sub{display:block!important}
+ #homeEnvelopesPanel #envelopes>.card .tinyline{display:flex!important}
+ #homeEnvelopesPanel #envelopes>.card .track{display:block!important}
+ #v-plan.active>.design-group,#v-card.active>.design-group,
+ #v-expense.active>.design-group,#v-analytics.active>.design-group,#v-settings.active>.design-group{
+   display:block!important;flex:none!important;height:auto!important;
+   min-height:0!important;max-height:none!important;overflow:visible!important;
+   margin-bottom:10px!important;
+ }
+ #v-plan.active>.design-group:nth-child(3){
+   display:block!important;flex:none!important;height:auto!important;
+   min-height:0!important;overflow:visible!important;
+ }
+ #v-plan.active .design-group>.payout-destinations{
+   display:block!important;flex:none!important;height:auto!important;
+   min-height:0!important;overflow:visible!important;
+ }
+ #v-plan.active #planTable{
+   display:block!important;flex:none!important;height:auto!important;
+   min-height:0!important;overflow:visible!important;
+ }
+ #v-plan.active #planTable table{height:auto!important;table-layout:fixed!important}
+ #v-plan.active #planTable th,#v-plan.active #planTable td{
+   padding:5px 6px!important;font-size:12px!important;line-height:1.25!important;
+ }
+ #v-card.active .payment-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #v-expense.active>.ops-action-group{margin-bottom:10px!important}
+ #v-expense.active .ops-action-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:14px!important}
+ #v-expense.active .ops-action-tile{aspect-ratio:auto!important;min-height:105px!important}
+ .ops-sheet-overlay{align-items:center!important}
+ .ops-sheet{
+   width:calc(100% - 2 * max(14px,env(safe-area-inset-right)))!important;
+   max-width:none!important;
+   height:calc(100dvh - 22px)!important;
+   max-height:calc(100dvh - 22px)!important;
+   border-radius:17px!important;
+ }
+ .ops-sheet-head{padding:8px 17px!important}
+ .ops-sheet-body{padding:8px 17px calc(12px + env(safe-area-inset-bottom))!important}
+ .ops-sheet .field{margin:8px 0!important}
+ .ops-sheet .field input,.ops-sheet .field select{min-height:38px!important;padding:7px 10px!important}
+ .ops-sheet .btn.full{min-height:38px!important;padding:9px!important}
+ .receipt-entry-sheet,.envelope-history-sheet{
+   width:min(100%,100vw)!important;max-width:none!important;
+   max-height:calc(100dvh - 15px)!important;
+ }
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1927,7 +2049,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.27 · тест';
+const APP_VERSION='1.5.28 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -2278,4 +2400,23 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initOperations,{once:true});
  else initOperations();
 })();
-</script></body></html>
+</script>
+<script>
+/* iOS rotation: media queries restore portrait automatically; clear stale app scroll
+   after returning so the upper part of the selected tab is not left off-screen. */
+(function(){
+ const orient=window.matchMedia('(orientation: landscape)');
+ function refreshAfterRotation(){
+   requestAnimationFrame(function(){
+     requestAnimationFrame(function(){
+       const app=document.querySelector('.app');
+       if(!orient.matches && app)app.scrollTop=0;
+       // No navigation or re-render: the selected tab, open forms and entered values persist.
+     });
+   });
+ }
+ if(orient.addEventListener)orient.addEventListener('change',refreshAfterRotation);
+ else if(orient.addListener)orient.addListener(refreshAfterRotation);
+})();
+</script>
+</body></html>
