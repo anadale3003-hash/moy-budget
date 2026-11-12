@@ -2902,7 +2902,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.37 · тест';
+const APP_VERSION='1.5.38 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -2930,25 +2930,28 @@ function receive(type){
  receiptEntryType=type;receiptEntryMonth=month;
  receiptEntryFocus=$(type==='advance'?'receiveAdvance':'receiveSalary');
  $('receiptEntryTitle').textContent=type==='advance'?'Аванс поступил':'Зарплата поступила';
- $('receiptEntryHint').textContent='За '+new Date(month+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'})+'. Укажи фактически полученную сумму и дату.';
- const m=monthData();
- // Never seed the entry form from an orphaned value left by undoing an
- // earlier confirmation: the payroll forecast already detects that case.
+ const m=monthData(),forecast=payrollForecast(m);
+ // The payroll plan is only a suggestion; it must never be inserted as an
+ // actual bank receipt, including for November or after cancel/undo.
  const orphanAdvance=type==='advance'&&
    !(data.receipts||[]).some(r=>r.month===month&&r.type==='advance')&&
-   payrollForecast(m).configured&&num(m.advance)>=payrollForecast(m).net;
- const proposed=orphanAdvance?payrollForecast(m).advanceForecast:
+   forecast.configured&&num(m.advance)>=forecast.net;
+ const proposed=orphanAdvance?forecast.advanceForecast:
    num(type==='advance'?plannedAdvance(m):plannedSalary(m));
- $('receiptEntryAmount').value=proposed>0?Math.round(proposed*100)/100:'';
+ const period=new Date(month+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+ $('receiptEntryHint').textContent='За '+period+'. '+(proposed>0?'По плану: '+rub(proposed)+'. ':'')+
+   'Введи сумму, которая действительно поступила на счёт.';
+ const amountField=$('receiptEntryAmount');
+ amountField.value='';
+ amountField.defaultValue='';
+ amountField.placeholder='Фактически получено, ₽';
  $('receiptEntryDate').max=iso(new Date());
  $('receiptEntryDate').min=data.startBalances.date;
  $('receiptEntryDate').value=iso(new Date());
  $('receiptEntryError').hidden=true;
  $('receiptEntryOverlay').hidden=false;
- // The amount is prefilled for convenience. Do not place the caret at the end
- // with the keyboard open, where typing can append a zero to the amount.
- // Selecting the field manually replaces its whole value.
-
+ // The blank required field prevents accidentally treating a payroll
+ // forecast as actual income. The user confirms only an entered amount.
 }
 $('receiptEntryForm').addEventListener('submit',e=>{
  e.preventDefault();
