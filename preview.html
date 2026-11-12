@@ -1405,6 +1405,57 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
    overflow:hidden!important;
  }
 }
+
+/* v1.5.33 TEST — unified colorful vector navigation (same six pages, same layout). */
+.app>.nav{grid-template-columns:repeat(6,minmax(0,1fr));box-sizing:border-box;gap:0;padding:4px 3px calc(4px + env(safe-area-inset-bottom));background:var(--card);border-top:1px solid var(--line)}
+.app>.nav .tab{
+ --tab-color:var(--blue);
+ appearance:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+ color:var(--muted);background:transparent;border:0;border-radius:11px;
+ min-width:0;min-height:0;line-height:1;padding:1px 0 2px;overflow:hidden;
+ transition:background-color .17s ease,transform .17s ease
+}
+.app>.nav .tab[data-go="home"]{--tab-color:#3683eb}
+.app>.nav .tab[data-go="plan"]{--tab-color:#19a884}
+.app>.nav .tab[data-go="card"]{--tab-color:#d99125}
+.app>.nav .tab[data-go="expense"]{--tab-color:#e47652}
+.app>.nav .tab[data-go="analytics"]{--tab-color:#9b70e6}
+.app>.nav .tab[data-go="settings"]{--tab-color:#71869b}
+.app>.nav .tab .tab-icon{
+ box-sizing:border-box;display:grid;place-items:center;
+ width:33px;height:29px;min-width:33px;min-height:29px;border-radius:11px;
+ color:var(--tab-color);background:color-mix(in srgb,var(--tab-color) 11%,transparent);
+ transition:background-color .18s ease,box-shadow .18s ease,transform .18s ease
+}
+.app>.nav .tab .tab-icon svg{display:block;width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2.05}
+.app>.nav .tab .tab-label{
+ display:block;max-width:100%;font-family:inherit;font-size:10px!important;line-height:12px;
+ font-weight:680;letter-spacing:-.17px;white-space:nowrap;overflow:hidden;text-overflow:clip;
+ color:var(--muted)
+}
+.app>.nav .tab.active{background:color-mix(in srgb,var(--tab-color) 9%,transparent)}
+.app>.nav .tab.active .tab-icon{
+ background:color-mix(in srgb,var(--tab-color) 21%,transparent);
+ box-shadow:0 0 0 1px color-mix(in srgb,var(--tab-color) 23%,transparent);
+ transform:translateY(-1px)
+}
+.app>.nav .tab.active .tab-label{color:var(--ink);font-weight:800}
+.app>.nav .tab:active .tab-icon{transform:scale(.94)}
+.app>.nav .tab:focus-visible{outline:2px solid var(--tab-color);outline-offset:-2px}
+@media(max-width:355px){
+ .app>.nav .tab .tab-icon{width:30px;height:28px;min-width:30px;min-height:28px}
+ .app>.nav .tab .tab-icon svg{width:21px;height:21px}
+ .app>.nav .tab .tab-label{font-size:9px!important;letter-spacing:-.32px}
+}
+@media(orientation:landscape){
+ .app>.nav .tab{gap:0!important;padding:0 0 1px!important}
+ .app>.nav .tab .tab-icon{width:30px;height:25px;min-width:30px;min-height:25px;border-radius:8px}
+ .app>.nav .tab .tab-icon svg{width:20px;height:20px}
+ .app>.nav .tab .tab-label{font-size:10px!important;line-height:11px}
+}
+@media(prefers-reduced-motion:reduce){
+ .app>.nav .tab,.app>.nav .tab .tab-icon{transition:none}
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1575,7 +1626,7 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 <div class="card"><b>Резервная копия</b><p class="foot">Сохрани данные перед обновлением или переносом на другой телефон.</p><div class="actions"><button class="btn secondary" id="exportData" type="button">Сохранить копию</button><button class="btn light" id="importClick" type="button">Восстановить</button></div><input type="file" id="importData" accept="application/json,.json" style="display:none"></div>
 <div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
 <div class="hint">Финансовые данные остаются в хранилище браузера на этом устройстве. Не очищай данные сайта, если не сохранил резервную копию.</div>
-</section></main><nav class="nav" aria-label="Разделы"><button class="tab active" data-go="home"><span>⌂</span>Главная</button><button class="tab" data-go="plan"><span>▤</span>Выплаты</button><button class="tab" data-go="card"><span>▣</span>Кредиты</button><button class="tab" data-go="expense"><span>⊞</span>Операции</button><button class="tab" data-go="analytics"><span>◴</span>Аналитика</button><button class="tab" data-go="settings"><span>⚙</span>Настройки</button></nav></div>
+</section></main><nav class="nav" aria-label="Разделы"><button type="button" class="tab active" data-go="home" aria-label="Главная"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m3 10 9-7 9 7"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"/><path d="M9 21v-7h6v7"/></svg></span><span class="tab-label">Главная</span></button><button type="button" class="tab" data-go="plan" aria-label="Выплаты"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7.5 15h3"/><path d="M16 13v4"/><path d="m14 15 2 2 2-2"/></svg></span><span class="tab-label">Выплаты</span></button><button type="button" class="tab" data-go="card" aria-label="Кредиты"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6.5 15h4.5"/><circle cx="17" cy="15" r="1.4"/></svg></span><span class="tab-label">Кредиты</span></button><button type="button" class="tab" data-go="expense" aria-label="Операции"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h15"/><path d="m15.5 3.5 3.5 3.5-3.5 3.5"/><path d="M20 17H5"/><path d="m8.5 13.5-3.5 3.5 3.5 3.5"/></svg></span><span class="tab-label">Операции</span></button><button type="button" class="tab" data-go="analytics" aria-label="Аналитика"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 20.5h18"/><rect x="5" y="12" width="3" height="8.5" rx="1"/><rect x="10.5" y="8" width="3" height="12.5" rx="1"/><rect x="16" y="4.5" width="3" height="16" rx="1"/></svg></span><span class="tab-label">Аналитика</span></button><button type="button" class="tab" data-go="settings" aria-label="Настройки"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.7 2.7h2.6l.6 2.2a7.3 7.3 0 0 1 1.7 1l2.2-.6 1.8 1.9-1 2a7.1 7.1 0 0 1 .2 3.8l1.9 1.2-.9 2.5-2.3-.1a7.5 7.5 0 0 1-2.4 2l-.4 2.3h-2.7l-.6-2.2a7.3 7.3 0 0 1-1.7-1l-2.2.6-1.8-1.9 1-2a7.1 7.1 0 0 1-.2-3.8L4.6 9.4l.9-2.5 2.3.1a7.5 7.5 0 0 1 2.4-2z" transform="translate(-.2 -.1) scale(.99)"/><circle cx="12" cy="12" r="3"/></svg></span><span class="tab-label">Настройки</span></button></nav></div>
 <div class="receipt-entry-overlay" id="receiptEntryOverlay" hidden>
  <section class="receipt-entry-sheet" role="dialog" aria-modal="true" aria-labelledby="receiptEntryTitle">
   <div class="receipt-entry-header"><h2 id="receiptEntryTitle">Подтверждение поступления</h2><button id="receiptEntryClose" class="envelope-history-close" type="button" aria-label="Закрыть">×</button></div>
@@ -2450,7 +2501,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.32 · тест';
+const APP_VERSION='1.5.33 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
