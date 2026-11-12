@@ -847,27 +847,27 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  #v-card .design-group>.card{padding:7px 9px}
 }
 
-/* v1.5.22 TEST ONLY: keep the two compact screens inside the visible iPhone viewport. */
+/* v1.5.23 TEST ONLY: keep the two compact screens inside the visible iPhone viewport. */
 .app:has(#v-plan.active)>.main,
 .app:has(#v-card.active)>.main{
  overflow:hidden!important;
- padding-top:max(9px,env(safe-area-inset-top))!important;
- padding-bottom:calc(68px + env(safe-area-inset-bottom))!important;
+ padding-top:calc(max(10px,env(safe-area-inset-top)) + 10px)!important;
+ padding-bottom:calc(64px + env(safe-area-inset-bottom))!important;
  touch-action:pan-x;
 }
 #v-plan.active,#v-card.active{
- display:flex!important;flex-direction:column;gap:5px;
+ display:flex!important;flex-direction:column;gap:3px;
  height:100%!important;min-height:0!important;
  overflow:hidden!important;padding:0!important;
 }
 #v-plan.active>.design-group,
 #v-card.active>.design-group{min-width:0;margin:0!important;flex:0 0 auto}
 #v-plan.active>.design-group{
- padding:6px 9px!important;
+ padding:5px 8px!important;
 }
 #v-plan.active>.design-group:nth-child(3){flex:1 1 auto!important;min-height:0;display:flex!important;flex-direction:column;overflow:hidden}
 #v-plan.active .design-group>.section-heading,
-#v-card.active .design-group>.section-heading{margin:0 0 4px!important}
+#v-card.active .design-group>.section-heading{margin:0 0 3px!important}
 #v-plan.active .design-group>.section-heading h2,
 #v-card.active .design-group>.section-heading h2{font-size:clamp(12px,3.6vw,15px)}
 #v-plan.active .design-group>.payroll-preview{
@@ -916,8 +916,8 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  max-height:min(65dvh,490px);overflow-y:auto;
 }
 #v-plan.active .plan-weights-disclosure>.card{margin:0;padding:9px}
-#v-card.active>.design-group{padding:7px 9px!important}
-#v-card.active .design-group>.card{padding:7px 9px!important;margin:0!important}
+#v-card.active>.design-group{padding:6px 8px!important}
+#v-card.active .design-group>.card{padding:6px 8px!important;margin:0!important}
 #v-card.active .design-group .field{margin:5px 0!important}
 #v-card.active .design-group .field span{margin-bottom:3px!important}
 #v-card.active .design-group .field input{padding:7px 9px!important;min-height:36px}
@@ -1753,7 +1753,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.22 · тест';
+const APP_VERSION='1.5.23 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
