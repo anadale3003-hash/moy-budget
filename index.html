@@ -1031,6 +1031,28 @@ function setup(){
   all.filter(n=>!n.classList.contains('design-group')).forEach(n=>n.classList.add('legacy-credit-extras'));
  }
  ['v-plan','v-expense','v-analytics','v-settings'].forEach(groupHeadings);
+ // Separate history, charts and settings into individually framed groups.
+ function separateItems(id){
+  const section=document.getElementById(id),first=section?.querySelector(':scope > .design-group');
+  if(!first)return;
+  const content=Array.from(first.children);
+  const items=content.filter(el=>el.classList.contains('card')||el.matches('details.compact-disclosure'));
+  items.slice(1).forEach((el,i)=>{
+   const wrap=document.createElement('div');wrap.className='design-group';
+   const isDetails=el.matches('details');
+   if(!isDetails){
+    const title=id==='v-analytics'?(i===0?'Поступления':i===1?'Основные категории':'Виды расходов'):
+      (el.querySelector('.row>b')?.textContent||'Параметры');
+    const heading=document.createElement('div');heading.className='section-heading';
+    const h=document.createElement('h2');h.textContent=title;heading.appendChild(h);wrap.appendChild(heading);
+    if(id==='v-settings'){const b=el.querySelector('.row>b');if(b)b.remove()}
+    if(id==='v-analytics'&&i>=1){const b=el.querySelector('.row>b');if(b)b.remove()}
+   }
+   first.parentElement.insertBefore(wrap,first.nextElementSibling);
+   wrap.appendChild(el);
+  });
+ }
+ ['v-expense','v-analytics','v-settings'].forEach(separateItems);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});
 else setup();
