@@ -297,8 +297,108 @@ input[type=number]{font-variant-numeric:tabular-nums}
  #homeEnvelopesPanel #envelopes>.card .tinyline{display:none}
  #homeEnvelopesPanel #envelopes>.card .emoji{width:22px;height:22px;font-size:13px}
 }
+
+/* Interactive envelopes: isolated scrollable history overlay. */
+#homeEnvelopesPanel #envelopes>.envelope-button{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;text-align:left;width:100%;cursor:pointer;touch-action:manipulation;transition:filter .15s}
+#homeEnvelopesPanel #envelopes>.envelope-button:active{filter:brightness(1.07)}
+#homeEnvelopesPanel #envelopes>.envelope-button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.envelope-history-overlay[hidden]{display:none!important}
+.envelope-history-overlay{position:fixed;inset:0;z-index:100;background:rgba(4,12,25,.72);display:flex;align-items:flex-end;justify-content:center;padding:0}
+.envelope-history-sheet{box-sizing:border-box;width:min(100%,600px);max-height:min(84dvh,820px);display:flex;flex-direction:column;min-height:0;background:var(--bg);color:var(--ink);border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -8px 35px #0004}
+.envelope-history-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex:0 0 auto}
+.envelope-history-top h2{font-size:18px;margin:0}
+.envelope-history-close{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:7px 12px;font-size:20px;cursor:pointer}
+.envelope-history-summary{margin:9px 0 12px;font-size:13px;color:var(--muted);flex:0 0 auto}
+.envelope-history-list{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;min-height:0;flex:1}
+.envelope-history-entry{display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding:12px 2px}
+.envelope-history-entry>div:first-child{min-width:0}
+.envelope-history-entry .history-title{font-weight:650;font-size:13px;overflow-wrap:anywhere}
+.envelope-history-entry .history-detail{font-size:11px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.envelope-history-entry .history-amount{white-space:nowrap;font-size:14px;font-weight:700}
+.envelope-history-entry .history-amount.positive{color:var(--green)}
+.envelope-history-entry .history-amount.negative{color:var(--red)}
+
+/* Preview: polished envelope reveal / dismissal, without moving the dashboard. */
+#homeEnvelopesPanel #envelopes>.envelope-button{
+ transform:translateZ(0);
+ transition:transform 180ms cubic-bezier(.2,.8,.2,1),box-shadow 220ms ease,filter 180ms ease;
+ -webkit-tap-highlight-color:transparent;
+}
+#homeEnvelopesPanel #envelopes>.envelope-button:active{
+ transform:scale(.965);filter:brightness(1.1);
+}
+.envelope-history-overlay{
+ opacity:0;visibility:hidden;pointer-events:none;
+ background:rgba(4,12,25,.64);
+ -webkit-backdrop-filter:blur(0);
+ backdrop-filter:blur(0);
+ transition:opacity 290ms ease,visibility 290ms ease,backdrop-filter 290ms ease,-webkit-backdrop-filter 290ms ease;
+}
+.envelope-history-overlay.is-open{
+ opacity:1;visibility:visible;pointer-events:auto;
+ -webkit-backdrop-filter:blur(6px);
+ backdrop-filter:blur(6px);
+}
+.envelope-history-sheet{
+ transform:translate3d(0,105%,0) scale(.97);
+ transform-origin:bottom center;
+ opacity:.95;
+ transition:transform 420ms cubic-bezier(.18,.85,.23,1.02),opacity 280ms ease;
+ will-change:transform;
+ border:1px solid var(--line);
+ border-bottom:0;
+}
+.envelope-history-overlay.is-open .envelope-history-sheet{transform:translate3d(0,0,0) scale(1);opacity:1}
+.envelope-history-sheet::before{
+ content:"";display:block;flex:0 0 auto;
+ width:42px;height:5px;border-radius:8px;
+ background:var(--muted);opacity:.42;
+ margin:-5px auto 14px;
+}
+.envelope-history-overlay.is-open .envelope-history-entry{
+ animation:envelope-entry-in 320ms both ease-out;
+}
+.envelope-history-overlay.is-open .envelope-history-entry:nth-child(2){animation-delay:35ms}
+.envelope-history-overlay.is-open .envelope-history-entry:nth-child(3){animation-delay:65ms}
+.envelope-history-overlay.is-open .envelope-history-entry:nth-child(4){animation-delay:95ms}
+.envelope-history-overlay.is-open .envelope-history-entry:nth-child(5){animation-delay:125ms}
+@keyframes envelope-entry-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+ #homeEnvelopesPanel #envelopes>.envelope-button,
+ .envelope-history-overlay,.envelope-history-sheet{transition:none!important}
+ .envelope-history-entry{animation:none!important}
+}
+
+/* Test layout: total-money tile fills the remaining top-summary column. */
+.hero .hero-overview{align-items:stretch}
+.hero .hero-overview .hero-breakdown{height:100%;align-self:stretch}
+.hero .hero-overview .hero-breakdown .hero-all{
+ flex:1 1 auto;width:100%;box-sizing:border-box;
+ display:flex;align-items:center;justify-content:center;flex-direction:column;
+ text-align:center;min-height:0;
+}
+.hero .hero-overview .hero-breakdown .hero-all{
+ min-width:0;overflow:hidden;padding:8px 5px;
+}
+.hero .hero-overview .hero-breakdown .hero-all span,
+.hero .hero-overview .hero-breakdown .hero-all b{
+ display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;
+ white-space:nowrap;overflow:hidden;text-overflow:clip;
+ text-align:center;line-height:1.2;
+}
+.hero .hero-overview .hero-breakdown .hero-all span{font-size:16px;font-weight:600;letter-spacing:0}
+.hero .hero-overview .hero-breakdown .hero-all b{font-size:30px;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:-.35px}
+
+/* Preview: equal perceived spacing above and below the spending card.
+   The main area already adds 7px of space below the hero. */
+.app.home-active>.hero{padding-bottom:5px}
+.app.home-active>.hero .payday-counter{margin-top:12px}
+@media(max-height:800px){
+ .app.home-active>.hero{padding-bottom:4px}
+ .app.home-active>.hero .payday-counter{margin-top:11px}
+}
 </style></head><body>
-<div class="app home-active"><header class="hero"><div class="hero-overview"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div><div class="brand hero-brand">Мой бюджет</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini"><span>Накопления</span><b id="heroSavings">—</b></div><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
+<div class="app home-active"><header class="hero"><div class="hero-overview"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div><div class="brand hero-brand">Мой бюджет</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
 <section class="view active" id="v-home">
 
@@ -402,6 +502,7 @@ input[type=number]{font-variant-numeric:tabular-nums}
 <div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
 <div class="hint">Финансовые данные остаются в хранилище браузера на этом устройстве. Не очищай данные сайта, если не сохранил резервную копию.</div>
 </section></main><nav class="nav" aria-label="Разделы"><button class="tab active" data-go="home"><span>⌂</span>Главная</button><button class="tab" data-go="plan"><span>▤</span>Выплаты</button><button class="tab" data-go="card"><span>▣</span>Кредитка</button><button class="tab" data-go="expense"><span>＋</span>Расходы</button><button class="tab" data-go="analytics"><span>◴</span>Аналитика</button><button class="tab" data-go="settings"><span>⚙</span>Настройки</button></nav></div>
+<div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 <script>
 (function(){'use strict';
 const THEMES={"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY='my-budget-v1';const fmt=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});const rub=n=>fmt.format(Math.round(n||0))+' ₽';const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
@@ -613,8 +714,34 @@ function refreshTypes(preferred){const category=$('expenseCategory').value;const
 $('expenseType').value=types.includes(old)||old==='__new__'?old:'';toggleNewType();}
 function toggleNewType(){$('newTypeWrap').style.display=$('expenseType').value==='__new__'?'block':'none';if($('expenseType').value!=='__new__')$('newExpenseType').value='';}
 function syncInputs(){const m=monthData();$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;$('mortgage').value=m.mortgage;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=data.debt;$('reserved').value=data.reserved;$('deadline').value=data.deadline;for(const c of cats)$('weight-'+c.id).value=data.weights[c.id]??0;}
-function render(){const m=monthData();const calc=allocation();const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advanceForecast):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroSavings').textContent=actual?rub(actual.savings):'—';$('heroAll').textContent=actual?rub(actual.total):'—';$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
-$('envelopes').innerHTML=cats.map(cat=>{const line=calc.rows.find(x=>x.id===cat.id);const budget=(line?.a||0)+(line?.b||0);const used=sumExpenses(cat.id),balance=realBalance(cat.id),remaining=balance===null?budget-used:balance,pct=balance===null&&budget?Math.max(0,Math.min(100,used/budget*100)):0;return `<div class="card"><div class="row"><div class="row-title"><div class="emoji">${cat.icon}</div><div><div class="name">${cat.name}</div><div class="sub">${balance===null?'План '+rub(budget):'Фактический остаток'}</div></div></div><div class="number" style="color:${remaining<0?'var(--red)':'var(--ink)'}">${rub(remaining)}</div></div><div class="track"><div class="fill" style="width:${pct}%;background:${cat.color}"></div></div><div class="tinyline"><span>За месяц потрачено ${rub(used)}</span><span>${balance===null?Math.round(pct)+'% от плана':'Учёт с '+esc(data.startBalances.date)}</span></div></div>`}).join('');
+// Fit the label and amount to the actual available tile width, including large balances.
+function fitTotalMoneyTile(){
+ const tile=document.querySelector('.hero-overview .hero-all');
+ if(!tile)return;
+ const amount=tile.querySelector('#heroAll');
+ const label=tile.querySelector('span');
+ if(!amount||!label)return;
+ const available=tile.clientWidth-14;
+ if(available<30)return;
+ const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+ for(const [el,max,min] of [[label,17,11],[amount,30,11]]){
+  el.style.fontSize=max+'px';
+  if(!ctx)continue;
+  const computed=getComputedStyle(el);
+  const family=computed.fontFamily||'sans-serif';
+  const weight=computed.fontWeight||'700';
+  let size=max;
+  while(size>min){
+   ctx.font=weight+' '+size+'px '+family;
+   const width=ctx.measureText(el.textContent||'').width;
+   if(width<=available)break;
+   size-=.5;
+  }
+  el.style.fontSize=Math.max(min,size)+'px';
+ }
+}
+function render(){const m=monthData();const calc=allocation();const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advanceForecast):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
+$('envelopes').innerHTML=cats.map(cat=>{const line=calc.rows.find(x=>x.id===cat.id);const budget=(line?.a||0)+(line?.b||0);const used=sumExpenses(cat.id),balance=realBalance(cat.id),remaining=balance===null?budget-used:balance,pct=balance===null&&budget?Math.max(0,Math.min(100,used/budget*100)):0;return `<button type="button" class="card envelope-button" data-envelope="${cat.id}" aria-label="Открыть историю: ${cat.name}"><div class="row"><div class="row-title"><div class="emoji">${cat.icon}</div><div><div class="name">${cat.name}</div><div class="sub">${balance===null?'План '+rub(budget):'Фактический остаток'}</div></div></div><div class="number" style="color:${remaining<0?'var(--red)':'var(--ink)'}">${rub(remaining)}</div></div><div class="track"><div class="fill" style="width:${pct}%;background:${cat.color}"></div></div><div class="tinyline"><span>За месяц потрачено ${rub(used)}</span><span>${balance===null?Math.round(pct)+'% от плана':'Учёт с '+esc(data.startBalances.date)}</span></div></button>`}).join('');
 const cc=credit();const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':'Откладывай '+rub(cc.per)+' с каждой предстоящей выплаты';$('obligations').innerHTML=`<div class="card"><div class="lineitem"><span>🏠 Ипотека: ${(data.paidMortgageMonth===month||regularPaidForMonth('mortgage',month)>=num(m.mortgage)&&num(m.mortgage)>0)?'оплачена':'платёж по плану'}</span><span>${rub(m.mortgage)}</span></div>${data.startBalances?`<div class="lineitem"><span>На следующую ипотеку отложено</span><span>${rub(mortgageFund())}</span></div>`:''}<div class="lineitem"><span>💳 Ещё накопить на кредитку</span><span>${rub(cc.debt)}</span></div><div class="sub" style="margin-top:10px">${esc(state)}</div></div>`;
 $('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс</th><th>Зарплата</th></tr></thead><tbody>'+calc.rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(calc.rows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(calc.rows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
 $('planWarnings').innerHTML=(!plannedAdvance(m)||!plannedSalary(m))
@@ -684,6 +811,58 @@ settings.forEach(el=>{
  wrap(el,label);
 });
 }
+
+
+let envelopeHistoryTrigger=null;
+function showEnvelopeHistory(id){
+ const cat=cats.find(c=>c.id===id);if(!cat)return;
+ const entries=[];const add=(date,title,detail,amount)=>{if(fromISO(date)&&Number.isFinite(amount)&&amount!==0)entries.push({date,title,detail,amount});};
+ if(data.startBalances&&fromISO(data.startBalances.date)){
+   add(data.startBalances.date,'Стартовый остаток','На начало учёта',num(data.startBalances.balances?.[id]));
+ }
+ for(const r of data.receipts||[]){
+  add(r.date,r.type==='advance'?'Распределение аванса':'Распределение зарплаты',r.month?'Выплата за '+r.month:'Поступление',num(r.amounts?.[id]));
+ }
+ for(const inc of data.extraIncomes||[]){
+  if(inc.destination===id)add(inc.date,'Дополнительный доход',[inc.source,inc.note].filter(Boolean).join(' · '),num(inc.amount));
+ }
+ for(const tr of data.transfers||[]){
+  if(tr.to===id){const source=cats.find(c=>c.id===tr.from)?.name||'другого конверта';add(tr.date,'Перевод из «'+source+'»',tr.note||'Пополнение конверта',num(tr.amount));}
+  if(tr.from===id){const target=cats.find(c=>c.id===tr.to)?.name||'другого конверта';add(tr.date,'Перевод в «'+target+'»',tr.note||'Перевод из конверта',-num(tr.amount));}
+ }
+ for(const e of data.expenses||[]){
+  if(e.category===id)add(e.date,e.type||'Расход',e.note||'Расход из конверта',-num(e.amount));
+ }
+ if(id==='savings')for(const pay of data.earlyRepayments||[]){
+  add(pay.date,pay.target==='mortgage'?'Досрочное погашение ипотеки':'Досрочное погашение кредитки',pay.note||'Из накоплений',-num(pay.amount));
+ }
+ entries.sort((a,b)=>b.date.localeCompare(a.date));
+ $('envelopeHistoryTitle').textContent=cat.icon+' '+cat.name;
+ const balance=realBalance(id);
+ $('envelopeHistorySummary').textContent='Остаток: '+(balance===null?'учёт не начат':rub(balance))+' · Операций: '+entries.length;
+ $('envelopeHistoryList').innerHTML=entries.length?entries.map(e=>'<div class="envelope-history-entry"><div><div class="history-title">'+esc(e.title)+'</div><div class="history-detail">'+esc(new Date(e.date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}))+(e.detail?' · '+esc(e.detail):'')+'</div></div><div class="history-amount '+(e.amount>=0?'positive':'negative')+'">'+(e.amount>=0?'+':'−')+rub(Math.abs(e.amount))+'</div></div>').join(''):'<div class="foot" style="padding:20px 4px">Пока нет операций по этому конверту.</div>';
+ $('envelopeHistoryList').scrollTop=0;
+ envelopeHistoryTrigger=document.activeElement;
+ const overlay=$('envelopeHistoryOverlay');
+ clearTimeout(envelopeHistoryCloseTimer);
+ overlay.hidden=false;
+ // Separate frames ensure WebKit applies the offscreen transform before transition.
+ requestAnimationFrame(()=>requestAnimationFrame(()=>overlay.classList.add('is-open')));
+ $('envelopeHistoryClose').focus();
+}
+let envelopeHistoryCloseTimer=null;
+function closeEnvelopeHistory(){
+ const overlay=$('envelopeHistoryOverlay');
+ if(overlay.hidden)return;
+ overlay.classList.remove('is-open');
+ if(envelopeHistoryTrigger?.focus)envelopeHistoryTrigger.focus();
+ clearTimeout(envelopeHistoryCloseTimer);
+ envelopeHistoryCloseTimer=setTimeout(()=>{if(!overlay.classList.contains('is-open'))overlay.hidden=true;},310);
+}
+$('envelopes').addEventListener('click',e=>{const b=e.target.closest('[data-envelope]');if(b)showEnvelopeHistory(b.dataset.envelope)});
+$('envelopeHistoryClose').addEventListener('click',closeEnvelopeHistory);
+$('envelopeHistoryOverlay').addEventListener('click',e=>{if(e.target===$('envelopeHistoryOverlay'))closeEnvelopeHistory()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('envelopeHistoryOverlay').hidden)closeEnvelopeHistory()});
 
 function renderAll(){syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();save()}
 function go(page){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));document.querySelector('.app').classList.toggle('home-active',page==='home');const main=document.querySelector('.main');if(main)main.scrollTop=0;}
@@ -793,7 +972,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.17';
+const APP_VERSION='1.5.18';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -893,6 +1072,9 @@ $('applyUpdate').addEventListener('click',async()=>{
   location.replace('./index.html?refresh='+Date.now());
 });
 
-setupCompactPanels();initTheme();renderAll();if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+setupCompactPanels();initTheme();renderAll();
+if('ResizeObserver' in window){new ResizeObserver(()=>fitTotalMoneyTile()).observe(document.querySelector('.hero-overview .hero-all'));}
+window.addEventListener('resize',fitTotalMoneyTile);
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 })();
 </script></body></html>
