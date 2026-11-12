@@ -1223,7 +1223,7 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  #v-expense.active .ops-action-tile{aspect-ratio:auto!important;min-height:105px!important}
  .ops-sheet-overlay{align-items:center!important}
  .ops-sheet{
-   width:calc(100% - 2 * max(14px,env(safe-area-inset-right)))!important;
+   width:calc(100% - 28px - env(safe-area-inset-left) - env(safe-area-inset-right))!important;
    max-width:none!important;
    height:calc(100dvh - 22px)!important;
    max-height:calc(100dvh - 22px)!important;
@@ -2415,6 +2415,16 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
      });
    });
  }
+ // Switching tabs while landscape must start from the new tab's top.
+ const nav=document.querySelector('.app>.nav');
+ if(nav)nav.addEventListener('click',function(event){
+   if(orient.matches && event.target.closest('[data-go]')){
+     requestAnimationFrame(function(){
+       const app=document.querySelector('.app');
+       if(app)app.scrollTop=0;
+     });
+   }
+ });
  if(orient.addEventListener)orient.addEventListener('change',refreshAfterRotation);
  else if(orient.addListener)orient.addListener(refreshAfterRotation);
 })();
