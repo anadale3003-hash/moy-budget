@@ -1637,6 +1637,47 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 @media(max-height:540px){
  #analyticsModalPlan{overflow-y:auto;overscroll-behavior:contain}
 }
+
+/* Preview 1.5.37 — save success confirmation, no changes to card layout. */
+.budget-save-toast[hidden]{display:none!important}
+.budget-save-toast{
+ position:fixed;left:50%;bottom:calc(77px + env(safe-area-inset-bottom));
+ z-index:360;box-sizing:border-box;max-width:min(92vw,390px);
+ display:flex;align-items:center;justify-content:center;gap:10px;
+ pointer-events:none;user-select:none;-webkit-user-select:none;
+ padding:10px 17px 10px 11px;border-radius:16px;
+ background:color-mix(in srgb,var(--card) 90%,#23a780 10%);
+ border:1px solid color-mix(in srgb,var(--line) 50%,#23a780 50%);
+ color:var(--ink);box-shadow:0 10px 32px #00000028,0 2px 8px #00000010;
+ font:inherit;font-size:13px;font-weight:750;line-height:1.2;
+ opacity:0;transform:translate(-50%,13px) scale(.94);
+ transition:opacity .21s ease,transform .27s cubic-bezier(.17,.88,.36,1.2)
+}
+.budget-save-toast.is-visible{opacity:1;transform:translate(-50%,0) scale(1)}
+.budget-save-toast .budget-save-symbol{
+ width:29px;height:29px;flex:0 0 29px;display:grid;place-items:center;
+ border-radius:50%;background:#219d76;color:#fff;
+ box-shadow:0 0 0 3px color-mix(in srgb,#219d76 14%,transparent)
+}
+.budget-save-toast .budget-save-symbol svg{width:19px;height:19px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block}
+.budget-save-toast .budget-save-symbol path{stroke-dasharray:27;stroke-dashoffset:27}
+.budget-save-toast.is-visible .budget-save-symbol{animation:budgetCheckPop .5s cubic-bezier(.2,1.5,.5,1) both}
+.budget-save-toast.is-visible .budget-save-symbol path{animation:budgetCheckDraw .38s .13s ease-out both}
+@keyframes budgetCheckPop{0%{transform:scale(.6)}58%{transform:scale(1.14)}100%{transform:scale(1)}}
+@keyframes budgetCheckDraw{to{stroke-dashoffset:0}}
+button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-out}
+@keyframes budgetActionGlow{0%{filter:brightness(1)}36%{filter:brightness(1.15)}100%{filter:brightness(1)}}
+@media(orientation:landscape){
+ .budget-save-toast{bottom:calc(57px + env(safe-area-inset-bottom));padding:7px 13px;font-size:12px}
+ .budget-save-toast .budget-save-symbol{width:23px;height:23px;flex-basis:23px}
+}
+@media(prefers-reduced-motion:reduce){
+ .budget-save-toast,.budget-save-toast.is-visible{transition:none}
+ .budget-save-toast.is-visible .budget-save-symbol,
+ .budget-save-toast.is-visible .budget-save-symbol path,
+ button.budget-action-saved:not(:disabled){animation:none}
+ .budget-save-toast.is-visible .budget-save-symbol path{stroke-dashoffset:0}
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -2015,7 +2056,92 @@ function payrollForecast(m,key=month){
 function plannedAdvance(m,key=month){return payrollForecast(m,key).configured?payrollForecast(m,key).advancePlan:num(m.advance)}
 function plannedSalary(m,key=month){return num(m.salary)>0?num(m.salary):(payrollForecast(m,key).configured?payrollForecast(m,key).salaryForecast:0)}
 function isForecast(m){return !num(m.salary)&&payrollForecast(m).configured}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(data))}catch(_){alert('Не удалось сохранить данные. Сделай резервную копию.') }}
+
+/* Feedback is tied to a completed localStorage write, never to the initial tap.
+   A cancelled confirmation or an invalid form cannot emit a success check. */
+const SAVE_FORM_MESSAGES={
+ earlyForm:'Погашение записано',
+ expenseForm:'Расход сохранён',
+ transferForm:'Перевод сохранён',
+ incomeForm:'Доход зачислен',
+ receiptEntryForm:'Поступление сохранено',
+ paymentEntryForm:'Оплата подтверждена',
+ ladderTransferForm:'Перевод в накопления сохранён',
+ ladderSettingsForm:'Цель сохранена'
+};
+const SAVE_BUTTON_MESSAGES={
+ saveStart:'Остатки сохранены',
+ savingsPlanSave:'Цель и срок сохранены',
+ undoAdvance:'Зачисление отменено',
+ undoSalary:'Зачисление отменено'
+};
+const SAVE_CHANGE_MESSAGES={
+ themeSelect:'Тема применена',
+ salaryMode:'Способ расчёта сохранён',
+ mortgage:'Платёж по ипотеке сохранён',
+ deadline:'Срок погашения сохранён',
+ advanceDate:'Дата аванса сохранена',
+ salaryDate:'Дата зарплаты сохранена'
+};
+let saveFeedbackIntent=null,saveFeedbackHideTimer=null;
+function stageSaveFeedback(message,button){
+ const intent={message,button};
+ saveFeedbackIntent=intent;
+ // Only synchronous operations in the original click/submit/change count.
+ Promise.resolve().then(()=>{if(saveFeedbackIntent===intent)saveFeedbackIntent=null});
+}
+document.addEventListener('click',e=>{
+ const button=e.target.closest?.('button');
+ if(!button||button.disabled)return;
+ let message=SAVE_BUTTON_MESSAGES[button.id]||null;
+ if(!message&&button.matches('[data-del],[data-del-early],[data-del-income]'))message='Запись удалена';
+ if(!message&&button.matches('[data-del-transfer]'))message='Перевод отменён';
+ if(!message&&button.matches('[data-undo-regular]'))message='Оплата отменена';
+ if(message)stageSaveFeedback(message,button);
+},true);
+document.addEventListener('submit',e=>{
+ const form=e.target;
+ const message=SAVE_FORM_MESSAGES[form.id];
+ if(message)stageSaveFeedback(message,e.submitter||form.querySelector('button[type="submit"]'));
+},true);
+document.addEventListener('change',e=>{
+ const message=SAVE_CHANGE_MESSAGES[e.target.id];
+ if(message)stageSaveFeedback(message,e.target);
+},true);
+function showSaveFeedback(message,button){
+ const toast=$('budgetSaveToast'),label=$('budgetSaveLabel');
+ if(!toast||!label)return;
+ if(saveFeedbackHideTimer)clearTimeout(saveFeedbackHideTimer);
+ label.textContent=message||'Сохранено';
+ toast.hidden=false;
+ toast.classList.remove('is-visible');
+ void toast.offsetWidth;
+ requestAnimationFrame(()=>toast.classList.add('is-visible'));
+ saveFeedbackHideTimer=setTimeout(()=>{
+   toast.classList.remove('is-visible');
+   setTimeout(()=>{if(!toast.classList.contains('is-visible'))toast.hidden=true},300);
+ },2200);
+ if(button?.classList&&button.isConnected){
+   button.classList.remove('budget-action-saved');
+   void button.offsetWidth;
+   button.classList.add('budget-action-saved');
+   setTimeout(()=>button.classList.remove('budget-action-saved'),750);
+ }
+}
+function save(){
+ try{
+   localStorage.setItem(KEY,JSON.stringify(data));
+   const intent=saveFeedbackIntent;
+   saveFeedbackIntent=null;
+   if(intent)showSaveFeedback(intent.message,intent.button);
+   return true;
+ }catch(_){
+   saveFeedbackIntent=null;
+   alert('Не удалось сохранить данные. Сделай резервную копию.');
+   return false;
+ }
+}
+
 function num(n){return Math.max(0,Number(n)||0)}
 function dateFor(monthKey,day){const [y,m]=monthKey.split('-').map(Number);const max=new Date(y,m,0).getDate();return new Date(y,m-1,Math.min(Math.max(1,day),max))}
 function isWorkingPayday(d){
@@ -2654,7 +2780,7 @@ $('envelopeHistoryClose').addEventListener('click',closeEnvelopeHistory);
 $('envelopeHistoryOverlay').addEventListener('click',e=>{if(e.target===$('envelopeHistoryOverlay'))closeEnvelopeHistory()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('envelopeHistoryOverlay').hidden)closeEnvelopeHistory()});
 
-function renderAll(){syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();save()}
+function renderAll(){syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();return save()}
 function go(page){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));document.querySelector('.app').classList.toggle('home-active',page==='home');const main=document.querySelector('.main');if(main)main.scrollTop=0;}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 $('monthPrev').onclick=()=>{let [y,m]=month.split('-').map(Number);month=iso(new Date(y,m-2,1)).slice(0,7);renderAll()};$('monthNext').onclick=()=>{let [y,m]=month.split('-').map(Number);month=iso(new Date(y,m,1)).slice(0,7);renderAll()};
@@ -2773,10 +2899,10 @@ if(!type){alert('Выбери вид расхода');return;}
 const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===type.toLocaleLowerCase('ru'));if(existing)type=existing;else data.expenseTypes[category].push(type);
 data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);renderAll()};
 $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b||!confirm('Удалить этот расход?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
-$('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
-$('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
+$('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
+$('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.36 · тест';
+const APP_VERSION='1.5.37 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -3096,7 +3222,7 @@ $('savingsPlanSave').addEventListener('click',()=>{
  const settings=ladderSettings();
  settings.targetAmount=goal;
  settings.targetMonth=savingsPlanTarget(months);
- renderAll();
+ if(!renderAll())return;
  $('savingsPlanStatus').textContent='Цель и срок сохранены. При новых накоплениях сумма в месяц пересчитается.';
  savingsPlanRender();
 });
@@ -3129,9 +3255,8 @@ $('ladderSettingsForm').addEventListener('submit',event=>{
  setting.reserve=Math.round(raw*100)/100;
  setting.targetAmount=goal;
  setting.included=$('ladderIncluded').checked;
- renderAll();
+ if(!renderAll())return;
  analyticsModalClose();
- alert('Цель и параметры подушки сохранены.');
 });
 $('ladderSource').addEventListener('change',()=>{
  $('ladderTransferAmount').value='';
@@ -3160,9 +3285,8 @@ $('ladderTransferForm').addEventListener('submit',event=>{
  });
  $('ladderTransferAmount').value='';
  $('analyticsUtilitiesPaid').checked=false;
- renderAll();
+ if(!renderAll())return;
  analyticsModalClose();
- alert('Перевод в «Накопления» записан и появится в истории операций.');
 });
 
 setupCompactPanels();initTheme();renderAll();
@@ -3304,4 +3428,5 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    window.visualViewport.addEventListener('resize',orientationChanged,{passive:true});
 })();
 </script>
+<div id="budgetSaveToast" class="budget-save-toast" role="status" aria-live="polite" aria-atomic="true" hidden><span class="budget-save-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span id="budgetSaveLabel">Сохранено</span></div>
 </body></html>
