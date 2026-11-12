@@ -235,8 +235,15 @@ input[type=number]{font-variant-numeric:tabular-nums}
   #v-plan .payment-confirm-heading{display:block}
   #v-plan .payment-confirm-heading .receipt-note{text-align:left;margin-top:2px}
 }
+
+/* v1.5.15: permanent bottom tabs, top summary only on Home. */
+.app{position:relative;height:100dvh;max-height:100dvh;overflow:hidden}
+.app:not(.home-active)>.hero{display:none}
+.app:not(.home-active)>.main{padding-top:max(12px, env(safe-area-inset-top))}
+.app>.main{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding-bottom:calc(76px + env(safe-area-inset-bottom));scroll-padding-bottom:calc(85px + env(safe-area-inset-bottom))}
+.app>.nav{position:absolute;left:0;right:0;bottom:0;transform:none;width:100%;margin:0;z-index:30;flex:0 0 auto}
 </style></head><body>
-<div class="app"><header class="hero"><div class="hero-overview"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div><div class="brand hero-brand">Мой бюджет</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini"><span>Накопления</span><b id="heroSavings">—</b></div><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
+<div class="app home-active"><header class="hero"><div class="hero-overview"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div><div class="brand hero-brand">Мой бюджет</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini"><span>Накопления</span><b id="heroSavings">—</b></div><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
 <section class="view active" id="v-home">
 
@@ -624,7 +631,7 @@ settings.forEach(el=>{
 }
 
 function renderAll(){syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();save()}
-function go(page){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));window.scrollTo({top:0,behavior:'smooth'})}
+function go(page){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));document.querySelector('.app').classList.toggle('home-active',page==='home');const main=document.querySelector('.main');if(main)main.scrollTop=0;}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 $('monthPrev').onclick=()=>{let [y,m]=month.split('-').map(Number);month=iso(new Date(y,m-2,1)).slice(0,7);renderAll()};$('monthNext').onclick=()=>{let [y,m]=month.split('-').map(Number);month=iso(new Date(y,m,1)).slice(0,7);renderAll()};
 for(const id of ['advance','salary','mortgage'])$(id).addEventListener('input',e=>{monthData()[id]=num(e.target.value);render();save()});
@@ -731,7 +738,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.14';
+const APP_VERSION='1.5.15';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
