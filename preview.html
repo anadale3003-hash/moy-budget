@@ -2043,19 +2043,27 @@ function payrollForecast(m,key=month){
  const rate=Math.min(50,num(cfg.taxRate));
  const net=cfg.mode==='net'?base:base*(1-rate/100);
  const advanceForecast=total>0?net*first/total:0;
- // A cancelled unusually large advance from older builds can leave m.advance
- // populated without a matching receipt. Do not let that orphaned value zero out
- // the salary forecast; keep existing ordinary manual plans intact.
- const advanceReceipt=(data.receipts||[]).find(r=>r.month===key&&r.type==='advance');
- const savedAdvance=num(m.advance);
- const actualAdvance=!advanceReceipt&&net>0&&savedAdvance>=net?0:savedAdvance;
- const advancePlan=actualAdvance||advanceForecast;
+ // Legacy month.advance/month.salary may contain a stale or cancelled
+ // manually entered amount. Treat an amount as ACTUAL only if a matching receipt
+ // exists. When the salary is configured, the remaining amount is a forecast.
+ const advanceReceipt=(data.receipts||[]).find(r=>r.id===key+'-advance');
+ const advancePlan=advanceReceipt?num(advanceReceipt.amount):advanceForecast;
  const salaryForecast=Math.max(0,net-advancePlan);
  return {net,advanceForecast,advancePlan,salaryForecast,total,first,official:work.official,configured:base>0};
 }
-function plannedAdvance(m,key=month){return payrollForecast(m,key).configured?payrollForecast(m,key).advancePlan:num(m.advance)}
-function plannedSalary(m,key=month){return num(m.salary)>0?num(m.salary):(payrollForecast(m,key).configured?payrollForecast(m,key).salaryForecast:0)}
-function isForecast(m){return !num(m.salary)&&payrollForecast(m).configured}
+function plannedAdvance(m,key=month){
+ const receipt=(data.receipts||[]).find(r=>r.id===key+'-advance');
+ if(receipt)return num(receipt.amount);
+ const forecast=payrollForecast(m,key);
+ return forecast.configured?forecast.advanceForecast:num(m.advance);
+}
+function plannedSalary(m,key=month){
+ const receipt=(data.receipts||[]).find(r=>r.id===key+'-salary');
+ if(receipt)return num(receipt.amount);
+ const forecast=payrollForecast(m,key);
+ return forecast.configured?forecast.salaryForecast:num(m.salary);
+}
+function isForecast(m){return !data.receipts.some(r=>r.id===month+'-salary')&&payrollForecast(m).configured}
 
 /* Feedback is tied to a completed localStorage write, never to the initial tap.
    A cancelled confirmation or an invalid form cannot emit a success check. */
@@ -2902,7 +2910,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.38 · тест';
+const APP_VERSION='1.5.39 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -2931,15 +2939,13 @@ function receive(type){
  receiptEntryFocus=$(type==='advance'?'receiveAdvance':'receiveSalary');
  $('receiptEntryTitle').textContent=type==='advance'?'Аванс поступил':'Зарплата поступила';
  const m=monthData(),forecast=payrollForecast(m);
- // The payroll plan is only a suggestion; it must never be inserted as an
- // actual bank receipt, including for November or after cancel/undo.
- const orphanAdvance=type==='advance'&&
-   !(data.receipts||[]).some(r=>r.month===month&&r.type==='advance')&&
-   forecast.configured&&num(m.advance)>=forecast.net;
- const proposed=orphanAdvance?forecast.advanceForecast:
-   num(type==='advance'?plannedAdvance(m):plannedSalary(m));
- const period=new Date(month+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
- $('receiptEntryHint').textContent='За '+period+'. '+(proposed>0?'По плану: '+rub(proposed)+'. ':'')+
+ // Show ONLY the same forecast as the payroll preview. In particular, do not
+ // use legacy m.advance or m.salary, which could contain 100000 even when
+ // November's calculated advance differs. Actual receipts are always typed.
+ const proposed=forecast.configured?
+   (type==='advance'?forecast.advanceForecast:forecast.salaryForecast):0;
+ const period=new Date(month+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'}).replace(/\.$/,'');
+ $('receiptEntryHint').textContent='За '+period+'. '+(proposed>0?'Прогноз: '+rub(proposed)+'. ':'')+
    'Введи сумму, которая действительно поступила на счёт.';
  const amountField=$('receiptEntryAmount');
  amountField.value='';
