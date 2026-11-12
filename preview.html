@@ -3590,7 +3590,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
   // Keep the monthly Operations summary when rebuilding the legacy landing.
   // The old section.replaceChildren(intro,historyGroup) silently detached
   // analyticsTotal, analyticsIncomeTotal and the Details/month controls.
-  const overview=section.querySelector(':scope > .operations-hub');
+  const overview=section.querySelector('.operations-hub');
   if(overview){
    // The existing three large tiles are the action entry points. Remove only
    // duplicated quick buttons; keep the summary and its existing event listeners.
