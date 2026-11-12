@@ -1703,6 +1703,16 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
 @media(max-height:570px) and (orientation:portrait){
  .budget-save-toast{top:30%!important}
 }
+
+/* v1.5.43: compact two-part payment confirmation. */
+#paymentEntryForm .payment-split-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:11px 0 6px}
+#paymentEntryForm .payment-split-choice{min-width:0;min-height:61px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:7px 5px;border:1px solid var(--line);border-radius:12px;color:var(--ink);background:var(--card);font:inherit}
+#paymentEntryForm .payment-split-choice span{font-size:12px;font-weight:650;color:var(--muted)}
+#paymentEntryForm .payment-split-choice b{font-size:17px;line-height:1.2;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+#paymentEntryForm .payment-split-choice.active{background:color-mix(in srgb,var(--card) 78%,#548de1 22%);border:2px solid #548de1;padding:6px 4px}
+#paymentEntryForm .payment-split-choice.active b{color:var(--ink)}
+#paymentEntryOverlay .receipt-entry-sheet{max-height:min(92dvh,850px)}
+@media(max-height:660px){#paymentEntryForm .payment-split-choices{margin:6px 0 3px}#paymentEntryForm .payment-split-choice{min-height:50px;padding:5px 4px}#paymentEntryForm .field{margin:10px 0 7px}}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1918,6 +1928,10 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
   <div class="receipt-entry-header"><h2 id="paymentEntryTitle">Подтверждение оплаты</h2><button id="paymentEntryClose" class="envelope-history-close" type="button" aria-label="Закрыть">×</button></div>
   <p class="foot" id="paymentEntryHint">Введи фактические данные списания банком.</p>
   <form id="paymentEntryForm">
+   <div class="payment-split-choices" id="paymentSplitChoices" role="group" aria-label="Часть платежа по расчёту">
+    <button type="button" class="payment-split-choice" data-pay-part="advance" aria-pressed="false"><span>С аванса</span><b id="paymentPartAdvance">—</b></button>
+    <button type="button" class="payment-split-choice" data-pay-part="salary" aria-pressed="false"><span>С зарплаты</span><b id="paymentPartSalary">—</b></button>
+   </div>
    <label class="field"><span>Сумма оплаты, ₽</span><input id="paymentEntryAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Сумма списания"></label>
    <label class="field"><span>Дата списания банком</span><input id="paymentEntryDate" type="date" required></label>
    <div id="creditPaymentFunding" class="credit-funding" hidden>
@@ -2398,7 +2412,7 @@ function paymentInfo(){
   if(!amount.value&&available>0)amount.placeholder=rub(Math.min(due||available,available));
  }
  const rows=(data.regularPayments||[]).filter(p=>p.month===month).sort((a,b)=>b.date.localeCompare(a.date));
- $('regularPaymentHistory').innerHTML=rows.length?'<div class="foot"><b>Подтверждённые платежи</b></div>'+rows.map(p=>`<div class="transaction"><div><b>${p.target==='mortgage'?'🏠 Ипотека':'💳 Кредитка'}</b><small>${esc(p.date)} · подтверждено${num(p.extraAmount)>0?' · из конверта '+esc(cats.find(c=>c.id===p.extraSource)?.name||'—')+' '+rub(p.extraAmount):''}</small></div><div class="row"><b>${rub(p.amount)}</b><button class="delete" type="button" data-undo-regular="${esc(p.id)}" title="Отменить подтверждение">↶</button></div></div>`).join(''):'<div class="foot">Подтверждённых платежей за выбранный месяц пока нет.</div>';
+ $('regularPaymentHistory').innerHTML=rows.length?'<div class="foot"><b>Подтверждённые платежи</b></div>'+rows.map(p=>`<div class="transaction"><div><b>${p.target==='mortgage'?'🏠 Ипотека':'💳 Кредитка'}</b><small>${esc(p.date)} · подтверждено${p.part==='advance'?' · с аванса':p.part==='salary'?' · с зарплаты':''}${num(p.extraAmount)>0?' · из конверта '+esc(cats.find(c=>c.id===p.extraSource)?.name||'—')+' '+rub(p.extraAmount):''}</small></div><div class="row"><b>${rub(p.amount)}</b><button class="delete" type="button" data-undo-regular="${esc(p.id)}" title="Отменить подтверждение">↶</button></div></div>`).join(''):'<div class="foot">Подтверждённых платежей за выбранный месяц пока нет.</div>';
 }
 function receiptInfo(){
  for(const type of ['advance','salary']){
@@ -2948,7 +2962,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.42 · тест';
+const APP_VERSION='1.5.43 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -3052,10 +3066,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('receiptEntryOve
 // Mortgage and credit payments use the same two-step entry as incoming salary.
 let paymentEntryTarget=null;
 let paymentEntryMonth=null;
+let paymentEntryPart=null;
 let paymentEntryTrigger=null;
 function closePaymentEntry(){
  $('paymentEntryOverlay').hidden=true;
- paymentEntryTarget=null;paymentEntryMonth=null;
+ paymentEntryTarget=null;paymentEntryMonth=null;paymentEntryPart=null;
  if(paymentEntryTrigger?.focus)paymentEntryTrigger.focus();
 }
 function paymentFunding(target,amount,date){
@@ -3078,7 +3093,7 @@ function updateCreditPaymentFunding(){
  const available=fromISO(date)&&source?Math.max(0,categoryBalanceAt(source,date)||0):null;
  $('creditPaymentSourceAvailable').textContent=extraAmount>0&&source?'Доступно в конверте на дату списания: '+rub(available):'';
 }
-function confirmRegularPayment(target,amount,date,extraSource=''){
+function confirmRegularPayment(target,amount,date,extraSource='',part=''){
  if(!data.startBalances)return 'Сначала укажи стартовые остатки в настройках.';
  if(!Number.isFinite(amount)||amount<=0||!fromISO(date)||date>iso(new Date())||date<data.startBalances.date)return 'Проверь сумму и дату. Платёж должен быть после начала учёта и не позже сегодня.';
  if(target==='credit'){
@@ -3092,30 +3107,77 @@ function confirmRegularPayment(target,amount,date,extraSource=''){
   if(categoryBalance===null||categoryBalance+0.001<extraAmount)return 'В выбранном конверте недостаточно денег на дату списания. Доступно: '+rub(Math.max(0,categoryBalance||0))+'.';
  }
  data.regularPayments.push({id:'payment-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
-  month,target,amount,date,reserveUsed,extraSource:extraAmount>0?extraSource:'',extraAmount});
+  month,target,part:part==='advance'||part==='salary'?part:'',amount,date,reserveUsed,extraSource:extraAmount>0?extraSource:'',extraAmount});
  if(target==='credit')data.reserved=Math.max(0,Math.round((num(data.reserved)-reserveUsed)*100)/100);
  closePaymentEntry();renderAll();
  return null;
 }
-// Suggest a payment from the BUDGET calculation, not only the existing reserve.
-// Reserve funds are checked independently in paymentFunding() when confirming.
-function calculatedPaymentAmount(target,date){
- if(target==='mortgage'){
-  const paid=regularPaidForMonth('mortgage',month);
-  if(data.paidMortgageMonth===month&&paid===0)return 0;
-  return Math.round(Math.max(0,num(monthData().mortgage)-paid)*100)/100;
+
+/* v1.5.43: offer ONE part of the planned payment from the existing
+   Advance and Salary allocation columns. Previously the modal offered
+   the entire mortgage or credit-card balance at once. */
+function calculatedPaymentParts(target){
+ const name=target==='mortgage'?'Ипотека':'Кредитная карта';
+ const row=allocation().rows.find(r=>r.name===name);
+ const money=n=>Math.round(num(n)*100)/100;
+ const planned={advance:money(row?.a),salary:money(row?.b)};
+ const done={advance:0,salary:0};
+ let unassigned=0;
+ for(const record of (data.regularPayments||[])){
+   if(record.target!==target||record.month!==month)continue;
+   const p=record.part;
+   if(p==='advance'||p==='salary')done[p]+=num(record.amount);
+   else unassigned+=num(record.amount);
  }
- const outstanding=Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
- if(!outstanding)return 0;
- const reserved=Math.max(0,regularCreditAvailable(date));
- const scheduled=credit();
- const row=allocation().rows.find(r=>r.name==='Кредитная карта');
- const planned=num(row?.a)+num(row?.b);
- // When the remaining balance is already funded, use the amount saved.
- // Otherwise use the calculated allocations for this cycle; if these are
- // empty, the per-payday schedule is the fallback, then outstanding debt.
- const calculated=Math.max(reserved,planned,num(scheduled.per));
- return Math.round(Math.min(outstanding,calculated>0?calculated:outstanding)*100)/100;
+ // Any older payments without a part label, and extra paid on a single
+ // part, count toward the total before another suggested confirmation.
+ for(const p of ['advance','salary']){
+   if(done[p]>planned[p]){unassigned+=done[p]-planned[p];done[p]=planned[p]}
+ }
+ for(const p of ['advance','salary']){
+   const left=Math.max(0,planned[p]-done[p]);
+   const absorbed=Math.min(left,unassigned);
+   done[p]+=absorbed;
+   unassigned-=absorbed;
+ }
+ let advance=Math.max(0,planned.advance-done.advance);
+ let salary=Math.max(0,planned.salary-done.salary);
+ const paid=regularPaidForMonth(target,month);
+ if(target==='mortgage'&&data.paidMortgageMonth===month&&paid===0){
+   advance=0;salary=0;
+ }
+ const limit=target==='mortgage'
+  ?Math.max(0,num(monthData().mortgage)-paid)
+  :Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
+ advance=Math.min(advance,limit);
+ salary=Math.min(salary,Math.max(0,limit-advance));
+ return {planned,remaining:{advance:money(advance),salary:money(salary)}};
+}
+function choosePaymentPart(part){
+ if(!paymentEntryTarget||!['advance','salary'].includes(part))return;
+ paymentEntryPart=part;
+ const calculated=calculatedPaymentParts(paymentEntryTarget);
+ for(const p of ['advance','salary']){
+  const button=document.querySelector('[data-pay-part="'+p+'"]');
+  if(button){
+   button.classList.toggle('active',p===part);
+   button.setAttribute('aria-pressed',String(p===part));
+  }
+  $(p==='advance'?'paymentPartAdvance':'paymentPartSalary').textContent=rub(calculated.remaining[p]);
+ }
+ const suggested=calculated.remaining[part];
+ const todayKey=$('paymentEntryDate').value||iso(new Date());
+ const available=Math.max(0,paymentEntryTarget==='mortgage'
+  ?regularMortgageAvailable(todayKey):regularCreditAvailable(todayKey));
+ const missing=Math.max(0,Math.round((suggested-available)*100)/100);
+ $('paymentEntryHint').textContent='По расчёту: с аванса '+rub(calculated.planned.advance)+
+  ', с зарплаты '+rub(calculated.planned.salary)+'. '+(suggested>0
+   ?'Осталось из '+(part==='advance'?'аванса':'зарплаты')+': '+rub(suggested)+'. ':'')+
+  'Отложено: '+rub(available)+'. '+(missing>0?'Для доплаты потребуется '+rub(missing)+' из конверта. ':'')+
+  'Подтверди фактически списанную сумму.';
+ const input=$('paymentEntryAmount');
+ input.value=suggested>0?String(suggested):'';
+ updateCreditPaymentFunding();
 }
 function openPaymentEntry(target){
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках.');return;}
@@ -3124,27 +3186,24 @@ function openPaymentEntry(target){
  paymentEntryTrigger=$(isMortgage?'confirmMortgagePayment':'confirmCreditPayment');
  $('paymentEntryTitle').textContent=isMortgage?'Оплата ипотеки':'Оплата кредитки';
  const todayKey=iso(new Date());
- const available=Math.max(0,isMortgage?regularMortgageAvailable(todayKey):regularCreditAvailable(todayKey));
- const suggested=calculatedPaymentAmount(target,todayKey);
- const missing=Math.max(0,Math.round((suggested-available)*100)/100);
- $('paymentEntryHint').textContent=
-  (suggested>0?'По расчёту: '+rub(suggested)+'. ':'')+
-  'Отложено: '+rub(available)+'. '+
-  (missing>0?'Недостающие '+rub(missing)+' можно списать из конверта. ':'')+
-  'Проверь фактическую сумму и дату списания.';
- const amountField=$('paymentEntryAmount');
- amountField.value=suggested>0?String(suggested):'';
- amountField.defaultValue='';
  $('paymentEntryDate').min=data.startBalances.date;
  $('paymentEntryDate').max=todayKey;
  $('paymentEntryDate').value=todayKey;
  $('paymentEntryError').hidden=true;
  $('creditPaymentSource').innerHTML='<option value="">Выбери конверт…</option>'+cats.map(c=>'<option value="'+c.id+'">'+c.icon+' '+c.name+'</option>').join('');
- updateCreditPaymentFunding();
+ const parts=calculatedPaymentParts(target);
+ choosePaymentPart(parts.remaining.advance>0?'advance':parts.remaining.salary>0?'salary':'advance');
  $('paymentEntryOverlay').hidden=false;
- amountField.focus();
- try{amountField.select()}catch(_){/* iOS may not select number inputs */}
+ const input=$('paymentEntryAmount');
+ input.focus();
+ try{input.select()}catch(_){/* Safari may not select numeric input */}
 }
+document.querySelectorAll('[data-pay-part]').forEach(button=>{
+ button.addEventListener('click',()=>{
+  choosePaymentPart(button.dataset.payPart);
+  $('paymentEntryAmount').focus();
+ });
+});
 for(const id of ['paymentEntryAmount','paymentEntryDate'])$(id).addEventListener('input',updateCreditPaymentFunding);
 $('creditPaymentSource').addEventListener('change',updateCreditPaymentFunding);
 $('confirmMortgagePayment').addEventListener('click',()=>openPaymentEntry('mortgage'));
@@ -3153,7 +3212,7 @@ $('paymentEntryForm').addEventListener('submit',e=>{
  e.preventDefault();
  if(!paymentEntryTarget||paymentEntryMonth!==month)return;
  const amount=Number($('paymentEntryAmount').value),date=$('paymentEntryDate').value;
- const error=confirmRegularPayment(paymentEntryTarget,amount,date,$('creditPaymentSource').value);
+ const error=confirmRegularPayment(paymentEntryTarget,amount,date,$('creditPaymentSource').value,paymentEntryPart);
  if(error){$('paymentEntryError').textContent=error;$('paymentEntryError').hidden=false;}
 });
 $('paymentEntryClose').addEventListener('click',closePaymentEntry);
