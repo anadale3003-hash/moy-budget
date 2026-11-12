@@ -2049,7 +2049,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000)};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];renderAll();alert('Данные восстановлены')}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.28 · тест';
+const APP_VERSION='1.5.29 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -2402,31 +2402,70 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 })();
 </script>
 <script>
-/* iOS rotation: media queries restore portrait automatically; clear stale app scroll
-   after returning so the upper part of the selected tab is not left off-screen. */
+/* v1.5.29: iOS PWA may keep the landscape scroll offset after going portrait.
+   Restore BOTH nested scroll surfaces, again after visual viewport finishes resizing.
+   Keep the current view, modal and unsaved fields intact. */
 (function(){
- const orient=window.matchMedia('(orientation: landscape)');
- function refreshAfterRotation(){
-   requestAnimationFrame(function(){
-     requestAnimationFrame(function(){
-       const app=document.querySelector('.app');
-       if(!orient.matches && app)app.scrollTop=0;
-       // No navigation or re-render: the selected tab, open forms and entered values persist.
-     });
+ const orientation=window.matchMedia('(orientation: landscape)');
+ const app=document.querySelector('.app');
+ const main=document.querySelector('.app>.main');
+ const nav=document.querySelector('.app>.nav');
+ let wasLandscape=orientation.matches;
+ let recoveryDeadline=0;
+ let recoveryTimers=[];
+ function cancelRecovery(){
+   recoveryTimers.forEach(clearTimeout);
+   recoveryTimers=[];
+   recoveryDeadline=0;
+ }
+ function resetPortraitScroll(){
+   if(orientation.matches)return;
+   if(app){app.scrollTop=0;app.scrollLeft=0}
+   if(main){main.scrollTop=0;main.scrollLeft=0}
+   if(document.scrollingElement)document.scrollingElement.scrollTop=0;
+   if(document.body)document.body.scrollTop=0;
+   if(window.scrollY)window.scrollTo(0,0);
+ }
+ function schedulePortraitRecovery(){
+   cancelRecovery();
+   recoveryDeadline=performance.now()+1200;
+   resetPortraitScroll();
+   // Safari may restore a stale offset more than one frame after the rotation.
+   [0,60,160,300,520,850,1100].forEach(delay=>{
+     recoveryTimers.push(setTimeout(()=>{
+       if(!orientation.matches){
+         resetPortraitScroll();
+         requestAnimationFrame(resetPortraitScroll);
+       }
+     },delay));
    });
  }
- // Switching tabs while landscape must start from the new tab's top.
- const nav=document.querySelector('.app>.nav');
- if(nav)nav.addEventListener('click',function(event){
-   if(orient.matches && event.target.closest('[data-go]')){
-     requestAnimationFrame(function(){
-       const app=document.querySelector('.app');
-       if(app)app.scrollTop=0;
-     });
+ function viewportChanged(){
+   const landscape=orientation.matches;
+   if(landscape!==wasLandscape){
+     wasLandscape=landscape;
+     if(landscape)cancelRecovery();
+     else schedulePortraitRecovery();
+   }else if(!landscape && recoveryDeadline && performance.now()<recoveryDeadline){
+     requestAnimationFrame(resetPortraitScroll);
    }
- });
- if(orient.addEventListener)orient.addEventListener('change',refreshAfterRotation);
- else if(orient.addListener)orient.addListener(refreshAfterRotation);
+ }
+ if(nav){
+   nav.addEventListener('click',function(event){
+     if(orientation.matches && event.target.closest('[data-go]')){
+       requestAnimationFrame(function(){
+         if(app)app.scrollTop=0;
+         if(main)main.scrollTop=0;
+       });
+     }
+   });
+ }
+ if(orientation.addEventListener)orientation.addEventListener('change',viewportChanged);
+ else if(orientation.addListener)orientation.addListener(viewportChanged);
+ window.addEventListener('orientationchange',viewportChanged,{passive:true});
+ window.addEventListener('resize',viewportChanged,{passive:true});
+ if(window.visualViewport)
+   window.visualViewport.addEventListener('resize',viewportChanged,{passive:true});
 })();
 </script>
 </body></html>
