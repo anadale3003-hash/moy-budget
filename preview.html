@@ -2425,7 +2425,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    const root=document.scrollingElement;
    if(root && root.scrollTop)root.scrollTop=0;
    if(document.body && document.body.scrollTop)document.body.scrollTop=0;
-   if(window.scrollY)window.scrollTo({top:0,left:0,behavior:'instant'});
+   if(window.scrollY)window.scrollTo(0,0);
  }
  function settleOnNextFrame(){
    if(framePending)return;
