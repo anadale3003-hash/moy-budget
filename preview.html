@@ -2525,8 +2525,22 @@ function allocation(){
  const mortgageA=receipts.advance?num(receipts.advance.amounts?.mortgage):Math.max(0,base.advance-offsets.advance);
  const mortgageB=receipts.salary?num(receipts.salary.amounts?.mortgage):Math.max(0,base.salary-offsets.salary);
  const cc=credit(),creditForMonth=cc.pays.filter(p=>p.month===month);
- const ac=receipts.advance?num(receipts.advance.amounts?.credit):Math.min(cc.debt,creditForMonth.filter(p=>p.type==='advance').length*cc.per,Math.max(0,advancePlan-mortgageA));
- const bc=receipts.salary?num(receipts.salary.amounts?.credit):Math.min(Math.max(0,cc.debt-ac),creditForMonth.filter(p=>p.type==='salary').length*cc.per,Math.max(0,salaryPlan-mortgageB));
+ // Distribute the outstanding credit debt in proportion to the forecast
+ // spendable income on each remaining payday, not as identical payments.
+ // Confirmed receipt allocations are frozen and never redistributed.
+ const paydayWeight=p=>{
+  const pm=data.months[p.month]||{mortgage:data.mortgageMonthly===undefined?55000:data.mortgageMonthly};
+  const income=p.type==='advance'?plannedAdvance(pm,p.month):plannedSalary(pm,p.month);
+  const mortgage=mortgageDistributionBase(p.month);
+  return Math.max(0,income-num(mortgage[p.type]));
+ };
+ const allWeight=cc.pays.reduce((sum,p)=>sum+paydayWeight(p),0);
+ const intended=type=>{
+  const weight=creditForMonth.filter(p=>p.type===type).reduce((sum,p)=>sum+paydayWeight(p),0);
+  return allWeight>0?Math.round(cc.debt*weight/allWeight*100)/100:0;
+ };
+ const ac=receipts.advance?num(receipts.advance.amounts?.credit):Math.min(cc.debt,intended('advance'),Math.max(0,advancePlan-mortgageA));
+ const bc=receipts.salary?num(receipts.salary.amounts?.credit):Math.min(Math.max(0,cc.debt-ac),intended('salary'),Math.max(0,salaryPlan-mortgageB));
  const weightTotal=cats.reduce((sum,c)=>sum+num(data.weights[c.id]),0);
  const remainA=Math.max(0,advancePlan-mortgageA-ac),remainB=Math.max(0,salaryPlan-mortgageB-bc);
  const rows=[{name:'Ипотека',a:mortgageA,b:mortgageB},{name:'Кредитная карта',a:ac,b:bc}];
@@ -3207,7 +3221,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.48 · тест';
+const APP_VERSION='1.5.50 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
