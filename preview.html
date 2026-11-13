@@ -3453,9 +3453,8 @@ function openPaymentEntry(target){
  const parts=calculatedPaymentParts(target);
  choosePaymentPart(parts.remaining.advance>0?'advance':parts.remaining.salary>0?'salary':'advance');
  $('paymentEntryOverlay').hidden=false;
- const input=$('paymentEntryAmount');
- input.focus();
- try{input.select()}catch(_){/* Safari may not select numeric input */}
+ // Keep the suggested amount visible without automatically selecting it or opening the keyboard.
+ // The user can tap the field to edit the amount manually.
 }
 document.querySelectorAll('[data-pay-part]').forEach(button=>{
  button.addEventListener('click',()=>{
