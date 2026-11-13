@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#101e35"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="default"><meta name="apple-mobile-web-app-title" content="Мой бюджет"><meta name="description" content="Семейный бюджет: зарплата, аванс, ипотека, кредитная карта и покупки."><link rel="manifest" href="manifest.webmanifest"><link rel="icon" type="image/svg+xml" href="icon.svg"><link rel="apple-touch-icon" href="icon.png"><title>Мой бюджет</title><style>
-:root{--bg:#f3f6fa;--ink:#172940;--muted:#728196;--card:#fff;--blue:#2965eb;--teal:#159c92;--green:#20a27a;--orange:#ed9d45;--line:#e6ecf4;--red:#d34c57}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:600px;margin:auto;min-height:100vh;padding-bottom:94px}.hero{background:linear-gradient(140deg,#122d52,#101e35 75%);color:white;border-radius:0 0 30px 30px;padding:calc(28px + env(safe-area-inset-top)) 22px 27px}.top{display:flex;align-items:center;justify-content:space-between}.eyebrow{font-size:12px;opacity:.72;font-weight:600;letter-spacing:.07em;text-transform:uppercase}.brand{font-weight:800;font-size:23px;letter-spacing:-.7px}.chip{border:1px solid #ffffff38;padding:7px 11px;border-radius:18px;color:#fff;background:#ffffff14;font-weight:600}.hero-amount{margin-top:26px;font-size:35px;font-weight:800;letter-spacing:-1.5px}.hero-amount small{font-size:18px}.hero-label{color:#bcc9da;font-size:13px}.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}.hero-mini{background:#ffffff13;padding:13px;border:1px solid #ffffff15;border-radius:16px}.hero-mini span{color:#c5cfda;font-size:12px}.hero-mini b{display:block;font-size:17px;margin-top:3px}.main{padding:19px 16px}.section-heading{display:flex;justify-content:space-between;align-items:center;margin:10px 2px 12px}.section-heading h2{margin:0;font-size:18px;letter-spacing:-.35px}.quiet{color:var(--muted);font-size:12px}.card{background:var(--card);border:1px solid #e6ecf2;border-radius:20px;padding:17px;margin-bottom:13px;box-shadow:0 4px 14px #17294006}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.row-title{display:flex;gap:11px;align-items:center}.emoji{width:40px;height:40px;display:grid;place-items:center;border-radius:13px;background:#eff4ff;font-size:21px}.name{font-weight:700}.sub{font-size:12px;color:var(--muted);margin-top:3px}.number{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}.track{background:#e9edf4;height:8px;border-radius:20px;margin-top:14px;overflow:hidden}.fill{height:100%;border-radius:20px}.tinyline{font-size:12px;display:flex;justify-content:space-between;color:var(--muted);margin-top:7px}.btn{border:0;border-radius:14px;padding:12px 16px;font-weight:700;background:var(--blue);color:white}.btn.secondary{background:#edf3ff;color:#2451a3}.btn.light{background:white;border:1px solid var(--line);color:var(--ink)}.btn.danger{background:#fff0f1;color:#c6414d}.btn:active{transform:scale(.99)}.btn.full{width:100%}.actions{display:flex;gap:9px}.actions>.btn{flex:1}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(600px,100%);background:#fff;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);padding:9px 7px calc(8px + env(safe-area-inset-bottom));z-index:10}.tab{border:0;background:transparent;color:#8895a7;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;min-width:0}.tab span{font-size:22px}.tab.active{color:var(--blue)}.view{display:none}.view.active{display:block}.field{display:block;margin:12px 0}.field span{font-size:12px;color:#66768a;display:block;font-weight:650;margin-bottom:6px}.field input,.field select{width:100%;border:1px solid #dce5f0;background:#fafcff;border-radius:13px;padding:13px;color:var(--ink);outline:none;min-width:0}.field input:focus,.field select:focus{border-color:#6d94ec;box-shadow:0 0 0 3px #2965eb14}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.label{font-size:13px;color:var(--muted)}.hint{background:#eaf2ff;border-radius:14px;padding:12px;color:#405b83;font-size:13px;margin:12px 0}.warning{background:#fff0eb;color:#9f4d2b;border-radius:14px;padding:12px;font-size:13px;margin:12px 0}.success{background:#e9f7f0;color:#247953;border-radius:14px;padding:12px;font-size:13px;margin:12px 0}.divider{height:1px;background:var(--line);margin:14px 0}.table{width:100%;border-collapse:collapse;font-size:13px}.table th{font-size:11px;color:var(--muted);font-weight:600;text-align:right;padding:8px 3px;border-bottom:1px solid var(--line)}.table th:first-child,.table td:first-child{text-align:left}.table td{text-align:right;padding:10px 3px;border-bottom:1px solid #f0f3f7;font-variant-numeric:tabular-nums}.table tr:last-child td{border-bottom:0;font-weight:800}.pill{border-radius:30px;background:#edf3ff;color:#2451a3;font-size:11px;font-weight:700;padding:5px 9px}.empty{font-size:13px;color:var(--muted);text-align:center;padding:22px 10px}.transaction{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.transaction:last-child{border:0}.transaction b{display:block}.transaction small{color:var(--muted)}.delete{border:0;color:#a4aebb;background:none;padding:4px;font-size:17px}.month-buttons{display:flex;align-items:center;gap:8px}.month-buttons button{background:#ffffff1e;color:#fff;border:0;border-radius:9px;width:30px;height:30px;font-size:20px}.small{font-size:12px}.foot{color:var(--muted);font-size:12px;margin-top:9px}.headline-note{font-weight:650;color:#39526e}.metric{font-size:23px;font-weight:800}.lineitem{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);gap:9px}.lineitem:last-child{border:0}.lineitem span:last-child{font-weight:750;white-space:nowrap}input[type=file]{width:100%}@media(min-width:600px){.hero{margin-top:18px;border-radius:28px}.app{padding-left:10px;padding-right:10px}}
+:root{--bg:#f3f6fa;--ink:#172940;--muted:#728196;--card:#fff;--blue:#2965eb;--teal:#159c92;--green:#20a27a;--orange:#ed9d45;--line:#e6ecf4;--red:#d34c57}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}button,input,select{font:inherit}button{cursor:pointer}.app{max-width:600px;margin:auto;min-height:100vh;padding-bottom:94px}.hero{background:linear-gradient(140deg,#122d52,#101e35 75%);color:white;border-radius:0 0 30px 30px;padding:calc(28px + env(safe-area-inset-top)) 22px 27px}.top{display:flex;align-items:center;justify-content:space-between}.eyebrow{font-size:12px;opacity:.72;font-weight:600;letter-spacing:.07em;text-transform:uppercase}.brand{font-weight:800;font-size:23px;letter-spacing:-.7px}.chip{border:1px solid #ffffff38;padding:7px 11px;border-radius:18px;color:#fff;background:#ffffff14;font-weight:600}.hero-amount{margin-top:26px;font-size:35px;font-weight:800;letter-spacing:-1.5px}.hero-amount small{font-size:18px}.hero-label{color:#bcc9da;font-size:13px}.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:20px}.hero-mini{background:#ffffff13;padding:13px;border:1px solid #ffffff15;border-radius:16px}.hero-mini span{color:#c5cfda;font-size:12px}.hero-mini b{display:block;font-size:17px;margin-top:3px}.main{padding:19px 16px}.section-heading{display:flex;justify-content:space-between;align-items:center;margin:10px 2px 12px}.section-heading h2{margin:0;font-size:18px;letter-spacing:-.35px}.quiet{color:var(--muted);font-size:12px}.card{background:var(--card);border:1px solid #e6ecf2;border-radius:20px;padding:17px;margin-bottom:13px;box-shadow:0 4px 14px #17294006}.row{display:flex;justify-content:space-between;gap:10px;align-items:center}.row-title{display:flex;gap:11px;align-items:center}.emoji{width:40px;height:40px;display:grid;place-items:center;border-radius:13px;background:#eff4ff;font-size:21px}.name{font-weight:700}.sub{font-size:12px;color:var(--muted);margin-top:3px}.number{font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}.track{background:#e9edf4;height:8px;border-radius:20px;margin-top:14px;overflow:hidden}.fill{height:100%;border-radius:20px}.tinyline{font-size:12px;display:flex;justify-content:space-between;color:var(--muted);margin-top:7px}.btn{border:0;border-radius:14px;padding:12px 16px;font-weight:700;background:var(--blue);color:white}.btn.secondary{background:#edf3ff;color:#2451a3}.btn.light{background:white;border:1px solid var(--line);color:var(--ink)}.btn.danger{background:#fff0f1;color:#c6414d}.btn:active{transform:scale(.99)}.btn.full{width:100%}.actions{display:flex;gap:9px}.actions>.btn{flex:1}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(600px,100%);background:#fff;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line);padding:9px 7px calc(8px + env(safe-area-inset-bottom));z-index:10}.tab{border:0;background:transparent;color:#8895a7;font-size:11px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:3px;padding:4px;min-width:0}.tab span{font-size:22px}.tab.active{color:var(--blue)}.view{display:none}.view.active{display:block}.field{display:block;margin:12px 0}.field span{font-size:12px;color:#66768a;display:block;font-weight:650;margin-bottom:6px}.field input,.field select{width:100%;border:1px solid #dce5f0;background:#fafcff;border-radius:13px;padding:13px;color:var(--ink);outline:none;min-width:0}.utilities-fixed-switch{display:flex;gap:8px;align-items:center;font-size:12px;font-weight:650;color:var(--ink);margin:12px 0 2px}.utilities-fixed-switch input{width:18px;height:18px;flex-shrink:0;accent-color:var(--blue)}.field[hidden]{display:none!important}.field input:focus,.field select:focus{border-color:#6d94ec;box-shadow:0 0 0 3px #2965eb14}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}.label{font-size:13px;color:var(--muted)}.hint{background:#eaf2ff;border-radius:14px;padding:12px;color:#405b83;font-size:13px;margin:12px 0}.warning{background:#fff0eb;color:#9f4d2b;border-radius:14px;padding:12px;font-size:13px;margin:12px 0}.success{background:#e9f7f0;color:#247953;border-radius:14px;padding:12px;font-size:13px;margin:12px 0}.divider{height:1px;background:var(--line);margin:14px 0}.table{width:100%;border-collapse:collapse;font-size:13px}.table th{font-size:11px;color:var(--muted);font-weight:600;text-align:right;padding:8px 3px;border-bottom:1px solid var(--line)}.table th:first-child,.table td:first-child{text-align:left}.table td{text-align:right;padding:10px 3px;border-bottom:1px solid #f0f3f7;font-variant-numeric:tabular-nums}.table tr:last-child td{border-bottom:0;font-weight:800}.pill{border-radius:30px;background:#edf3ff;color:#2451a3;font-size:11px;font-weight:700;padding:5px 9px}.empty{font-size:13px;color:var(--muted);text-align:center;padding:22px 10px}.transaction{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}.transaction:last-child{border:0}.transaction b{display:block}.transaction small{color:var(--muted)}.delete{border:0;color:#a4aebb;background:none;padding:4px;font-size:17px}.month-buttons{display:flex;align-items:center;gap:8px}.month-buttons button{background:#ffffff1e;color:#fff;border:0;border-radius:9px;width:30px;height:30px;font-size:20px}.small{font-size:12px}.foot{color:var(--muted);font-size:12px;margin-top:9px}.headline-note{font-weight:650;color:#39526e}.metric{font-size:23px;font-weight:800}.lineitem{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line);gap:9px}.lineitem:last-child{border:0}.lineitem span:last-child{font-weight:750;white-space:nowrap}input[type=file]{width:100%}@media(min-width:600px){.hero{margin-top:18px;border-radius:28px}.app{padding-left:10px;padding-right:10px}}
 
 /* v1.4 – compact one-screen layout and SQL Work Assistant palette tokens */
 html,body{height:100%;overflow:hidden}
@@ -1651,7 +1651,7 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  color:var(--ink);box-shadow:0 10px 32px #00000028,0 2px 8px #00000010;
  font:inherit;font-size:13px;font-weight:750;line-height:1.2;
  opacity:0;transform:translate(-50%,13px) scale(.94);
- transition:opacity .21s ease,transform .27s cubic-bezier(.17,.88,.36,1.2)
+ transition:opacity .15s ease,transform .19s cubic-bezier(.17,.88,.36,1.2)
 }
 .budget-save-toast.is-visible{opacity:1;transform:translate(-50%,0) scale(1)}
 .budget-save-toast .budget-save-symbol{
@@ -1661,11 +1661,11 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 }
 .budget-save-toast .budget-save-symbol svg{width:19px;height:19px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block}
 .budget-save-toast .budget-save-symbol path{stroke-dasharray:27;stroke-dashoffset:27}
-.budget-save-toast.is-visible .budget-save-symbol{animation:budgetCheckPop .5s cubic-bezier(.2,1.5,.5,1) both}
-.budget-save-toast.is-visible .budget-save-symbol path{animation:budgetCheckDraw .38s .13s ease-out both}
+.budget-save-toast.is-visible .budget-save-symbol{animation:budgetCheckPop .34s cubic-bezier(.2,1.5,.5,1) both}
+.budget-save-toast.is-visible .budget-save-symbol path{animation:budgetCheckDraw .25s .08s ease-out both}
 @keyframes budgetCheckPop{0%{transform:scale(.6)}58%{transform:scale(1.14)}100%{transform:scale(1)}}
 @keyframes budgetCheckDraw{to{stroke-dashoffset:0}}
-button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-out}
+button.budget-action-saved:not(:disabled){animation:budgetActionGlow .46s ease-out}
 @keyframes budgetActionGlow{0%{filter:brightness(1)}36%{filter:brightness(1.15)}100%{filter:brightness(1)}}
 @media(orientation:landscape){
  .budget-save-toast{bottom:calc(57px + env(safe-area-inset-bottom));padding:7px 13px;font-size:12px}
@@ -1897,6 +1897,101 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
  #v-analytics .analytics-goal-rest>strong{font-size:clamp(15px,3vw,18px)}
  #v-analytics .analytics-goal-settings{display:flex!important;grid-column:1;grid-row:4;min-height:30px;padding:5px 9px}
 }
+.rule-live-plan{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;margin:12px 0 14px}.rule-live-title{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:700;margin-bottom:8px}.rule-live-plan .table{width:100%;font-size:11px}.rule-live-plan .table th,.rule-live-plan .table td{padding:5px 3px}.rule-live-plan .table td:not(:first-child),.rule-live-plan .table th:not(:first-child){text-align:right;white-space:nowrap}.rule-live-plan .rule-highlight{background:var(--selected);font-weight:700}.rule-live-plan .rule-preview-total{font-weight:700;border-top:1px solid var(--line)}.rule-live-warning{font-size:11px;color:var(--red);margin-top:7px}.rule-live-warning[hidden]{display:none}</style><style>
+.category-value{position:relative}.category-value input{padding-right:44px!important}.category-gear{position:absolute;right:2px;top:0;bottom:0;width:42px;border:0;background:transparent;color:var(--blue);font-size:23px}.rule-caption{font-size:10px;color:var(--muted);margin-top:4px}.rule-dialog{width:min(420px,calc(100% - 28px));max-height:85dvh;overflow:auto;border:1px solid var(--line);border-radius:18px;background:var(--card);color:var(--ink);padding:18px}.rule-dialog::backdrop{background:#0009}.rule-dialog h3{margin:0 0 16px}.rule-dialog .field{margin:12px 0}.rule-dialog .field span{font-size:12px}
+
+/* Proportions editor: a single scrollable modal with allocation table
+   followed immediately by adjustable categories. No clipped lower half. */
+#v-plan>details.compact-disclosure[open]{
+ position:fixed!important;inset:0!important;z-index:1000!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;
+ justify-content:center!important;overflow:visible!important;
+ padding:max(14px,env(safe-area-inset-top)) 14px max(20px,env(safe-area-inset-bottom))!important;
+ background:rgba(4,12,25,.78)!important;box-sizing:border-box;
+}
+#v-plan>details.compact-disclosure[open]>summary{
+ flex:0 0 auto!important;width:min(100%,520px)!important;
+ border-radius:15px 15px 0 0!important;
+}
+#v-plan>details.compact-disclosure[open]>.card{
+ display:block!important;flex:0 1 auto!important;
+ width:min(100%,520px)!important;
+ max-height:calc(100dvh - 135px)!important;
+ overflow-y:auto!important;overscroll-behavior:contain!important;
+ -webkit-overflow-scrolling:touch;
+ background:var(--card)!important;
+ padding:8px 13px 18px!important;
+ margin:0!important;min-height:0!important;
+ border-radius:0 0 15px 15px!important;
+}
+#v-plan .payout-popup-preview{
+ display:none;
+ padding:4px 0 10px;
+ margin-bottom:12px;border-bottom:1px solid var(--line);
+}
+#v-plan>details.compact-disclosure[open]>.card>.payout-popup-preview{
+ display:block!important;
+}
+.payout-popup-preview-title{font-size:13px;font-weight:750;margin:2px 0 7px;color:var(--ink)}
+.payout-popup-preview-content table{
+ width:100%;table-layout:fixed;border-collapse:collapse;font-size:clamp(10px,2.7vw,12px)
+}
+.payout-popup-preview-content th,.payout-popup-preview-content td{
+ padding:5px 2px;text-align:right;line-height:1.25
+}
+.payout-popup-preview-content th:first-child,.payout-popup-preview-content td:first-child{
+ text-align:left;width:38%
+}
+
+/* Portal overlay: always above the advance card and outside clipped #v-plan. */
+body>details.proportions-modal[open]{
+ position:fixed!important;inset:0!important;z-index:10000!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;
+ justify-content:center!important;box-sizing:border-box!important;
+ padding:max(10px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))!important;
+ border:0!important;border-radius:0!important;margin:0!important;
+ background:rgba(5,10,24,.80)!important;
+ backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+ overflow:visible!important;
+}
+body>details.proportions-modal[open]>summary{
+ width:min(100%,520px)!important;max-width:520px;box-sizing:border-box;
+ flex:0 0 46px!important;min-height:46px!important;
+ background:var(--card)!important;color:var(--ink)!important;
+ padding:11px 15px!important;
+ border-radius:16px 16px 0 0!important;font-size:15px!important;
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+}
+body>details.proportions-modal[open]>summary:after{content:'✕'!important}
+body>details.proportions-modal[open]>.card{
+ width:min(100%,520px)!important;height:min(79dvh,760px)!important;
+ max-height:calc(100dvh - 105px)!important;min-height:0!important;
+ display:flex!important;flex-direction:column!important;
+ flex:0 1 auto!important;overflow:hidden!important;
+ background:var(--card)!important;border:0!important;
+ border-radius:0 0 16px 16px!important;
+ margin:0!important;padding:0!important;
+}
+body>details.proportions-modal[open] .payout-popup-preview{
+ display:flex!important;flex-direction:column!important;
+ flex:0 0 48%!important;min-height:0!important;
+ overflow:hidden!important;padding:12px 12px 8px!important;margin:0!important;
+ border-bottom:1px solid var(--line)!important;
+}
+body>details.proportions-modal[open] .payout-popup-preview-content{
+ flex:1 1 auto!important;overflow-y:auto!important;min-height:0;
+ -webkit-overflow-scrolling:touch;
+}
+body>details.proportions-modal[open] .payout-popup-preview-content table{
+ font-size:clamp(10px,2.75vw,12px);table-layout:fixed;width:100%;border-collapse:collapse;
+}
+body>details.proportions-modal[open] .payout-popup-preview-content th,
+body>details.proportions-modal[open] .payout-popup-preview-content td{padding:5px 2px;line-height:1.2}
+body>details.proportions-modal[open] .proportions-settings-pane{
+ flex:1 1 52%!important;min-height:0!important;overflow-y:auto!important;
+ padding:12px 14px 18px!important;-webkit-overflow-scrolling:touch;
+}
+body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bottom:4px}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -1922,7 +2017,7 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
 </div>
 </div><!-- End: advance and salary card -->
 <div class="section-heading"><h2>Куда перевести деньги</h2><span class="quiet">с каждой выплаты</span></div>
-<div class="card payout-destinations"><div id="planTable"></div><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two"><label class="field"><span>Семейные нужды</span><input id="weight-family" type="number" min="0" step="0.5"></label><label class="field"><span>Коммуналка</span><input id="weight-utilities" type="number" min="0" step="0.5"></label><label class="field"><span>Накопления</span><input id="weight-savings" type="number" min="0" step="0.5"></label><label class="field"><span>Остальное</span><input id="weight-other" type="number" min="0" step="0.5"></label></div><div class="foot">Это относительные веса, а не проценты от всего дохода. По умолчанию 50 : 7,5 : 7,5 : 7,5.</div></div></section>
+<div class="card payout-destinations"><div id="planTable"></div><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two" id="categoryRules"></div><div class="foot">Сначала выделяются суммы в ₽, затем проценты от оставшейся части выплаты. Нераспределённый остаток — в «Остальное». Настройки действуют для следующих поступлений.</div></div></section>
 <section class="view" id="v-card"><div class="section-heading"><h2>Кредиты</h2></div>
 <div class="card mortgage-monthly-settings"><b>🏠 Ипотека</b><label class="field"><span>Ежемесячный платёж по ипотеке, ₽</span><input id="mortgage" type="number" min="0" step="100" inputmode="decimal"></label><div id="mortgageMonthlyStatus" class="foot">Изменение платежа применяется к будущим неподтверждённым поступлениям.</div></div>
 <div class="section-heading"><h2>Ипотека и кредитка</h2></div>
@@ -2255,6 +2350,8 @@ if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,inclu
 if(!data.salaryConfig||typeof data.salaryConfig!=='object')data.salaryConfig={base:0,mode:'gross',taxRate:13};
 if(data.salaryConfig.taxRate===undefined)data.salaryConfig.taxRate=13;
 if(typeof data.paidMortgageMonth!=='string')data.paidMortgageMonth='';
+if(!Number.isFinite(Number(data.utilitiesAdvanceTarget))||Number(data.utilitiesAdvanceTarget)<0)data.utilitiesAdvanceTarget=15000;
+if(typeof data.utilitiesFromSalary!=='boolean')data.utilitiesFromSalary=true;
 // Первоначальные настройки старых версий были 15/30; для этого бюджета даты 16/1.
 if(!data.payDays||typeof data.payDays!=='object')data.payDays={advance:16,salary:1};
 if(!data.payDays2026Migrated){if(Number(data.payDays.advance)===15&&Number(data.payDays.salary)===30)data.payDays={advance:16,salary:1};data.payDays2026Migrated=true;}
@@ -2382,13 +2479,13 @@ function showSaveFeedback(message,button){
    toast.classList.remove('is-visible');
    saveFeedbackFinishTimer=setTimeout(()=>{
      if(!toast.classList.contains('is-visible'))toast.hidden=true;
-   },350);
- },2350);
+   },220);
+ },1450);
  if(button?.classList&&button.isConnected){
    button.classList.remove('budget-action-saved');
    void button.offsetWidth;
    button.classList.add('budget-action-saved');
-   setTimeout(()=>button.classList.remove('budget-action-saved'),750);
+   setTimeout(()=>button.classList.remove('budget-action-saved'),490);
  }
 }
 function save(){
@@ -2515,7 +2612,7 @@ function mortgageDistributionOffsets(targetMonth){
  }
  return result;
 }
-function allocation(){
+function allocation(receiptDate=null,ruleOverrides=null){
  const m=monthData(),salaryPlan=plannedSalary(m),advancePlan=plannedAdvance(m),total=advancePlan+salaryPlan;
  const base=mortgageDistributionBase(month),offsets=mortgageDistributionOffsets(month);
  const receipts={
@@ -2541,19 +2638,80 @@ function allocation(){
  };
  const ac=receipts.advance?num(receipts.advance.amounts?.credit):Math.min(cc.debt,intended('advance'),Math.max(0,advancePlan-mortgageA));
  const bc=receipts.salary?num(receipts.salary.amounts?.credit):Math.min(Math.max(0,cc.debt-ac),intended('salary'),Math.max(0,salaryPlan-mortgageB));
- const weightTotal=cats.reduce((sum,c)=>sum+num(data.weights[c.id]),0);
  const remainA=Math.max(0,advancePlan-mortgageA-ac),remainB=Math.max(0,salaryPlan-mortgageB-bc);
- const rows=[{name:'Ипотека',a:mortgageA,b:mortgageB},{name:'Кредитная карта',a:ac,b:bc}];
- for(const c of cats){
-  const weight=weightTotal?num(data.weights[c.id])/weightTotal:(c.id==='other'?1:0);
-  rows.push({name:c.name,id:c.id,
-   a:receipts.advance?num(receipts.advance.amounts?.[c.id]):remainA*weight,
-   b:receipts.salary?num(receipts.salary.amounts?.[c.id]):remainB*weight});
+ const rules=ruleOverrides||categoryRules();
+ // Each rule represents a MONTHLY target. Percentages use the complete
+ // forecast (advance + salary), not the leftover of individual paydays.
+ // Existing confirmed receipt allocations are immutable.
+ const confirmed={
+  advance:receipts.advance?.amounts||null,
+  salary:receipts.salary?.amounts||null
+ };
+ const out={advance:Object.fromEntries(cats.map(c=>[c.id,num(confirmed.advance?.[c.id])])),
+            salary:Object.fromEntries(cats.map(c=>[c.id,num(confirmed.salary?.[c.id])]))};
+ const cap={
+  advance:confirmed.advance?0:remainA,
+  salary:confirmed.salary?0:remainB
+ };
+ const targets=Object.fromEntries(cats.map(c=>{
+  const rule=rules[c.id]||{source:'both',mode:'percent',value:0};
+  let amount=rule.mode==='rub'?num(rule.value):total*num(rule.value)/100;
+  // The advance-only utilities amount is a target envelope balance, not
+  // another transfer on top of savings already held for the next bill.
+  if(c.id==='utilities'&&rule.mode==='rub'&&rule.source==='advance'&&!confirmed.advance&&data.startBalances){
+   const date=receiptDate||iso(plannedPayday(month,Number(data.payDays.advance)||16));
+   amount=Math.max(0,amount-Math.max(0,num(categoryBalanceAt('utilities',date))));
+  }
+  const already=num(confirmed.advance?.[c.id])+num(confirmed.salary?.[c.id]);
+  return [c.id,Math.max(0,amount-(c.id==='utilities'&&rule.mode==='rub'&&rule.source==='advance'&&!confirmed.advance?0:already))];
+ }));
+ // A rule linked to a single payday gets that payday first; rules linked
+ // to both divide their remaining monthly target across the two paydays.
+ const allocateGroup=(ids,types)=>{
+  const remaining=ids.filter(id=>targets[id]>0.00001);
+  const available=types.reduce((sum,type)=>sum+cap[type],0);
+  const requested=remaining.reduce((sum,id)=>sum+targets[id],0);
+  if(!available||!requested)return;
+  const factor=Math.min(1,available/requested);
+  for(const id of remaining){
+   const grant=targets[id]*factor;
+   const space=types.reduce((sum,t)=>sum+cap[t],0);
+   if(!space)break;
+   const shares=types.map(t=>Math.min(cap[t],grant*cap[t]/space));
+   types.forEach((t,i)=>{out[t][id]+=shares[i];cap[t]=Math.max(0,cap[t]-shares[i]);});
+   targets[id]=Math.max(0,targets[id]-grant);
+  }
+ };
+ const ids=(mode,source)=>cats.filter(c=>rules[c.id]?.mode===mode&&rules[c.id]?.source===source).map(c=>c.id);
+ for(const mode of ['rub','percent']){
+  allocateGroup(ids(mode,'advance'),['advance']);
+  allocateGroup(ids(mode,'salary'),['salary']);
+  allocateGroup(ids(mode,'both'),['advance','salary']);
  }
+ // Unallocated income remains available in "Other", so every actual
+ // receipt still distributes exactly its full amount.
+ for(const type of ['advance','salary'])if(!confirmed[type])out[type].other+=cap[type];
+ const aa=out.advance,bb=out.salary;
+ const weightTotal=1;
+ const rows=[{name:'Ипотека',a:mortgageA,b:mortgageB},{name:'Кредитная карта',a:ac,b:bc}];
+ for(const c of cats)rows.push({name:c.name,id:c.id,a:num(aa[c.id]),b:num(bb[c.id])});
  const due=Math.min(num(m.mortgage),total);
  const mortgage=mortgageA+mortgageB;
  const deficit=Math.max(0,mortgage+ac+bc-total);
  return {rows,total,mortgage,credit:ac+bc,deficit,unfundedMortgage:Math.max(0,due-(base.advance+base.salary)),weightTotal,offsets};
+}
+function displayAllocationRows(rows){
+ // Balanced whole-ruble rounding for the UI; stored allocations keep kopecks.
+ const shown=rows.map(r=>({...r}));
+ for(const key of ['a','b']){
+  const raw=rows.map(r=>Math.max(0,num(r[key])));
+  const bases=raw.map(Math.floor);
+  const remaining=Math.round(raw.reduce((a,v)=>a+v,0))-bases.reduce((a,v)=>a+v,0);
+  const order=raw.map((v,i)=>({i,fraction:v-bases[i]})).sort((a,b)=>b.fraction-a.fraction||a.i-b.i);
+  for(let k=0;k<remaining&&k<order.length;k++)bases[order[k].i]++;
+  shown.forEach((r,i)=>r[key]=bases[i]);
+ }
+ return shown;
 }
 function esc(s){return String(s||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 function sumExpenses(id){return data.expenses.filter(e=>e.date?.startsWith(month)&&e.category===id).reduce((a,e)=>a+num(e.amount),0)}
@@ -2650,7 +2808,7 @@ function receiptInfo(){
 function refreshTypes(preferred){const category=$('expenseCategory').value;const types=data.expenseTypes[category]||[];const old=preferred??$('expenseType').value;const options=types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');$('expenseType').innerHTML='<option value="">Выбери вид расхода</option>'+options+'<option value="__new__">＋ Добавить новый…</option>';
 $('expenseType').value=types.includes(old)||old==='__new__'?old:'';toggleNewType();}
 function toggleNewType(){$('newTypeWrap').style.display=$('expenseType').value==='__new__'?'block':'none';if($('expenseType').value!=='__new__')$('newExpenseType').value='';}
-function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=data.debt;$('reserved').value=data.reserved;$('deadline').value=data.deadline;for(const c of cats)$('weight-'+c.id).value=data.weights[c.id]??0;}
+function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=data.debt;$('reserved').value=data.reserved;$('deadline').value=data.deadline;renderCategoryRules();}
 // Fit the label and amount to the actual available tile width, including large balances.
 function fitTotalMoneyTile(){
  const tile=document.querySelector('.hero-overview .hero-all');
@@ -2680,7 +2838,10 @@ function fitTotalMoneyTile(){
 function render(){const m=monthData();const calc=allocation();const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advanceForecast):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
 $('envelopes').innerHTML=cats.map(cat=>{const line=calc.rows.find(x=>x.id===cat.id);const budget=(line?.a||0)+(line?.b||0);const used=sumExpenses(cat.id),balance=realBalance(cat.id),remaining=balance===null?budget-used:balance,pct=balance===null&&budget?Math.max(0,Math.min(100,used/budget*100)):0;return `<button type="button" class="card envelope-button" data-envelope="${cat.id}" aria-label="Открыть историю: ${cat.name}"><div class="row"><div class="row-title"><div class="emoji">${cat.icon}</div><div><div class="name">${cat.name}</div><div class="sub">${balance===null?'План '+rub(budget):'Фактический остаток'}</div></div></div><div class="number" style="color:${remaining<0?'var(--red)':'var(--ink)'}">${rub(remaining)}</div></div><div class="track"><div class="fill" style="width:${pct}%;background:${cat.color}"></div></div><div class="tinyline"><span>За месяц потрачено ${rub(used)}</span><span>${balance===null?Math.round(pct)+'% от плана':'Учёт с '+esc(data.startBalances.date)}</span></div></button>`}).join('');
 const cc=credit();const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':'Откладывай '+rub(cc.per)+' с каждой предстоящей выплаты';$('obligations').innerHTML=`<div class="card"><div class="lineitem"><span>🏠 Ипотека: ${(data.paidMortgageMonth===month||regularPaidForMonth('mortgage',month)>=num(m.mortgage)&&num(m.mortgage)>0)?'оплачена':'платёж по плану'}</span><span>${rub(m.mortgage)}</span></div>${data.startBalances?`<div class="lineitem"><span>На следующую ипотеку отложено</span><span>${rub(mortgageFund())}</span></div>`:''}<div class="lineitem"><span>💳 Ещё накопить на кредитку</span><span>${rub(cc.debt)}</span></div><div class="sub" style="margin-top:10px">${esc(state)}</div></div>`;
-$('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс</th><th>Зарплата</th></tr></thead><tbody>'+calc.rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(calc.rows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(calc.rows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
+const visiblePlanRows=displayAllocationRows(calc.rows);
+$('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс</th><th>Зарплата</th></tr></thead><tbody>'+visiblePlanRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
+const popupPreview=$('proportionDistributionPreview');
+if(popupPreview?.closest('details')?.open)popupPreview.querySelector('.payout-popup-preview-content').innerHTML=$('planTable').innerHTML;
 $('planWarnings').innerHTML=(!plannedAdvance(m)||!plannedSalary(m))
  ? '<div class="hint">Укажи оклад в настройках или фактические выплаты для полного расчёта.</div>'
  : ''
@@ -3005,6 +3166,35 @@ const proportionCard=[...document.querySelectorAll('#v-plan > .card')].find(el=>
 wrap(proportionCard,'Изменить пропорции распределения');
 const payoutPopup=proportionCard?.parentElement;
 if(payoutPopup?.tagName==='DETAILS'){
+ // Show the allocation table inside the expanded proportions popup, ABOVE
+ // the category settings, rather than only underneath the popup.
+ const preview=document.createElement('div');
+ preview.id='proportionDistributionPreview';
+ preview.className='payout-popup-preview';
+ preview.innerHTML='<div class="payout-popup-preview-title">Распределение по выплатам</div><div class="payout-popup-preview-content"></div>';
+ proportionCard.prepend(preview);
+ // Split the popup into two independently scrollable panes. The allocation
+ // stays in the top half; all adjustable categories stay visible below.
+ const settingsPane=document.createElement('div');
+ settingsPane.className='proportions-settings-pane';
+ for(const node of [...proportionCard.children].filter(node=>node!==preview))settingsPane.append(node);
+ proportionCard.append(settingsPane);
+ // The payouts view clips children to its one-screen layout on iPhone.
+ // Portal the *actual* details element to body while expanded so it can
+ // cover the advance card, and restore it to the same position on close.
+ const anchor=document.createComment('proportions-popup-anchor');
+ payoutPopup.before(anchor);
+ const refresh=()=>{if(payoutPopup.open)preview.querySelector('.payout-popup-preview-content').innerHTML=$('planTable').innerHTML;};
+ payoutPopup.addEventListener('toggle',()=>{
+  if(payoutPopup.open){
+   document.body.append(payoutPopup);
+   payoutPopup.classList.add('proportions-modal');
+   refresh();
+  }else{
+   payoutPopup.classList.remove('proportions-modal');
+   anchor.after(payoutPopup);
+  }
+ });
  payoutPopup.addEventListener('click',event=>{
   if(event.target===payoutPopup)payoutPopup.open=false;
  });
@@ -3138,7 +3328,55 @@ $('mortgage').addEventListener('change',e=>{
  $('mortgageMonthlyStatus').textContent='Платёж сохранён. Месяцы с подтверждёнными поступлениями не изменены.';
  renderAll();
 });
-for(const c of cats)$('weight-'+c.id).addEventListener('input',e=>{data.weights[c.id]=num(e.target.value);render();save()});
+function categoryRules(){
+ if(!data.categoryRules){
+  const fixed=data.utilitiesFromSalary!==false;
+  const total=cats.filter(c=>!fixed||c.id!=='utilities').reduce((a,c)=>a+Math.max(0,num(data.weights[c.id])),0);
+  data.categoryRules=Object.fromEntries(cats.map(c=>[c.id,fixed&&c.id==='utilities'
+   ?{source:'advance',mode:'rub',value:Math.max(0,num(data.utilitiesAdvanceTarget))}
+   :{source:'both',mode:'percent',value:total?Math.max(0,num(data.weights[c.id]))/total*100:0}]));
+ }
+ return data.categoryRules;
+}
+function renderCategoryRules(){
+ const rules=categoryRules();
+ $('categoryRules').innerHTML=cats.map(c=>{const r=rules[c.id];return `<div class="field"><span>${c.name}</span><div class="category-value"><input aria-label="${c.name}" value="${Number(r.value.toFixed(2))} ${r.mode==='rub'?'₽':'%'}" readonly><button class="category-gear" type="button" data-rule="${c.id}" aria-label="Настройки: ${c.name}">⚙</button></div><div class="rule-caption">${r.source==='advance'?'С аванса':r.source==='salary'?'С зарплаты':'С каждой выплаты'}</div></div>`}).join('');
+}
+const ruleDialog=document.createElement('dialog');ruleDialog.className='rule-dialog';
+ruleDialog.innerHTML=`<form id="ruleForm"><h3 id="ruleTitle" tabindex="-1" autofocus></h3><div class="rule-live-plan"><div class="rule-live-title">Распределение по прогнозу <span id="rulePreviewTotal"></span></div><div id="rulePreviewTable"></div><div id="rulePreviewWarning" class="rule-live-warning" hidden></div></div><label class="field"><span>Откуда выделять</span><select id="ruleSource"><option value="advance">С аванса</option><option value="salary">С зарплаты</option><option value="both">С каждой выплаты</option></select></label><label class="field"><span>Способ расчёта</span><select id="ruleMode"><option value="rub">Сумма, ₽</option><option value="percent">Процент, %</option></select></label><label class="field"><span id="ruleValueLabel">Значение</span><input id="ruleValue" type="number" min="0" step="0.01" inputmode="decimal" required></label><p class="foot">Процент считается от общего прогноза на месяц (аванс + зарплата), а сумма в ₽ задаётся на месяц один раз. Выбранные выплаты определяют источник денег. Ипотека и кредитка резервируются в первую очередь; при нехватке денег суммы категорий уменьшаются.</p><div class="actions"><button type="button" class="btn light" id="ruleCancel">Отмена</button><button class="btn" type="submit">Сохранить</button></div></form>`;
+document.body.append(ruleDialog);
+let editingRule=null,ruleTrigger=null;
+function renderRulePreview(){
+ if(!editingRule)return;
+ const value=Number($('ruleValue').value),mode=$('ruleMode').value,source=$('ruleSource').value;
+ const valid=$('ruleValue').value.trim()!==''&&Number.isFinite(value)&&value>=0&&(mode!=='percent'||value<=100);
+ const proposed={...categoryRules(),[editingRule]:{source,mode,value:valid?value:0}};
+ const totalPercent=Object.values(proposed).filter(r=>r.mode==='percent').reduce((sum,r)=>sum+num(r.value),0);
+ const calc=allocation(null,proposed);
+ const visibleRows=displayAllocationRows(calc.rows);
+ $('rulePreviewTotal').textContent=rub(calc.total);
+ $('rulePreviewTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс</th><th>Зарплата</th></tr></thead><tbody>'
+  +visibleRows.map(r=>'<tr'+(r.id===editingRule?' class="rule-highlight"':'')+'><td>'+esc(r.name)+'</td><td>'+rub(r.a)+'</td><td>'+rub(r.b)+'</td></tr>').join('')
+  +'<tr class="rule-preview-total"><td>Всего</td><td>'+rub(visibleRows.reduce((a,r)=>a+r.a,0))+'</td><td>'+rub(visibleRows.reduce((a,r)=>a+r.b,0))+'</td></tr></tbody></table>';
+ const warning=!valid?'Введи корректное значение.':totalPercent>100.011?'Сумма процентов больше 100%. Уменьши долю.':'';
+ $('rulePreviewWarning').hidden=!warning;
+ $('rulePreviewWarning').textContent=warning;
+}
+
+$('categoryRules').addEventListener('click',e=>{const btn=e.target.closest('[data-rule]');if(!btn)return;editingRule=btn.dataset.rule;ruleTrigger=btn;const r=categoryRules()[editingRule];$('ruleTitle').textContent=cats.find(c=>c.id===editingRule).name;$('ruleSource').value=r.source;$('ruleMode').value=r.mode;$('ruleValue').value=Number(r.value.toFixed(2));syncRuleUnit();renderRulePreview();ruleDialog.showModal();$('ruleTitle').focus({preventScroll:true});});
+function syncRuleUnit(){const pct=$('ruleMode').value==='percent';$('ruleValueLabel').textContent=pct?'Процент от месячного прогноза, %':'Сумма на месяц, ₽';if(pct)$('ruleValue').max=100;else $('ruleValue').removeAttribute('max');renderRulePreview();}
+for(const id of ['ruleValue','ruleSource'])$(id).addEventListener(id==='ruleValue'?'input':'change',renderRulePreview);
+$('ruleMode').addEventListener('change',syncRuleUnit);
+$('ruleCancel').addEventListener('click',()=>ruleDialog.close());
+ruleDialog.addEventListener('click',e=>{if(e.target===ruleDialog){const r=ruleDialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)ruleDialog.close();}});
+$('ruleForm').addEventListener('submit',e=>{
+ e.preventDefault();const value=Number($('ruleValue').value),mode=$('ruleMode').value,source=$('ruleSource').value;
+ if(!Number.isFinite(value)||value<0||(mode==='percent'&&value>100))return;
+ const proposed={...categoryRules(),[editingRule]:{source,mode,value}};
+ const sum=Object.values(proposed).filter(r=>r.mode==='percent').reduce((a,r)=>a+r.value,0);
+ if(sum>100.011){alert('Сумма процентов от месячного прогноза больше 100%. Уменьши долю другой категории.');return;}
+ data.categoryRules=proposed;if(renderAll()){ruleDialog.close();showSaveFeedback('Пропорции сохранены',ruleTrigger);}
+});
 $('earlyDate').value=iso(today);
 
 $('earlyForm').addEventListener('submit',e=>{
@@ -3221,7 +3459,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.50';
+const APP_VERSION='1.5.60';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -3296,7 +3534,7 @@ $('receiptEntryForm').addEventListener('submit',e=>{
  data.receipts.push(receipt);
  m[type]=amount;
  try{
-  const calc=allocation(),col=type==='advance'?'a':'b',amounts={};
+  const calc=allocation(date),col=type==='advance'?'a':'b',amounts={};
   for(const row of calc.rows){
    const dest=row.id||(row.name==='Ипотека'?'mortgage':'credit');
    amounts[dest]=Math.round(num(row[col])*100)/100;
