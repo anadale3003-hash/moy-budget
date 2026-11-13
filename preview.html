@@ -2562,9 +2562,15 @@ function allocation(receiptDate=null){
  };
  const targets=Object.fromEntries(cats.map(c=>{
   const rule=rules[c.id]||{source:'both',mode:'percent',value:0};
-  const amount=rule.mode==='rub'?num(rule.value):total*num(rule.value)/100;
+  let amount=rule.mode==='rub'?num(rule.value):total*num(rule.value)/100;
+  // The advance-only utilities amount is a target envelope balance, not
+  // another transfer on top of savings already held for the next bill.
+  if(c.id==='utilities'&&rule.mode==='rub'&&rule.source==='advance'&&!confirmed.advance&&data.startBalances){
+   const date=receiptDate||iso(plannedPayday(month,Number(data.payDays.advance)||16));
+   amount=Math.max(0,amount-Math.max(0,num(categoryBalanceAt('utilities',date))));
+  }
   const already=num(confirmed.advance?.[c.id])+num(confirmed.salary?.[c.id]);
-  return [c.id,Math.max(0,amount-already)];
+  return [c.id,Math.max(0,amount-(c.id==='utilities'&&rule.mode==='rub'&&rule.source==='advance'&&!confirmed.advance?0:already))];
  }));
  // A rule linked to a single payday gets that payday first; rules linked
  // to both divide their remaining monthly target across the two paydays.
@@ -2578,12 +2584,8 @@ function allocation(receiptDate=null){
    const grant=targets[id]*factor;
    const space=types.reduce((sum,t)=>sum+cap[t],0);
    if(!space)break;
-   for(const t of types){
-    if(cap[t]<=0)continue;
-    const share=grant*cap[t]/space;
-    out[t][id]+=share;
-    cap[t]=Math.max(0,cap[t]-share);
-   }
+   const shares=types.map(t=>Math.min(cap[t],grant*cap[t]/space));
+   types.forEach((t,i)=>{out[t][id]+=shares[i];cap[t]=Math.max(0,cap[t]-shares[i]);});
    targets[id]=Math.max(0,targets[id]-grant);
   }
  };
