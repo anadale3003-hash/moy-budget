@@ -1942,6 +1942,56 @@ button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-o
 .payout-popup-preview-content th:first-child,.payout-popup-preview-content td:first-child{
  text-align:left;width:38%
 }
+
+/* Portal overlay: always above the advance card and outside clipped #v-plan. */
+body>details.proportions-modal[open]{
+ position:fixed!important;inset:0!important;z-index:10000!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;
+ justify-content:center!important;box-sizing:border-box!important;
+ padding:max(10px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))!important;
+ border:0!important;border-radius:0!important;margin:0!important;
+ background:rgba(5,10,24,.80)!important;
+ backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+ overflow:visible!important;
+}
+body>details.proportions-modal[open]>summary{
+ width:min(100%,520px)!important;max-width:520px;box-sizing:border-box;
+ flex:0 0 46px!important;min-height:46px!important;
+ background:var(--card)!important;color:var(--ink)!important;
+ padding:11px 15px!important;
+ border-radius:16px 16px 0 0!important;font-size:15px!important;
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+}
+body>details.proportions-modal[open]>summary:after{content:'✕'!important}
+body>details.proportions-modal[open]>.card{
+ width:min(100%,520px)!important;height:min(79dvh,760px)!important;
+ max-height:calc(100dvh - 105px)!important;min-height:0!important;
+ display:flex!important;flex-direction:column!important;
+ flex:0 1 auto!important;overflow:hidden!important;
+ background:var(--card)!important;border:0!important;
+ border-radius:0 0 16px 16px!important;
+ margin:0!important;padding:0!important;
+}
+body>details.proportions-modal[open] .payout-popup-preview{
+ display:flex!important;flex-direction:column!important;
+ flex:0 0 48%!important;min-height:0!important;
+ overflow:hidden!important;padding:12px 12px 8px!important;margin:0!important;
+ border-bottom:1px solid var(--line)!important;
+}
+body>details.proportions-modal[open] .payout-popup-preview-content{
+ flex:1 1 auto!important;overflow-y:auto!important;min-height:0;
+ -webkit-overflow-scrolling:touch;
+}
+body>details.proportions-modal[open] .payout-popup-preview-content table{
+ font-size:clamp(10px,2.75vw,12px);table-layout:fixed;width:100%;border-collapse:collapse;
+}
+body>details.proportions-modal[open] .payout-popup-preview-content th,
+body>details.proportions-modal[open] .payout-popup-preview-content td{padding:5px 2px;line-height:1.2}
+body>details.proportions-modal[open] .proportions-settings-pane{
+ flex:1 1 52%!important;min-height:0!important;overflow-y:auto!important;
+ padding:12px 14px 18px!important;-webkit-overflow-scrolling:touch;
+}
+body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bottom:4px}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-title">До ближайшей выплаты</span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -3109,8 +3159,28 @@ if(payoutPopup?.tagName==='DETAILS'){
  preview.className='payout-popup-preview';
  preview.innerHTML='<div class="payout-popup-preview-title">Распределение по выплатам</div><div class="payout-popup-preview-content"></div>';
  proportionCard.prepend(preview);
+ // Split the popup into two independently scrollable panes. The allocation
+ // stays in the top half; all adjustable categories stay visible below.
+ const settingsPane=document.createElement('div');
+ settingsPane.className='proportions-settings-pane';
+ for(const node of [...proportionCard.children].filter(node=>node!==preview))settingsPane.append(node);
+ proportionCard.append(settingsPane);
+ // The payouts view clips children to its one-screen layout on iPhone.
+ // Portal the *actual* details element to body while expanded so it can
+ // cover the advance card, and restore it to the same position on close.
+ const anchor=document.createComment('proportions-popup-anchor');
+ payoutPopup.before(anchor);
  const refresh=()=>{if(payoutPopup.open)preview.querySelector('.payout-popup-preview-content').innerHTML=$('planTable').innerHTML;};
- payoutPopup.addEventListener('toggle',refresh);
+ payoutPopup.addEventListener('toggle',()=>{
+  if(payoutPopup.open){
+   document.body.append(payoutPopup);
+   payoutPopup.classList.add('proportions-modal');
+   refresh();
+  }else{
+   payoutPopup.classList.remove('proportions-modal');
+   anchor.after(payoutPopup);
+  }
+ });
  payoutPopup.addEventListener('click',event=>{
   if(event.target===payoutPopup)payoutPopup.open=false;
  });
@@ -3374,7 +3444,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.57 · тест';
+const APP_VERSION='1.5.58 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
