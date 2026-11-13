@@ -1651,7 +1651,7 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
  color:var(--ink);box-shadow:0 10px 32px #00000028,0 2px 8px #00000010;
  font:inherit;font-size:13px;font-weight:750;line-height:1.2;
  opacity:0;transform:translate(-50%,13px) scale(.94);
- transition:opacity .21s ease,transform .27s cubic-bezier(.17,.88,.36,1.2)
+ transition:opacity .15s ease,transform .19s cubic-bezier(.17,.88,.36,1.2)
 }
 .budget-save-toast.is-visible{opacity:1;transform:translate(-50%,0) scale(1)}
 .budget-save-toast .budget-save-symbol{
@@ -1661,11 +1661,11 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 }
 .budget-save-toast .budget-save-symbol svg{width:19px;height:19px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block}
 .budget-save-toast .budget-save-symbol path{stroke-dasharray:27;stroke-dashoffset:27}
-.budget-save-toast.is-visible .budget-save-symbol{animation:budgetCheckPop .5s cubic-bezier(.2,1.5,.5,1) both}
-.budget-save-toast.is-visible .budget-save-symbol path{animation:budgetCheckDraw .38s .13s ease-out both}
+.budget-save-toast.is-visible .budget-save-symbol{animation:budgetCheckPop .34s cubic-bezier(.2,1.5,.5,1) both}
+.budget-save-toast.is-visible .budget-save-symbol path{animation:budgetCheckDraw .25s .08s ease-out both}
 @keyframes budgetCheckPop{0%{transform:scale(.6)}58%{transform:scale(1.14)}100%{transform:scale(1)}}
 @keyframes budgetCheckDraw{to{stroke-dashoffset:0}}
-button.budget-action-saved:not(:disabled){animation:budgetActionGlow .65s ease-out}
+button.budget-action-saved:not(:disabled){animation:budgetActionGlow .46s ease-out}
 @keyframes budgetActionGlow{0%{filter:brightness(1)}36%{filter:brightness(1.15)}100%{filter:brightness(1)}}
 @media(orientation:landscape){
  .budget-save-toast{bottom:calc(57px + env(safe-area-inset-bottom));padding:7px 13px;font-size:12px}
@@ -2479,13 +2479,13 @@ function showSaveFeedback(message,button){
    toast.classList.remove('is-visible');
    saveFeedbackFinishTimer=setTimeout(()=>{
      if(!toast.classList.contains('is-visible'))toast.hidden=true;
-   },350);
- },2350);
+   },220);
+ },1450);
  if(button?.classList&&button.isConnected){
    button.classList.remove('budget-action-saved');
    void button.offsetWidth;
    button.classList.add('budget-action-saved');
-   setTimeout(()=>button.classList.remove('budget-action-saved'),750);
+   setTimeout(()=>button.classList.remove('budget-action-saved'),490);
  }
 }
 function save(){
@@ -2700,6 +2700,19 @@ function allocation(receiptDate=null,ruleOverrides=null){
  const deficit=Math.max(0,mortgage+ac+bc-total);
  return {rows,total,mortgage,credit:ac+bc,deficit,unfundedMortgage:Math.max(0,due-(base.advance+base.salary)),weightTotal,offsets};
 }
+function displayAllocationRows(rows){
+ // Balanced whole-ruble rounding for the UI; stored allocations keep kopecks.
+ const shown=rows.map(r=>({...r}));
+ for(const key of ['a','b']){
+  const raw=rows.map(r=>Math.max(0,num(r[key])));
+  const bases=raw.map(Math.floor);
+  const remaining=Math.round(raw.reduce((a,v)=>a+v,0))-bases.reduce((a,v)=>a+v,0);
+  const order=raw.map((v,i)=>({i,fraction:v-bases[i]})).sort((a,b)=>b.fraction-a.fraction||a.i-b.i);
+  for(let k=0;k<remaining&&k<order.length;k++)bases[order[k].i]++;
+  shown.forEach((r,i)=>r[key]=bases[i]);
+ }
+ return shown;
+}
 function esc(s){return String(s||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 function sumExpenses(id){return data.expenses.filter(e=>e.date?.startsWith(month)&&e.category===id).reduce((a,e)=>a+num(e.amount),0)}
 function incomeAmountFor(destination,fromDate=null){
@@ -2825,7 +2838,8 @@ function fitTotalMoneyTile(){
 function render(){const m=monthData();const calc=allocation();const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advanceForecast):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
 $('envelopes').innerHTML=cats.map(cat=>{const line=calc.rows.find(x=>x.id===cat.id);const budget=(line?.a||0)+(line?.b||0);const used=sumExpenses(cat.id),balance=realBalance(cat.id),remaining=balance===null?budget-used:balance,pct=balance===null&&budget?Math.max(0,Math.min(100,used/budget*100)):0;return `<button type="button" class="card envelope-button" data-envelope="${cat.id}" aria-label="Открыть историю: ${cat.name}"><div class="row"><div class="row-title"><div class="emoji">${cat.icon}</div><div><div class="name">${cat.name}</div><div class="sub">${balance===null?'План '+rub(budget):'Фактический остаток'}</div></div></div><div class="number" style="color:${remaining<0?'var(--red)':'var(--ink)'}">${rub(remaining)}</div></div><div class="track"><div class="fill" style="width:${pct}%;background:${cat.color}"></div></div><div class="tinyline"><span>За месяц потрачено ${rub(used)}</span><span>${balance===null?Math.round(pct)+'% от плана':'Учёт с '+esc(data.startBalances.date)}</span></div></button>`}).join('');
 const cc=credit();const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':'Откладывай '+rub(cc.per)+' с каждой предстоящей выплаты';$('obligations').innerHTML=`<div class="card"><div class="lineitem"><span>🏠 Ипотека: ${(data.paidMortgageMonth===month||regularPaidForMonth('mortgage',month)>=num(m.mortgage)&&num(m.mortgage)>0)?'оплачена':'платёж по плану'}</span><span>${rub(m.mortgage)}</span></div>${data.startBalances?`<div class="lineitem"><span>На следующую ипотеку отложено</span><span>${rub(mortgageFund())}</span></div>`:''}<div class="lineitem"><span>💳 Ещё накопить на кредитку</span><span>${rub(cc.debt)}</span></div><div class="sub" style="margin-top:10px">${esc(state)}</div></div>`;
-$('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс</th><th>Зарплата</th></tr></thead><tbody>'+calc.rows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(calc.rows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(calc.rows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
+const visiblePlanRows=displayAllocationRows(calc.rows);
+$('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс</th><th>Зарплата</th></tr></thead><tbody>'+visiblePlanRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
 const popupPreview=$('proportionDistributionPreview');
 if(popupPreview?.closest('details')?.open)popupPreview.querySelector('.payout-popup-preview-content').innerHTML=$('planTable').innerHTML;
 $('planWarnings').innerHTML=(!plannedAdvance(m)||!plannedSalary(m))
@@ -3339,10 +3353,11 @@ function renderRulePreview(){
  const proposed={...categoryRules(),[editingRule]:{source,mode,value:valid?value:0}};
  const totalPercent=Object.values(proposed).filter(r=>r.mode==='percent').reduce((sum,r)=>sum+num(r.value),0);
  const calc=allocation(null,proposed);
+ const visibleRows=displayAllocationRows(calc.rows);
  $('rulePreviewTotal').textContent=rub(calc.total);
  $('rulePreviewTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс</th><th>Зарплата</th></tr></thead><tbody>'
-  +calc.rows.map(r=>'<tr'+(r.id===editingRule?' class="rule-highlight"':'')+'><td>'+esc(r.name)+'</td><td>'+rub(r.a)+'</td><td>'+rub(r.b)+'</td></tr>').join('')
-  +'<tr class="rule-preview-total"><td>Всего</td><td>'+rub(calc.rows.reduce((a,r)=>a+r.a,0))+'</td><td>'+rub(calc.rows.reduce((a,r)=>a+r.b,0))+'</td></tr></tbody></table>';
+  +visibleRows.map(r=>'<tr'+(r.id===editingRule?' class="rule-highlight"':'')+'><td>'+esc(r.name)+'</td><td>'+rub(r.a)+'</td><td>'+rub(r.b)+'</td></tr>').join('')
+  +'<tr class="rule-preview-total"><td>Всего</td><td>'+rub(visibleRows.reduce((a,r)=>a+r.a,0))+'</td><td>'+rub(visibleRows.reduce((a,r)=>a+r.b,0))+'</td></tr></tbody></table>';
  const warning=!valid?'Введи корректное значение.':totalPercent>100.011?'Сумма процентов больше 100%. Уменьши долю.':'';
  $('rulePreviewWarning').hidden=!warning;
  $('rulePreviewWarning').textContent=warning;
@@ -3360,7 +3375,7 @@ $('ruleForm').addEventListener('submit',e=>{
  const proposed={...categoryRules(),[editingRule]:{source,mode,value}};
  const sum=Object.values(proposed).filter(r=>r.mode==='percent').reduce((a,r)=>a+r.value,0);
  if(sum>100.011){alert('Сумма процентов от месячного прогноза больше 100%. Уменьши долю другой категории.');return;}
- data.categoryRules=proposed;if(renderAll())ruleDialog.close();
+ data.categoryRules=proposed;if(renderAll()){ruleDialog.close();showSaveFeedback('Пропорции сохранены',ruleTrigger);}
 });
 $('earlyDate').value=iso(today);
 
@@ -3444,7 +3459,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.59 · тест';
+const APP_VERSION='1.5.60 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
