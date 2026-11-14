@@ -3237,7 +3237,7 @@ function savingsPlanRender(){
  document.querySelectorAll('[data-savings-months]').forEach(btn=>{
    btn.classList.toggle('active',validMonths&&Number(btn.dataset.savingsMonths)===parsed);
  });
- if(!validMonths||!validGoal){
+ if(!validMonths||!validGoal||!validReserve){
    $('savingsPlanPerMonth').textContent='—';
    $('savingsPlanDeadline').textContent=!validReserve?'Укажи корректный размер подушки':
     !validGoal?'Цель должна быть не ниже подушки: '+rub(info.reserve)
