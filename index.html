@@ -2314,11 +2314,11 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <label class="field"><span>Источник дохода</span><select id="incomeSource"><option>Проценты по вкладу</option><option>Премия</option><option>Кэшбэк</option><option>Возврат покупки</option><option>Подработка</option><option>Подарок</option><option>Другое</option></select></label>
 <label class="field"><span>Куда зачислить</span><select id="incomeDestination">
 <option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option>
-<option value="savings">Накопления</option><option value="other">Остальное</option>
+<option value="savings">Накопления</option><option value="reserve">🛡 Подушка безопасности</option><option value="other">Доступный бюджет (Остальное)</option>
 <option value="mortgage">На ипотеку</option><option value="credit">На кредитку</option>
 </select></label>
 <label class="field"><span>Примечание (необязательно)</span><input id="incomeNote" maxlength="120" placeholder="Например, проценты за октябрь"></label>
-<div class="foot">Записывай только фактически полученные деньги. Переводы между своими счетами не являются доходом. Премию, внесённую здесь, не учитывай второй раз в зарплате.</div>
+<div class="foot">Записывай только фактически полученные деньги. При выборе «Подушка безопасности» доход пополнит защищённую подушку, не затронув доступный бюджет и накопления. Переводы между своими счетами не являются доходом. Премию, внесённую здесь, не учитывай второй раз в зарплате.</div>
 <button class="btn full" type="submit">Зачислить доход</button>
 </form></div></details>
 <details class="compact-disclosure operation-disclosure" id="incomeHistoryPanel"><summary><span class="disclosure-title">История дополнительных доходов</span><span class="disclosure-count" id="incomeCount">0</span></summary><div class="card" id="incomeList"></div></details>
@@ -2360,6 +2360,14 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </section>
 <section class="view" id="v-settings">
 <div class="section-heading"><h2>Настройки</h2><span class="pill">v1.5.0</span></div>
+<div class="card" id="notifySettingsCard">
+ <div class="row"><b>🔔 Уведомления</b><span class="quiet">Тестирование</span></div>
+ <div class="foot">Проверка уведомлений на iPhone. Чтобы получать напоминания при закрытом приложении, потребуется подключить сервис отправки push.</div>
+ <label class="field"><span>Напоминания</span><select id="notifyReminderChoice"><option value="all">Аванс, зарплата и итоги месяца</option><option value="pay">Только аванс и зарплата</option><option value="none">Выключены</option></select></label>
+ <button class="btn" type="button" id="notifyEnableBtn">Разрешить уведомления</button>
+ <button class="btn" type="button" id="notifyTestBtn">Отправить тестовое уведомление</button>
+ <div class="foot" id="notifyStatus" role="status" aria-live="polite">Разрешение ещё не проверено.</div>
+</div>
 <div class="card theme-card"><div class="row"><b>Тема оформления</b><span class="quiet">Как в SQL Work Assistant</span></div><label class="field"><span>Выбери оформление</span><select id="themeSelect"></select></label></div>
 <div class="card" id="salarySettingsCard"><div class="row"><b>Оклад и рабочий календарь</b><span class="quiet">Расчёт выплат</span></div>
 <label class="field"><span>Месячный оклад, ₽</span><input id="baseSalary" type="number" min="0" step="100" inputmode="decimal" placeholder="Введи оклад"></label>
@@ -3098,7 +3106,7 @@ $('transferList').innerHTML=transferRows.length?transferRows.map(t=>{const from=
 const incomeRows=data.extraIncomes.filter(i=>i.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
 $('incomeCount').textContent=String(incomeRows.length);
 $('incomeList').innerHTML=incomeRows.length?incomeRows.map(i=>{
- const cat=cats.find(c=>c.id===i.destination),dest=cat?.name||(i.destination==='mortgage'?'Ипотека':'Кредитная карта');
+ const cat=cats.find(c=>c.id===i.destination),dest=cat?.name||(i.destination==='reserve'?'Подушка безопасности':i.destination==='mortgage'?'Ипотека':'Кредитная карта');
  return `<div class="transaction"><div><b>${esc(i.source)}</b><small>${esc(i.date)} · ${esc(dest)}${i.note?' · '+esc(i.note):''}</small></div><div class="row"><b style="color:var(--green)">+${rub(i.amount)}</b><button type="button" class="delete" data-del-income="${esc(i.id)}" title="Удалить доход">✕</button></div></div>`;
 }).join(''):'<div class="empty">Пока нет дополнительных доходов за месяц</div>';
 const rows=data.expenses.filter(e=>e.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));$('expenseCount').textContent=String(rows.length);$('expenseList').innerHTML=rows.length?rows.map(e=>{const c=cats.find(c=>c.id===e.category);return `<div class="transaction"><div><b>${esc(e.note||e.type||c?.name||'Покупка')}</b><small>${esc(e.date)} · ${esc(c?.name||'Категория')}${e.type?' · '+esc(e.type):''}</small></div><div class="row"><b>${rub(e.amount)}</b><button class="delete" data-del="${esc(e.id)}" title="Удалить">✕</button></div></div>`}).join(''):'<div class="empty">Пока нет расходов за выбранный месяц</div>';}
@@ -3108,6 +3116,15 @@ const rows=data.expenses.filter(e=>e.date?.startsWith(month)).sort((a,b)=>b.date
 function ladderSettings(){
  if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
  return data.ladder;
+}
+/* Extra income credited directly to the protected cushion stays outside savings envelopes. */
+function reserveIncomeTotal(asOf=iso(new Date())){
+ const start=data.startBalances?.date||'0000-01-01';
+ return (data.extraIncomes||[]).filter(i=>i.destination==='reserve'&&i.date>=start&&i.date<=asOf)
+   .reduce((sum,i)=>sum+num(i.amount),0);
+}
+function actualReserve(asOf=iso(new Date())){
+ return num(ladderSettings().reserve)+reserveIncomeTotal(asOf);
 }
 
 /* v1.5.32: automatic, conservative economy discovery from recorded expenses.
@@ -3216,10 +3233,13 @@ function analyticsReportRender(){
 
 /* v1.5.35: capital goal planner. Same reserve accounting as the ladder above. */
 function capitalSnapshot(goalOverride){
- const settings=ladderSettings(),reserve=num(settings.reserve);
+ const settings=ladderSettings(),reserve=actualReserve();
+ const baseReserve=num(settings.reserve);
  const savings=categoryBalanceAt('savings',iso(new Date()));
  const booked=savings===null?0:Math.max(0,savings);
- const extra=settings.included?Math.max(0,booked-reserve):booked;
+ // When the original cushion is already included in savings, subtract only that part.
+ // New direct cushion income is held separately and must never be deducted twice.
+ const extra=settings.included?Math.max(0,booked-baseReserve):booked;
  const total=reserve+extra;
  const automaticGoal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
  const userGoal=typeof settings.targetAmount==='number'&&Number.isFinite(settings.targetAmount)
@@ -3247,11 +3267,13 @@ function savingsPlanRender(){
  const proposedGoal=Number(targetInput.value);
  const reserveInput=$('ladderReserveInput');
  const reserveValue=Number(reserveInput.value);
- const validReserve=reserveInput.value.trim()!==''&&Number.isFinite(reserveValue)&&reserveValue>=0&&reserveValue<=1000000000;
- const reserve=validReserve?reserveValue:num(ladderSettings().reserve);
+ const incoming=reserveIncomeTotal();
+ const validReserve=reserveInput.value.trim()!==''&&Number.isFinite(reserveValue)&&reserveValue>=incoming&&reserveValue<=1000000000;
+ const reserve=validReserve?reserveValue:actualReserve();
  const savings=categoryBalanceAt('savings',iso(new Date()));
  const booked=savings===null?0:Math.max(0,savings);
- const total=reserve+($('ladderIncluded').checked?Math.max(0,booked-reserve):booked);
+ const baseReserve=Math.max(0,reserve-incoming);
+ const total=reserve+($('ladderIncluded').checked?Math.max(0,booked-baseReserve):booked);
  const validGoal=targetInput.value.trim()!==''&&Number.isInteger(proposedGoal)
    &&proposedGoal>=reserve&&proposedGoal<=1000000000;
  const info={goal:proposedGoal,total,remaining:Math.max(0,proposedGoal-total),reserve};
@@ -3284,7 +3306,7 @@ function savingsPlanOpen(){
  const settings=ladderSettings();
  const remaining=savingsPlanMonthsLeft(settings.targetMonth);
  $('savingsPlanTargetAmount').value=String(capitalSnapshot().goal);
- $('ladderReserveInput').value=String(num(settings.reserve));
+ $('ladderReserveInput').value=String(actualReserve());
  $('ladderIncluded').checked=!!settings.included;
  $('savingsPlanMonths').value=String(remaining===null?12:Math.max(1,Math.min(120,remaining)));
  $('savingsPlanStatus').textContent=remaining===null?'Выбери срок и сохрани его, чтобы план запомнился.':
@@ -3690,7 +3712,7 @@ $('incomeForm').addEventListener('submit',e=>{
  e.preventDefault();
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках, чтобы правильно учитывать доходы.');go('settings');return;}
  const amount=num($('incomeAmount').value),date=$('incomeDate').value,source=$('incomeSource').value,destination=$('incomeDestination').value,note=$('incomeNote').value.trim();
- if(amount<=0||!fromISO(date)||!['family','utilities','savings','other','mortgage','credit'].includes(destination))return;
+ if(amount<=0||!fromISO(date)||!['family','utilities','savings','other','mortgage','credit','reserve'].includes(destination))return;
  if(date<data.startBalances.date){alert('Дата дохода раньше начала учёта. Измени дату или включи эти деньги в стартовые остатки.');return;}
  data.extraIncomes.push({id:'inc-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),amount,date,source,destination,note});
  month=date.slice(0,7);$('incomeAmount').value='';$('incomeNote').value='';
@@ -3713,7 +3735,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.71';
+const APP_VERSION='1.5.73';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -4053,14 +4075,15 @@ $('savingsPlanSave').addEventListener('click',()=>{
  const targetInput=$('savingsPlanTargetAmount');
  const reserveInput=$('ladderReserveInput');
  const reserve=Number(reserveInput.value);
+ const incoming=reserveIncomeTotal();
  const goal=Number(targetInput.value);
  if(!Number.isInteger(months)||months<1||months>120){alert('Выбери срок от 1 до 120 месяцев.');return;}
- if(reserveInput.value.trim()===''||!Number.isFinite(reserve)||reserve<0||reserve>1000000000){alert('Укажи корректный размер подушки.');return;}
+ if(reserveInput.value.trim()===''||!Number.isFinite(reserve)||reserve<incoming||reserve>1000000000){alert('Размер подушки не может быть меньше уже записанных в неё поступлений ('+rub(incoming)+'). Чтобы уменьшить эту сумму, удали ошибочные доходы.');return;}
  if(targetInput.value.trim()===''||!Number.isInteger(goal)||goal<reserve||goal>1000000000){
    alert('Цель должна быть не меньше защищённой подушки: '+rub(reserve)+'.');return;
  }
  const settings=ladderSettings();
- settings.reserve=Math.round(reserve*100)/100;
+ settings.reserve=Math.round((reserve-incoming)*100)/100;
  settings.included=$('ladderIncluded').checked;
  settings.targetAmount=goal;
  settings.targetMonth=savingsPlanTarget(months);
@@ -4269,4 +4292,39 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 })();
 </script>
 <div id="budgetSaveToast" class="budget-save-toast" role="status" aria-live="polite" aria-atomic="true" hidden><span class="budget-save-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span id="budgetSaveLabel">Сохранено</span></div>
+<script>
+/* Notification preparation: only explicit user actions prompt and display local test notifications.
+   Scheduled push delivery requires a separately deployed backend and subscription endpoint. */
+(function(){
+ const ready=()=>{
+  const choice=document.getElementById('notifyReminderChoice');
+  const enable=document.getElementById('notifyEnableBtn');
+  const test=document.getElementById('notifyTestBtn');
+  const status=document.getElementById('notifyStatus');
+  if(!choice||!enable||!test||!status)return;
+  const key='budget-notification-preferences-v1';
+  choice.value=localStorage.getItem(key)||'all';
+  choice.addEventListener('change',()=>{localStorage.setItem(key,choice.value);status.textContent='Выбор сохранён на этом устройстве. Автоматическая отправка пока не подключена.'});
+  const supported=()=>('Notification' in window)&&('serviceWorker' in navigator)&&window.isSecureContext;
+  const refresh=()=>{
+   if(!supported()){status.textContent='Уведомления недоступны в этом браузере. На iPhone открой приложение с экрана «Домой».';return;}
+   status.textContent=Notification.permission==='granted'?'Разрешение получено. Можно отправить тест. Автоматические уведомления пока не подключены.':Notification.permission==='denied'?'Уведомления запрещены в настройках iPhone.':'Для проверки нажми «Разрешить уведомления».';
+  };
+  enable.addEventListener('click',async()=>{
+   if(!supported()){refresh();return;}
+   try{const permission=await Notification.requestPermission();refresh();if(permission!=='granted')status.textContent='Разрешение не получено. Проверь настройки уведомлений iPhone.';}catch(e){status.textContent='Не удалось запросить разрешение: '+e.message;}
+  });
+  test.addEventListener('click',async()=>{
+   if(!supported()){refresh();return;}
+   if(Notification.permission!=='granted'){status.textContent='Сначала разреши уведомления.';return;}
+   try{const reg=await navigator.serviceWorker.ready;
+    await reg.showNotification('Мой бюджет — тест 🔔',{body:'Уведомления разрешены. Следующий шаг — подключить отправку по расписанию.',icon:'./icon.png',badge:'./icon.png',tag:'budget-notification-test'});
+    status.textContent='Тестовое уведомление отправлено на устройство. Это локальный тест, не фоновая рассылка.';
+   }catch(e){status.textContent='Тест не отправлен: '+e.message;}
+  });
+  refresh();
+ };
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready();
+})();
+</script>
 </body></html>
