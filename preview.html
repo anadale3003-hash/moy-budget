@@ -2121,6 +2121,27 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
   z-index:1;
  }
 }
+
+/* v1.5.67: repeat saved monthly goal projection on analytics, not a second plan. */
+#v-analytics .analytics-monthly-save{
+ flex:0 0 auto;min-width:0;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;
+ text-align:center;gap:3px;padding:8px 12px;
+ border-radius:14px;
+ border:1px solid color-mix(in srgb,var(--line) 60%,#20a98d 40%);
+ background:color-mix(in srgb,var(--card) 82%,#20a98d 18%);
+}
+#v-analytics .analytics-monthly-save>span{
+ font-size:clamp(11px,3.2vw,13px);font-weight:750;color:var(--muted);
+}
+#v-analytics .analytics-monthly-save>strong{
+ font-size:clamp(21px,6.4vw,29px);font-weight:850;
+ color:var(--ink);line-height:1.13;letter-spacing:-.4px;
+ font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#v-analytics .analytics-monthly-save>small{
+ font-size:clamp(9px,2.6vw,11px);line-height:1.2;color:var(--muted);
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-heading"><span class="payday-title">До ближайшей выплаты</span><span class="payday-date" id="nextPaymentDate"></span></span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -2244,6 +2265,11 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
     <div class="analytics-goal-tile"><span>Уже накоплено</span><strong id="analyticsGoalCurrent">—</strong></div>
    </div>
    <div class="analytics-goal-rest"><span>Осталось накопить</span><strong id="analyticsGoalRemaining">—</strong></div>
+  </div>
+  <div class="analytics-monthly-save" aria-label="Нужно откладывать в месяц">
+   <span>Нужно откладывать в месяц</span>
+   <strong id="analyticsMonthlySaveAmount">—</strong>
+   <small id="analyticsMonthlySaveDeadline">—</small>
   </div>
   <button class="analytics-bottom-link analytics-goal-settings" type="button" data-anal-open="plan">⚙️ Настроить цель и срок <span>›</span></button>
  </div>
@@ -3186,6 +3212,17 @@ function ladderRender(){
  $('analyticsGoalAmount').textContent=rub(goal);
  $('analyticsGoalCurrent').textContent=rub(total);
  $('analyticsGoalRemaining').textContent=rub(Math.max(0,goal-total));
+ const monthsLeft=savingsPlanMonthsLeft(settings.targetMonth);
+ if(monthsLeft!==null){
+  const count=Math.max(1,monthsLeft);
+  $('analyticsMonthlySaveAmount').textContent=rub(Math.ceil(Math.max(0,goal-total)/count));
+  const [targetYear,targetMonth]=settings.targetMonth.split('-').map(Number);
+  const targetDate=new Date(targetYear,targetMonth-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+  $('analyticsMonthlySaveDeadline').textContent='Плановая цель — '+targetDate+' · '+(monthsLeft>0?monthsLeft:0)+' мес. осталось';
+ }else{
+  $('analyticsMonthlySaveAmount').textContent='—';
+  $('analyticsMonthlySaveDeadline').textContent='Укажи срок в настройках цели';
+ }
  $('ladderGoal').textContent=rub(goal);
  $('ladderBadge').textContent='Цель: '+rub(goal);
  $('ladderReserve').textContent=rub(reserve);
@@ -3589,7 +3626,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.66 · тест';
+const APP_VERSION='1.5.67 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
