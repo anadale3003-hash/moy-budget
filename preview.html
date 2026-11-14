@@ -2052,6 +2052,11 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  padding:4px 10px;min-width:85px;text-align:center;
 }
 .app.home-active .payday-counter .payday-per-day{margin-top:4px!important}
+
+/* 1.5.64: daily spending allowance traffic light without changing layout. */
+.app.home-active .payday-counter #dailySpendingLimit.daily-good{color:#8df1ae!important;text-shadow:0 0 11px rgba(66,213,119,.18)}
+.app.home-active .payday-counter #dailySpendingLimit.daily-medium{color:#ffe083!important;text-shadow:0 0 10px rgba(255,211,102,.12)}
+.app.home-active .payday-counter #dailySpendingLimit.daily-low{color:#ff999f!important;text-shadow:0 0 10px rgba(255,104,120,.15)}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-heading"><span class="payday-title">До ближайшей выплаты</span><span class="payday-date" id="nextPaymentDate"></span></span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -2590,6 +2595,7 @@ function nearestPayday(now=new Date()){
 }
 function showPaydayCountdown(actual){
  const next=nearestPayday(),where=$('nextPaymentWhen'),dateEl=$('nextPaymentDate'),limit=$('dailySpendingLimit'),note=$('dailySpendingNote');
+ limit.classList.remove('daily-good','daily-medium','daily-low');
  if(!next){where.textContent='Нет расписания';dateEl.textContent='';limit.textContent='—';note.textContent='Проверь даты аванса и зарплаты';return;}
  const now=new Date(),utcToday=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
  const dayCount=Math.max(0,Math.round((Date.UTC(next.date.getFullYear(),next.date.getMonth(),next.date.getDate())-utcToday)/86400000));
@@ -2601,7 +2607,9 @@ function showPaydayCountdown(actual){
  if(!actual){limit.textContent='—';note.textContent='Для дневного лимита укажи стартовые остатки в настройках';return;}
  if(dayCount===0){limit.textContent='Выплата сегодня';note.textContent='Если деньги ещё не поступили, дождись фактического зачисления';return;}
  const spendable=Math.max(0,actual.available);
- limit.textContent='Можно тратить ~'+rub(Math.floor(spendable/dayCount))+'/день';
+ const dailyAmount=Math.floor(spendable/dayCount);
+ limit.classList.add(dailyAmount>5000?'daily-good':dailyAmount>3000?'daily-medium':'daily-low');
+ limit.textContent='Можно тратить ~'+rub(dailyAmount)+'/день';
  note.textContent='Из доступных '+rub(spendable)+' на '+dayCount+' дн. · без накоплений и обязательных платежей';
 }
 function nextPaydays(){
@@ -3517,7 +3525,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.63 · тест';
+const APP_VERSION='1.5.64 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
