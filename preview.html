@@ -2057,6 +2057,50 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 .app.home-active .payday-counter #dailySpendingLimit.daily-good{color:#8df1ae!important;text-shadow:0 0 11px rgba(66,213,119,.18)}
 .app.home-active .payday-counter #dailySpendingLimit.daily-medium{color:#ffe083!important;text-shadow:0 0 10px rgba(255,211,102,.12)}
 .app.home-active .payday-counter #dailySpendingLimit.daily-low{color:#ff999f!important;text-shadow:0 0 10px rgba(255,104,120,.15)}
+
+/* 1.5.65: align the four envelope cards irrespective of title wrapping. */
+@media (orientation:portrait){
+ #homeEnvelopesPanel #envelopes>.envelope-button{
+  justify-content:space-between!important;
+  padding:8px 9px!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button>.row{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  justify-content:space-between!important;
+  gap:3px!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .row-title{
+  align-items:flex-start!important;
+  min-height:0!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .row-title>div:last-child{
+  min-width:0!important;flex:1 1 auto!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .name{
+  min-height:2.36em!important;
+  display:block!important;
+  overflow-wrap:normal;
+  line-height:1.18!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .sub{
+  margin-top:1px!important;
+  line-height:1.15!important;
+  font-size:clamp(9px,2.6vw,11px)!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .number{
+  flex:0 0 auto!important;
+  align-self:flex-start!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .track{
+  margin-top:5px!important;flex:0 0 auto!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .tinyline{
+  margin-top:4px!important;flex:0 0 auto!important;
+  font-size:clamp(9px,2.55vw,11px)!important;
+  line-height:1.1!important;
+ }
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-heading"><span class="payday-title">До ближайшей выплаты</span><span class="payday-date" id="nextPaymentDate"></span></span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -3525,7 +3569,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.64 · тест';
+const APP_VERSION='1.5.65 · тест';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
