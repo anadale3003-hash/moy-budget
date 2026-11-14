@@ -1612,7 +1612,6 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 }
 
 /* 1.5.36: custom capital goal, compact on iPhone without dashboard scrolling. */
-#analyticsModalCapital #ladderTargetInput,
 #analyticsModalPlan #savingsPlanTargetAmount{font-size:16px!important;min-height:40px}
 #analyticsModalPlan .analytics-plan-summary>div:first-child{background:color-mix(in srgb,var(--card) 86%,#9877db 14%)}
 @media(max-height:720px){
@@ -2400,7 +2399,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
       <small id="savingsPlanDeadline">—</small>
      </div>
      <div class="analytics-plan-paydays" id="savingsPlanSplit">—</div>
-     <p class="foot analytics-plan-hint">Цель включает подушку. Например, при 500 000 ₽ резерва цель 600 000 ₽ — это ещё 100 000 ₽. Проценты и премии не прогнозируются; аванс и зарплата делятся поровну.</p>
+     <p class="foot analytics-plan-hint">Цель включает подушку. Если подушка хранится в «Накоплениях», включи галочку, чтобы не считать её дважды. Проценты и премии не прогнозируются; аванс и зарплата делятся поровну.</p>
      <button class="btn full analytics-plan-save" type="button" id="savingsPlanSave">Сохранить цель и срок</button>
      <div class="foot analytics-plan-status" id="savingsPlanStatus" aria-live="polite"></div>
     </div>
@@ -2623,7 +2622,6 @@ const SAVE_FORM_MESSAGES={
  receiptEntryForm:'Поступление сохранено',
  paymentEntryForm:'Оплата подтверждена',
  ladderTransferForm:'Перевод в накопления сохранён',
- ladderSettingsForm:'Цель сохранена'
 };
 const SAVE_BUTTON_MESSAGES={
  saveStart:'Остатки сохранены',
