@@ -2057,6 +2057,70 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 .app.home-active .payday-counter #dailySpendingLimit.daily-good{color:#8df1ae!important;text-shadow:0 0 11px rgba(66,213,119,.18)}
 .app.home-active .payday-counter #dailySpendingLimit.daily-medium{color:#ffe083!important;text-shadow:0 0 10px rgba(255,211,102,.12)}
 .app.home-active .payday-counter #dailySpendingLimit.daily-low{color:#ff999f!important;text-shadow:0 0 10px rgba(255,104,120,.15)}
+
+/* 1.5.65: align the four envelope cards irrespective of title wrapping. */
+@media (orientation:portrait){
+ #homeEnvelopesPanel #envelopes>.envelope-button{
+  justify-content:space-between!important;
+  padding:8px 9px!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button>.row{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  justify-content:space-between!important;
+  gap:3px!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .row-title{
+  align-items:flex-start!important;
+  min-height:0!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .row-title>div:last-child{
+  min-width:0!important;flex:1 1 auto!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .name{
+  min-height:2.36em!important;
+  display:block!important;
+  overflow-wrap:normal;
+  line-height:1.18!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .sub{
+  margin-top:1px!important;
+  line-height:1.15!important;
+  font-size:clamp(9px,2.6vw,11px)!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .number{
+  flex:0 0 auto!important;
+  align-self:flex-start!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .track{
+  margin-top:5px!important;flex:0 0 auto!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .tinyline{
+  margin-top:4px!important;flex:0 0 auto!important;
+  font-size:clamp(9px,2.55vw,11px)!important;
+  line-height:1.1!important;
+ }
+}
+
+/* v1.5.66: omit redundant envelope subtitles and keep amounts clear of headings. */
+@media (orientation:portrait){
+ #homeEnvelopesPanel #envelopes>.envelope-button>.row{
+  justify-content:space-between!important;
+  gap:7px!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .row-title{
+  flex:0 0 auto!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .name{
+  min-height:2.36em!important;
+  margin:0!important;
+ }
+ #homeEnvelopesPanel #envelopes>.envelope-button .number{
+  margin-top:auto!important;
+  position:relative!important;
+  z-index:1;
+ }
+}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-heading"><span class="payday-title">До ближайшей выплаты</span><span class="payday-date" id="nextPaymentDate"></span></span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
@@ -2902,7 +2966,7 @@ function fitTotalMoneyTile(){
  }
 }
 function render(){const m=monthData();const calc=allocation();const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advanceForecast):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
-$('envelopes').innerHTML=cats.map(cat=>{const line=calc.rows.find(x=>x.id===cat.id);const budget=(line?.a||0)+(line?.b||0);const used=sumExpenses(cat.id),balance=realBalance(cat.id),remaining=balance===null?budget-used:balance,pct=balance===null&&budget?Math.max(0,Math.min(100,used/budget*100)):0;return `<button type="button" class="card envelope-button" data-envelope="${cat.id}" aria-label="Открыть историю: ${cat.name}"><div class="row"><div class="row-title"><div class="emoji">${cat.icon}</div><div><div class="name">${cat.name}</div><div class="sub">${balance===null?'План '+rub(budget):'Фактический остаток'}</div></div></div><div class="number" style="color:${remaining<0?'var(--red)':'var(--ink)'}">${rub(remaining)}</div></div><div class="track"><div class="fill" style="width:${pct}%;background:${cat.color}"></div></div><div class="tinyline"><span>За месяц потрачено ${rub(used)}</span><span>${balance===null?Math.round(pct)+'% от плана':'Учёт с '+esc(data.startBalances.date)}</span></div></button>`}).join('');
+$('envelopes').innerHTML=cats.map(cat=>{const line=calc.rows.find(x=>x.id===cat.id);const budget=(line?.a||0)+(line?.b||0);const used=sumExpenses(cat.id),balance=realBalance(cat.id),remaining=balance===null?budget-used:balance,pct=balance===null&&budget?Math.max(0,Math.min(100,used/budget*100)):0;return `<button type="button" class="card envelope-button" data-envelope="${cat.id}" aria-label="Открыть историю: ${cat.name}"><div class="row"><div class="row-title"><div class="emoji">${cat.icon}</div><div><div class="name">${cat.name}</div></div></div><div class="number" style="color:${remaining<0?'var(--red)':'var(--ink)'}">${rub(remaining)}</div></div><div class="track"><div class="fill" style="width:${pct}%;background:${cat.color}"></div></div><div class="tinyline"><span>За месяц потрачено ${rub(used)}</span><span>${balance===null?Math.round(pct)+'% от плана':'Учёт с '+esc(data.startBalances.date)}</span></div></button>`}).join('');
 const cc=credit();const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':'Откладывай '+rub(cc.per)+' с каждой предстоящей выплаты';$('obligations').innerHTML=`<div class="card"><div class="lineitem"><span>🏠 Ипотека: ${(data.paidMortgageMonth===month||regularPaidForMonth('mortgage',month)>=num(m.mortgage)&&num(m.mortgage)>0)?'оплачена':'платёж по плану'}</span><span>${rub(m.mortgage)}</span></div>${data.startBalances?`<div class="lineitem"><span>На следующую ипотеку отложено</span><span>${rub(mortgageFund())}</span></div>`:''}<div class="lineitem"><span>💳 Ещё накопить на кредитку</span><span>${rub(cc.debt)}</span></div><div class="sub" style="margin-top:10px">${esc(state)}</div></div>`;
 const visiblePlanRows=displayAllocationRows(calc.rows);
 $('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс</th><th>Зарплата</th></tr></thead><tbody>'+visiblePlanRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
@@ -3525,7 +3589,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.64';
+const APP_VERSION='1.5.66';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
