@@ -2360,6 +2360,14 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </section>
 <section class="view" id="v-settings">
 <div class="section-heading"><h2>Настройки</h2><span class="pill">v1.5.0</span></div>
+<div class="card" id="notifySettingsCard">
+ <div class="row"><b>🔔 Уведомления</b><span class="quiet">Тестирование</span></div>
+ <div class="foot">Проверка уведомлений на iPhone. Чтобы получать напоминания при закрытом приложении, потребуется подключить сервис отправки push.</div>
+ <label class="field"><span>Напоминания</span><select id="notifyReminderChoice"><option value="all">Аванс, зарплата и итоги месяца</option><option value="pay">Только аванс и зарплата</option><option value="none">Выключены</option></select></label>
+ <button class="btn" type="button" id="notifyEnableBtn">Разрешить уведомления</button>
+ <button class="btn" type="button" id="notifyTestBtn">Отправить тестовое уведомление</button>
+ <div class="foot" id="notifyStatus" role="status" aria-live="polite">Разрешение ещё не проверено.</div>
+</div>
 <div class="card theme-card"><div class="row"><b>Тема оформления</b><span class="quiet">Как в SQL Work Assistant</span></div><label class="field"><span>Выбери оформление</span><select id="themeSelect"></select></label></div>
 <div class="card" id="salarySettingsCard"><div class="row"><b>Оклад и рабочий календарь</b><span class="quiet">Расчёт выплат</span></div>
 <label class="field"><span>Месячный оклад, ₽</span><input id="baseSalary" type="number" min="0" step="100" inputmode="decimal" placeholder="Введи оклад"></label>
@@ -4269,4 +4277,39 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 })();
 </script>
 <div id="budgetSaveToast" class="budget-save-toast" role="status" aria-live="polite" aria-atomic="true" hidden><span class="budget-save-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span id="budgetSaveLabel">Сохранено</span></div>
+<script>
+/* Notification preparation: only explicit user actions prompt and display local test notifications.
+   Scheduled push delivery requires a separately deployed backend and subscription endpoint. */
+(function(){
+ const ready=()=>{
+  const choice=document.getElementById('notifyReminderChoice');
+  const enable=document.getElementById('notifyEnableBtn');
+  const test=document.getElementById('notifyTestBtn');
+  const status=document.getElementById('notifyStatus');
+  if(!choice||!enable||!test||!status)return;
+  const key='budget-notification-preferences-v1';
+  choice.value=localStorage.getItem(key)||'all';
+  choice.addEventListener('change',()=>{localStorage.setItem(key,choice.value);status.textContent='Выбор сохранён на этом устройстве. Автоматическая отправка пока не подключена.'});
+  const supported=()=>('Notification' in window)&&('serviceWorker' in navigator)&&window.isSecureContext;
+  const refresh=()=>{
+   if(!supported()){status.textContent='Уведомления недоступны в этом браузере. На iPhone открой приложение с экрана «Домой».';return;}
+   status.textContent=Notification.permission==='granted'?'Разрешение получено. Можно отправить тест. Автоматические уведомления пока не подключены.':Notification.permission==='denied'?'Уведомления запрещены в настройках iPhone.':'Для проверки нажми «Разрешить уведомления».';
+  };
+  enable.addEventListener('click',async()=>{
+   if(!supported()){refresh();return;}
+   try{const permission=await Notification.requestPermission();refresh();if(permission!=='granted')status.textContent='Разрешение не получено. Проверь настройки уведомлений iPhone.';}catch(e){status.textContent='Не удалось запросить разрешение: '+e.message;}
+  });
+  test.addEventListener('click',async()=>{
+   if(!supported()){refresh();return;}
+   if(Notification.permission!=='granted'){status.textContent='Сначала разреши уведомления.';return;}
+   try{const reg=await navigator.serviceWorker.ready;
+    await reg.showNotification('Мой бюджет — тест 🔔',{body:'Уведомления разрешены. Следующий шаг — подключить отправку по расписанию.',icon:'./icon.png',badge:'./icon.png',tag:'budget-notification-test'});
+    status.textContent='Тестовое уведомление отправлено на устройство. Это локальный тест, не фоновая рассылка.';
+   }catch(e){status.textContent='Тест не отправлен: '+e.message;}
+  });
+  refresh();
+ };
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready();
+})();
+</script>
 </body></html>
