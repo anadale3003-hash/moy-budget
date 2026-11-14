@@ -3713,7 +3713,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.70';
+const APP_VERSION='1.5.71';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -3873,9 +3873,10 @@ function suggestedRegularPayment(target,date){
   :Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
  if(target==='mortgage'&&data.paidMortgageMonth===month&&already===0)return 0;
  const available=Math.max(0,target==='mortgage'?regularMortgageAvailable(date):regularCreditAvailable(date));
- // Mortgage: one bank debit for the remaining installment. Card: suggest
- // available accumulated reserve, while allowing manual additional payoff.
- return Math.round((target==='mortgage'?due:Math.min(due,available))*100)/100;
+ // Default to what has actually been funded, capped by the remaining due.
+ // Never propose an unfunded full mortgage installment from the envelope.
+ // Actual bank debit can still be entered manually if it differs.
+ return Math.round(Math.min(due,available)*100)/100;
 }
 function openPaymentEntry(target){
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках.');return;}
