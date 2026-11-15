@@ -2326,7 +2326,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 
 <section class="view" id="v-analytics">
  <div class="analytics-one-screen">
-  <div class="analytics-dash-header"><h2>Аналитика</h2></div>
+  <div class="analytics-dash-header"><h2>Аналитика</h2><button type="button" class="analytics-icon-button" id="advisorOpen">🤖 Советник</button></div>
   <div class="analytics-economy-card">
    <div class="analytics-panel-top"><b>💡 Найденная экономия</b><button type="button" class="analytics-text-button" data-anal-open="economy">Подробнее ›</button></div>
    <div class="analytics-economy-total"><strong id="ladderSaving">—</strong><span id="ladderPeriod">Сравнение с прошлым месяцем</span></div>
@@ -3735,7 +3735,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.73';
+const APP_VERSION='1.5.74';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 function updateMessage(message){$('updateStatus').textContent=message;}
@@ -4325,6 +4325,138 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
   refresh();
  };
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready();
+})();
+</script>
+
+<style>
+#adviceDialog{border:0;padding:0;background:transparent;width:min(560px,calc(100vw - 20px));max-height:min(90dvh,850px);color:var(--ink)}
+#adviceDialog::backdrop{background:#0b1b32b8}
+.advisor-shell{background:var(--card);border-radius:20px;padding:17px;max-height:90dvh;overflow:auto;box-shadow:0 12px 50px #0003}
+.advisor-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px}
+.advisor-head h2{margin:0;font-size:20px}
+.advisor-desc{font-size:13px;color:var(--muted);margin:8px 0 12px}
+#adviceText{white-space:pre-wrap;overflow:auto;width:100%;min-height:150px;max-height:32dvh;resize:vertical;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-size:12px;line-height:1.45;padding:10px}
+.advisor-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.advisor-actions .btn{padding:11px 7px;font-size:13px}
+#adviceStatus{min-height:18px;margin-top:8px;font-size:12px;color:var(--muted)}
+#advisorOpen{display:inline-flex;align-items:center;justify-content:center;min-height:37px;border:1.5px solid var(--blue);background:var(--blue);color:white;box-shadow:0 3px 9px #2965eb30;transition:transform .12s,filter .12s}
+#advisorOpen:active,#advisorOpen:focus-visible{transform:scale(.96);filter:brightness(1.12)}
+.advisor-actions .btn{min-height:47px;border:1px solid transparent;box-shadow:0 2px 8px #00000012;transition:transform .12s,filter .12s,background .12s}
+.advisor-actions .btn:active,.advisor-actions .btn:focus-visible{transform:scale(.96);filter:brightness(.94);outline:2px solid var(--blue);outline-offset:2px}
+.advisor-actions .btn.light{border-color:var(--line)}
+.advisor-actions .btn.done{background:#147b59!important;color:#fff!important;border-color:#147b59!important}
+#adviceStatus{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:36px}
+
+</style>
+<dialog id="adviceDialog" aria-labelledby="advisorTitle"><div class="advisor-shell">
+<div class="advisor-head"><h2 id="advisorTitle">🤖 Финансовый советник</h2><button class="btn light" id="advisorClose" type="button" aria-label="Закрыть">✕</button></div>
+<p class="advisor-desc">Подготовим обезличенную финансовую сводку для ChatGPT. Советник ищет способы увеличивать капитал: экономия, вклады, ипотека, кредитка. Никаких платных API и автоматической отправки данных.</p>
+<label class="utilities-fixed-switch"><input type="checkbox" id="advisorDetailed"> Включить разбивку расходов по видам</label>
+<textarea id="adviceText" readonly aria-label="Отчёт для финансового анализа"></textarea>
+<div class="advisor-actions"><button type="button" class="btn" id="advisorCopy">📋 Скопировать</button><button type="button" class="btn secondary" id="advisorShare">📤 Отправить</button></div>
+<div class="advisor-actions"><button type="button" class="btn light" id="advisorDownload">Сохранить .txt</button><button type="button" class="btn light" id="advisorRefresh">Обновить сводку</button></div>
+<div id="adviceStatus" role="status" aria-live="polite"></div>
+<p class="advisor-desc">Данные останутся в приложении, пока ты сам не выберешь «Скопировать» или «Отправить». Перед отправкой можно проверить текст. ChatGPT не получает данные автоматически.</p>
+</div></dialog>
+
+<script>
+(function(){
+'use strict';
+function setupAdvisor(){
+ const open=document.getElementById('advisorOpen');
+ const dialog=document.getElementById('adviceDialog');
+ if(!open||!dialog)return;
+ const $a=id=>document.getElementById(id);
+ const amount=v=>Number.isFinite(Number(v))?Math.max(0,Number(v)):0;
+ const ru=v=>Math.round(v).toLocaleString('ru-RU')+' ₽';
+ const now=()=>new Date().toISOString().slice(0,10);
+ const current=()=>new Date().toLocaleDateString('sv-SE').slice(0,7);
+ const validDate=d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d);
+ const sum=(items,fn)=>items.reduce((v,i)=>v+fn(i),0);
+ const group=(items,keyFunc)=>{
+  const m=new Map();
+  items.forEach(x=>{const k=keyFunc(x)||'Без категории';m.set(k,(m.get(k)||0)+amount(x.amount));});
+  return [...m].sort((a,b)=>b[1]-a[1]).map(([k,v])=>'  '+k+': '+ru(v)).join('\n')||'  Нет операций';
+ };
+ function report(){
+  // Read-only snapshot. No records, dates or app settings are changed.
+  const d=typeof data==='object'&&data?data:JSON.parse(localStorage.getItem('my-budget-v1')||'{}');
+  const today=new Date().toLocaleDateString('sv-SE');
+  const month=today.slice(0,7);
+  const expenses=Array.isArray(d.expenses)?d.expenses.filter(x=>validDate(x.date)&&x.date<=today):[];
+  const incomes=Array.isArray(d.extraIncomes)?d.extraIncomes.filter(x=>validDate(x.date)&&x.date<=today):[];
+  const receipts=Array.isArray(d.receipts)?d.receipts.filter(x=>validDate(x.date)&&x.date<=today):[];
+  const periods=[...new Set([...expenses.map(x=>x.date.slice(0,7)),...receipts.map(x=>x.date.slice(0,7)),...incomes.map(x=>x.date.slice(0,7))])].filter(x=>x<=month).sort().slice(-6);
+  if(!periods.includes(month)) periods.push(month);
+  const mortgage=amount(d.months?.[month]?.mortgage??d.mortgageMonthly??55000);
+  const reserve=amount(d.ladder?.reserve);
+  const debt=amount(d.debt);
+  const reserved=amount(d.reserved);
+  const catNames={family:'Семейные нужды',utilities:'Коммуналка',savings:'Накопления',other:'Остальное'};
+  const monthExpense=expenses.filter(x=>x.date.startsWith(month));
+  const monthIncome=incomes.filter(x=>x.date.startsWith(month));
+  const monthReceipt=receipts.filter(x=>x.date.startsWith(month));
+  const detail=$a('advisorDetailed').checked;
+  const lines=[
+   'ФИНАНСОВЫЙ АНАЛИЗ — «МОЙ БЮДЖЕТ»',
+   'Дата: '+today+'. Валюта: рубли.',
+   'Это отчёт только из записей приложения; отсутствие операции не означает отсутствие расхода.',
+   'Записи в будущем исключены. Планы и фактически поступившие деньги не смешивать.',
+   '',
+   'ЗАДАЧА ДЛЯ CHATGPT:',
+   'Выступи финансовым советником семьи. Цель — увеличить чистый капитал безопасными и практичными решениями.',
+   'Не предлагай акции, криптовалюту, спекуляции и рискованный бизнес.',
+   'Неприкосновенная финансовая подушка — 500 000 ₽ (если фактическое значение ниже, приоритет — восстановление).',
+   'Найди до 5 конкретных действий: действие, эффект в ₽/месяц и ₽/год, трудность и риски.',
+   'Разделяй подтверждённую экономию, гипотезы и проценты/доходы; не считай переводы между счетами доходом.',
+   'Сравни досрочное погашение ипотеки со вкладом только если известны процент ипотеки, чистая ставка вклада, налоги и ограничения; иначе запроси данные.',
+   'Проверь резерв и сроки погашения кредитки. Составь реалистичный план на ближайшие 30 дней.',
+   'Ничего не выдумывай: пропущенные данные обозначь как неизвестные.',
+   '',
+   'СОСТОЯНИЕ:',
+   'Ипотека — план ежемесячного платежа: '+ru(mortgage),
+   'Кредитная карта — учтённый долг: '+ru(debt)+'; отдельно отложено: '+ru(reserved)+'; срок: '+(d.deadline||'не указан'),
+   'Подушка безопасности — значение в настройках: '+ru(reserve)+' (может быть не равно остатку на счёте)',
+   'Накопления: точный свободный остаток не выводится, если он неотличим от бюджетных переводов.',
+   'Текущий месяц: '+month,
+   'Поступления зарплаты/аванса, записанные как полученные: '+ru(sum(monthReceipt,x=>amount(x.amount))),
+   'Дополнительные доходы: '+ru(sum(monthIncome,x=>amount(x.amount))),
+   'Записанные расходы: '+ru(sum(monthExpense,x=>amount(x.amount))),
+   'По категориям расходов:',
+   group(monthExpense,x=>catNames[x.category]||x.category),
+   'По источникам дополнительных доходов:',
+   group(monthIncome,x=>x.source||'Прочее'),
+   '',
+   'ПОСЛЕДНИЕ МЕСЯЦЫ (только фактические операции):'
+  ];
+  for(const p of periods){
+   const e=expenses.filter(x=>x.date.startsWith(p)), r=receipts.filter(x=>x.date.startsWith(p)), i=incomes.filter(x=>x.date.startsWith(p));
+   lines.push(p+': выплаты '+ru(sum(r,x=>amount(x.amount)))+', доп. доходы '+ru(sum(i,x=>amount(x.amount)))+', расходы '+ru(sum(e,x=>amount(x.amount))));
+  }
+  if(detail){lines.push('','ВИДЫ РАСХОДОВ ЗА ТЕКУЩИЙ МЕСЯЦ:',group(monthExpense,x=>x.type||catNames[x.category]||'Без вида'));}
+  lines.push('','Примечание: отчёт не содержит ФИО, заметок к операциям, номеров счетов и полных журналов транзакций.');
+  return lines.join('\n');
+ }
+ const feedback=(id,message)=>{
+ const button=$a(id);
+ if(button){
+  if(!button.dataset.originalLabel)button.dataset.originalLabel=button.textContent;
+  button.classList.add('done');button.textContent='✓ Готово';
+  clearTimeout(button._advisorFeedbackTimer);
+  button._advisorFeedbackTimer=setTimeout(()=>{button.textContent=button.dataset.originalLabel;button.classList.remove('done')},1800);
+ }
+ $a('adviceStatus').textContent='✓ '+message;
+};
+const refresh=()=>{$a('adviceText').value=report();$a('adviceStatus').textContent='✓ Сводка сформирована на этом устройстве.';};
+ open.addEventListener('click',()=>{try{refresh();dialog.showModal();}catch(e){alert('Не удалось сформировать сводку: '+e.message);}});
+ $a('advisorClose').addEventListener('click',()=>dialog.close());
+ $a('advisorDetailed').addEventListener('change',refresh);
+ $a('advisorRefresh').addEventListener('click',()=>{refresh();feedback('advisorRefresh','Сводка обновлена.');});
+ $a('advisorCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($a('adviceText').value);feedback('advisorCopy','Скопировано. Вставь сводку в чат ChatGPT.');}catch(_){$a('adviceText').focus();$a('adviceText').select();$a('adviceStatus').textContent='Выделено. Нажми «Копировать» в меню iPhone.';}});
+ $a('advisorShare').addEventListener('click',async()=>{try{if(navigator.share){await navigator.share({title:'Финансовый анализ — Мой бюджет',text:$a('adviceText').value});feedback('advisorShare','Открыто меню отправки.');}else{$a('adviceStatus').textContent='Меню отправки недоступно. Используй «Скопировать».';}}catch(e){if(e.name!=='AbortError')$a('adviceStatus').textContent='Не удалось открыть отправку.';}});
+ $a('advisorDownload').addEventListener('click',()=>{const u=URL.createObjectURL(new Blob([$a('adviceText').value],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download='finansovyy-sovetnik-'+new Date().toLocaleDateString('sv-SE')+'.txt';document.body.appendChild(a);a.click();a.remove();feedback('advisorDownload','Файл подготовлен.');setTimeout(()=>URL.revokeObjectURL(u),1500);});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupAdvisor,{once:true});else setupAdvisor();
 })();
 </script>
 </body></html>
