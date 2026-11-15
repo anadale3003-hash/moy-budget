@@ -4351,6 +4351,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 <dialog id="adviceDialog" aria-labelledby="advisorTitle"><div class="advisor-shell">
 <div class="advisor-head"><h2 id="advisorTitle">🤖 Финансовый советник</h2><button class="btn light" id="advisorClose" type="button" aria-label="Закрыть">✕</button></div>
 <p class="advisor-desc">Подготовим обезличенную финансовую сводку для ChatGPT. Советник ищет способы увеличивать капитал: экономия, вклады, ипотека, кредитка. Никаких платных API и автоматической отправки данных.</p>
+<label class="field"><span>Формат ответа ChatGPT</span><select id="advisorResponseMode" aria-label="Формат финансового анализа"><option value="short" selected>⚡ Только важное</option><option value="full">📊 Развёрнутый анализ</option></select></label>
 <label class="utilities-fixed-switch"><input type="checkbox" id="advisorDetailed"> Включить разбивку расходов по видам</label>
 <textarea id="adviceText" readonly aria-label="Отчёт для финансового анализа"></textarea>
 <div class="advisor-actions"><button type="button" class="btn" id="advisorCopy">📋 Скопировать</button><button type="button" class="btn secondary" id="advisorShare">📤 Отправить</button></div>
@@ -4397,6 +4398,7 @@ function setupAdvisor(){
   const monthIncome=incomes.filter(x=>x.date.startsWith(month));
   const monthReceipt=receipts.filter(x=>x.date.startsWith(month));
   const detail=$a('advisorDetailed').checked;
+  const responseMode=$a('advisorResponseMode').value;
   const lines=[
    'ФИНАНСОВЫЙ АНАЛИЗ — «МОЙ БЮДЖЕТ»',
    'Дата: '+today+'. Валюта: рубли.',
@@ -4404,14 +4406,26 @@ function setupAdvisor(){
    'Записи в будущем исключены. Планы и фактически поступившие деньги не смешивать.',
    '',
    'ЗАДАЧА ДЛЯ CHATGPT:',
-   'Выступи финансовым советником семьи. Цель — увеличить чистый капитал безопасными и практичными решениями.',
+   'Выступи финансовым советником семьи. Цель — безопасно увеличивать чистый капитал.',
    'Не предлагай акции, криптовалюту, спекуляции и рискованный бизнес.',
-   'Неприкосновенная финансовая подушка — 500 000 ₽ (если фактическое значение ниже, приоритет — восстановление).',
-   'Найди до 5 конкретных действий: действие, эффект в ₽/месяц и ₽/год, трудность и риски.',
-   'Разделяй подтверждённую экономию, гипотезы и проценты/доходы; не считай переводы между счетами доходом.',
-   'Сравни досрочное погашение ипотеки со вкладом только если известны процент ипотеки, чистая ставка вклада, налоги и ограничения; иначе запроси данные.',
-   'Проверь резерв и сроки погашения кредитки. Составь реалистичный план на ближайшие 30 дней.',
-   'Ничего не выдумывай: пропущенные данные обозначь как неизвестные.',
+   'Неприкосновенная подушка — 500 000 ₽; её фактический остаток может быть неизвестен.',
+   'Не выдумывай данные. Различай факты, планы, гипотезы, проценты и доходы. Переводы между счетами — не доход.',
+   'Проверь долг и сроки кредитки, сохранность резерва и реалистичность платежей.',
+   'Не сравнивай ипотеку и вклад без ставки ипотеки, чистой ставки вклада, налогов и ограничений.',
+   ...(responseMode==='short'?[
+    'ФОРМАТ ОТВЕТА: ТОЛЬКО ВАЖНОЕ.',
+    'Пиши коротко, без длинного вступления, таблиц, графиков и повторов; максимум 120 слов.',
+    'Сначала 3–4 ключевые цифры с пометкой, если они не подтверждены фактическим остатком.',
+    'Затем не более 3 приоритетных действий с конкретными суммами там, где они обоснованы.',
+    'Заверши одним коротким шагом на ближайшие 30 дней и главным выводом.',
+    'Если экономия не подтверждена, прямо назови её гипотезой. Не называй погашение долга доходом или экономией.'
+   ]:[
+    'ФОРМАТ ОТВЕТА: РАЗВЁРНУТЫЙ АНАЛИЗ.',
+    'Найди до 5 конкретных действий: эффект в ₽/месяц и ₽/год, сложность, риски.',
+    'Разделяй подтверждённую экономию, гипотезы и процентные доходы.',
+    'Дай проверку резерва, график погашения кредитки и реалистичный план на 30 дней.',
+    'Неизвестные данные обозначь явно; не считай погашение долга экономией.'
+   ]),
    '',
    'СОСТОЯНИЕ:',
    'Ипотека — план ежемесячного платежа: '+ru(mortgage),
@@ -4451,6 +4465,7 @@ const refresh=()=>{$a('adviceText').value=report();$a('adviceStatus').textConten
  open.addEventListener('click',()=>{try{refresh();dialog.showModal();}catch(e){alert('Не удалось сформировать сводку: '+e.message);}});
  $a('advisorClose').addEventListener('click',()=>dialog.close());
  $a('advisorDetailed').addEventListener('change',refresh);
+ $a('advisorResponseMode').addEventListener('change',refresh);
  $a('advisorRefresh').addEventListener('click',()=>{refresh();feedback('advisorRefresh','Сводка обновлена.');});
  $a('advisorCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($a('adviceText').value);feedback('advisorCopy','Скопировано. Вставь сводку в чат ChatGPT.');}catch(_){$a('adviceText').focus();$a('adviceText').select();$a('adviceStatus').textContent='Выделено. Нажми «Копировать» в меню iPhone.';}});
  $a('advisorShare').addEventListener('click',async()=>{try{if(navigator.share){await navigator.share({title:'Финансовый анализ — Мой бюджет',text:$a('adviceText').value});feedback('advisorShare','Открыто меню отправки.');}else{$a('adviceStatus').textContent='Меню отправки недоступно. Используй «Скопировать».';}}catch(e){if(e.name!=='AbortError')$a('adviceStatus').textContent='Не удалось открыть отправку.';}});
