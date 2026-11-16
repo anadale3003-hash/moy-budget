@@ -2249,9 +2249,20 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div><!-- End: advance and salary card -->
 <div class="section-heading"><h2>Куда перевести деньги</h2><span class="quiet">с каждой выплаты</span></div>
 <div class="goal-allocation-card" id="goalAllocationCard" aria-live="polite">
- <div class="goal-allocation-main"><div class="goal-allocation-title">🎯 Накопления по цели <span class="goal-allocation-tag">ТЕСТ</span></div>
- <strong id="goalAllocationAmount">—</strong><div id="goalAllocationNote" class="goal-allocation-note">Проверяем цель...</div></div>
- <button id="goalAllocationAction" class="goal-allocation-action" type="button">Настроить</button>
+ <div class="goal-allocation-heading">
+  <b>🎯 Накопления <span class="goal-allocation-tag">ТЕСТ</span></b>
+  <button id="goalAllocationAction" class="goal-allocation-action" type="button">Цель и срок ›</button>
+ </div>
+ <div class="goal-allocation-main">
+  <div class="goal-allocation-total"><span>На этот месяц</span><strong id="goalAllocationAmount">—</strong></div>
+  <div class="goal-allocation-split"><span>С аванса <b id="goalSplitAdvance">—</b></span><span>С зарплаты <b id="goalSplitSalary">—</b></span></div>
+ </div>
+ <div id="goalAllocationNote" class="goal-allocation-note">Проверяем цель...</div>
+ <div class="goal-allocation-mode" role="group" aria-label="Как распределять накопления">
+  <span>Распределение:</span>
+  <button type="button" class="goal-mode-option" id="goalModeAuto" aria-pressed="true">По цели</button>
+  <button type="button" class="goal-mode-option" id="goalModeManual" aria-pressed="false">Вручную</button>
+ </div>
 </div>
 <div class="card payout-destinations"><div id="planTable"></div><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two" id="categoryRules"></div><div class="foot">Сначала выделяются суммы в ₽, затем проценты от оставшейся части выплаты. Нераспределённый остаток — в «Остальное». Настройки действуют для следующих поступлений.</div></div></section>
 <section class="view" id="v-card"><div class="section-heading"><h2>Кредиты</h2></div>
@@ -2986,12 +2997,43 @@ function allocation(receiptDate=null,ruleOverrides=null){
  };
  const ids=(mode,source)=>cats.filter(c=>rules[c.id]?.mode===mode&&rules[c.id]?.source===source).map(c=>c.id);
  if(linkedSavings!==null){
-  // In goal mode: essentials first, savings next, optional "Other" last.
-  // Previously ruble savings could displace percentage-based family funding.
-  for(const id of ['family','utilities','savings','other']){
-   const rule=rules[id];if(!rule)continue;
-   const types=rule.source==='advance'?['advance']:rule.source==='salary'?['salary']:['advance','salary'];
-   allocateGroup([id],types);
+  // First honor essential categories that are explicitly bound to one payday.
+  // Then split goal savings between both paydays before assigning movable family
+  // expenses. This does NOT reduce the MONTHLY family/utility targets: the goal
+  // cap was already reduced by the full essential budgets.
+  for(const id of ['family','utilities']){
+   const rule=rules[id];if(!rule||rule.source==='both')continue;
+   allocateGroup([id],[rule.source]);
+  }
+  const savingsGoal=Math.max(0,targets.savings);
+  const confirmedA=num(confirmed.advance?.savings);
+  const confirmedB=num(confirmed.salary?.savings);
+  // Aim for half of the whole monthly target per payday. An already confirmed
+  // receipt is immutable, and its contribution counts toward the monthly goal.
+  const desiredA=Math.max(0,linkedSavings/2-confirmedA);
+  const desiredB=Math.max(0,linkedSavings/2-confirmedB);
+  let assignedA=Math.min(cap.advance,desiredA,savingsGoal);
+  let assignedB=Math.min(cap.salary,desiredB,Math.max(0,savingsGoal-assignedA));
+  let pending=Math.max(0,savingsGoal-assignedA-assignedB);
+  // If one payday has insufficient capacity, the other can carry the shortfall.
+  const fillA=Math.min(pending,Math.max(0,cap.advance-assignedA));
+  assignedA+=fillA;pending-=fillA;
+  const fillB=Math.min(pending,Math.max(0,cap.salary-assignedB));
+  assignedB+=fillB;pending-=fillB;
+  out.advance.savings+=assignedA;
+  out.salary.savings+=assignedB;
+  cap.advance=Math.max(0,cap.advance-assignedA);
+  cap.salary=Math.max(0,cap.salary-assignedB);
+  targets.savings=Math.max(0,pending);
+  // Families with a flexible "both" rule may move across paydays without
+  // decreasing the family's total allocation.
+  for(const id of ['family','utilities']){
+   if(rules[id]?.source==='both')allocateGroup([id],['advance','salary']);
+  }
+  const otherRule=rules.other;
+  if(otherRule){
+   const types=otherRule.source==='advance'?['advance']:otherRule.source==='salary'?['salary']:['advance','salary'];
+   allocateGroup(['other'],types);
   }
  }else{
   for(const mode of ['rub','percent']){
@@ -3690,45 +3732,61 @@ function renderGoalLinkedPanel(calc){
  const card=$('goalAllocationCard');
  if(!card)return;
  const settings=ladderSettings(),hasGoal=!!settings.targetMonth;
- const on=hasGoal&&settings.autoAllocateSavings!==false;
+ const enabled=settings.autoAllocateSavings!==false;
+ const on=hasGoal&&enabled;
  const target=on?goalLinkedSavingsTarget():null;
  const savingsRow=calc.rows.find(r=>r.id==='savings');
- const planned=savingsRow?num(savingsRow.a)+num(savingsRow.b):0;
+ const fromAdvance=savingsRow?num(savingsRow.a):0;
+ const fromSalary=savingsRow?num(savingsRow.b):0;
+ const planned=fromAdvance+fromSalary;
  const action=$('goalAllocationAction'),amount=$('goalAllocationAmount'),note=$('goalAllocationNote');
+ $('goalSplitAdvance').textContent=rub(fromAdvance);
+ $('goalSplitSalary').textContent=rub(fromSalary);
+ const manual=$('goalModeManual'),auto=$('goalModeAuto');
+ auto.disabled=!hasGoal;
+ auto.setAttribute('aria-pressed',String(on));
+ manual.setAttribute('aria-pressed',String(!on));
  card.classList.toggle('goal-is-active',target!==null);
  card.classList.toggle('goal-is-disabled',!on);
  if(!hasGoal){
-  amount.textContent='Цель не настроена';
-  note.textContent='Сохрани цель и срок в «Аналитике» — затем сумма накоплений будет рассчитана автоматически.';
-  action.textContent='Задать цель';
+  amount.textContent='Цель не задана';
+  note.textContent='Нажми «Цель и срок», чтобы установить сумму и дату. После сохранения включится расчёт по цели.';
+  action.textContent='Задать цель ›';
  }else if(!on){
-  amount.textContent='Ручной режим';
-  note.textContent='Сейчас накопления распределяются по прежним правилам. Можно включить связь с целью.';
-  action.textContent='Включить';
+  amount.textContent=rub(planned);
+  note.textContent='Ручной режим: действуют правила категории «Накопления» из «Изменить пропорции распределения».';
+  action.textContent='Цель и срок ›';
  }else if(target===null){
-  amount.textContent='Вне срока цели';
-  note.textContent='Выбранный месяц не входит в сохранённый период цели.';
-  action.textContent='Изменить цель';
+  amount.textContent='—';
+  note.textContent='Выбранный месяц вне срока цели. Выбери актуальный месяц или измени срок.';
+  action.textContent='Изменить срок ›';
  }else{
-  amount.textContent=rub(planned)+' / месяц';
-  const goal=capitalSnapshot(),shortfall=Math.max(0,target-planned);
-  note.textContent=(goal.remaining<=0?'Цель уже достигнута.':
-   shortfall>1?'Нехватка свободных средств: '+rub(shortfall)+'. ':
-   'Расчёт выполнен. ')+
-   'Обязательные платежи и семейные нужды имеют приоритет. Перевод произойдёт только после подтверждения выплаты.';
-  action.textContent='Настроить';
+  amount.textContent=rub(planned);
+  const snapshot=capitalSnapshot(),shortfall=Math.max(0,target-planned);
+  const left=snapshot.remaining;
+  const months=savingsPlanMonthsLeft(settings.targetMonth);
+  let explanation='До цели '+rub(left)+' · '+months+' мес. до срока.';
+  if(snapshot.remaining<=0)explanation='Цель достигнута — новые взносы не требуются.';
+  else if(shortfall>0.5)explanation+=' Не хватает свободных денег: '+rub(shortfall)+'.';
+  else if(fromAdvance<0.5 && fromSalary>0.5)explanation+=' С аванса свободного остатка нет, сумма перенесена на зарплату.';
+  else if(fromSalary<0.5 && fromAdvance>0.5)explanation+=' С зарплаты свободного остатка нет, сумма перенесена на аванс.';
+  else explanation+=' Взносы распределены между двумя выплатами.';
+  note.textContent=explanation;
+  action.textContent='Цель и срок ›';
  }
 }
 $('goalAllocationAction').addEventListener('click',()=>{
- const settings=ladderSettings();
- if(!settings.targetMonth){
-  go('analytics');analyticsModalOpen('plan');return;
- }
- if(settings.autoAllocateSavings===false){
-  settings.autoAllocateSavings=true;
-  renderAll();return;
- }
  go('analytics');analyticsModalOpen('plan');
+});
+$('goalModeAuto').addEventListener('click',()=>{
+ const settings=ladderSettings();
+ if(!settings.targetMonth){go('analytics');analyticsModalOpen('plan');return;}
+ if(settings.autoAllocateSavings!==false)return;
+ settings.autoAllocateSavings=true;renderAll();
+});
+$('goalModeManual').addEventListener('click',()=>{
+ if(ladderSettings().autoAllocateSavings===false)return;
+ ladderSettings().autoAllocateSavings=false;renderAll();
 });
 
 function renderCategoryRules(){
@@ -4680,6 +4738,43 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  #v-plan .goal-allocation-card{padding:7px 8px;margin:4px 0 6px}
  #v-plan .goal-allocation-note{font-size:9px}
  #v-plan .goal-allocation-action{padding:4px 6px;max-width:90px}
+}
+
+/* TEST UX: explain both paydays and expose goal/manual modes without hidden menus */
+#v-plan .goal-allocation-card{
+ display:flex!important;flex-direction:column!important;
+ align-items:stretch!important;justify-content:flex-start!important;
+ gap:5px!important;padding:8px 10px!important;margin:5px 0 7px!important;
+}
+#v-plan .goal-allocation-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+#v-plan .goal-allocation-heading>b{font-size:13px;color:var(--ink)}
+#v-plan .goal-allocation-action{
+ min-height:29px!important;max-width:none!important;white-space:nowrap;
+ border:0!important;background:transparent!important;padding:2px 1px!important;
+}
+#v-plan .goal-allocation-main{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px;min-width:0}
+#v-plan .goal-allocation-total{display:flex;flex-direction:column;flex:0 0 auto}
+#v-plan .goal-allocation-total>span{font-size:10px;color:var(--muted)}
+#v-plan .goal-allocation-total>strong{font-size:clamp(15px,4.5vw,21px);white-space:nowrap}
+#v-plan .goal-allocation-split{display:flex;flex-direction:column;gap:1px;text-align:right;min-width:0}
+#v-plan .goal-allocation-split>span{font-size:11px;color:var(--muted);white-space:nowrap}
+#v-plan .goal-allocation-split b{font-variant-numeric:tabular-nums;color:var(--ink)}
+#v-plan .goal-allocation-note{font-size:10px!important;line-height:1.2!important;margin:1px 0!important}
+#v-plan .goal-allocation-mode{display:flex;align-items:center;justify-content:flex-start;gap:5px}
+#v-plan .goal-allocation-mode>span{font-size:10px;color:var(--muted);margin-right:3px}
+#v-plan .goal-mode-option{
+ border:1px solid var(--line);border-radius:8px;background:var(--card);
+ color:var(--muted);padding:4px 9px;min-height:27px;font-size:10px;font-weight:700;
+}
+#v-plan .goal-mode-option[aria-pressed="true"]{
+ background:color-mix(in srgb,var(--card) 65%,#a990f2 35%)!important;
+ color:var(--ink)!important;border-color:var(--blue)!important;
+}
+#v-plan .goal-mode-option:disabled{opacity:.48}
+#v-plan #planTable{font-variant-numeric:tabular-nums}
+@media(max-width:380px){
+ #v-plan .goal-allocation-card{gap:4px!important;padding:7px 8px!important}
+ #v-plan .goal-allocation-split>span{font-size:10px}
 }
 </style>
 <dialog id="adviceDialog" aria-labelledby="advisorTitle"><div class="advisor-shell">
