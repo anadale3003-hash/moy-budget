@@ -3913,16 +3913,17 @@ function confirmRegularPayment(target,amount,date,extraSource='',part=''){
 /* Regular bank payment confirmation now uses the shared reserve. Wage
    splits remain in allocation() for planning, not as a payment choice. */
 function suggestedRegularPayment(target,date){
- const already=regularPaidForMonth(target,month);
- const due=target==='mortgage'
-  ?Math.max(0,num(monthData().mortgage)-already)
+ // The EXPECTED bank payment is independent of how much money was reserved.
+ // A zero reserve must never erase a known planned amount from the form.
+ const paid=regularPaidForMonth(target,month);
+ const remaining=target==='mortgage'
+  ?Math.max(0,num(monthData().mortgage)-paid)
   :Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
- if(target==='mortgage'&&data.paidMortgageMonth===month&&already===0)return 0;
- const available=Math.max(0,target==='mortgage'?regularMortgageAvailable(date):regularCreditAvailable(date));
- // Default to what has actually been funded, capped by the remaining due.
- // Never propose an unfunded full mortgage installment from the envelope.
- // Actual bank debit can still be entered manually if it differs.
- return Math.round(Math.min(due,available)*100)/100;
+ if(target==='mortgage'&&data.paidMortgageMonth===month&&paid===0)return 0;
+ if(target==='mortgage')return Math.round(remaining*100)/100;
+ if(remaining<=0)return 0;
+ const installment=num(credit().per);
+ return Math.round(Math.min(remaining,installment>0?installment:remaining)*100)/100;
 }
 function openPaymentEntry(target){
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках.');return;}
@@ -3939,8 +3940,8 @@ function openPaymentEntry(target){
  const available=Math.max(0,isMortgage?regularMortgageAvailable(todayKey):regularCreditAvailable(todayKey));
  const suggested=suggestedRegularPayment(target,todayKey);
  $('paymentEntryAmount').value=suggested>0?String(suggested):'';
- $('paymentEntryHint').textContent='Из отложенных средств доступно '+rub(available)+'. '+
-  'Подтверди сумму, которую фактически списал банк. Если резерв не покрывает платёж, недостающую сумму можно списать из конверта.';
+ $('paymentEntryHint').textContent='Ожидаемый платёж: '+rub(suggested)+'. Отложено: '+rub(available)+'. '+
+  'Сумма подставлена для удобства. Перед подтверждением сверь её с фактическим списанием банка. Если резерва не хватает, недостающее можно взять из конверта.';
  updateCreditPaymentFunding();
  $('paymentEntryOverlay').hidden=false;
  // Keep the suggested amount visible without automatically selecting it or opening the keyboard.
@@ -4517,6 +4518,37 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  font-size:11px;
  font-weight:750;
  letter-spacing:.015em;
+}
+
+/* Test 1.5.80b: restore the savings-goal save button on short iPhone screens.
+   Scroll the modal contents, not the underlying Analytics dashboard. */
+#analyticsModalPlan.analytics-sheet-page{
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ -webkit-overflow-scrolling:touch;
+ min-height:0!important;
+ max-height:100%!important;
+ overscroll-behavior:contain;
+ padding-bottom:calc(16px + env(safe-area-inset-bottom))!important;
+}
+#analyticsModalPlan #savingsPlanSave{
+ display:flex!important;
+ flex:0 0 auto!important;
+ position:sticky!important;
+ bottom:0;
+ z-index:2;
+ min-height:44px!important;
+ margin:8px 0 0!important;
+ width:100%!important;
+ justify-content:center;
+ align-items:center;
+ box-sizing:border-box;
+}
+#analyticsModalPlan #savingsPlanStatus{flex:0 0 auto!important}
+@media(max-height:700px){
+ #analyticsModalPlan.analytics-sheet-page{gap:6px!important}
+ #analyticsModalPlan .analytics-plan-summary>div{padding:6px 8px!important}
+ #analyticsModalPlan #savingsPlanSave{min-height:42px!important}
 }
 </style>
 <dialog id="adviceDialog" aria-labelledby="advisorTitle"><div class="advisor-shell">
