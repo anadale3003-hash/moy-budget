@@ -1,24 +1,40 @@
-# Мой бюджет — сервер push-уведомлений (Cloudflare Worker)
+# Мой бюджет — Cloudflare Web Push
 
-**Стадия 1: подключение автоматического развёртывания через GitHub.**
+Сервер push-уведомлений для PWA «Мой бюджет».
 
-GitHub repository подключён в Cloudflare Workers Builds: ветка `main`, root directory `/push-worker`. Этот коммит запускает первую автоматическую сборку. Пока сервер лишь отвечает на запрос проверки; **реальные push-уведомления не активированы**.
+## Что делает
 
-## Подключение из Cloudflare
+- Принимает подписку установленного PWA на push.
+- Хранит только endpoint подписки, ключи подписки и настройки напоминаний в SQLite-backed Durable Object.
+- Самостоятельно создаёт VAPID key pair при первом запросе публичного ключа; закрытый ключ хранится только в Durable Object, в GitHub его нет.
+- Отправляет тестовое push по запросу пользователя.
+- Ежедневно в 08:30 по Москве проверяет даты аванса/зарплаты и последний день месяца.
+- Учитывает даты выплат из приложения и перенос на предыдущий рабочий день по календарю РФ, который используется приложением для 2026–2027 годов.
+- Не передаёт на сервер суммы, расходы, доходы, счета или другие финансовые записи.
 
-1. Workers & Pages → Create application → **Connect GitHub**.
-2. Предоставить Cloudflare доступ к репозиторию **anadale3003-hash/moy-budget**.
-3. Выбрать ветку **main** и **Root directory: `push-worker`** (важно: не корень репозитория).
-4. Имя Worker: **moy-budget-push** (строго совпадает с wrangler.jsonc).
-5. Deploy command: `npx wrangler deploy` (или `npm run deploy`).
-6. Save and Deploy. Открыть выданную ссылку *.workers.dev — должна появиться JSON-строка с `status: "deployed"` и `pushEnabled: false`.
+## GitHub / Cloudflare
 
-Если ранее Worker создан вручную с таким же именем, вместо Create application можно открыть его Settings → Builds → Connect GitHub и указать те же repo/root/branch.
+- Repository: `anadale3003-hash/moy-budget`
+- Production branch: `main`
+- Root directory: `/push-worker`
+- Deploy command: `npx wrangler deploy`
+- Worker name: `autumn-resonance-d140`
+- Cron: `30 5 * * *` (05:30 UTC = 08:30 Europe/Moscow)
 
-## Дальше
+Wrangler creates the SQLite Durable Object namespace using the `new_sqlite_classes` migration on deployment. No manual KV namespace or VAPID secret is required.
 
-После проверки развертывания будут отдельно добавлены Web Push VAPID, защищённое хранение подписки iPhone, обработчик `push` в `sw.js`, кнопка подписки в приложении, реальная отправка из расписания. Сервер не должен получать суммы операций или финансовые записи — только подписку устройства и тип напоминания.
+## First run
 
-**Безопасность:** никогда не коммитить VAPID private key, API tokens, пароли и другие секреты в репозиторий.
+1. Wait for the Cloudflare Workers Build to finish.
+2. Check `https://autumn-resonance-d140.anadale3003.workers.dev/health`.
+3. Expected JSON includes `"status":"ready"` and `"pushEnabled":true`.
+4. Open the installed iPhone PWA, Settings → Push notifications → Connect push notifications.
+5. Allow notifications. Then use the server test button.
+6. Choose reminders: all (paydays + month-end), paydays only, or off.
 
-Cron `30 5 * * *` — 05:30 UTC / 08:30 по Москве, каждый день. Пока обработчик ничего не отправляет.
+## Security
+
+- Browser API requests are restricted by CORS to `https://anadale3003-hash.github.io`.
+- Subscription records contain no financial transactions or balances.
+- VAPID private key is generated once and stored server-side in Durable Object storage.
+- The test endpoint can only send to a subscription endpoint already registered by the app.
