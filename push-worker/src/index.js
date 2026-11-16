@@ -79,18 +79,27 @@ function addMonths(year, month, offset) {
   const date = new Date(Date.UTC(year, month - 1 + offset, 1));
   return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 };
 }
+// Only the latest active pay cycle per type can generate reminders.
+// A pending payment is reminded once daily for up to 14 days after its planned date.
 function duePaydays(today, prefs) {
   const [year, month] = today.split("-").map(Number);
   const advanceDay = Math.min(31, Math.max(1, Number(prefs.advanceDay) || 16));
   const salaryDay = Math.min(31, Math.max(1, Number(prefs.salaryDay) || 1));
-  const due = [];
-  for (let offset = -1; offset <= 1; offset++) {
+  const candidates = [];
+  for (let offset = -2; offset <= 1; offset++) {
     const cycle = addMonths(year, month, offset);
-    if (shiftPayday(cycle.year, cycle.month, advanceDay) === today) due.push("advance");
-    const salaryMonth = addMonths(cycle.year, cycle.month, salaryDay <= advanceDay ? 1 : 0);
-    if (shiftPayday(salaryMonth.year, salaryMonth.month, salaryDay) === today) due.push("salary");
+    const period = String(cycle.year) + "-" + String(cycle.month).padStart(2, "0");
+    candidates.push({ type: "advance", period,
+      due: shiftPayday(cycle.year, cycle.month, advanceDay) });
+    const target = addMonths(cycle.year, cycle.month, salaryDay <= advanceDay ? 1 : 0);
+    candidates.push({ type: "salary", period,
+      due: shiftPayday(target.year, target.month, salaryDay) });
   }
-  return [...new Set(due)];
+  const nowDay = Date.parse(today + "T00:00:00Z");
+  return ["advance", "salary"].map(type => candidates.filter(item => {
+    const difference = (nowDay - Date.parse(item.due + "T00:00:00Z")) / 86400000;
+    return item.type === type && difference >= 0 && difference <= 14;
+  }).sort((a, b) => b.due.localeCompare(a.due))[0]).filter(Boolean);
 }
 function isMonthEnd(iso) {
   const [year, month, day] = iso.split("-").map(Number);
@@ -156,6 +165,11 @@ export default {
             advanceDay: Math.min(31, Math.max(1, Number(prefs.advanceDay) || 16)),
             salaryDay: Math.min(31, Math.max(1, Number(prefs.salaryDay) || 1))
           },
+          confirmed: Object.fromEntries(
+            (Array.isArray(body.confirmedPeriods) ? body.confirmedPeriods : [])
+              .filter(key => /^20\\d{2}-(0[1-9]|1[0-2])-(advance|salary)$/.test(key))
+              .slice(-48).map(key => [key, true])
+          ),
           sent: {}, updatedAt: Date.now()
         };
         const existing = await storeCall(env, "/get", { id });
@@ -203,11 +217,15 @@ export default {
       for (const record of records) {
         const prefs = record.preferences || {};
         if (prefs.reminders === "none") continue;
-        const types = duePaydays(today, prefs);
-        if (prefs.reminders === "all" && isMonthEnd(today)) types.push("month-end");
-        for (const type of [...new Set(types)]) {
-          const sentKey = today + ":" + type;
-          if (record.sent?.[sentKey]) continue;
+        const due = duePaydays(today, prefs).filter(item =>
+          !record.confirmed?.[item.period + "-" + item.type]
+        );
+        const messages = due.map(item => ({ type: item.type, period: item.period }));
+        if (prefs.reminders === "all" && isMonthEnd(today)) messages.push({ type: "month-end", period: today.slice(0, 7) });
+        for (const item of messages) {
+          const type = item.type;
+          const sentKey = today + ":" + item.period + ":" + type;
+          if (record.sent?.[sentKey] || (type !== "month-end" && record.confirmed?.[item.period + "-" + type])) continue;
           try {
             const response = await sendToRecord(env, record, notificationFor(type));
             if (response.status === 404 || response.status === 410) {
