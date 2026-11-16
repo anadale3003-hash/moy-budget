@@ -39,6 +39,18 @@ async function endpointId(endpoint) {
   const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(endpoint));
   return b64url(new Uint8Array(digest));
 }
+// A push subscription's auth secret is known to the subscribing device, but not
+// to someone who only knows the push endpoint URL. Never embed a shared API key in PWA JS.
+function secureEqual(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const x = new TextEncoder().encode(a), y = new TextEncoder().encode(b);
+  let diff = x.length ^ y.length;
+  for (let i = 0; i < Math.max(x.length, y.length); i++) diff |= (x[i] || 0) ^ (y[i] || 0);
+  return diff === 0 && x.length > 0;
+}
+function ownsSubscription(record, secret) {
+  return !!record && secureEqual(record.subscription?.keys?.auth, secret);
+}
 function storeStub(env) {
   const id = env.SUBSCRIPTIONS.idFromName("moy-budget-global");
   return env.SUBSCRIPTIONS.get(id);
@@ -80,7 +92,7 @@ function addMonths(year, month, offset) {
   return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 };
 }
 // Only the latest active pay cycle per type can generate reminders.
-// A pending payment is reminded once daily for up to 14 days after its planned date.
+// A pending payment is reminded hourly during the configured Cron window for up to 14 days after its planned date.
 function duePaydays(today, prefs) {
   const [year, month] = today.split("-").map(Number);
   const advanceDay = Math.min(31, Math.max(1, Number(prefs.advanceDay) || 16));
@@ -125,7 +137,7 @@ function notificationFor(type) {
 async function sendToRecord(env, record, message) {
   const vapid = await storeCall(env, "/vapid");
   const payload = await buildPushPayload(
-    { data: { ...message, url: APP_URL }, options: { ttl: 86400, urgency: "high", topic: message.tag } },
+    { data: { ...message, url: APP_URL }, options: { ttl: message.tag?.includes("-20") ? 3600 : 86400, urgency: "high", topic: message.tag } },
     record.subscription,
     { subject: VAPID_SUBJECT, publicKey: vapid.publicKey, privateKey: vapid.privateKey }
   );
@@ -173,7 +185,21 @@ export default {
           sent: {}, updatedAt: Date.now()
         };
         const existing = await storeCall(env, "/get", { id });
-        if (existing?.record) record.sent = existing.record.sent || {};
+        if (existing?.record) {
+          if (!ownsSubscription(existing.record, sub.keys.auth) ||
+              !secureEqual(existing.record.subscription?.keys?.p256dh, sub.keys.p256dh)) {
+            return json({ error: "Subscription ownership verification failed" }, 403, cors);
+          }
+          record.sent = existing.record.sent || {};
+          record.claims = existing.record.claims || {};
+        } else {
+          // Creating a subscription is public by design. Bound new creations
+          // per source to prevent accidental/malicious Durable Object growth.
+          const address = request.headers.get("CF-Connecting-IP") || "unknown";
+          const subject = await endpointId(address);
+          const allowed = await storeCall(env, "/allow-create", { subject });
+          if (!allowed.ok) return json({ error: "Subscription registration limit reached" }, 429, cors);
+        }
         await storeCall(env, "/save", { id, record });
         return json({ ok: true, subscribed: true }, 200, cors);
       }
@@ -183,6 +209,9 @@ export default {
         const id = await endpointId(body.endpoint);
         const result = await storeCall(env, "/get", { id });
         if (!result?.record) return json({ error: "Device is not subscribed" }, 404, cors);
+        if (!ownsSubscription(result.record, body.auth)) return json({ error: "Subscription ownership verification failed" }, 403, cors);
+        const permission = await storeCall(env, "/allow-test", { id });
+        if (!permission.ok) return json({ error: "Too many push tests; try later" }, 429, cors);
         const response = await sendToRecord(env, result.record, {
           title: "Мой бюджет — проверка 🔔",
           body: "Отлично! Серверное push-уведомление дошло до твоего iPhone.",
@@ -197,12 +226,22 @@ export default {
         const id = await endpointId(body.endpoint);
         const result = await storeCall(env, "/get", { id });
         if (!result?.record) return json({ error: "Device is not subscribed" }, 404, cors);
+        if (!ownsSubscription(result.record, body.auth)) return json({ error: "Subscription ownership verification failed" }, 403, cors);
+        const permission = await storeCall(env, "/allow-test", { id });
+        if (!permission.ok) return json({ error: "Too many push tests; try later" }, 429, cors);
         const queued = await storeCall(env, "/queue-test", { id, delayMs: 30000 });
         return json({ ok: true, queued: true, delaySeconds: 30, queuedId: queued.queuedId }, 200, cors);
       }
       if (request.method === "POST" && url.pathname === "/unsubscribe") {
         const body = await request.json();
-        if (body.endpoint) await storeCall(env, "/delete", { id: await endpointId(body.endpoint) });
+        if (body.endpoint) {
+          const id = await endpointId(body.endpoint);
+          const found = await storeCall(env, "/get", { id });
+          if (found.record && !ownsSubscription(found.record, body.auth)) {
+            return json({ error: "Subscription ownership verification failed" }, 403, cors);
+          }
+          if (found.record) await storeCall(env, "/delete", { id });
+        }
         return json({ ok: true }, 200, cors);
       }
       return json({ error: "Not found" }, 404, cors);
@@ -212,7 +251,10 @@ export default {
   },
   async scheduled(_event, env, ctx) {
     ctx.waitUntil((async () => {
-      const today = moscowDate(new Date());
+      const now = new Date(_event?.scheduledTime || Date.now());
+      const today = moscowDate(now);
+      // The Moscow timezone is UTC+03:00 year-round.
+      const hour = String((now.getUTCHours() + 3) % 24).padStart(2, "0");
       const records = await storeCall(env, "/list");
       for (const record of records) {
         const prefs = record.preferences || {};
@@ -224,25 +266,32 @@ export default {
         if (prefs.reminders === "all" && isMonthEnd(today)) messages.push({ type: "month-end", period: today.slice(0, 7) });
         for (const item of messages) {
           const type = item.type;
-          const sentKey = today + ":" + item.period + ":" + type;
-          if (record.sent?.[sentKey] || (type !== "month-end" && record.confirmed?.[item.period + "-" + type])) continue;
+          // Salary and advance reminders have a per-HOUR key. Month-end
+          // analytics remains once daily to avoid 13 identical summaries.
+          const sentKey = today + ":" + item.period + ":" + type +
+            (type === "month-end" ? ":daily" : ":" + hour);
+          const confirmKey = type === "month-end" ? null : item.period + "-" + type;
+          // Atomic claim in Durable Object prevents overlapping Cron invocations
+          // from sending a duplicate. Confirmations are rechecked inside the claim.
+          const claim = await storeCall(env, "/claim", { id: record.id, sentKey, confirmKey });
+          if (!claim.ok) continue;
           try {
-            const response = await sendToRecord(env, record, notificationFor(type));
+            const message = notificationFor(type);
+            if (type !== "month-end") message.tag = type + "-" + today + "-" + hour;
+            const response = await sendToRecord(env, record, message);
             if (response.status === 404 || response.status === 410) {
               await storeCall(env, "/delete", { id: record.id });
               break;
             }
             if (response.ok) {
-              record.sent = record.sent || {};
-              record.sent[sentKey] = Date.now();
-              for (const key of Object.keys(record.sent)) {
-                if (key.slice(0, 10) < today.slice(0, 10) && Date.now() - record.sent[key] > 60 * 86400000) delete record.sent[key];
-              }
-              record.updatedAt = Date.now();
-              await storeCall(env, "/save", { id: record.id, record });
+              await storeCall(env, "/mark-sent", { id: record.id, sentKey });
+            } else {
+              console.warn("Push rejected", response.status, "subscription", record.id.slice(0, 8));
+              await storeCall(env, "/release-claim", { id: record.id, sentKey });
             }
-          } catch (_) {
-            // Keep the subscription; a transient push-service error can recover tomorrow.
+          } catch (error) {
+            console.error("Scheduled push failed", String(error?.message || error));
+            await storeCall(env, "/release-claim", { id: record.id, sentKey });
           }
         }
       }
@@ -297,6 +346,65 @@ export class SubscriptionStore extends DurableObject {
         await this.ctx.storage.put("vapid", keys);
       }
       return json(keys);
+    }
+    if (url.pathname === "/allow-create" && request.method === "POST") {
+      const { subject } = await request.json();
+      if (!/^[A-Za-z0-9_-]{40,48}$/.test(subject || "")) return json({ ok: false }, 400);
+      const bucket = Math.floor(Date.now() / 3600000);
+      const key = "signup:" + bucket + ":" + subject;
+      const used = Number(await this.ctx.storage.get(key) || 0);
+      if (used >= 12) return json({ ok: false });
+      await this.ctx.storage.put(key, used + 1);
+      return json({ ok: true });
+    }
+    if (url.pathname === "/allow-test" && request.method === "POST") {
+      const { id } = await request.json();
+      if (!id || !(await this.ctx.storage.get("sub:" + id))) return json({ ok: false });
+      const bucket = Math.floor(Date.now() / 3600000);
+      const key = "test-rate:" + bucket + ":" + id;
+      const used = Number(await this.ctx.storage.get(key) || 0);
+      if (used >= 8) return json({ ok: false });
+      await this.ctx.storage.put(key, used + 1);
+      return json({ ok: true });
+    }
+    if (url.pathname === "/claim" && request.method === "POST") {
+      const { id, sentKey, confirmKey } = await request.json();
+      const result = await this.ctx.storage.transaction(async tx => {
+        const record = await tx.get("sub:" + id);
+        if (!record || record.sent?.[sentKey] || (confirmKey && record.confirmed?.[confirmKey])) return false;
+        record.claims = record.claims || {};
+        if (record.claims[sentKey] && Date.now() - record.claims[sentKey] < 10 * 60000) return false;
+        record.claims[sentKey] = Date.now();
+        await tx.put("sub:" + id, record);
+        return true;
+      });
+      return json({ ok: result });
+    }
+    if (url.pathname === "/mark-sent" && request.method === "POST") {
+      const { id, sentKey } = await request.json();
+      await this.ctx.storage.transaction(async tx => {
+        const record = await tx.get("sub:" + id);
+        if (!record) return;
+        record.sent = record.sent || {};
+        record.sent[sentKey] = Date.now();
+        if (record.claims) delete record.claims[sentKey];
+        for (const k of Object.keys(record.sent)) {
+          if (Date.now() - record.sent[k] > 60 * 86400000) delete record.sent[k];
+        }
+        await tx.put("sub:" + id, record);
+      });
+      return json({ ok: true });
+    }
+    if (url.pathname === "/release-claim" && request.method === "POST") {
+      const { id, sentKey } = await request.json();
+      await this.ctx.storage.transaction(async tx => {
+        const record = await tx.get("sub:" + id);
+        if (record?.claims) {
+          delete record.claims[sentKey];
+          await tx.put("sub:" + id, record);
+        }
+      });
+      return json({ ok: true });
     }
     if (url.pathname === "/save" && request.method === "POST") {
       const { id, record } = await request.json();
