@@ -1,0 +1,456 @@
+МОЙ БЮДЖЕТ 1.5.79 — КОМПАКТНЫЙ ПАКЕТ ДЛЯ АУДИТА ФИНАНСОВОЙ ЛОГИКИ
+Этот текст состоит из точных последовательных фрагментов index.html (без CSS). Между фрагментами могут отсутствовать функции, обработчики и объявления. НЕ считай его полным исходником и не делай выводов об отсутствии кода вне фрагментов.
+Цель: найти ошибки в распределении выплат, доступном остатке, округлении, отмене зачислений и сохранении. Проверь контрольную метку в конце.
+
+
+
+============== Загрузка финансовых данных и начальные значения ==============
+Позиция в исходном index.html: [181300, 184775)
+
+238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY='my-budget-v1';const fmt=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});const rub=n=>fmt.format(Math.round(n||0))+' ₽';const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
+let data;const defaults=()=>({months:{},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:10000,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
+try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();if(!data.expenseTypes||typeof data.expenseTypes!=='object')data.expenseTypes={};
+for(const c of cats){if(!Array.isArray(data.expenseTypes[c.id]))data.expenseTypes[c.id]=[];}
+for(const x of data.expenses){if(x.type&&cats.some(c=>c.id===x.category)){const a=data.expenseTypes[x.category];if(!a.some(y=>y.toLocaleLowerCase('ru')===String(x.type).toLocaleLowerCase('ru')))a.push(String(x.type));}}
+if(!data.startBalances||typeof data.startBalances!=='object')data.startBalances=null;
+if(!Array.isArray(data.receipts))data.receipts=[];
+if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];
+if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];
+if(!Array.isArray(data.transfers))data.transfers=[];
+if(!Array.isArray(data.regularPayments))data.regularPayments=[];
+if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
+if(!data.salaryConfig||typeof data.salaryConfig!=='object')data.salaryConfig={base:0,mode:'gross',taxRate:13};
+if(data.salaryConfig.taxRate===undefined)data.salaryConfig.taxRate=13;
+if(typeof data.paidMortgageMonth!=='string')data.paidMortgageMonth='';
+if(!Number.isFinite(Number(data.utilitiesAdvanceTarget))||Number(data.utilitiesAdvanceTarget)<0)data.utilitiesAdvanceTarget=15000;
+if(typeof data.utilitiesFromSalary!=='boolean')data.utilitiesFromSalary=true;
+// Первоначальные настройки старых версий были 15/30; для этого бюджета даты 16/1.
+if(!data.payDays||typeof data.payDays!=='object')data.payDays={advance:16,salary:1};
+if(!data.payDays2026Migrated){if(Number(data.payDays.advance)===15&&Number(data.payDays.salary)===30)data.payDays={advance:16,salary:1};data.payDays2026Migrated=true;}
+let month=current
+
+
+============== Расчёт выплат и календарь ==============
+Позиция в исходном index.html: [185750, 188940)
+
+k Dusk',false)}
+
+function monthData(){
+ if(!data.months[month])data.months[month]={advance:0,salary:0,mortgage:Number.isFinite(Number(data.mortgageMonthly))&&data.mortgageMonthly!==undefined?num(data.mortgageMonthly):55000};
+ const m=data.months[month];
+ if(m.mortgage===undefined)m.mortgage=data.mortgageMonthly===undefined?55000:num(data.mortgageMonthly);
+ return m;
+}
+const RU_NONWORK=["2026-01-01", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-02-23", "2026-03-09", "2026-05-01", "2026-05-11", "2026-06-12", "2026-11-04", "2026-12-31", "2027-01-01", "2027-01-04", "2027-01-05", "2027-01-06", "2027-01-07", "2027-01-08", "2027-02-22", "2027-02-23", "2027-03-08", "2027-05-03", "2027-05-10", "2027-06-14", "2027-11-04", "2027-11-05", "2027-12-31"];
+const RU_WORK_SAT=["2027-02-20"];
+const RU_DAYS_OFF=new Set(RU_NONWORK),RU_SAT_WORK=new Set(RU_WORK_SAT);
+function countWorkdays(key){
+ const [y,mo]=key.split('-').map(Number);const last=new Date(y,mo,0).getDate();let total=0,first=0;
+ for(let d=1;d<=last;d++){
+  const x=new Date(y,mo-1,d),date=iso(x),day=x.getDay();
+  if((day!==0&&day!==6&&!RU_DAYS_OFF.has(date))||RU_SAT_WORK.has(date)){total++;if(d<=15)first++;}
+ }
+ return {total,first,official:y===2026||y===2027};
+}
+function payrollForecast(m,key=month){
+ const cfg=data.salaryConfig,base=num(cfg.base),work=countWorkdays(key);
+ const overrideTotal=Number(m.manualDaysTotal),overrideFirst=Number(m.manualDaysFirst);
+ const total=m.manualDaysTotal!==undefined&&m.manualDaysTotal!==''&&overrideTotal>0?Math.min(31,overrideTotal):work.total;
+ const first=m.manualDaysFirst!==undefined&&m.manualDaysFirst!==''&&overrideFirst>=0?Math.min(total,overrideFirst):work.first;
+ const rate=Math.min(50,num(cfg.taxRate));
+ const net=cfg.mode==='net'?base:base*(1-rate/100);
+ const advanceForecast=total>0?net*first/total:0;
+ // Legacy month.advance/month.salary may contain a stale or cancelled
+ // manually entered amount. Treat an amount as ACTUAL only if a matching receipt
+ // exists. When the salary is configured, the remaining amount is a forecast.
+ const advanceReceipt=(data.receipts||[]).find(r=>r.id===key+'-advance');
+ const advancePlan=advanceReceipt?num(advanceReceipt.amount):advanceForecast;
+ const salaryForecast=Math.max(0,net-advancePlan);
+ return {net,advanceForecast,advancePlan,salaryForecast,total,first,official:work.official,configured:base>0};
+}
+function plannedAdvance(m,key=month){
+ const receipt=(data.receipts||[]).find(r=>r.id===key+'-advance');
+ if(receipt)return num(receipt.amount);
+ const forecast=payrollForecast(m,key);
+ return forecast.configured?forecast.advanceForecast:num(m.advance);
+}
+function plannedSalary(m,key=month){
+ const receipt=(data.receipts||[]).find(r=>r.id===key+'-salary');
+ if(receipt)return num(receipt.amount);
+ const forecast=payrollForecast(m,key);
+ return forecast.configured?forecast.salaryForecast:num(m.salary);
+}
+function isForecast(m){return !data.receipts.some(r=>r.id===month+'-salary')&&payrollForecast(m).configured}
+
+/* Feedback is tied to a completed localStorage write, never to the initial tap.
+   A cancelled confirmation or an invalid form cannot emit a success check. */
+
+
+============== Сохранение localStorage ==============
+Позиция в исходном index.html: [192220, 193245)
+
+ }
+}
+let lastSavedReceiptSignature=JSON.stringify((data.receipts||[]).map(r=>r.id).sort());
+function save(){
+ try{
+   localStorage.setItem(KEY,JSON.stringify(data));
+   const receiptSignature=JSON.stringify((data.receipts||[]).map(r=>r.id).sort());
+   if(receiptSignature!==lastSavedReceiptSignature){
+     lastSavedReceiptSignature=receiptSignature;
+     // Emitted only AFTER a successful local save; no amounts or dates are sent.
+     window.dispatchEvent(new Event('budget:receipts-changed'));
+   }
+   const intent=saveFeedbackIntent;
+   saveFeedbackIntent=null;
+   if(saveFeedbackClearTimer!==null){clearTimeout(saveFeedbackClearTimer);saveFeedbackClearTimer=null;}
+   if(intent)showSaveFeedback(intent.message,intent.button);
+   return true;
+ }catch(_){
+   saveFeedbackIntent=null;
+   if(saveFeedbackClearTimer!==null){clearTimeout(saveFeedbackClearTimer);saveFeedbackClearTimer=null;}
+   alert('Не удалось сохранить данные. Сделай резервную копию.');
+   return false;
+ }
+}
+
+function num(n){return Math.max(0,Number(n)|
+
+
+============== Даты зарплаты, аванса и ближайшей выплаты ==============
+Позиция в исходном index.html: [193245, 197326)
+
+|0)}
+function dateFor(monthKey,day){const [y,m]=monthKey.split('-').map(Number);const max=new Date(y,m,0).getDate();return new Date(y,m-1,Math.min(Math.max(1,day),max))}
+function isWorkingPayday(d){
+ const key=iso(d),week=d.getDay();
+ return RU_SAT_WORK.has(key)||((week!==0&&week!==6)&&!RU_DAYS_OFF.has(key));
+}
+function shiftPaydayBack(d){
+ const day=new Date(d.getFullYear(),d.getMonth(),d.getDate());
+ for(let i=0;i<18&&!isWorkingPayday(day);i++)day.setDate(day.getDate()-1);
+ return day;
+}
+function plannedPayday(monthKey,day){return shiftPaydayBack(dateFor(monthKey,day));}
+function nearestPayday(now=new Date()){
+ const reference=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+ const options=[];
+ for(let i=-2;i<=3;i++){
+  const cycle=new Date(reference.getFullYear(),reference.getMonth()+i,1);
+  const ym=iso(cycle).slice(0,7);
+  for(const type of ['advance','salary']){
+   const nextMonth=type==='salary'&&Number(data.payDays.salary)<=Number(data.payDays.advance);
+   const target=new Date(cycle.getFullYear(),cycle.getMonth()+(nextMonth?1:0),1);
+   const key=iso(target).slice(0,7);
+   const when=plannedPayday(key,Number(data.payDays[type])||1);
+   if(when>=reference)options.push({date:when,type,month:ym});
+  }
+ }
+ return options.sort((a,b)=>a.date-b.date)[0]||null;
+}
+function showPaydayCountdown(actual){
+ const next=nearestPayday(),where=$('nextPaymentWhen'),dateEl=$('nextPaymentDate'),limit=$('dailySpendingLimit'),note=$('dailySpendingNote');
+ limit.classList.remove('daily-good','daily-medium','daily-low');
+ if(!next){where.textContent='Нет расписания';dateEl.textContent='';limit.textContent='—';note.textContent='Проверь даты аванса и зарплаты';return;}
+ const now=new Date(),utcToday=Date.UTC(now.getFullYear(),now.getMonth(),now.getDate());
+ const dayCount=Math.max(0,Math.round((Date.UTC(next.date.getFullYear(),next.date.getMonth(),next.date.getDate())-utcToday)/86400000));
+ const label=next.type==='advance'?'Аванс':'Зарплата';
+ const date=next.date.toLocaleDateString('ru-RU',{day:'numeric',month:'short'});
+ const daysWord=dayCount%10===1&&dayCount%100!==11?'день':(dayCount%10>=2&&dayCount%10<=4&&(dayCount%100<12||dayCount%100>14)?'дня':'дней');
+ dateEl.textContent=label+' · '+date;
+ where.innerHTML='<strong class="payday-days-badge'+(dayCount===0?' payday-today':'')+'">'+(dayCount===0?'Сегодня':dayCount+' '+daysWord)+'</strong>';
+ if(!actual){limit.textContent='—';note.textContent='Для дневного лимита укажи стартовые остатки в настройках';return;}
+ if(dayCount===0){limit.textContent='Выплата сегодня';note.textContent='Если деньги ещё не поступили, дождись фактического зачисления';return;}
+ const spendable=Math.max(0,actual.available);
+ const dailyAmount=Math.floor(spendable/dayCount);
+ limit.classList.add(dailyAmount>5000?'daily-good':dailyAmount>3000?'daily-medium':'daily-low');
+ limit.textContent='Можно тратить ~'+rub(dailyAmount)+'/день';
+ note.textContent='Из доступных '+rub(spendable)+' на '+dayCount+' дн. · без накоплений и обязательных платежей';
+}
+function nextPaydays(){
+  // A salary paid on the 1st of the next calendar month belongs to the previous
+  // planning cycle, whose advance was paid on the 16th. Keep calendar dates for
+  // the credit deadline but associate both payments with the same plan month.
+  const due=fromISO(data.deadline);if(!due)return [];
+  const start=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  const arr=[];
+  const earlySalary=Number(data.payDays.salary)<=Number(data.payDays.advance);
+  for(let i=-1;i<48;i++){
+    const base=new Date(start.getFullYear(),start.getMonth()+i,1);
+    const cycle=iso(base).slice(0,7);
+    for(const type of ['advance','salary']){
+      const shift=type==='salary'&&earlySalary?1:0;
+      const target=new Date(base.getFullYear(),base.getMonth()+shift,1);
+      const day=type==='advance'?data.payDays.advance:data.payDays.salary;
+      const when=plannedPayday(iso(target).slice(0,7),Number(day)||1);
+      if(when>=start&&when<=due)arr.push({date:when,type,month:cycle});
+    }
+  }
+  return arr.sort((a,b)=>a.date-b.date);
+}
+
+
+
+============== Расчёт распределения денег ==============
+Позиция в исходном index.html: [197326, 205200)
+
+function credit(){const debt=Math.max(0,num(data.debt)-num(data.reserved)-incomeAmountFor('credit')-repaymentTotal('credit')-regularPaymentSum('credit'));const due=fromISO(data.deadline);const pays=nextPaydays();const per=pays.length?Math.ceil(debt/pays.length*100)/100:0;return {debt,due,pays,per}}
+// Mortgage top-ups from envelopes are already paid. Offset only the EXTRA
+// funding from subsequent UNCONFIRMED wage distributions, in payment order.
+// Past receipts retain their original confirmed allocations.
+function mortgageDistributionBase(key){
+ const m=data.months[key]||{advance:0,salary:0,mortgage:data.mortgageMonthly===undefined?55000:data.mortgageMonthly};
+ const advance=plannedAdvance(m,key),salary=plannedSalary(m,key),total=advance+salary;
+ const monthly=num(m.mortgage===undefined?(data.mortgageMonthly===undefined?55000:data.mortgageMonthly):m.mortgage);
+ const due=Math.min(monthly,total);
+ return {advance:total?due*advance/total:0,salary:total?due*salary/total:0};
+}
+function mortgageDistributionOffsets(targetMonth){
+ const result={advance:0,salary:0};
+ const extras=(data.regularPayments||[]).filter(p=>p.target==='mortgage'&&num(p.extraAmount)>0&&p.date)
+  .sort((a,b)=>a.date.localeCompare(b.date));
+ if(!extras.length)return result;
+ const firstMonth=extras[0].date.slice(0,7);
+ const earliest=firstMonth<targetMonth?firstMonth:targetMonth;
+ const [y,m]=earliest.split('-').map(Number);
+ const slots=[];
+ const [ty,tm]=targetMonth.split('-').map(Number);
+ const count=(ty-y)*12+tm-m;
+ if(count<0)return result;
+ for(let i=0;i<=count;i++){
+  const d=new Date(y,m-1+i,1),key=iso(d).slice(0,7);
+  const base=mortgageDistributionBase(key);
+  for(const type of ['advance','salary']){
+   const salaryInNextMonth=type==='salary'&&Number(data.payDays.salary)<=Number(data.payDays.advance);
+   const payMonth=new Date(d.getFullYear(),d.getMonth()+(salaryInNextMonth?1:0),1);
+   const when=plannedPayday(iso(payMonth).slice(0,7),Number(data.payDays[type])||1);
+   slots.push({key,type,date:iso(when),base:num(base[type])});
+  }
+ }
+ slots.sort((a,b)=>a.date.localeCompare(b.date)||(a.type==='advance'?-1:1));
+ let carry=0,index=0;
+ const confirmed=new Set((data.receipts||[]).filter(r=>r.amounts&&Object.keys(r.amounts).length>0).map(r=>r.month+'-'+r.type));
+ for(const slot of slots){
+  while(index<extras.length&&extras[index].date<=slot.date){carry+=num(extras[index].extraAmount);index++;}
+  if(confirmed.has(slot.key+'-'+slot.type))continue;
+  const offset=Math.min(slot.base,carry);
+  carry=Math.max(0,carry-offset);
+  if(slot.key===targetMonth)result[slot.type]=Math.round(offset*100)/100;
+ }
+ return result;
+}
+function allocation(receiptDate=null,ruleOverrides=null){
+ const m=monthData(),salaryPlan=plannedSalary(m),advancePlan=plannedAdvance(m),total=advancePlan+salaryPlan;
+ const base=mortgageDistributionBase(month),offsets=mortgageDistributionOffsets(month);
+ const receipts={
+  advance:data.receipts.find(r=>r.id===month+'-advance'&&r.amounts&&Object.keys(r.amounts).length>0),
+  salary:data.receipts.find(r=>r.id===month+'-salary'&&r.amounts&&Object.keys(r.amounts).length>0)
+ };
+ const mortgageA=receipts.advance?num(receipts.advance.amounts?.mortgage):Math.max(0,base.advance-offsets.advance);
+ const mortgageB=receipts.salary?num(receipts.salary.amounts?.mortgage):Math.max(0,base.salary-offsets.salary);
+ const cc=credit(),creditForMonth=cc.pays.filter(p=>p.month===month);
+ // Distribute the outstanding credit debt in proportion to the forecast
+ // spendable income on each remaining payday, not as identical payments.
+ // Confirmed receipt allocations are frozen and never redistributed.
+ const paydayWeight=p=>{
+  const pm=data.months[p.month]||{mortgage:data.mortgageMonthly===undefined?55000:data.mortgageMonthly};
+  const income=p.type==='advance'?plannedAdvance(pm,p.month):plannedSalary(pm,p.month);
+  const mortgage=mortgageDistributionBase(p.month);
+  return Math.max(0,income-num(mortgage[p.type]));
+ };
+ const allWeight=cc.pays.reduce((sum,p)=>sum+paydayWeight(p),0);
+ const intended=type=>{
+  const weight=creditForMonth.filter(p=>p.type===type).reduce((sum,p)=>sum+paydayWeight(p),0);
+  return allWeight>0?Math.round(cc.debt*weight/allWeight*100)/100:0;
+ };
+ const ac=receipts.advance?num(receipts.advance.amounts?.credit):Math.min(cc.debt,intended('advance'),Math.max(0,advancePlan-mortgageA));
+ const bc=receipts.salary?num(receipts.salary.amounts?.credit):Math.min(Math.max(0,cc.debt-ac),intended('salary'),Math.max(0,salaryPlan-mortgageB));
+ const remainA=Math.max(0,advancePlan-mortgageA-ac),remainB=Math.max(0,salaryPlan-mortgageB-bc);
+ const rules=ruleOverrides||categoryRules();
+ // Each rule represents a MONTHLY target. Percentages use the complete
+ // forecast (advance + salary), not the leftover of individual paydays.
+ // Existing confirmed receipt allocations are immutable.
+ const confirmed={
+  advance:receipts.advance?.amounts||null,
+  salary:receipts.salary?.amounts||null
+ };
+ const out={advance:Object.fromEntries(cats.map(c=>[c.id,num(confirmed.advance?.[c.id])])),
+            salary:Object.fromEntries(cats.map(c=>[c.id,num(confirmed.salary?.[c.id])]))};
+ const cap={
+  advance:confirmed.advance?0:remainA,
+  salary:confirmed.salary?0:remainB
+ };
+ const targets=Object.fromEntries(cats.map(c=>{
+  const rule=rules[c.id]||{source:'both',mode:'percent',value:0};
+  let amount=rule.mode==='rub'?num(rule.value):total*num(rule.value)/100;
+  // The advance-only utilities amount is a target envelope balance, not
+  // another transfer on top of savings already held for the next bill.
+  if(c.id==='utilities'&&rule.mode==='rub'&&rule.source==='advance'&&!confirmed.advance&&data.startBalances){
+   const date=receiptDate||iso(plannedPayday(month,Number(data.payDays.advance)||16));
+   amount=Math.max(0,amount-Math.max(0,num(categoryBalanceAt('utilities',date))));
+  }
+  const already=num(confirmed.advance?.[c.id])+num(confirmed.salary?.[c.id]);
+  return [c.id,Math.max(0,amount-(c.id==='utilities'&&rule.mode==='rub'&&rule.source==='advance'&&!confirmed.advance?0:already))];
+ }));
+ // A rule linked to a single payday gets that payday first; rules linked
+ // to both divide their remaining monthly target across the two paydays.
+ const allocateGroup=(ids,types)=>{
+  const remaining=ids.filter(id=>targets[id]>0.00001);
+  const available=types.reduce((sum,type)=>sum+cap[type],0);
+  const requested=remaining.reduce((sum,id)=>sum+targets[id],0);
+  if(!available||!requested)return;
+  const factor=Math.min(1,available/requested);
+  for(const id of remaining){
+   const grant=targets[id]*factor;
+   const space=types.reduce((sum,t)=>sum+cap[t],0);
+   if(!space)break;
+   const shares=types.map(t=>Math.min(cap[t],grant*cap[t]/space));
+   types.forEach((t,i)=>{out[t][id]+=shares[i];cap[t]=Math.max(0,cap[t]-shares[i]);});
+   targets[id]=Math.max(0,targets[id]-grant);
+  }
+ };
+ const ids=(mode,source)=>cats.filter(c=>rules[c.id]?.mode===mode&&rules[c.id]?.source===source).map(c=>c.id);
+ for(const mode of ['rub','percent']){
+  allocateGroup(ids(mode,'advance'),['advance']);
+  allocateGroup(ids(mode,'salary'),['salary']);
+  allocateGroup(ids(mode,'both'),['advance','salary']);
+ }
+ // Unallocated income remains available in "Other", so every actual
+ // receipt still distributes exactly its full amount.
+ for(const type of ['advance','salary'])if(!confirmed[type])out[type].other+=cap[type];
+ const aa=out.advance,bb=out.salary;
+ const weightTotal=1;
+ const rows=[{name:'Ипотека',a:mortgageA,b:mortgageB},{name:'Кредитная карта',a:ac,b:bc}];
+ for(const c of cats)rows.push({name:c.name,id:c.id,a:num(aa[c.id]),b:num(bb[c.id])});
+ const due=Math.min(num(m.mortgage),total);
+ const mortgage=mortgageA+mortgageB;
+ const deficit=Math.max(0,mortgage+ac+bc-total);
+ return {rows,total,mortgage,credit:ac+bc,deficit,unfundedMortgage:Math.max(0,due-(base.advance+base.salary)),weightTotal,offsets};
+}
+func
+
+
+============== Расходы, балансы и доступные деньги ==============
+Позиция в исходном index.html: [205890, 210105)
+
+&#39;'}[ch]))}
+function sumExpenses(id){return data.expenses.filter(e=>e.date?.startsWith(month)&&e.category===id).reduce((a,e)=>a+num(e.amount),0)}
+function incomeAmountFor(destination,fromDate=null){
+ return data.extraIncomes.filter(i=>i.destination===destination&&(!fromDate||i.date>=fromDate)).reduce((a,i)=>a+num(i.amount),0);
+}
+function incomeTotalMonth(key){return data.extraIncomes.filter(i=>i.date?.startsWith(key)).reduce((a,i)=>a+num(i.amount),0);}
+function regularPaymentSum(target,fromDate=null,toDate=null){return (data.regularPayments||[]).filter(p=>p.target===target&&(!fromDate||p.date>=fromDate)&&(!toDate||p.date<=toDate)).reduce((a,p)=>a+num(p.amount),0)}
+function repaymentTotal(target,fromDate=null){return (data.earlyRepayments||[]).filter(x=>x.target===target&&(!fromDate||x.date>=fromDate)).reduce((sum,x)=>sum+num(x.amount),0)}
+function repaymentSavingsSpent(fromDate){return (data.earlyRepayments||[]).filter(x=>x.date>=fromDate).reduce((sum,x)=>sum+num(x.amount),0)}
+function transferDelta(id,fromDate,toDate=null){return (data.transfers||[]).filter(t=>t.date>=fromDate&&(!toDate||t.date<=toDate)).reduce((sum,t)=>sum+(t.to===id?num(t.amount):0)-(t.from===id?num(t.amount):0),0)}
+function categoryBalanceAt(id,date){
+ if(!data.startBalances||date<data.startBalances.date)return null;
+ const start=data.startBalances.date;
+ const base=num(data.startBalances.balances[id]);
+ const received=data.receipts.filter(r=>r.date>=start&&r.date<=date).reduce((a,r)=>a+num(r.amounts?.[id]),0);
+ const spent=data.expenses.filter(e=>e.date>=start&&e.date<=date&&e.category===id).reduce((a,e)=>a+num(e.amount),0);
+ const income=data.extraIncomes.filter(i=>i.destination===id&&i.date>=start&&i.date<=date).reduce((a,i)=>a+num(i.amount),0);
+ const early=id==='savings'?(data.earlyRepayments||[]).filter(x=>x.date>=start&&x.date<=date).reduce((a,x)=>a+num(x.amount),0):0;
+ const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start&&p.date<=date).reduce((a,p)=>a+num(p.extraAmount),0);
+ return base+received+income-spent-early-creditExtra+transferDelta(id,start,date);
+}
+function realBalance(id){if(!data.startBalances)return null;const start=data.startBalances.date;const base=num(data.startBalances.balances[id]);const received=data.receipts.filter(r=>r.date>=start).reduce((a,r)=>a+num(r.amounts?.[id]),0);const spent=data.expenses.filter(e=>e.date>=start&&e.category===id).reduce((a,e)=>a+num(e.amount),0);const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start).reduce((a,p)=>a+num(p.extraAmount),0);return base+received+incomeAmountFor(id,start)-spent-(id==='savings'?repaymentSavingsSpent(start):0)-creditExtra+transferDelta(id,start)}
+// Фактический остаток на сегодня, без планируемых и датированных будущим операций.
+// Бюджетные конверты, ипотечный резерв и резерв кредитки не пересекаются.
+function actualMoneyToday(){
+ if(!data.startBalances||data.startBalances.date>iso(new Date()))return null;
+ const asOf=iso(new Date());
+ const envelopes=cats.reduce((total,c)=>total+categoryBalanceAt(c.id,asOf),0);
+ const mortgage=num(data.startBalances.mortgage)
+   +data.receipts.filter(r=>r.date>=data.startBalances.date&&r.date<=asOf).reduce((a,r)=>a+num(r.amounts?.mortgage),0)
+   +data.extraIncomes.filter(i=>i.destination==='mortgage'&&i.date>=data.startBalances.date&&i.date<=asOf).reduce((a,i)=>a+num(i.amount),0)
+   -mortgageReserveSpent(data.startBalances.date,asOf);
+ // data.reserved includes manual credit-card reserves and reserves from received wages.
+ // Exclude future-dated receipt allocations if any exist.
+ const futureCredit=data.receipts.filter(r=>r.date>asOf).reduce((a,r)=>a+num(r.amounts?.credit),0);
+ const creditReserve=num(data.reserved)-futureCredit
+   +data.extraIncomes.filter(i=>i.destination==='credit'&&i.date>=data.startBalances.date&&i.date<=asOf).reduce((a,i)=>a+num(i.amount),0);
+ const savings=categoryBalanceAt('savings',asOf);
+ const available=envelopes-savings;
+ const reserve=mortgage+creditReserve;
+ return {envelopes,savings,available,reserve,mortgage,creditReserve,total:envelopes+reserve};
+}
+function
+
+
+============== Подтверждение фактического поступления ==============
+Позиция в исходном index.html: [273800, 276700)
+
+>0?String(Math.round(proposed*100)/100):'';
+ amountField.defaultValue='';
+ amountField.placeholder='Фактически получено, ₽';
+ $('receiptEntryDate').max=iso(new Date());
+ $('receiptEntryDate').min=data.startBalances.date;
+ $('receiptEntryDate').value=iso(new Date());
+ $('receiptEntryError').hidden=true;
+ $('receiptEntryOverlay').hidden=false;
+ // The proposed amount exactly matches the payroll preview. The user can
+ // edit it before confirming the actual receipt.
+}
+$('receiptEntryForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ if(!receiptEntryType||!receiptEntryMonth)return;
+ const amount=Number($('receiptEntryAmount').value),date=$('receiptEntryDate').value;
+ const err=$('receiptEntryError');
+ if(!Number.isFinite(amount)||amount<=0||!fromISO(date)||date>iso(new Date())||date<data.startBalances.date){
+  err.textContent='Укажи положительную сумму и дату от начала учёта до сегодняшнего дня.';err.hidden=false;return;
+ }
+ if(month!==receiptEntryMonth||data.receipts.some(r=>r.id===receiptEntryMonth+'-'+receiptEntryType)){
+  err.textContent='Месяц или состояние поступления изменилось. Закрой окно и попробуй снова.';err.hidden=false;return;
+ }
+ const type=receiptEntryType,key=month+'-'+type,m=monthData();
+ const pf=payrollForecast(m);
+ const orphanAdvance=type==='advance'&&!data.receipts.some(r=>r.month===month&&r.type==='advance')&&
+   pf.configured&&num(m.advance)>=pf.net;
+ const previousMonthAmount=orphanAdvance?0:num(m[type]);
+ if(pf.configured&&type==='advance'&&amount>pf.net*1.25){
+  if(!confirm('Внимание: аванс '+rub(amount)+' заметно превышает ожидаемый доход на руки '+rub(pf.net)+'. Проверь, не добавился ли лишний ноль. Сохранить именно эту сумму?'))return;
+ }
+ // Register a temporary receipt BEFORE calculating distribution. Otherwise the
+ // orphan-advance protection treats a legitimate large receipt as cancelled and
+ // allocates only the much smaller salary forecast.
+ const receipt={id:key,type,month,date,amount,amounts:{},previousMonthAmount};
+ data.receipts.push(receipt);
+ m[type]=amount;
+ try{
+  const calc=allocation(date),col=type==='advance'?'a':'b',amounts={};
+  for(const row of calc.rows){
+   const dest=row.id||(row.name==='Ипотека'?'mortgage':'credit');
+   amounts[dest]=Math.round(num(row[col])*100)/100;
+  }
+  // Rounding per destination can leave a few kopecks. Put them in "Other".
+  const distributed=Object.values(amounts).reduce((sum,v)=>sum+v,0);
+  const difference=Math.round((amount-distributed)*100)/100;
+  amounts.other=Math.round((num(amounts.other)+difference)*100)/100;
+  const verified=Object.values(amounts).reduce((sum,v)=>sum+v,0);
+  if(Object.values(amounts).some(v=>!Number.isFinite(v)||v<0)||
+     Math.abs(verified-amount)>0.011)throw Error('Сумма поступления не совпадает с распределением. Ничего не сохранено; попробуй ещё раз.');
+  receipt.amounts=amounts;
+  if(amounts.credit)data.reserved=num(data.reserved)+a
+
+
+============== Отмена подтверждённой выплаты ==============
+Позиция в исходном index.html: [284700, 285850)
+
+addEventListener('click',()=>receive('salary'));
+
+function undoReceipt(type){
+ const key=month+'-'+type;
+ const receipt=data.receipts.find(r=>r.id===key);
+ if(!receipt){alert('Поступление не найдено.');return;}
+ const title=type==='advance'?'аванс':'зарплату';
+ if((num(receipt.amounts?.mortgage)>0&&regularMortgageAvailable(iso(new Date()))-num(receipt.amounts?.mortgage)<-0.001)||(num(receipt.amounts?.credit)>0&&regularCreditAvailable(iso(new Date()))-num(receipt.amounts?.credit)<-0.001)){alert('Нельзя отменить поступление: часть отложенных средств уже использована для подтверждённых платежей. Сначала отмени соответствующий платёж.');return;}
+ if(!confirm('Отменить зачисление '+rub(receipt.amount)+' ('+title+') за '+month+'? Суммы будут вычтены из категорий. Уже записанные покупки и погашения сохранятся.'))return;
+ data.receipts=data.receipts.filter(r=>r.id!==key);
+ // Restore the planning amount too. Removing only the receipt used to leave
+ // its large value in monthData(), forcing the salary forecast down to zero.
+ const currentPlan=monthData();
+ if(Math.abs(num(currentPlan[type])-num(receipt.amount))<0.001){
+  currentPlan[type]=r
+
+END_OF_FINANCIAL_CORE_AUDIT_1_5_79
