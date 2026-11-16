@@ -2228,7 +2228,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <main class="main">
 <section class="view active" id="v-home">
 
-<div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайшие обязательства</h2></div><div id="obligations"></div></div>
+<div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайшие обязательства</h2><button class="analytics-icon-button alert-bell home-alert-trigger" type="button" id="budgetAlertsOpen" aria-label="Открыть финансовые предупреждения" title="Предупреждения">🔔 <span class="home-alert-label">Советы</span><span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button></div><div id="obligations"></div></div>
 <div class="home-envelopes-visible dashboard-frame" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты и остатки</h2><span class="quiet">План − расходы</span></div><div id="envelopes"></div></div>
 </section>
 <section class="view" id="v-plan">
@@ -2338,7 +2338,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 
 <section class="view" id="v-analytics">
  <div class="analytics-one-screen">
-  <div class="analytics-dash-header"><h2>Аналитика</h2><div class="alert-preview-controls"><button class="analytics-icon-button alert-bell" type="button" id="budgetAlertsOpen" aria-label="Открыть финансовые предупреждения" title="Предупреждения">🔔<span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button><button type="button" class="analytics-icon-button" id="advisorOpen">🤖 Советник</button></div></div>
+  <div class="analytics-dash-header"><h2>Аналитика</h2><button type="button" class="analytics-icon-button" id="advisorOpen">🤖 Советник</button></div>
   <div class="analytics-economy-card">
    <div class="analytics-panel-top"><b>💡 Найденная экономия</b><button type="button" class="analytics-text-button" data-anal-open="economy">Подробнее ›</button></div>
    <div class="analytics-economy-total"><strong id="ladderSaving">—</strong><span id="ladderPeriod">Сравнение с прошлым месяцем</span></div>
@@ -4972,6 +4972,10 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 #v-plan .goal-allocation-card{padding:6px 9px!important;gap:4px!important}
 #v-plan .goal-allocation-note{font-size:10px!important;line-height:1.2!important}
 
+/* Test: discreet bell on Home opens separate advisory dialog */
+.home-alert-trigger{display:inline-flex;align-items:center;gap:4px;font-size:12px;flex-shrink:0}
+.home-alert-trigger .alert-bell-count{right:-6px;top:-7px}
+@media(max-width:370px){.home-alert-label{display:none}}
 /* Test 1.5.84: bell button + dialog without altering home layout */
 .alert-preview-controls{display:flex;align-items:center;gap:6px;min-width:0}
 .alert-preview-controls .analytics-icon-button{white-space:nowrap}
