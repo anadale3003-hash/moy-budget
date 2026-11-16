@@ -3375,7 +3375,7 @@ function savingsPlanRender(){
  const verified=confirmedSavingsBalance();
  const savings=verified===null?categoryBalanceAt('savings',iso(new Date())):verified;
  const booked=savings===null?0:Math.max(0,savings);
- const baseReserve=num(ladderSettings().reserve);
+ const baseReserve=Math.max(0,reserve-incoming);
  const total=reserve+($('ladderIncluded').checked?Math.max(0,booked-baseReserve):booked);
  const validGoal=targetInput.value.trim()!==''&&Number.isInteger(proposedGoal)
    &&proposedGoal>=reserve&&proposedGoal<=1000000000;
