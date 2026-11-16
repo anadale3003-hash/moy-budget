@@ -137,7 +137,7 @@ function notificationFor(type) {
 async function sendToRecord(env, record, message) {
   const vapid = await storeCall(env, "/vapid");
   const payload = await buildPushPayload(
-    { data: { ...message, url: APP_URL }, options: { ttl: message.tag?.includes("-20") ? 3600 : 86400, urgency: "high", topic: message.tag } },
+    { data: { ...message, url: APP_URL }, options: { ttl: message.tag?.startsWith("advance-") || message.tag?.startsWith("salary-") ? 3600 : 86400, urgency: "high", topic: message.tag } },
     record.subscription,
     { subject: VAPID_SUBJECT, publicKey: vapid.publicKey, privateKey: vapid.privateKey }
   );
