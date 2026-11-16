@@ -2227,6 +2227,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-heading"><span class="payday-title">До ближайшей выплаты</span><span class="payday-date" id="nextPaymentDate"></span></span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
 <section class="view active" id="v-home">
+<div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div>
 
 <div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайшие обязательства</h2></div><div id="obligations"></div></div>
 <div class="home-envelopes-visible dashboard-frame" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты и остатки</h2><span class="quiet">План − расходы</span></div><div id="envelopes"></div></div>
@@ -3128,7 +3129,73 @@ function fitTotalMoneyTile(){
   el.style.fontSize=Math.max(min,size)+'px';
  }
 }
-function render(){const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advanceForecast):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
+
+/* Financial risk notices: use actual records for balances, label forecasts, never spend reserve. */
+function renderEarlyAlerts(){
+ const host=$('budgetEarlyAlerts');if(!host)return;
+ const now=new Date(),todayKey=iso(now),start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+ const daysUntil=d=>Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(start.getFullYear(),start.getMonth(),start.getDate()))/86400000);
+ const dateLabel=d=>d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+ const notes=[];
+ const push=(kind,title,body)=>notes.push({kind,title,body});
+ // Next mortgage payment is the first of the coming month, not an income forecast.
+ const dueDate=new Date(now.getFullYear(),now.getMonth()+(now.getDate()>=1?1:0),1);
+ const dueKey=iso(dueDate).slice(0,7);
+ const duePlan=data.months[dueKey];
+ const mortgageAmount=num(duePlan?.mortgage===undefined?(data.mortgageMonthly===undefined?55000:data.mortgageMonthly):duePlan.mortgage);
+ const daysMortgage=daysUntil(dueDate);
+ const mortgageAvailable=data.startBalances&&data.startBalances.date<=todayKey?Math.max(0,regularMortgageAvailable(todayKey)):null;
+ if(mortgageAmount>0&&daysMortgage<=45){
+  if(mortgageAvailable!==null&&mortgageAvailable+0.01<mortgageAmount){
+   const gap=mortgageAmount-mortgageAvailable;
+   push(daysMortgage<=15?'critical':'warn','🏠 На ипотеку ещё не всё отложено',
+     'К '+dateLabel(dueDate)+' потребуется '+rub(mortgageAmount)+'. По записям отложено '+rub(mortgageAvailable)+'. Не хватает '+rub(gap)+'. Проверь остаток счёта и отложи разницу заранее.');
+  }else if(mortgageAvailable===null){
+   push('info','🏠 Проверь деньги на ипотеку',
+     'К '+dateLabel(dueDate)+' нужен платёж '+rub(mortgageAmount)+'. Остаток ипотечного счёта не подтверждён — проверь, что сумма уже отложена.');
+  }
+ }
+ // January advance: compare January's projected first-half workdays with December.
+ const yy=now.getFullYear()+(now.getMonth()===11?1:0);
+ const jan=new Date(yy,0,1),janKey=iso(jan).slice(0,7);
+ const janPayday=plannedPayday(janKey,Number(data.payDays.advance)||16);
+ const janRangeDays=daysUntil(janPayday);
+ if(now.getMonth()>=10||now.getMonth()===0){
+  if(janRangeDays>=-17&&janRangeDays<=100){
+   const decKey=(yy-1)+'-12';
+   const janCfg=data.months[janKey]||{},decCfg=data.months[decKey]||{};
+   const janEstimate=payrollForecast(janCfg,janKey),decEstimate=payrollForecast(decCfg,decKey);
+   const januaryReceipt=(data.receipts||[]).some(r=>r.id===janKey+'-advance');
+   if(!januaryReceipt){
+    const smaller=janEstimate.configured&&decEstimate.configured&&janEstimate.advanceForecast<decEstimate.advanceForecast;
+    const febDue=new Date(yy,1,1);
+    const febKey=iso(febDue).slice(0,7);
+    const febPlan=data.months[febKey];
+    const febMortgage=num(febPlan?.mortgage===undefined?(data.mortgageMonthly===undefined?55000:data.mortgageMonthly):febPlan.mortgage);
+    const estimateText=smaller?'По расчёту аванс может быть около '+rub(janEstimate.advanceForecast)+' вместо декабрьских '+rub(decEstimate.advanceForecast)+'. ':'Из-за новогодних праздников аванс может быть меньше обычного. ';
+    push('warn','🎄 Подготовь деньги к январю',
+      estimateText+'На ипотеку к '+dateLabel(febDue)+' потребуется '+rub(febMortgage)+'. По возможности отложи деньги из декабрьских поступлений. Прогноз не учитывает все особенности расчёта работодателя.');
+   }
+  }
+ }
+ // Credit due: report the outstanding balance and known reserves only.
+ const creditDue=fromISO(data.deadline),outstanding=creditOutstanding();
+ if(creditDue&&outstanding>0){
+  const days=daysUntil(creditDue);
+  const reserved=Math.max(0,num(data.reserved)+incomeAmountFor('credit'));
+  const gap=Math.max(0,outstanding-reserved);
+  if(days<=90){
+   const deadlineText=days<0?'Срок погашения по настройкам уже прошёл.':days<=30?'До срока осталось '+days+' дн.':'Срок '+dateLabel(creditDue)+'.';
+   push(days<=30?'critical':'warn','💳 Проверь кредитку',
+     deadlineText+' Учтённый долг '+rub(outstanding)+', отдельно зарезервировано '+rub(reserved)+'. '+(gap>0?'До полного погашения не хватает '+rub(gap)+'. ':'')+'Проверь льготный период, обязательный платёж и данные банка.');
+  }
+ }
+ // No fabricated savings or inferred cushion balance.
+ if(notes.length===0){host.innerHTML='';return;}
+ host.innerHTML=notes.slice(0,3).map(n=>'<div class="budget-early-alert '+n.kind+'"><b>'+esc(n.title)+'</b><p>'+esc(n.body)+'</p></div>').join('');
+}
+
+function render(){renderEarlyAlerts();const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advanceForecast):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
 $('envelopes').innerHTML=cats.map(cat=>{const line=calc.rows.find(x=>x.id===cat.id);const budget=(line?.a||0)+(line?.b||0);const used=sumExpenses(cat.id),balance=realBalance(cat.id),remaining=balance===null?budget-used:balance,pct=balance===null&&budget?Math.max(0,Math.min(100,used/budget*100)):0;return `<button type="button" class="card envelope-button" data-envelope="${cat.id}" aria-label="Открыть историю: ${cat.name}"><div class="row"><div class="row-title"><div class="emoji">${cat.icon}</div><div><div class="name">${cat.name}</div></div></div><div class="number" style="color:${remaining<0?'var(--red)':'var(--ink)'}">${rub(remaining)}</div></div><div class="track"><div class="fill" style="width:${pct}%;background:${cat.color}"></div></div><div class="tinyline"><span>За месяц потрачено ${rub(used)}</span><span>${balance===null?Math.round(pct)+'% от плана':'Учёт с '+esc(data.startBalances.date)}</span></div></button>`}).join('');
 const cc=credit();const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':'Откладывай '+rub(cc.per)+' с каждой предстоящей выплаты';$('obligations').innerHTML=`<div class="card"><div class="lineitem"><span>🏠 Ипотека: ${(data.paidMortgageMonth===month||regularPaidForMonth('mortgage',month)>=num(m.mortgage)&&num(m.mortgage)>0)?'оплачена':'платёж по плану'}</span><span>${rub(m.mortgage)}</span></div>${data.startBalances?`<div class="lineitem"><span>На следующую ипотеку отложено</span><span>${rub(mortgageFund())}</span></div>`:''}<div class="lineitem"><span>💳 Ещё накопить на кредитку</span><span>${rub(cc.debt)}</span></div><div class="sub" style="margin-top:10px">${esc(state)}</div></div>`;
 const visiblePlanRows=displayAllocationRows(calc.rows);
@@ -4891,6 +4958,14 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 #v-plan .goal-allocation-card{padding:6px 9px!important;gap:4px!important}
 #v-plan .goal-allocation-note{font-size:10px!important;line-height:1.2!important}
 
+/* v1.5.83: proactive financial warnings, shown on Home before obligations. */
+.budget-early-alerts:empty{display:none}
+.budget-early-alerts{display:grid;gap:8px;margin-bottom:11px}
+.budget-early-alert{border:1px solid var(--line);border-left:3px solid #d78b38;border-radius:13px;background:var(--card);padding:10px 12px}
+.budget-early-alert.critical{border-left-color:#cf5555}
+.budget-early-alert.info{border-left-color:var(--blue)}
+.budget-early-alert b{display:block;font-size:13px;margin-bottom:4px}
+.budget-early-alert p{margin:0;font-size:12px;line-height:1.4;color:var(--ink)}
 /* v1.5.82: verified savings are entered separately from budget allocations. */
 #analyticsModalPlan .confirmed-savings-card{padding:9px 10px;margin:9px 0;border:1px solid var(--line);border-radius:12px;background:var(--card)}
 #analyticsModalPlan .confirmed-savings-card .row{align-items:center;gap:8px}
@@ -4963,6 +5038,7 @@ function setupAdvisor(){
    'Неприкосновенная подушка — 500 000 ₽; её фактический остаток может быть неизвестен.',
    'Не выдумывай данные. Различай факты, планы, гипотезы, проценты и доходы. Переводы между счетами — не доход.',
    'Проверь долг и сроки кредитки, сохранность резерва и реалистичность платежей.',
+   'Отвечай простым разговорным языком, без финансового жаргона. Предупреждай заранее о будущей нехватке денег: январский аванс после праздников, ближайшая ипотека, кредитка. Называй дату, конкретную сумму и действие. Прогноз отделяй от фактов.',
    'Не сравнивай ипотеку и вклад без ставки ипотеки, чистой ставки вклада, налогов и ограничений.',
    ...(responseMode==='short'?[
     'ФОРМАТ ОТВЕТА: ТОЛЬКО ВАЖНОЕ.',
