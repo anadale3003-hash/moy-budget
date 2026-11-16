@@ -232,7 +232,8 @@ export class SubscriptionStore extends DurableObject {
         const pair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
         const publicRaw = new Uint8Array(await crypto.subtle.exportKey("raw", pair.publicKey));
         const privateJwk = await crypto.subtle.exportKey("jwk", pair.privateKey);
-        const privateRaw = Uint8Array.from(atob(privateJwk.d.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0));
+        const privateB64 = privateJwk.d.replace(/-/g, "+").replace(/_/g, "/");
+        const privateRaw = Uint8Array.from(atob(privateB64 + "=".repeat((4 - privateB64.length % 4) % 4)), c => c.charCodeAt(0));
         keys = { publicKey: b64url(publicRaw), privateKey: b64url(privateRaw) };
         await this.ctx.storage.put("vapid", keys);
       }
