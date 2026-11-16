@@ -1,0 +1,106 @@
+МОЙ БЮДЖЕТ 1.5.79 — ПРОДОЛЖЕНИЕ index.html
+ЧАСТЬ 7 ИЗ 7; СОДЕРЖИМОЕ СТРОГО В ПОРЯДКЕ
+Исходный файл: index.html, смещение символов [315358, 322523) (нумерация с нуля).
+Это буквальный фрагмент без изменений. Он может начинаться/заканчиваться внутри JS/CSS/HTML — не трактуй границы как границы синтаксиса.
+Для полного аудита объединяй все части по порядку и используй 01_Moy_Budget_Application_1.5.79.txt как источник начального CSS.
+==== НАЧАЛО ФРАГМЕНТА ====
+  return [...m].sort((a,b)=>b[1]-a[1]).map(([k,v])=>'  '+k+': '+ru(v)).join('\n')||'  Нет операций';
+ };
+ function report(){
+  // Read-only snapshot. No records, dates or app settings are changed.
+  const d=typeof data==='object'&&data?data:JSON.parse(localStorage.getItem('my-budget-v1')||'{}');
+  const today=new Date().toLocaleDateString('sv-SE');
+  const month=today.slice(0,7);
+  const expenses=Array.isArray(d.expenses)?d.expenses.filter(x=>validDate(x.date)&&x.date<=today):[];
+  const incomes=Array.isArray(d.extraIncomes)?d.extraIncomes.filter(x=>validDate(x.date)&&x.date<=today):[];
+  const receipts=Array.isArray(d.receipts)?d.receipts.filter(x=>validDate(x.date)&&x.date<=today):[];
+  const periods=[...new Set([...expenses.map(x=>x.date.slice(0,7)),...receipts.map(x=>x.date.slice(0,7)),...incomes.map(x=>x.date.slice(0,7))])].filter(x=>x<=month).sort().slice(-6);
+  if(!periods.includes(month)) periods.push(month);
+  const mortgage=amount(d.months?.[month]?.mortgage??d.mortgageMonthly??55000);
+  const reserve=amount(d.ladder?.reserve);
+  const debt=amount(d.debt);
+  const reserved=amount(d.reserved);
+  const catNames={family:'Семейные нужды',utilities:'Коммуналка',savings:'Накопления',other:'Остальное'};
+  const monthExpense=expenses.filter(x=>x.date.startsWith(month));
+  const monthIncome=incomes.filter(x=>x.date.startsWith(month));
+  const monthReceipt=receipts.filter(x=>x.date.startsWith(month));
+  const detail=$a('advisorDetailed').checked;
+  const responseMode=$a('advisorResponseMode').value;
+  const lines=[
+   'ФИНАНСОВЫЙ АНАЛИЗ — «МОЙ БЮДЖЕТ»',
+   'Дата: '+today+'. Валюта: рубли.',
+   'Это отчёт только из записей приложения; отсутствие операции не означает отсутствие расхода.',
+   'Записи в будущем исключены. Планы и фактически поступившие деньги не смешивать.',
+   '',
+   'ЗАДАЧА ДЛЯ CHATGPT:',
+   'Выступи финансовым советником семьи. Цель — безопасно увеличивать чистый капитал.',
+   'Не предлагай акции, криптовалюту, спекуляции и рискованный бизнес.',
+   'Неприкосновенная подушка — 500 000 ₽; её фактический остаток может быть неизвестен.',
+   'Не выдумывай данные. Различай факты, планы, гипотезы, проценты и доходы. Переводы между счетами — не доход.',
+   'Проверь долг и сроки кредитки, сохранность резерва и реалистичность платежей.',
+   'Не сравнивай ипотеку и вклад без ставки ипотеки, чистой ставки вклада, налогов и ограничений.',
+   ...(responseMode==='short'?[
+    'ФОРМАТ ОТВЕТА: ТОЛЬКО ВАЖНОЕ.',
+    'Пиши коротко, без длинного вступления, таблиц, графиков и повторов; максимум 120 слов.',
+    'Сначала 3–4 ключевые цифры с пометкой, если они не подтверждены фактическим остатком.',
+    'Затем не более 3 приоритетных действий с конкретными суммами там, где они обоснованы.',
+    'Заверши одним коротким шагом на ближайшие 30 дней и главным выводом.',
+    'Если экономия не подтверждена, прямо назови её гипотезой. Не называй погашение долга доходом или экономией.'
+   ]:[
+    'ФОРМАТ ОТВЕТА: РАЗВЁРНУТЫЙ АНАЛИЗ.',
+    'Найди до 5 конкретных действий: эффект в ₽/месяц и ₽/год, сложность, риски.',
+    'Разделяй подтверждённую экономию, гипотезы и процентные доходы.',
+    'Дай проверку резерва, график погашения кредитки и реалистичный план на 30 дней.',
+    'Неизвестные данные обозначь явно; не считай погашение долга экономией.'
+   ]),
+   '',
+   'СОСТОЯНИЕ:',
+   'Ипотека — план ежемесячного платежа: '+ru(mortgage),
+   'Кредитная карта — учтённый долг: '+ru(debt)+'; отдельно отложено: '+ru(reserved)+'; срок: '+(d.deadline||'не указан'),
+   'Подушка безопасности — значение в настройках: '+ru(reserve)+' (может быть не равно остатку на счёте)',
+   'Накопления: точный свободный остаток не выводится, если он неотличим от бюджетных переводов.',
+   'Текущий месяц: '+month,
+   'Поступления зарплаты/аванса, записанные как полученные: '+ru(sum(monthReceipt,x=>amount(x.amount))),
+   'Дополнительные доходы: '+ru(sum(monthIncome,x=>amount(x.amount))),
+   'Записанные расходы: '+ru(sum(monthExpense,x=>amount(x.amount))),
+   'По категориям расходов:',
+   group(monthExpense,x=>catNames[x.category]||x.category),
+   'По источникам дополнительных доходов:',
+   group(monthIncome,x=>x.source||'Прочее'),
+   '',
+   'ПОСЛЕДНИЕ МЕСЯЦЫ (только фактические операции):'
+  ];
+  for(const p of periods){
+   const e=expenses.filter(x=>x.date.startsWith(p)), r=receipts.filter(x=>x.date.startsWith(p)), i=incomes.filter(x=>x.date.startsWith(p));
+   lines.push(p+': выплаты '+ru(sum(r,x=>amount(x.amount)))+', доп. доходы '+ru(sum(i,x=>amount(x.amount)))+', расходы '+ru(sum(e,x=>amount(x.amount))));
+  }
+  if(detail){lines.push('','ВИДЫ РАСХОДОВ ЗА ТЕКУЩИЙ МЕСЯЦ:',group(monthExpense,x=>x.type||catNames[x.category]||'Без вида'));}
+  lines.push('','Примечание: отчёт не содержит ФИО, заметок к операциям, номеров счетов и полных журналов транзакций.');
+  return lines.join('\n');
+ }
+ const feedback=(id,message)=>{
+ const button=$a(id);
+ if(button){
+  if(!button.dataset.originalLabel)button.dataset.originalLabel=button.textContent;
+  button.classList.add('done');button.textContent='✓ Готово';
+  clearTimeout(button._advisorFeedbackTimer);
+  button._advisorFeedbackTimer=setTimeout(()=>{button.textContent=button.dataset.originalLabel;button.classList.remove('done')},1800);
+ }
+ $a('adviceStatus').textContent='✓ '+message;
+};
+const refresh=()=>{$a('adviceText').value=report();$a('adviceStatus').textContent='✓ Сводка сформирована на этом устройстве.';};
+ open.addEventListener('click',()=>{try{refresh();dialog.showModal();}catch(e){alert('Не удалось сформировать сводку: '+e.message);}});
+ $a('advisorClose').addEventListener('click',()=>dialog.close());
+ $a('advisorDetailed').addEventListener('change',refresh);
+ $a('advisorResponseMode').addEventListener('change',refresh);
+ $a('advisorRefresh').addEventListener('click',()=>{refresh();feedback('advisorRefresh','Сводка обновлена.');});
+ $a('advisorCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($a('adviceText').value);feedback('advisorCopy','Скопировано. Вставь сводку в чат ChatGPT.');}catch(_){$a('adviceText').focus();$a('adviceText').select();$a('adviceStatus').textContent='Выделено. Нажми «Копировать» в меню iPhone.';}});
+ $a('advisorShare').addEventListener('click',async()=>{try{if(navigator.share){await navigator.share({title:'Финансовый анализ — Мой бюджет',text:$a('adviceText').value});feedback('advisorShare','Открыто меню отправки.');}else{$a('adviceStatus').textContent='Меню отправки недоступно. Используй «Скопировать».';}}catch(e){if(e.name!=='AbortError')$a('adviceStatus').textContent='Не удалось открыть отправку.';}});
+ $a('advisorDownload').addEventListener('click',()=>{const u=URL.createObjectURL(new Blob([$a('adviceText').value],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download='finansovyy-sovetnik-'+new Date().toLocaleDateString('sv-SE')+'.txt';document.body.appendChild(a);a.click();a.remove();feedback('advisorDownload','Файл подготовлен.');setTimeout(()=>URL.revokeObjectURL(u),1500);});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupAdvisor,{once:true});else setupAdvisor();
+})();
+</script>
+</body></html>
+
+==== КОНЕЦ ФРАГМЕНТА ====
