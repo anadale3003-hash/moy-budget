@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "moy-budget-push",
+  "name": "autumn-resonance-d140",
   "main": "src/index.js",
   "compatibility_date": "2026-11-01",
   "workers_dev": true,
