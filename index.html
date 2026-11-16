@@ -2366,6 +2366,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  <label class="field"><span>Какие напоминания присылать</span><select id="notifyReminderChoice"><option value="all">Аванс, зарплата и итоги месяца</option><option value="pay">Только аванс и зарплата</option><option value="none">Выключены</option></select></label>
  <button class="btn" type="button" id="notifyEnableBtn">Подключить push-уведомления</button>
  <button class="btn" type="button" id="notifyTestBtn">Отправить тестовое push</button>
+ <button class="btn secondary" type="button" id="notifyDelayedTestBtn">🔒 Тест через 30 секунд</button>
  <div class="foot" id="notifyStatus" role="status" aria-live="polite">Push ещё не подключён на этом устройстве.</div>
 </div>
 <div class="card theme-card"><div class="row"><b>Тема оформления</b><span class="quiet">Как в SQL Work Assistant</span></div><label class="field"><span>Выбери оформление</span><select id="themeSelect"></select></label></div>
@@ -4300,8 +4301,9 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
   const choice=document.getElementById('notifyReminderChoice');
   const enable=document.getElementById('notifyEnableBtn');
   const test=document.getElementById('notifyTestBtn');
+  const delayed=document.getElementById('notifyDelayedTestBtn');
   const status=document.getElementById('notifyStatus');
-  if(!choice||!enable||!test||!status)return;
+  if(!choice||!enable||!test||!delayed||!status)return;
   const preferenceKey='budget-notification-preferences-v1';
   choice.value=localStorage.getItem(preferenceKey)||'all';
   const isInstalled=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
@@ -4374,6 +4376,24 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
     catch(e){status.textContent='Не удалось обновить даты выплат: '+e.message;}
    });
   }
+  delayed.addEventListener('click',async()=>{
+   if(!supported()||Notification.permission!=='granted'){
+    await refresh();
+    return;
+   }
+   delayed.disabled=true;
+   try{
+    const sub=await currentSubscription();
+    if(!sub)throw new Error('Сначала подключи push-уведомления.');
+    const result=await post('/test-delayed',{endpoint:sub.endpoint});
+    if(!result.ok)throw new Error('Сервер не подтвердил запланированную отправку.');
+    status.textContent='Тест назначен: через 30 секунд. Заблокируй iPhone и дождись push на экране блокировки.';
+   }catch(e){
+    status.textContent='Не удалось запланировать тест: '+e.message;
+   }finally{
+    delayed.disabled=false;
+   }
+  });
   test.addEventListener('click',async()=>{
    if(!supported()||Notification.permission!=='granted'){await refresh();return;}
    test.disabled=true;
