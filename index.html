@@ -2378,7 +2378,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="two"><label class="field"><span>Рабочих дней в месяце (необязательно)</span><input id="manualDaysTotal" type="number" min="1" max="31" step="1" placeholder="Автоматически"></label><label class="field"><span>Из них с 1 по 15 (необязательно)</span><input id="manualDaysFirst" type="number" min="0" max="15" step="1" placeholder="Автоматически"></label></div>
 <div id="salaryCalendarInfo" class="hint"></div></div>
 <div class="card"><b>Старт с текущих остатков</b><p class="foot">Установи реальные деньги на счетах. Старые покупки до даты старта не будут вычтены ещё раз. Плановые зарплаты не считаются полученными.</p><label class="field"><span>Дата начала учёта</span><input id="startDate" type="date"></label><div class="two"><label class="field"><span>Семейные нужды, ₽</span><input id="start-family" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Коммуналка, ₽</span><input id="start-utilities" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Накопления, ₽</span><input id="start-savings" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Остальное, ₽</span><input id="start-other" type="number" min="0" inputmode="decimal"></label></div><label class="field"><span>Уже отложено на следующую ипотеку, ₽</span><input id="startMortgageFund" type="number" min="0" inputmode="decimal"></label><label class="field"><span>За какой месяц ипотека уже оплачена</span><input id="paidMortgageMonth" type="month"></label><button class="btn full" id="saveStart" type="button">Сохранить стартовые остатки</button><div id="startStatus" class="foot"></div></div>
-<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion">1.5.79</strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
+<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion">1.5.80</strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
 <div class="card"><b>Резервная копия</b><p class="foot">Сохрани данные перед обновлением или переносом на другой телефон.</p><div class="actions"><button class="btn secondary" id="exportData" type="button">Сохранить копию</button><button class="btn light" id="importClick" type="button">Восстановить</button></div><input type="file" id="importData" accept="application/json,.json" style="display:none"></div>
 <div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
 <div class="hint">Финансовые данные остаются в хранилище браузера на этом устройстве. Не очищай данные сайта, если не сохранил резервную копию.</div>
@@ -2575,7 +2575,7 @@ else setup();
 </script>
 <script>
 (function(){'use strict';
-const THEMES={"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY='my-budget-v1';const fmt=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});const rub=n=>fmt.format(Math.round(n||0))+' ₽';const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
+const THEMES={"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY='my-budget-v1';const fmt=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});const rub=n=>fmt.format(Math.round(Number.isFinite(n)?n:0))+' ₽';const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
 let data;const defaults=()=>({months:{},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:10000,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
 try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();if(!data.expenseTypes||typeof data.expenseTypes!=='object')data.expenseTypes={};
 for(const c of cats){if(!Array.isArray(data.expenseTypes[c.id]))data.expenseTypes[c.id]=[];}
@@ -2750,7 +2750,7 @@ function save(){
  }
 }
 
-function num(n){return Math.max(0,Number(n)||0)}
+function num(n){const value=Number(n);return Number.isFinite(value)?Math.max(0,value):0}
 function dateFor(monthKey,day){const [y,m]=monthKey.split('-').map(Number);const max=new Date(y,m,0).getDate();return new Date(y,m-1,Math.min(Math.max(1,day),max))}
 function isWorkingPayday(d){
  const key=iso(d),week=d.getDay();
@@ -3007,7 +3007,7 @@ function actualMoneyToday(){
  return {envelopes,savings,available,reserve,mortgage,creditReserve,total:envelopes+reserve};
 }
 function mortgageFund(){if(!data.startBalances)return null;return num(data.startBalances.mortgage)+data.receipts.filter(r=>r.date>=data.startBalances.date).reduce((a,r)=>a+num(r.amounts?.mortgage),0)+incomeAmountFor('mortgage',data.startBalances.date)-mortgageReserveSpent(data.startBalances.date)}
-function updateStartFields(){const x=data.startBalances||{date:iso(today),balances:{},mortgage:0};$('startDate').value=x.date;$('startMortgageFund').value=x.mortgage||0;for(const c of cats)$('start-'+c.id).value=x.balances?.[c.id]||0;$('paidMortgageMonth').value=data.paidMortgageMonth||'';}
+function updateStartFields(){const x=data.startBalances||{date:iso(new Date()),balances:{},mortgage:0};$('startDate').value=x.date;$('startMortgageFund').value=x.mortgage||0;for(const c of cats)$('start-'+c.id).value=x.balances?.[c.id]||0;$('paidMortgageMonth').value=data.paidMortgageMonth||'';}
 function regularPaidForMonth(target,key){return (data.regularPayments||[]).filter(p=>p.target===target&&p.month===key).reduce((a,p)=>a+num(p.amount),0)}
 function regularCreditAvailable(date){
  if(!data.startBalances)return 0;
@@ -3424,7 +3424,7 @@ $('analyticsIncomeTotal').textContent=rub(allIncome);
 $('analyticsExtraIncome').textContent=rub(extraIncome);
 $('analyticsNet').textContent='Доходы − расходы: '+rub(allIncome-total);
 $('analyticsTotal').textContent=rub(total);
-const isCurrent=month===currentMonth;const denominator=isCurrent?today.getDate():new Date(y,m,0).getDate();
+const now=new Date();const isCurrent=month===iso(now).slice(0,7);const denominator=isCurrent?now.getDate():new Date(y,m,0).getDate();
 $('analyticsDaily').textContent=rub(total/Math.max(1,denominator))+' в день';
 $('analyticsChange').textContent=!previous?'Нет данных':(total>=previous?'+':'−')+Math.abs(Math.round((total-previous)/previous*100))+'%';
 const bar=(label,val,max)=>`<div class="analytics-line"><div class="row"><span>${esc(label)}</span><b>${rub(val)}</b></div><div class="track"><div class="fill" style="width:${max>0?Math.min(100,val/max*100):0}%;background:var(--blue)"></div></div></div>`;
@@ -3661,14 +3661,14 @@ $('ruleForm').addEventListener('submit',e=>{
  if(sum>100.011){alert('Сумма процентов от месячного прогноза больше 100%. Уменьши долю другой категории.');return;}
  data.categoryRules=proposed;if(renderAll()){ruleDialog.close();showSaveFeedback('Пропорции сохранены',ruleTrigger);}
 });
-$('earlyDate').value=iso(today);
+$('earlyDate').value=iso(new Date());
 
 $('earlyForm').addEventListener('submit',e=>{
  e.preventDefault();
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках.');go('settings');return;}
  const amount=num($('earlyAmount').value),date=$('earlyDate').value,target=$('earlyTarget').value,note=$('earlyNote').value.trim();
  if(!amount||!fromISO(date)||!['credit','mortgage'].includes(target))return;
- if(date>iso(today)){alert('Будущий платёж пока не выполнен. Добавь запись после фактического погашения.');return;}
+ if(date>iso(new Date())){alert('Будущий платёж пока не выполнен. Добавь запись после фактического погашения.');return;}
  if(date<data.startBalances.date){alert('Дата платежа раньше даты начала учёта. Учти его в стартовых остатках.');return;}
  // Calculate balance as of payment date to avoid spending future receipts on earlier transactions.
  const savingsAtDate=num(data.startBalances.balances.savings)
@@ -3686,7 +3686,7 @@ $('earlyForm').addEventListener('submit',e=>{
  if(target==='mortgage')alert('Погашение записано. После подтверждения банка вручную обнови ежемесячный платёж по ипотеке, если он изменился.');
 });
 $('earlyHistory').addEventListener('click',e=>{const b=e.target.closest('[data-del-early]');if(!b)return;if(!confirm('Удалить запись о досрочном погашении? Остаток накоплений восстановится.'))return;data.earlyRepayments=data.earlyRepayments.filter(x=>x.id!==b.dataset.delEarly);renderAll();});
-$('transferDate').value=iso(today);
+$('transferDate').value=iso(new Date());
 function updateTransferAvailable(){
  const from=$('transferFrom').value, date=$('transferDate').value;
  const balance=fromISO(date)?categoryBalanceAt(from,date):null;
@@ -3700,7 +3700,7 @@ $('transferForm').addEventListener('submit',e=>{
  const from=$('transferFrom').value,to=$('transferTo').value,date=$('transferDate').value,amount=num($('transferAmount').value),note=$('transferNote').value.trim();
  if(!cats.some(c=>c.id===from)||!cats.some(c=>c.id===to)||!fromISO(date)||!Number.isFinite(amount)||amount<=0){alert('Проверь поля перевода.');return;}
  if(from===to){alert('Выбери разные категории.');return;}
- if(date>iso(today)){alert('Будущие переводы пока не учитываются.');return;}
+ if(date>iso(new Date())){alert('Будущие переводы пока не учитываются.');return;}
  if(date<data.startBalances.date){alert('Дата перевода раньше начала учёта.');return;}
  const available=categoryBalanceAt(from,date);
  if(available===null||amount>available+0.001){alert('Недостаточно средств в исходной категории. Доступно: '+rub(Math.max(0,available||0)));return;}
@@ -3714,7 +3714,7 @@ $('transferList').addEventListener('click',e=>{
  if(!confirm('Отменить перевод? Сумма вернётся в исходную категорию.'))return;
  data.transfers=data.transfers.filter(t=>t.id!==b.dataset.delTransfer);renderAll();
 });
-$('incomeDate').value=iso(today);
+$('incomeDate').value=iso(new Date());
 
 $('incomeForm').addEventListener('submit',e=>{
  e.preventDefault();
@@ -3730,7 +3730,7 @@ $('incomeList').addEventListener('click',e=>{
  const b=e.target.closest('[data-del-income]');if(!b||!confirm('Удалить это поступление?'))return;
  data.extraIncomes=data.extraIncomes.filter(i=>i.id!==b.dataset.delIncome);renderAll();
 });
-$('expenseDate').value=iso(today);
+$('expenseDate').value=iso(new Date());
 $('expenseCategory').addEventListener('change',()=>refreshTypes());
 $('expenseType').addEventListener('change',toggleNewType);
 refreshTypes();
@@ -3740,7 +3740,7 @@ if(!type){alert('Выбери вид расхода');return;}
 const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===type.toLocaleLowerCase('ru'));if(existing)type=existing;else data.expenseTypes[category].push(type);
 data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);renderAll()};
 $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b||!confirm('Удалить этот расход?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
-$('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
+$('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(new Date())+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
 const APP_VERSION='1.5.80';
