@@ -2361,12 +2361,12 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <section class="view" id="v-settings">
 <div class="section-heading"><h2>Настройки</h2><span class="pill">v1.5.0</span></div>
 <div class="card" id="notifySettingsCard">
- <div class="row"><b>🔔 Уведомления</b><span class="quiet">Тестирование</span></div>
- <div class="foot">Проверка уведомлений на iPhone. Чтобы получать напоминания при закрытом приложении, потребуется подключить сервис отправки push.</div>
- <label class="field"><span>Напоминания</span><select id="notifyReminderChoice"><option value="all">Аванс, зарплата и итоги месяца</option><option value="pay">Только аванс и зарплата</option><option value="none">Выключены</option></select></label>
- <button class="btn" type="button" id="notifyEnableBtn">Разрешить уведомления</button>
- <button class="btn" type="button" id="notifyTestBtn">Отправить тестовое уведомление</button>
- <div class="foot" id="notifyStatus" role="status" aria-live="polite">Разрешение ещё не проверено.</div>
+ <div class="row"><b>🔔 Push-уведомления</b><span class="quiet">Автоматически</span></div>
+ <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. Время отправки — 08:30 по Москве. Даты аванса и зарплаты берутся из настроек приложения с переносом на предыдущий рабочий день по календарю РФ.</div>
+ <label class="field"><span>Какие напоминания присылать</span><select id="notifyReminderChoice"><option value="all">Аванс, зарплата и итоги месяца</option><option value="pay">Только аванс и зарплата</option><option value="none">Выключены</option></select></label>
+ <button class="btn" type="button" id="notifyEnableBtn">Подключить push-уведомления</button>
+ <button class="btn" type="button" id="notifyTestBtn">Отправить тестовое push</button>
+ <div class="foot" id="notifyStatus" role="status" aria-live="polite">Push ещё не подключён на этом устройстве.</div>
 </div>
 <div class="card theme-card"><div class="row"><b>Тема оформления</b><span class="quiet">Как в SQL Work Assistant</span></div><label class="field"><span>Выбери оформление</span><select id="themeSelect"></select></label></div>
 <div class="card" id="salarySettingsCard"><div class="row"><b>Оклад и рабочий календарь</b><span class="quiet">Расчёт выплат</span></div>
@@ -4293,34 +4293,96 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 </script>
 <div id="budgetSaveToast" class="budget-save-toast" role="status" aria-live="polite" aria-atomic="true" hidden><span class="budget-save-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span id="budgetSaveLabel">Сохранено</span></div>
 <script>
-/* Notification preparation: only explicit user actions prompt and display local test notifications.
-   Scheduled push delivery requires a separately deployed backend and subscription endpoint. */
+/* Remote Web Push integration for the installed PWA. */
 (function(){
+ const API='https://autumn-resonance-d140.anadale3003.workers.dev';
  const ready=()=>{
   const choice=document.getElementById('notifyReminderChoice');
   const enable=document.getElementById('notifyEnableBtn');
   const test=document.getElementById('notifyTestBtn');
   const status=document.getElementById('notifyStatus');
   if(!choice||!enable||!test||!status)return;
-  const key='budget-notification-preferences-v1';
-  choice.value=localStorage.getItem(key)||'all';
-  choice.addEventListener('change',()=>{localStorage.setItem(key,choice.value);status.textContent='Выбор сохранён на этом устройстве. Автоматическая отправка пока не подключена.'});
-  const supported=()=>('Notification' in window)&&('serviceWorker' in navigator)&&window.isSecureContext;
-  const refresh=()=>{
-   if(!supported()){status.textContent='Уведомления недоступны в этом браузере. На iPhone открой приложение с экрана «Домой».';return;}
-   status.textContent=Notification.permission==='granted'?'Разрешение получено. Можно отправить тест. Автоматические уведомления пока не подключены.':Notification.permission==='denied'?'Уведомления запрещены в настройках iPhone.':'Для проверки нажми «Разрешить уведомления».';
+  const preferenceKey='budget-notification-preferences-v1';
+  choice.value=localStorage.getItem(preferenceKey)||'all';
+  const isInstalled=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  const supported=()=>('Notification' in window)&&('serviceWorker' in navigator)&&('PushManager' in window)&&window.isSecureContext;
+  const appSettings=()=>{
+   try{return JSON.parse(localStorage.getItem('my-budget-v1')||'{}')||{};}catch(_){return {};}
   };
+  const b64ToBytes=value=>{
+   const normalized=String(value).replace(/-/g,'+').replace(/_/g,'/');
+   const padded=normalized+'='.repeat((4-normalized.length%4)%4);
+   return Uint8Array.from(atob(padded),c=>c.charCodeAt(0));
+  };
+  const post=async(path,payload)=>{
+   const response=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+   let result={};try{result=await response.json();}catch(_){}
+   if(!response.ok)throw new Error(result.detail||result.error||('HTTP '+response.status));
+   return result;
+  };
+  const preferences=()=>{
+   const d=appSettings();
+   return {reminders:choice.value,advanceDay:Number(d.payDays?.advance)||16,salaryDay:Number(d.payDays?.salary)||1};
+  };
+  const currentSubscription=async()=>{
+   const reg=await navigator.serviceWorker.ready;
+   return reg.pushManager.getSubscription();
+  };
+  const saveSubscription=async(sub)=>{
+   await post('/subscribe',{subscription:sub.toJSON(),preferences:preferences()});
+  };
+  const refresh=async()=>{
+   if(!supported()){status.textContent='Push недоступен. На iPhone установи приложение на экран «Домой» и открой его оттуда.';return;}
+   if(!isInstalled()){status.textContent='Сначала добавь приложение на экран «Домой»: Safari → Поделиться → На экран «Домой».';return;}
+   if(Notification.permission==='denied'){status.textContent='Уведомления запрещены в настройках iPhone. Разреши их для «Моего бюджета».';return;}
+   try{
+    const sub=await currentSubscription();
+    status.textContent=sub?'Push подключён. Сервер готов отправлять напоминания.':'Разрешение: '+Notification.permission+'. Нажми «Подключить push-уведомления».';
+   }catch(e){status.textContent='Не удалось проверить подписку: '+e.message;}
+  };
+  choice.addEventListener('change',async()=>{
+   localStorage.setItem(preferenceKey,choice.value);
+   try{const sub=await currentSubscription();if(sub){await saveSubscription(sub);status.textContent=choice.value==='none'?'Автоматические напоминания выключены.':'Настройки напоминаний обновлены на сервере.';}else status.textContent='Выбор сохранён. Подключи push, чтобы активировать расписание.';}
+   catch(e){status.textContent='Не удалось обновить настройки: '+e.message;}
+  });
   enable.addEventListener('click',async()=>{
-   if(!supported()){refresh();return;}
-   try{const permission=await Notification.requestPermission();refresh();if(permission!=='granted')status.textContent='Разрешение не получено. Проверь настройки уведомлений iPhone.';}catch(e){status.textContent='Не удалось запросить разрешение: '+e.message;}
+   if(!supported()){await refresh();return;}
+   if(!isInstalled()){status.textContent='Открой «Мой бюджет» с иконки на экране «Домой». Push на iPhone работает для установленного веб-приложения.';return;}
+   enable.disabled=true;status.textContent='Подключаем push…';
+   try{
+    if(Notification.permission!=='granted'){
+     const permission=await Notification.requestPermission();
+     if(permission!=='granted')throw new Error('Разрешение на уведомления не получено.');
+    }
+    const reg=await navigator.serviceWorker.ready;
+    if(!reg.pushManager)throw new Error('PushManager недоступен в этом браузере.');
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub){
+     const keyResponse=await fetch(API+'/vapid-public-key',{cache:'no-store'});
+     if(!keyResponse.ok)throw new Error('Не удалось получить ключ сервера (HTTP '+keyResponse.status+').');
+     const keyData=await keyResponse.json();
+     sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToBytes(keyData.publicKey)});
+    }
+    await saveSubscription(sub);
+    status.textContent='Готово! iPhone подписан на push. Можно отправить тест.';
+   }catch(e){status.textContent='Не удалось подключить push: '+e.message;}
+   finally{enable.disabled=false;}
   });
   test.addEventListener('click',async()=>{
-   if(!supported()){refresh();return;}
-   if(Notification.permission!=='granted'){status.textContent='Сначала разреши уведомления.';return;}
-   try{const reg=await navigator.serviceWorker.ready;
-    await reg.showNotification('Мой бюджет — тест 🔔',{body:'Уведомления разрешены. Следующий шаг — подключить отправку по расписанию.',icon:'./icon.png',badge:'./icon.png',tag:'budget-notification-test'});
-    status.textContent='Тестовое уведомление отправлено на устройство. Это локальный тест, не фоновая рассылка.';
-   }catch(e){status.textContent='Тест не отправлен: '+e.message;}
+   if(!supported()||Notification.permission!=='granted'){await refresh();return;}
+   test.disabled=true;
+   try{
+    const sub=await currentSubscription();
+    if(sub){
+     await post('/test',{endpoint:sub.endpoint});
+     status.textContent='Тестовый push отправлен сервером. Проверь уведомления iPhone.';
+    }else{
+     const reg=await navigator.serviceWorker.ready;
+     await reg.showNotification('Мой бюджет — локальный тест 🔔',{body:'Локальные уведомления работают. Для серверного push сначала подключи подписку.',icon:'./icon.png',badge:'./icon.png',tag:'budget-local-test'});
+     status.textContent='Показан локальный тест. Сначала подключи серверный push.';
+    }
+   }catch(e){status.textContent='Тестовый push не отправлен: '+e.message;}
+   finally{test.disabled=false;}
   });
   refresh();
  };
