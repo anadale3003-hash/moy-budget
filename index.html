@@ -3743,7 +3743,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(today)+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.80-test';
+const APP_VERSION='1.5.80';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION.replace('-test','')+' · ТЕСТ';
@@ -4421,7 +4421,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    try{
     const sub=await currentSubscription();
     if(!sub)throw new Error('Сначала подключи push-уведомления.');
-    const result=await post('/test-delayed',{endpoint:sub.endpoint});
+    const result=await post('/test-delayed',{endpoint:sub.endpoint,auth:sub.toJSON().keys.auth});
     if(!result.ok)throw new Error('Сервер не подтвердил запланированную отправку.');
     status.textContent='Тест назначен: через 30 секунд. Заблокируй iPhone и дождись push на экране блокировки.';
    }catch(e){
@@ -4436,7 +4436,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    try{
     const sub=await currentSubscription();
     if(sub){
-     await post('/test',{endpoint:sub.endpoint});
+     await post('/test',{endpoint:sub.endpoint,auth:sub.toJSON().keys.auth});
      status.textContent='Тестовый push отправлен сервером. Проверь уведомления iPhone.';
     }else{
      const reg=await navigator.serviceWorker.ready;
