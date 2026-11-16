@@ -2431,6 +2431,16 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
      </div>
      <label class="field analytics-plan-input"><span>Размер подушки, ₽</span><input id="ladderReserveInput" type="number" inputmode="decimal" step="100" min="0" required value="500000"></label>
      <label class="analytics-plan-included"><input id="ladderIncluded" type="checkbox"><span>Подушка уже входит в остаток категории «Накопления»</span></label>
+     <div class="confirmed-savings-card" id="confirmedSavingsCard">
+      <div class="row"><b>🏦 Фактически на накопительном счёте</b><span class="quiet" id="confirmedSavingsState">Не подтверждено</span></div>
+      <div class="foot">Укажи реальный остаток счёта. Плановые переводы из выплат не считаются фактическими. Если подушка хранится на этом же счёте, оставь галочку выше.</div>
+      <label class="field"><span>Фактический остаток счёта, ₽</span><input id="confirmedSavingsBalanceInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="Укажи сумму по банку"></label>
+      <button type="button" class="btn full secondary" id="confirmedSavingsSet">Сохранить фактический остаток</button>
+      <label class="field"><span>Дополнительно перевёл в накопления, ₽</span><input id="confirmedSavingsDeposit" inputmode="decimal" type="number" min="0.01" step="0.01" placeholder="Например, 15 000"></label>
+      <button type="button" class="btn full secondary" id="confirmedSavingsAdd">Подтвердить пополнение</button>
+      <div class="foot" id="confirmedSavingsMessage" role="status" aria-live="polite"></div>
+      <div id="confirmedSavingsHistory"></div>
+     </div>
      <label class="field analytics-plan-input"><span>Моя цель, ₽ (включая подушку)</span><input id="savingsPlanTargetAmount" type="number" inputmode="numeric" min="0" max="1000000000" step="1000" required value="1000000"></label>
      <label class="field analytics-plan-input"><span>За сколько месяцев накопить?</span><input id="savingsPlanMonths" type="number" inputmode="numeric" min="1" max="120" step="1" value="12"></label>
      <div class="analytics-plan-presets" aria-label="Выбрать срок">
@@ -2779,13 +2789,15 @@ function nearestPayday(now=new Date()){
  const options=[];
  for(let i=-2;i<=3;i++){
   const cycle=new Date(reference.getFullYear(),reference.getMonth()+i,1);
-  const ym=iso(cycle).slice(0,7);
+  const period=iso(cycle).slice(0,7);
   for(const type of ['advance','salary']){
+   // Salary on the 1st of the NEXT calendar month belongs to this cycle.
    const nextMonth=type==='salary'&&Number(data.payDays.salary)<=Number(data.payDays.advance);
    const target=new Date(cycle.getFullYear(),cycle.getMonth()+(nextMonth?1:0),1);
    const key=iso(target).slice(0,7);
    const when=plannedPayday(key,Number(data.payDays[type])||1);
-   if(when>=reference)options.push({date:when,type,month:ym});
+   if((data.receipts||[]).some(r=>r.id===period+'-'+type))continue;
+   if(when>=reference)options.push({date:when,type,month:period});
   }
  }
  return options.sort((a,b)=>a.date-b.date)[0]||null;
@@ -2830,7 +2842,10 @@ function nextPaydays(now=new Date()){
   }
   return arr.sort((a,b)=>a.date-b.date);
 }
-function credit(){const debt=Math.max(0,num(data.debt)-num(data.reserved)-incomeAmountFor('credit')-repaymentTotal('credit')-regularPaymentSum('credit'));const due=fromISO(data.deadline);const pays=nextPaydays();const per=pays.length?Math.ceil(debt/pays.length*100)/100:0;return {debt,due,pays,per}}
+function creditOutstanding(){
+ return creditOutstanding();
+}
+function credit(){const debt=Math.max(0,creditOutstanding()-num(data.reserved)-incomeAmountFor('credit'));const due=fromISO(data.deadline);const pays=nextPaydays();const per=pays.length?Math.ceil(debt/pays.length*100)/100:0;return {debt,due,pays,per}}
 // Mortgage top-ups from envelopes are already paid. Offset only the EXTRA
 // funding from subsequent UNCONFIRMED wage distributions, in payment order.
 // Past receipts retain their original confirmed allocations.
@@ -3086,7 +3101,7 @@ function receiptInfo(){
 function refreshTypes(preferred){const category=$('expenseCategory').value;const types=data.expenseTypes[category]||[];const old=preferred??$('expenseType').value;const options=types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');$('expenseType').innerHTML='<option value="">Выбери вид расхода</option>'+options+'<option value="__new__">＋ Добавить новый…</option>';
 $('expenseType').value=types.includes(old)||old==='__new__'?old:'';toggleNewType();}
 function toggleNewType(){$('newTypeWrap').style.display=$('expenseType').value==='__new__'?'block':'none';if($('expenseType').value!=='__new__')$('newExpenseType').value='';}
-function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=data.debt;$('reserved').value=data.reserved;$('deadline').value=data.deadline;renderCategoryRules();}
+function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=Math.round(creditOutstanding()*100)/100;$('reserved').value=data.reserved;$('deadline').value=data.deadline;renderCategoryRules();}
 // Fit the label and amount to the actual available tile width, including large balances.
 function fitTotalMoneyTile(){
  const tile=document.querySelector('.hero-overview .hero-all');
@@ -3267,13 +3282,19 @@ function analyticsReportRender(){
 }
 
 /* v1.5.35: capital goal planner. Same reserve accounting as the ladder above. */
+/* Actual external savings are confirmed manually; planning allocations
+   remain budget earmarks, not evidence of a bank transfer. */
+function confirmedSavingsBalance(){
+ const v=data.confirmedSavings;
+ if(!v||!Number.isFinite(Number(v.base))||Number(v.base)<0)return null;
+ return Math.max(0,num(v.base)+(v.entries||[]).reduce((sum,e)=>sum+(e.kind==='withdrawal'?-num(e.amount):num(e.amount)),0));
+}
 function capitalSnapshot(goalOverride){
  const settings=ladderSettings(),reserve=actualReserve();
  const baseReserve=num(settings.reserve);
- const savings=categoryBalanceAt('savings',iso(new Date()));
+ const confirmed=confirmedSavingsBalance();
+ const savings=confirmed===null?categoryBalanceAt('savings',iso(new Date())):confirmed;
  const booked=savings===null?0:Math.max(0,savings);
- // When the original cushion is already included in savings, subtract only that part.
- // New direct cushion income is held separately and must never be deducted twice.
  const extra=settings.included?Math.max(0,booked-baseReserve):booked;
  const total=reserve+extra;
  const automaticGoal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
@@ -3283,7 +3304,7 @@ function capitalSnapshot(goalOverride){
    &&goalOverride>=reserve&&goalOverride<=1000000000;
  const goal=override?goalOverride:(userGoal?settings.targetAmount:automaticGoal);
  return {settings,reserve,savings,extra,total,goal,automatic:!override&&!userGoal,
-   remaining:Math.max(0,goal-total)};
+   actualVerified:confirmed!==null,remaining:Math.max(0,goal-total)};
 }
 function savingsPlanTarget(months){
  const now=new Date(),d=new Date(now.getFullYear(),now.getMonth()+months-1,1);
@@ -3294,6 +3315,39 @@ function savingsPlanMonthsLeft(targetMonth){
  const [year,m]=targetMonth.split('-').map(Number);
  const now=new Date();return (year-now.getFullYear())*12+m-(now.getMonth()+1)+1;
 }
+function renderConfirmedSavings(){
+ const confirmed=confirmedSavingsBalance();
+ $('confirmedSavingsState').textContent=confirmed===null?'Нужно указать факт':'Подтверждено';
+ $('confirmedSavingsBalanceInput').value=confirmed===null?'':String(Math.round(confirmed*100)/100);
+ $('confirmedSavingsHistory').innerHTML=(data.confirmedSavings?.entries||[]).slice(-5).reverse()
+  .map(e=>'<div class="lineitem"><span>'+esc(e.date)+' · пополнение</span><span>'+rub(e.amount)+' <button type="button" class="delete" data-undo-savings-deposit="'+esc(e.id)+'" title="Отменить пополнение">↶</button></span></div>').join('');
+}
+$('confirmedSavingsSet').addEventListener('click',()=>{
+ const value=$('confirmedSavingsBalanceInput').value.trim(),amount=Number(value);
+ if(value===''||!Number.isFinite(amount)||amount<0)return $('confirmedSavingsMessage').textContent='Укажи фактический остаток по банковскому счёту.';
+ if(!confirm('Установить фактический остаток накоплений '+rub(amount)+'? Это не доход и не перевод между конвертами.'))return;
+ data.confirmedSavings={base:Math.round(amount*100)/100,entries:[]};
+ renderAll();savingsPlanOpen();
+ $('confirmedSavingsMessage').textContent='Фактический остаток сохранён. Предыдущая плановая сумма больше не используется для расчёта цели.';
+});
+$('confirmedSavingsAdd').addEventListener('click',()=>{
+ const v=$('confirmedSavingsDeposit').value.trim(),amount=Number(v);
+ if(v===''||!Number.isFinite(amount)||amount<=0)return $('confirmedSavingsMessage').textContent='Укажи положительную сумму пополнения.';
+ if(confirmedSavingsBalance()===null)return $('confirmedSavingsMessage').textContent='Сначала укажи текущий фактический остаток по банковскому счёту.';
+ if(!confirm('Подтвердить перевод '+rub(amount)+' на накопительный счёт? Не добавлять повторно, если уже учтён в фактическом остатке.'))return;
+ data.confirmedSavings.entries.push({id:'sav-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),date:iso(new Date()),amount:Math.round(amount*100)/100});
+ $('confirmedSavingsDeposit').value='';
+ renderAll();savingsPlanOpen();
+ $('confirmedSavingsMessage').textContent='Пополнение подтверждено. Перевод не считается доходом.';
+});
+$('confirmedSavingsHistory').addEventListener('click',e=>{
+ const btn=e.target.closest('[data-undo-savings-deposit]');if(!btn)return;
+ const entry=data.confirmedSavings?.entries?.find(x=>x.id===btn.dataset.undoSavingsDeposit);
+ if(!entry||!confirm('Отменить пополнение '+rub(entry.amount)+'?'))return;
+ data.confirmedSavings.entries=data.confirmedSavings.entries.filter(x=>x.id!==entry.id);
+ renderAll();savingsPlanOpen();
+});
+
 function savingsPlanRender(){
  const input=$('savingsPlanMonths');
  const parsed=Number(input.value);
@@ -3339,6 +3393,7 @@ function savingsPlanRender(){
 }
 function savingsPlanOpen(){
  const settings=ladderSettings();
+ renderConfirmedSavings();
  const remaining=savingsPlanMonthsLeft(settings.targetMonth);
  $('savingsPlanTargetAmount').value=String(capitalSnapshot().goal);
  $('ladderReserveInput').value=String(actualReserve());
@@ -3623,7 +3678,13 @@ for(const id of ['baseSalary','salaryTaxRate'])$(id).addEventListener('input',e=
 $('salaryMode').addEventListener('change',e=>{data.salaryConfig.mode=e.target.value;render();save()});
 for(const id of ['manualDaysTotal','manualDaysFirst'])$(id).addEventListener('input',e=>{monthData()[id]=e.target.value===''?'':num(e.target.value);render();save()});
 for(const id of ['advanceDate','salaryDate'])$(id).addEventListener('change',e=>{const d=fromISO(e.target.value);if(!d)return;data.payDays[id==='advanceDate'?'advance':'salary']=d.getDate();render();save()});
-for(const id of ['debt','reserved'])$(id).addEventListener('input',e=>{data[id]=num(e.target.value);render();save()});
+$('debt').addEventListener('input',e=>{
+ // The displayed debt is the remaining real debt. data.debt remains the
+ // original ledger basis because confirmed payments are subtracted elsewhere.
+ data.debt=num(e.target.value)+repaymentTotal('credit')+regularPaymentSum('credit');
+ render();save();
+});
+$('reserved').addEventListener('input',e=>{data.reserved=num(e.target.value);render();save()});
 $('deadline').addEventListener('change',e=>{data.deadline=e.target.value;render();save()});
 $('mortgage').addEventListener('change',e=>{
  const raw=e.target.value.trim(),monthly=Number(raw);
@@ -3936,7 +3997,7 @@ function confirmRegularPayment(target,amount,date,extraSource='',part=''){
  if(!data.startBalances)return 'Сначала укажи стартовые остатки в настройках.';
  if(!Number.isFinite(amount)||amount<=0||!fromISO(date)||date>iso(new Date())||date<data.startBalances.date)return 'Проверь сумму и дату. Платёж должен быть после начала учёта и не позже сегодня.';
  if(target==='credit'){
-  const outstanding=Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
+  const outstanding=creditOutstanding();
   if(amount>outstanding+0.001)return 'Платёж превышает оставшийся учтённый долг: '+rub(outstanding);
  }
  const {reserveUsed,extraAmount}=paymentFunding(target,amount,date);
@@ -4828,6 +4889,15 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 #v-plan .goal-needed{font-size:13px;font-weight:800;color:var(--blue);line-height:1.2}
 #v-plan .goal-allocation-card{padding:6px 9px!important;gap:4px!important}
 #v-plan .goal-allocation-note{font-size:10px!important;line-height:1.2!important}
+
+/* v1.5.82: verified savings are entered separately from budget allocations. */
+#analyticsModalPlan .confirmed-savings-card{padding:9px 10px;margin:9px 0;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+#analyticsModalPlan .confirmed-savings-card .row{align-items:center;gap:8px}
+#analyticsModalPlan .confirmed-savings-card .row>b{font-size:12px}
+#analyticsModalPlan .confirmed-savings-card .field{margin:7px 0}
+#analyticsModalPlan .confirmed-savings-card .btn{min-height:37px;margin:4px 0}
+#analyticsModalPlan .confirmed-savings-card .foot{font-size:11px}
+#analyticsModalPlan #confirmedSavingsHistory .lineitem{font-size:11px}
 </style>
 <dialog id="adviceDialog" aria-labelledby="advisorTitle"><div class="advisor-shell">
 <div class="advisor-head"><h2 id="advisorTitle">🤖 Финансовый советник</h2><button class="btn light" id="advisorClose" type="button" aria-label="Закрыть">✕</button></div>
