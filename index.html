@@ -2227,6 +2227,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего денег</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-heading"><span class="payday-title">До ближайшей выплаты</span><span class="payday-date" id="nextPaymentDate"></span></span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
 <section class="view active" id="v-home">
+<div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div>
 
 <div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайшие обязательства</h2></div><div id="obligations"></div></div>
 <div class="home-envelopes-visible dashboard-frame" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты и остатки</h2><span class="quiet">План − расходы</span></div><div id="envelopes"></div></div>
@@ -2338,7 +2339,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 
 <section class="view" id="v-analytics">
  <div class="analytics-one-screen">
-  <div class="analytics-dash-header"><h2>Аналитика</h2><div class="alerts-header-actions"><button type="button" class="analytics-icon-button" id="budgetAlertsOpen">🔔 Советы <span id="budgetAlertsCount" class="alerts-count" hidden></span></button><button type="button" class="analytics-icon-button" id="advisorOpen">🤖 Советник</button></div></div>
+  <div class="analytics-dash-header"><h2>Аналитика</h2><button type="button" class="analytics-icon-button" id="advisorOpen">🤖 Советник</button></div>
   <div class="analytics-economy-card">
    <div class="analytics-panel-top"><b>💡 Найденная экономия</b><button type="button" class="analytics-text-button" data-anal-open="economy">Подробнее ›</button></div>
    <div class="analytics-economy-total"><strong id="ladderSaving">—</strong><span id="ladderPeriod">Сравнение с прошлым месяцем</span></div>
@@ -3190,15 +3191,10 @@ function renderEarlyAlerts(){
   }
  }
  // No fabricated savings or inferred cushion balance.
- if(notes.length===0){host.innerHTML='<div class="foot">✅ Сейчас нет новых предупреждений. Проверяй после поступлений и платежей.</div>';$('budgetAlertsCount').hidden=true;return;}
+ if(notes.length===0){host.innerHTML='';return;}
  host.innerHTML=notes.slice(0,3).map(n=>'<div class="budget-early-alert '+n.kind+'"><b>'+esc(n.title)+'</b><p>'+esc(n.body)+'</p></div>').join('');
- const count=$('budgetAlertsCount');count.textContent=String(Math.min(notes.length,3));count.hidden=false;
 }
 
-const budgetAlertsDialog=$('budgetAlertsDialog');
-$('budgetAlertsOpen').addEventListener('click',()=>{renderEarlyAlerts();if(!budgetAlertsDialog.open)budgetAlertsDialog.showModal()});
-$('budgetAlertsClose').addEventListener('click',()=>budgetAlertsDialog.close());
-budgetAlertsDialog.addEventListener('click',event=>{if(event.target===budgetAlertsDialog)budgetAlertsDialog.close()});
 function render(){renderEarlyAlerts();const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advanceForecast):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
 $('envelopes').innerHTML=cats.map(cat=>{const line=calc.rows.find(x=>x.id===cat.id);const budget=(line?.a||0)+(line?.b||0);const used=sumExpenses(cat.id),balance=realBalance(cat.id),remaining=balance===null?budget-used:balance,pct=balance===null&&budget?Math.max(0,Math.min(100,used/budget*100)):0;return `<button type="button" class="card envelope-button" data-envelope="${cat.id}" aria-label="Открыть историю: ${cat.name}"><div class="row"><div class="row-title"><div class="emoji">${cat.icon}</div><div><div class="name">${cat.name}</div></div></div><div class="number" style="color:${remaining<0?'var(--red)':'var(--ink)'}">${rub(remaining)}</div></div><div class="track"><div class="fill" style="width:${pct}%;background:${cat.color}"></div></div><div class="tinyline"><span>За месяц потрачено ${rub(used)}</span><span>${balance===null?Math.round(pct)+'% от плана':'Учёт с '+esc(data.startBalances.date)}</span></div></button>`}).join('');
 const cc=credit();const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':'Откладывай '+rub(cc.per)+' с каждой предстоящей выплаты';$('obligations').innerHTML=`<div class="card"><div class="lineitem"><span>🏠 Ипотека: ${(data.paidMortgageMonth===month||regularPaidForMonth('mortgage',month)>=num(m.mortgage)&&num(m.mortgage)>0)?'оплачена':'платёж по плану'}</span><span>${rub(m.mortgage)}</span></div>${data.startBalances?`<div class="lineitem"><span>На следующую ипотеку отложено</span><span>${rub(mortgageFund())}</span></div>`:''}<div class="lineitem"><span>💳 Ещё накопить на кредитку</span><span>${rub(cc.debt)}</span></div><div class="sub" style="margin-top:10px">${esc(state)}</div></div>`;
@@ -4962,20 +4958,6 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 #v-plan .goal-allocation-card{padding:6px 9px!important;gap:4px!important}
 #v-plan .goal-allocation-note{font-size:10px!important;line-height:1.2!important}
 
-/* v1.5.84: on-demand finance warning dialog */
-.alerts-header-actions{display:flex;align-items:center;gap:6px;min-width:0}
-.alerts-header-actions .analytics-icon-button{white-space:nowrap}
-.alerts-count{display:inline-block;margin-left:3px;padding:1px 5px;border-radius:9px;background:var(--red);color:#fff;font-size:10px}
-.alerts-count[hidden]{display:none}
-.budget-alerts-dialog{width:min(460px,calc(100% - 28px));max-height:min(80dvh,660px);overflow:auto;border:1px solid var(--line);border-radius:19px;background:var(--card);color:var(--ink);padding:0;box-shadow:0 12px 55px #06172a45}
-.budget-alerts-dialog::backdrop{background:rgba(8,20,39,.65)}
-.budget-alerts-shell{padding:18px}
-.budget-alerts-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.budget-alerts-top h2{font-size:17px;margin:0}
-.budget-alerts-top .btn{padding:7px 12px}
-.budget-alerts-help{color:var(--muted);font-size:12px;line-height:1.4;margin:11px 0 16px}
-.budget-early-alerts{margin-bottom:0!important}
-@media(max-width:390px){.alerts-header-actions{gap:4px}.alerts-header-actions .analytics-icon-button{font-size:11px;padding:6px}}
 /* v1.5.83: proactive financial warnings, shown on Home before obligations. */
 .budget-early-alerts:empty{display:none}
 .budget-early-alerts{display:grid;gap:8px;margin-bottom:11px}
@@ -4993,7 +4975,6 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 #analyticsModalPlan .confirmed-savings-card .foot{font-size:11px}
 #analyticsModalPlan #confirmedSavingsHistory .lineitem{font-size:11px}
 </style>
-<dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">🔔 Важные предупреждения</h2><button type="button" class="btn light" id="budgetAlertsClose">✕</button></div><p class="budget-alerts-help">Предупреждения по записям бюджета. Прогнозы не гарантируют размер будущих выплат.</p><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
 <dialog id="adviceDialog" aria-labelledby="advisorTitle"><div class="advisor-shell">
 <div class="advisor-head"><h2 id="advisorTitle">🤖 Финансовый советник</h2><button class="btn light" id="advisorClose" type="button" aria-label="Закрыть">✕</button></div>
 <p class="advisor-desc">Подготовим обезличенную финансовую сводку для ChatGPT. Советник ищет способы увеличивать капитал: экономия, вклады, ипотека, кредитка. Никаких платных API и автоматической отправки данных.</p>
