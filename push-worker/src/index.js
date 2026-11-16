@@ -177,6 +177,15 @@ export default {
         if (response.status === 404 || response.status === 410) await storeCall(env, "/delete", { id });
         return json({ ok: response.ok, status: response.status }, response.ok ? 200 : 502, cors);
       }
+      if (request.method === "POST" && url.pathname === "/test-delayed") {
+        const body = await request.json();
+        if (!body.endpoint || typeof body.endpoint !== "string") return json({ error: "Missing endpoint" }, 400, cors);
+        const id = await endpointId(body.endpoint);
+        const result = await storeCall(env, "/get", { id });
+        if (!result?.record) return json({ error: "Device is not subscribed" }, 404, cors);
+        const queued = await storeCall(env, "/queue-test", { id, delayMs: 30000 });
+        return json({ ok: true, queued: true, delaySeconds: 30, queuedId: queued.queuedId }, 200, cors);
+      }
       if (request.method === "POST" && url.pathname === "/unsubscribe") {
         const body = await request.json();
         if (body.endpoint) await storeCall(env, "/delete", { id: await endpointId(body.endpoint) });
@@ -224,6 +233,38 @@ export default {
 };
 
 export class SubscriptionStore extends DurableObject {
+  async alarm() {
+    const entries = await this.ctx.storage.list({ prefix: "queued:" });
+    const now = Date.now();
+    let next = null;
+    for (const [key, job] of entries) {
+      if (!job || !Number.isFinite(job.when)) {
+        await this.ctx.storage.delete(key);
+        continue;
+      }
+      if (job.when > now) {
+        next = next === null ? job.when : Math.min(next, job.when);
+        continue;
+      }
+      // Delete before sending; jobs must not repeat if alarm is retried.
+      await this.ctx.storage.delete(key);
+      const record = await this.ctx.storage.get("sub:" + job.id);
+      if (!record) continue;
+      try {
+        const response = await sendToRecord(this.env, record, {
+          title: "Мой бюджет — тест блокировки 🔒",
+          body: "Пуш пришёл через 30 секунд. Уведомления работают, даже когда приложение закрыто.",
+          tag: "delayed-test"
+        });
+        if (response.status === 404 || response.status === 410) {
+          await this.ctx.storage.delete("sub:" + job.id);
+        }
+      } catch (error) {
+        console.error("Delayed push failed:", String(error));
+      }
+    }
+    if (next !== null) await this.ctx.storage.setAlarm(next);
+  }
   async fetch(request) {
     const url = new URL(request.url);
     if (url.pathname === "/vapid") {
@@ -253,6 +294,17 @@ export class SubscriptionStore extends DurableObject {
       const { id } = await request.json();
       await this.ctx.storage.delete("sub:" + id);
       return json({ ok: true });
+    }
+    if (url.pathname === "/queue-test" && request.method === "POST") {
+      const { id, delayMs } = await request.json();
+      if (!id || !(await this.ctx.storage.get("sub:" + id))) return json({ error: "Unknown subscription" }, 404);
+      const when = Date.now() + Math.min(60000, Math.max(30000, Number(delayMs) || 30000));
+      // One pending delayed test per device; don't crowd the alarm queue.
+      const key = "queued:" + id;
+      await this.ctx.storage.put(key, { id, when });
+      const currentAlarm = await this.ctx.storage.getAlarm();
+      if (currentAlarm === null || currentAlarm > when) await this.ctx.storage.setAlarm(when);
+      return json({ ok: true, queuedId: id, when });
     }
     if (url.pathname === "/list") {
       const values = await this.ctx.storage.list({ prefix: "sub:" });
