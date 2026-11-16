@@ -3955,17 +3955,16 @@ function confirmRegularPayment(target,amount,date,extraSource='',part=''){
 /* Regular bank payment confirmation now uses the shared reserve. Wage
    splits remain in allocation() for planning, not as a payment choice. */
 function suggestedRegularPayment(target,date){
- // The EXPECTED bank payment is independent of how much money was reserved.
- // A zero reserve must never erase a known planned amount from the form.
- const paid=regularPaidForMonth(target,month);
- const remaining=target==='mortgage'
-  ?Math.max(0,num(monthData().mortgage)-paid)
+ // The amount prefilled for bank-payment confirmation is the portion ACTUALLY
+ // reserved as of the selected date, not the whole planned mortgage or debt.
+ // Never suggest spending money from envelopes without a conscious choice.
+ const already=regularPaidForMonth(target,month);
+ const due=target==='mortgage'
+  ?Math.max(0,num(monthData().mortgage)-already)
   :Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
- if(target==='mortgage'&&data.paidMortgageMonth===month&&paid===0)return 0;
- if(target==='mortgage')return Math.round(remaining*100)/100;
- if(remaining<=0)return 0;
- const installment=num(credit().per);
- return Math.round(Math.min(remaining,installment>0?installment:remaining)*100)/100;
+ if(target==='mortgage'&&data.paidMortgageMonth===month&&already===0)return 0;
+ const available=Math.max(0,target==='mortgage'?regularMortgageAvailable(date):regularCreditAvailable(date));
+ return Math.round(Math.max(0,Math.min(due,available))*100)/100;
 }
 function openPaymentEntry(target){
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках.');return;}
@@ -3982,8 +3981,12 @@ function openPaymentEntry(target){
  const available=Math.max(0,isMortgage?regularMortgageAvailable(todayKey):regularCreditAvailable(todayKey));
  const suggested=suggestedRegularPayment(target,todayKey);
  $('paymentEntryAmount').value=suggested>0?String(suggested):'';
- $('paymentEntryHint').textContent='Ожидаемый платёж: '+rub(suggested)+'. Отложено: '+rub(available)+'. '+
-  'Сумма подставлена для удобства. Перед подтверждением сверь её с фактическим списанием банка. Если резерва не хватает, недостающее можно взять из конверта.';
+ const due= isMortgage
+  ?Math.max(0,num(monthData().mortgage)-regularPaidForMonth('mortgage',month))
+  :Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
+ $('paymentEntryHint').textContent='Платёж по плану: '+rub(due)+'. Отложено: '+rub(available)+'. '+
+  (suggested>0?'Подставлена только отложенная сумма. ':'Отложенных средств пока нет — сумма не подставлена. ')+
+  'Подтверждай только фактическое списание банка. Если платёж больше резерва, недостающее можно вручную взять из конверта.';
  updateCreditPaymentFunding();
  $('paymentEntryOverlay').hidden=false;
  // Keep the suggested amount visible without automatically selecting it or opening the keyboard.
