@@ -1,0 +1,442 @@
+МОЙ БЮДЖЕТ 1.5.79 — ПРОДОЛЖЕНИЕ index.html
+ЧАСТЬ 4 ИЗ 7; СОДЕРЖИМОЕ СТРОГО В ПОРЯДКЕ
+Исходный файл: index.html, смещение символов [219419, 251415) (нумерация с нуля).
+Это буквальный фрагмент без изменений. Он может начинаться/заканчиваться внутри JS/CSS/HTML — не трактуй границы как границы синтаксиса.
+Для полного аудита объединяй все части по порядку и используй 01_Moy_Budget_Application_1.5.79.txt как источник начального CSS.
+==== НАЧАЛО ФРАГМЕНТА ====
+const cc=credit();const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':'Откладывай '+rub(cc.per)+' с каждой предстоящей выплаты';$('obligations').innerHTML=`<div class="card"><div class="lineitem"><span>🏠 Ипотека: ${(data.paidMortgageMonth===month||regularPaidForMonth('mortgage',month)>=num(m.mortgage)&&num(m.mortgage)>0)?'оплачена':'платёж по плану'}</span><span>${rub(m.mortgage)}</span></div>${data.startBalances?`<div class="lineitem"><span>На следующую ипотеку отложено</span><span>${rub(mortgageFund())}</span></div>`:''}<div class="lineitem"><span>💳 Ещё накопить на кредитку</span><span>${rub(cc.debt)}</span></div><div class="sub" style="margin-top:10px">${esc(state)}</div></div>`;
+const visiblePlanRows=displayAllocationRows(calc.rows);
+$('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс</th><th>Зарплата</th></tr></thead><tbody>'+visiblePlanRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
+const popupPreview=$('proportionDistributionPreview');
+if(popupPreview?.closest('details')?.open)popupPreview.querySelector('.payout-popup-preview-content').innerHTML=$('planTable').innerHTML;
+$('planWarnings').innerHTML=(!plannedAdvance(m)||!plannedSalary(m))
+ ? '<div class="hint">Укажи оклад в настройках или фактические выплаты для полного расчёта.</div>'
+ : ''
+ + (calc.unfundedMortgage?`<div class="warning">Не хватает ${rub(calc.unfundedMortgage)} на ипотеку. Нужно покрыть разницу другим источником.</div>`:'')
+ + ((calc.offsets.advance||calc.offsets.salary)?`<div class="hint">Учтена дополнительная оплата ипотеки из конвертов: меньше отложить с аванса на ${rub(calc.offsets.advance)}, с зарплаты на ${rub(calc.offsets.salary)}. Уже подтверждённые поступления не меняются.</div>`:'')
+ + (calc.deficit?`<div class="warning">Ипотека и кредитка превышают доход месяца на ${rub(calc.deficit)}. Отложить требуемую сумму полностью не получится.</div>`:'')
+ + (!calc.weightTotal?'<div class="warning">Укажи хотя бы один положительный вес для распределения остатка.</div>':'');
+
+$('debtRemaining').textContent=rub(cc.debt);$('payCount').textContent=cc.pays.length;$('perPay').textContent=rub(cc.per);let alert='';if(cc.debt===0)alert='<div class="success">Оставшаяся сумма к накоплению равна нулю. Проверь фактический долг и платежи в банке.</div>';else if(!cc.due||cc.pays.length===0)alert='<div class="warning">До указанного срока нет будущих выплат. Нужен другой источник денег или перенос срока с банком.</div>';else alert=`<div class="hint">До ${cc.due.toLocaleDateString('ru-RU')} нужно накопить ${rub(cc.debt)}. В расчёте ${cc.pays.length} будущих поступлений.</div>`;$('debtAlert').innerHTML=alert;
+let saved=0;$('debtSchedule').innerHTML=cc.pays.slice(0,28).map((p,i)=>{const n=Math.min(cc.per,Math.max(0,cc.debt-saved));saved+=n;return `<div class="lineitem"><span>${p.date.toLocaleDateString('ru-RU')} · ${p.type==='advance'?'Аванс':'Зарплата'}</span><span>${rub(n)}</span></div>`}).join('')||'<div class="empty">Запланированных выплат нет</div>';
+const savingsAvailable=realBalance('savings');
+$('earlyAvailable').textContent='Доступно из накоплений: '+(savingsAvailable===null?'сначала задай начальные остатки':rub(Math.max(0,savingsAvailable)));
+const earlyRows=(data.earlyRepayments||[]).filter(x=>x.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
+$('earlyCount').textContent='· '+earlyRows.length;
+$('earlyHistory').innerHTML=earlyRows.length?earlyRows.map(x=>`<div class="transaction"><div><b>${x.target==='credit'?'Кредитная карта':'Ипотека'}</b><small>${esc(x.date)} · Из накоплений${x.note?' · '+esc(x.note):''}</small></div><div class="row"><b>${rub(x.amount)}</b><button class="delete" type="button" data-del-early="${esc(x.id)}" title="Удалить запись">✕</button></div></div>`).join(''):'<div class="empty">Нет досрочных погашений за месяц</div>';
+const transferRows=(data.transfers||[]).filter(t=>t.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
+$('transferCount').textContent=String(transferRows.length);
+$('transferList').innerHTML=transferRows.length?transferRows.map(t=>{const from=cats.find(c=>c.id===t.from)?.name||'Категория',to=cats.find(c=>c.id===t.to)?.name||'Категория';return `<div class="transaction"><div><b>${esc(from)} → ${esc(to)}</b><small>${esc(t.date)}${t.note?' · '+esc(t.note):''}</small></div><div class="row"><b>${rub(t.amount)}</b><button type="button" class="delete" data-del-transfer="${esc(t.id)}" title="Отменить перевод">✕</button></div></div>`}).join(''):'<div class="empty">За этот месяц переводов нет</div>';
+const incomeRows=data.extraIncomes.filter(i=>i.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));
+$('incomeCount').textContent=String(incomeRows.length);
+$('incomeList').innerHTML=incomeRows.length?incomeRows.map(i=>{
+ const cat=cats.find(c=>c.id===i.destination),dest=cat?.name||(i.destination==='reserve'?'Подушка безопасности':i.destination==='mortgage'?'Ипотека':'Кредитная карта');
+ return `<div class="transaction"><div><b>${esc(i.source)}</b><small>${esc(i.date)} · ${esc(dest)}${i.note?' · '+esc(i.note):''}</small></div><div class="row"><b style="color:var(--green)">+${rub(i.amount)}</b><button type="button" class="delete" data-del-income="${esc(i.id)}" title="Удалить доход">✕</button></div></div>`;
+}).join(''):'<div class="empty">Пока нет дополнительных доходов за месяц</div>';
+const rows=data.expenses.filter(e=>e.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));$('expenseCount').textContent=String(rows.length);$('expenseList').innerHTML=rows.length?rows.map(e=>{const c=cats.find(c=>c.id===e.category);return `<div class="transaction"><div><b>${esc(e.note||e.type||c?.name||'Покупка')}</b><small>${esc(e.date)} · ${esc(c?.name||'Категория')}${e.type?' · '+esc(e.type):''}</small></div><div class="row"><b>${rub(e.amount)}</b><button class="delete" data-del="${esc(e.id)}" title="Удалить">✕</button></div></div>`}).join(''):'<div class="empty">Пока нет расходов за выбранный месяц</div>';}
+
+
+/* Capital goals use the existing savings category, plus any external protected deposit. */
+function ladderSettings(){
+ if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
+ return data.ladder;
+}
+/* Extra income credited directly to the protected cushion stays outside savings envelopes. */
+function reserveIncomeTotal(asOf=iso(new Date())){
+ const start=data.startBalances?.date||'0000-01-01';
+ return (data.extraIncomes||[]).filter(i=>i.destination==='reserve'&&i.date>=start&&i.date<=asOf)
+   .reduce((sum,i)=>sum+num(i.amount),0);
+}
+function actualReserve(asOf=iso(new Date())){
+ return num(ladderSettings().reserve)+reserveIncomeTotal(asOf);
+}
+
+/* v1.5.32: automatic, conservative economy discovery from recorded expenses.
+   Only comparable categories with expenses in both periods are used;
+   growth elsewhere offsets reductions, and transfers never exceed recorded funds. */
+function analyticsEconomy(){
+ const selected=month,nowDay=iso(new Date());
+ const [year,m]=selected.split('-').map(Number);
+ const previous=iso(new Date(year,m-2,1)).slice(0,7);
+ const isCurrent=selected===currentMonth;
+ const cutoff=isCurrent?new Date().getDate():31;
+ const previousCutoff=isCurrent?Math.min(cutoff,new Date(year,m-1,0).getDate()):31;
+ const groups=[],sources=['family','utilities','other'];
+ const match=(entry,key,day)=>entry.date?.startsWith(key)&&Number(entry.date.slice(8,10))<=day;
+ for(const id of sources){
+   const past=data.expenses.filter(e=>e.category===id&&match(e,previous,previousCutoff));
+   const present=data.expenses.filter(e=>e.category===id&&match(e,selected,cutoff));
+   // Missing current records may mean purchases have not yet been entered.
+   if(!past.length||!present.length)continue;
+   const pastTotal=past.reduce((a,e)=>a+num(e.amount),0);
+   const presentTotal=present.reduce((a,e)=>a+num(e.amount),0);
+   const signed=pastTotal-presentTotal;
+   const saved=(data.transfers||[]).filter(t=>t.kind==='economy'&&t.to==='savings'&&t.from===id&&t.period===selected)
+    .reduce((a,t)=>a+num(t.amount),0);
+   const balance=categoryBalanceAt(id,nowDay);
+   const pastTypes=new Map(),presentTypes=new Map();
+   for(const e of past){const key=String(e.type||'Без вида').trim()||'Без вида';pastTypes.set(key,(pastTypes.get(key)||0)+num(e.amount))}
+   for(const e of present){const key=String(e.type||'Без вида').trim()||'Без вида';presentTypes.set(key,(presentTypes.get(key)||0)+num(e.amount))}
+   const types=[...pastTypes.entries()].map(([name,value])=>({
+     name,delta:Math.max(0,Math.round((value-(presentTypes.get(name)||0))*100)/100)
+   })).filter(t=>t.delta>0).sort((x,y)=>y.delta-x.delta);
+   groups.push({id,name:cats.find(c=>c.id===id)?.name||id,past:pastTotal,present:presentTotal,
+     signed,decline:Math.max(0,signed),saved,balance,types,allocated:0,max:0});
+ }
+ const grossReduction=Math.max(0,Math.round(groups.reduce((a,g)=>a+g.signed,0)*100)/100);
+ // Distribute the actual net improvement, not a sum of isolated reductions.
+ const sorted=[...groups].sort((a,b)=>b.decline-a.decline);
+ let uncovered=grossReduction;
+ for(const group of sorted){
+   group.allocated=Math.min(uncovered,group.decline);
+   uncovered=Math.max(0,Math.round((uncovered-group.allocated)*100)/100);
+ }
+ const previouslyTransferred=groups.reduce((a,g)=>a+g.saved,0);
+ let transferLeft=Math.max(0,Math.round((grossReduction-previouslyTransferred)*100)/100);
+ const todayMonth=isCurrent;
+ for(const group of sorted){
+   const categoryRemaining=Math.max(0,group.allocated-group.saved);
+   group.max=todayMonth&&group.balance!==null
+     ?Math.max(0,Math.floor(Math.min(transferLeft,categoryRemaining,group.balance)*100)/100):0;
+   transferLeft=Math.max(0,Math.round((transferLeft-group.max)*100)/100);
+ }
+ // Assign explanatory type declines only up to their category's allocated net savings.
+ const lines=[];
+ for(const group of sorted){
+   let cap=group.allocated;
+   for(const t of group.types){
+     const value=Math.min(cap,t.delta);
+     if(value>0.009)lines.push({category:group.id,label:group.name+' · '+t.name,amount:value});
+     cap=Math.max(0,Math.round((cap-value)*100)/100);
+     if(cap<0.01)break;
+   }
+ }
+ lines.sort((x,y)=>y.amount-x.amount);
+ return {selected,previous,cutoff,isCurrent,groups,lines,total:grossReduction,
+   available:groups.reduce((a,g)=>a+g.max,0),comparable:groups.length,
+   previousSaved:previouslyTransferred};
+}
+function ladderEconomy(source){
+ const auto=analyticsEconomy(),found=auto.groups.find(g=>g.id===source);
+ if(!found)return {error:'Для этой категории пока недостаточно записей в обоих месяцах.',max:0};
+ return {last:found.past,now:found.present,delta:found.allocated,saved:found.saved,
+   remaining:Math.max(0,found.allocated-found.saved),balance:found.balance,max:found.max};
+}
+let analyticsEconomyPage=0,analyticsTypePage=0,analyticsStatsTab='categories';
+function analyticsPageSize(){return window.matchMedia('(orientation:landscape)').matches?3:4}
+function analyticsBreakdownRender(auto){
+ const list=$('analyticsEconomyFullList'),per=analyticsPageSize();
+ const count=Math.max(1,Math.ceil(auto.lines.length/per));
+ analyticsEconomyPage=Math.max(0,Math.min(analyticsEconomyPage,count-1));
+ const items=auto.lines.slice(analyticsEconomyPage*per,(analyticsEconomyPage+1)*per);
+ list.innerHTML=items.length?items.map(x=>
+   '<div class="analytics-economy-row"><span>'+esc(x.label)+'</span><b>−'+rub(x.amount)+'</b></div>'
+ ).join(''):'<div class="foot">Пока нет подтверждённого сравнения по видам расходов.</div>';
+ $('analyticsEconomyPrev').disabled=analyticsEconomyPage===0;
+ $('analyticsEconomyNext').disabled=analyticsEconomyPage>=count-1;
+ $('analyticsEconomyPageLabel').textContent=auto.lines.length?'Страница '+(analyticsEconomyPage+1)+' из '+count:'Нет находок';
+}
+function analyticsReportRender(){
+ const views={categories:'analyticsStatsCategories',types:'analyticsStatsTypes',income:'analyticsStatsIncome',months:'analyticsStatsMonths'};
+ for(const key of Object.keys(views))$(views[key]).hidden=key!==analyticsStatsTab;
+ document.querySelectorAll('[data-anal-stats]').forEach(b=>b.classList.toggle('active',b.dataset.analStats===analyticsStatsTab));
+ const totals=new Map();
+ data.expenses.filter(e=>e.date?.startsWith(month)).forEach(e=>{
+   const type=String(e.type||cats.find(c=>c.id===e.category)?.name||'Без вида').trim()||'Без вида';
+   totals.set(type,(totals.get(type)||0)+num(e.amount));
+ });
+ const arr=[...totals].sort((a,b)=>b[1]-a[1]),per=4,pages=Math.max(1,Math.ceil(arr.length/per));
+ analyticsTypePage=Math.max(0,Math.min(analyticsTypePage,pages-1));
+ $('analyticsPagedTypes').innerHTML=arr.length?arr.slice(analyticsTypePage*per,(analyticsTypePage+1)*per)
+   .map(([label,value])=>'<div class="lineitem"><span>'+esc(label)+'</span><span>'+rub(value)+'</span></div>').join('')
+   :'<div class="foot">В этом месяце пока нет расходов.</div>';
+ $('analyticsTypesPrev').disabled=analyticsTypePage===0;
+ $('analyticsTypesNext').disabled=analyticsTypePage>=pages-1;
+ $('analyticsTypesPageLabel').textContent=arr.length?'Страница '+(analyticsTypePage+1)+' из '+pages:'Нет записей';
+}
+
+/* v1.5.35: capital goal planner. Same reserve accounting as the ladder above. */
+function capitalSnapshot(goalOverride){
+ const settings=ladderSettings(),reserve=actualReserve();
+ const baseReserve=num(settings.reserve);
+ const savings=categoryBalanceAt('savings',iso(new Date()));
+ const booked=savings===null?0:Math.max(0,savings);
+ // When the original cushion is already included in savings, subtract only that part.
+ // New direct cushion income is held separately and must never be deducted twice.
+ const extra=settings.included?Math.max(0,booked-baseReserve):booked;
+ const total=reserve+extra;
+ const automaticGoal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
+ const userGoal=typeof settings.targetAmount==='number'&&Number.isFinite(settings.targetAmount)
+   &&settings.targetAmount>=reserve&&settings.targetAmount<=1000000000;
+ const override=typeof goalOverride==='number'&&Number.isInteger(goalOverride)
+   &&goalOverride>=reserve&&goalOverride<=1000000000;
+ const goal=override?goalOverride:(userGoal?settings.targetAmount:automaticGoal);
+ return {settings,reserve,savings,extra,total,goal,automatic:!override&&!userGoal,
+   remaining:Math.max(0,goal-total)};
+}
+function savingsPlanTarget(months){
+ const now=new Date(),d=new Date(now.getFullYear(),now.getMonth()+months-1,1);
+ return iso(d).slice(0,7);
+}
+function savingsPlanMonthsLeft(targetMonth){
+ if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(targetMonth||''))return null;
+ const [year,m]=targetMonth.split('-').map(Number);
+ const now=new Date();return (year-now.getFullYear())*12+m-(now.getMonth()+1)+1;
+}
+function savingsPlanRender(){
+ const input=$('savingsPlanMonths');
+ const parsed=Number(input.value);
+ const validMonths=input.value.trim()!==''&&Number.isInteger(parsed)&&parsed>=1&&parsed<=120;
+ const targetInput=$('savingsPlanTargetAmount');
+ const proposedGoal=Number(targetInput.value);
+ const reserveInput=$('ladderReserveInput');
+ const reserveValue=Number(reserveInput.value);
+ const incoming=reserveIncomeTotal();
+ const validReserve=reserveInput.value.trim()!==''&&Number.isFinite(reserveValue)&&reserveValue>=incoming&&reserveValue<=1000000000;
+ const reserve=validReserve?reserveValue:actualReserve();
+ const savings=categoryBalanceAt('savings',iso(new Date()));
+ const booked=savings===null?0:Math.max(0,savings);
+ const baseReserve=Math.max(0,reserve-incoming);
+ const total=reserve+($('ladderIncluded').checked?Math.max(0,booked-baseReserve):booked);
+ const validGoal=targetInput.value.trim()!==''&&Number.isInteger(proposedGoal)
+   &&proposedGoal>=reserve&&proposedGoal<=1000000000;
+ const info={goal:proposedGoal,total,remaining:Math.max(0,proposedGoal-total),reserve};
+ $('savingsPlanGoal').textContent=validGoal?rub(info.goal):'—';
+ $('savingsPlanCurrent').textContent=rub(info.total);
+ $('savingsPlanRemaining').textContent=validGoal?rub(info.remaining):'—';
+ $('savingsPlanSave').disabled=!(validMonths&&validGoal&&validReserve);
+ document.querySelectorAll('[data-savings-months]').forEach(btn=>{
+   btn.classList.toggle('active',validMonths&&Number(btn.dataset.savingsMonths)===parsed);
+ });
+ if(!validMonths||!validGoal||!validReserve){
+   $('savingsPlanPerMonth').textContent='—';
+   $('savingsPlanDeadline').textContent=!validReserve?'Укажи корректный размер подушки':
+    !validGoal?'Цель должна быть не ниже подушки: '+rub(info.reserve)
+     :'Выбери срок от 1 до 120 месяцев';
+   $('savingsPlanSplit').textContent='—';
+   return;
+ }
+ const perMonth=Math.ceil(info.remaining/parsed);
+ const fromAdvance=Math.floor(perMonth/2);
+ const fromSalary=perMonth-fromAdvance;
+ const deadline=savingsPlanTarget(parsed);
+ const [y,m]=deadline.split('-').map(Number);
+ const displayDate=new Date(y,m-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+ $('savingsPlanPerMonth').textContent=rub(perMonth);
+ $('savingsPlanDeadline').textContent='Плановая цель — '+displayDate+' · '+parsed+' мес. включая текущий';
+ $('savingsPlanSplit').textContent='Поровну: с аванса '+rub(fromAdvance)+' · с зарплаты '+rub(fromSalary);
+}
+function savingsPlanOpen(){
+ const settings=ladderSettings();
+ const remaining=savingsPlanMonthsLeft(settings.targetMonth);
+ $('savingsPlanTargetAmount').value=String(capitalSnapshot().goal);
+ $('ladderReserveInput').value=String(actualReserve());
+ $('ladderIncluded').checked=!!settings.included;
+ $('savingsPlanMonths').value=String(remaining===null?12:Math.max(1,Math.min(120,remaining)));
+ $('savingsPlanStatus').textContent=remaining===null?'Выбери срок и сохрани его, чтобы план запомнился.':
+  remaining<=0?'Прошлый срок уже завершился — выбери новый.':'Срок сохранён. При новых накоплениях сумма в месяц пересчитается.';
+ savingsPlanRender();
+}
+function ladderRender(){
+ const {settings,reserve,savings,extra,total,goal,automatic}=capitalSnapshot();
+ const base=automatic&&total>=1000000?goal-500000:0;
+ const progress=Math.max(0,Math.min(100,goal>base?Math.round((total-base)/(goal-base)*100):100));
+ $('ladderTotal').textContent=rub(total);
+ $('analyticsGoalAmount').textContent=rub(goal);
+ $('analyticsGoalCurrent').textContent=rub(total);
+ $('analyticsGoalRemaining').textContent=rub(Math.max(0,goal-total));
+ const monthsLeft=savingsPlanMonthsLeft(settings.targetMonth);
+ if(monthsLeft!==null){
+  const count=Math.max(1,monthsLeft);
+  $('analyticsMonthlySaveAmount').textContent=rub(Math.ceil(Math.max(0,goal-total)/count));
+  const [targetYear,targetMonth]=settings.targetMonth.split('-').map(Number);
+  const targetDate=new Date(targetYear,targetMonth-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+  $('analyticsMonthlySaveDeadline').textContent='Плановая цель — '+targetDate+' · '+(monthsLeft>0?monthsLeft:0)+' мес. осталось';
+ }else{
+  $('analyticsMonthlySaveAmount').textContent='—';
+  $('analyticsMonthlySaveDeadline').textContent='Укажи срок в настройках цели';
+ }
+ $('ladderGoal').textContent=rub(goal);
+ $('ladderBadge').textContent='Цель: '+rub(goal);
+ $('ladderReserve').textContent=rub(reserve);
+ $('ladderExtra').textContent=savings===null?'—':rub(extra);
+ $('ladderRemaining').textContent=total>=goal?'Цель достигнута! · 100%':
+   'До цели осталось '+rub(Math.max(0,goal-total))+' · '+progress+'%';
+ $('ladderFill').style.width=progress+'%';
+ $('ladderTrack').setAttribute('aria-valuenow',progress);
+ $('ladderNote').textContent=savings===null
+   ?'Дополнительные накопления появятся после ввода стартовых остатков. Подушка указана отдельно.'
+   :settings.included?'Подушка уже внутри категории «Накопления». Повторно не учитываем.'
+   :'Подушка считается отдельно. Если она уже есть в остатке «Накоплений», включи переключатель.';
+ if(document.activeElement!==$('ladderReserveInput'))$('ladderReserveInput').value=reserve;
+
+ if(document.activeElement!==$('ladderIncluded'))$('ladderIncluded').checked=!!settings.included;
+ const auto=analyticsEconomy();
+ const economyCard=document.querySelector('#v-analytics .analytics-economy-card');
+ if(economyCard)economyCard.classList.toggle('has-comparison',!!auto.comparable);
+ $('ladderSaving').textContent=auto.comparable?rub(auto.total):'—';
+ $('ladderPeriod').textContent=auto.isCurrent?'За те же дни прошлого месяца':'Сравнение полных месяцев';
+ const preview=auto.lines.slice(0,2);
+ $('analyticsEconomyPreview').innerHTML=preview.length?preview.map(x=>
+   '<div class="analytics-economy-row"><span>'+esc(x.label)+'</span><b>−'+rub(x.amount)+'</b></div>'
+ ).join(''):'<div class="foot">'+(auto.comparable?'Снижение расходов пока не найдено.':'Добавь расходы за два месяца, чтобы увидеть экономию.')+'</div>';
+ $('analyticsEconomyNote').textContent=auto.comparable
+   ?'Сравниваем '+auto.comparable+' катег. · '+(auto.available?('доступно для перевода '+rub(auto.available)):'пока нет подтверждённо свободных денег')
+   :'Сравнение появится после внесения расходов за оба периода';
+ $('analyticsEconomyToSavings').disabled=!(auto.available>0);
+ $('analyticsEconomyOpenTransfer').disabled=!(auto.available>0);
+ $('analyticsEconomyExplanation').textContent='Поиск по всем видам. Сокращение затрат учитывается только после роста других трат.';
+ $('ladderCompare').textContent='Найдено '+(auto.comparable?rub(auto.total):'—')+
+   '. Уже переведено '+rub(auto.previousSaved)+
+   '. Сумма предварительная: неоплаченные покупки и счета могут изменить результат.';
+ analyticsBreakdownRender(auto);
+ const select=$('ladderSource'),prior=select.value;
+ const eligible=auto.groups.filter(g=>g.allocated>0.009);
+ select.innerHTML=eligible.length
+   ?eligible.map(g=>'<option value="'+g.id+'">'+esc(g.name)+' · '+rub(g.allocated)+'</option>').join('')
+   :'<option value="">Нет доступной экономии</option>';
+ if(eligible.some(g=>g.id===prior))select.value=prior;
+ else if(eligible.length)select.value=(eligible.find(g=>g.max>0)||eligible[0]).id;
+ const choice=auto.groups.find(g=>g.id===select.value),max=choice?.max||0;
+ $('ladderTransferLimit').textContent=!auto.isCurrent?'Перевести можно только из текущего месяца.':
+   !data.startBalances?'Сначала укажи стартовые остатки.':
+   !choice?'Пока нет сравнимой экономии.':
+   'Доступно в '+choice.name+': '+rub(Math.max(0,choice.balance||0))+
+   '. Безопасный предел записи: '+rub(max)+'.';
+ $('ladderTransferButton').disabled=!(max>0);
+ const amountInput=$('ladderTransferAmount');
+ amountInput.max=String(max);
+ if(!amountInput.value||Number(amountInput.value)>max||Number(amountInput.value)<=0)
+   amountInput.value=max>0?String(Math.round(max*100)/100):'';
+ $('analyticsUtilitiesWrap').hidden=select.value!=='utilities';
+ analyticsReportRender();
+}
+
+function analyticsRender(){
+const rows=data.expenses.filter(e=>e.date?.startsWith(month));const total=rows.reduce((s,e)=>s+num(e.amount),0);
+const y=Number(month.slice(0,4)),m=Number(month.slice(5,7));const prev=iso(new Date(y,m-2,1)).slice(0,7);
+const previous=data.expenses.filter(e=>e.date?.startsWith(prev)).reduce((s,e)=>s+num(e.amount),0);
+const extraIncome=incomeTotalMonth(month);
+const wagesReceived=data.receipts.filter(r=>r.date?.startsWith(month)).reduce((a,r)=>a+num(r.amount),0);
+const allIncome=extraIncome+wagesReceived;
+const wageRows=data.receipts.filter(r=>r.date?.startsWith(month));
+const incomeRows=data.extraIncomes.filter(r=>r.date?.startsWith(month));
+$('operationsMonthName').textContent=new Date(y,m-1,1).toLocaleDateString('ru-RU',{month:'short'}).replace(/\.$/,'')+' '+y;
+$('operationsExpenseItems').textContent=rows.length+' '+(rows.length%10===1&&rows.length%100!==11?'запись':rows.length%10>=2&&rows.length%10<=4&&(rows.length%100<12||rows.length%100>14)?'записи':'записей')+' расходов';
+const incomeCount=wageRows.length+incomeRows.length;
+$('operationsIncomeItems').textContent=incomeCount+' '+(incomeCount%10===1&&incomeCount%100!==11?'поступление':incomeCount%10>=2&&incomeCount%10<=4&&(incomeCount%100<12||incomeCount%100>14)?'поступления':'поступлений');
+$('analyticsCount').textContent=$('operationsIncomeItems').textContent;
+$('opsModalExpense').textContent=rub(total);
+$('opsModalIncome').textContent=rub(allIncome);
+$('opsModalDiff').textContent=rub(allIncome-total);
+const incomeEntries=[
+ ...wageRows.map(r=>({label:r.type==='advance'?'Аванс':'Зарплата',amount:num(r.amount),date:r.date,note:'Выплаты'})),
+ ...incomeRows.map(r=>({label:String(r.source||'Дополнительный доход'),amount:num(r.amount),date:r.date,note:String(r.note||'Дополнительный доход')}))
+].sort((a,b)=>b.date.localeCompare(a.date));
+$('operationsIncomeDetails').innerHTML=incomeEntries.length?
+ incomeEntries.map(r=>'<div class="operations-income-row"><div><b>'+esc(r.label)+'</b><small>'+esc(r.date)+(r.note?' · '+esc(r.note):'')+'</small></div><strong>'+rub(r.amount)+'</strong></div>').join('')
+ :'<div class="foot">За этот месяц поступления ещё не записаны.</div>';
+$('analyticsIncomeTotal').textContent=rub(allIncome);
+$('analyticsExtraIncome').textContent=rub(extraIncome);
+$('analyticsNet').textContent='Доходы − расходы: '+rub(allIncome-total);
+$('analyticsTotal').textContent=rub(total);
+const isCurrent=month===currentMonth;const denominator=isCurrent?today.getDate():new Date(y,m,0).getDate();
+$('analyticsDaily').textContent=rub(total/Math.max(1,denominator))+' в день';
+$('analyticsChange').textContent=!previous?'Нет данных':(total>=previous?'+':'−')+Math.abs(Math.round((total-previous)/previous*100))+'%';
+const bar=(label,val,max)=>`<div class="analytics-line"><div class="row"><span>${esc(label)}</span><b>${rub(val)}</b></div><div class="track"><div class="fill" style="width:${max>0?Math.min(100,val/max*100):0}%;background:var(--blue)"></div></div></div>`;
+const byCat=cats.map(c=>({name:c.name,amount:rows.filter(e=>e.category===c.id).reduce((s,e)=>s+num(e.amount),0)})).sort((a,b)=>b.amount-a.amount);
+$('analyticsCategories').innerHTML=total?byCat.filter(x=>x.amount>0).map(x=>bar(x.name,x.amount,total)).join(''):'<div class="empty">Пока нет покупок за этот месяц</div>';
+const byType=new Map();for(const e of rows){const name=String(e.type||cats.find(c=>c.id===e.category)?.name||'Без вида').trim();byType.set(name,(byType.get(name)||0)+num(e.amount));}
+const ordered=[...byType].map(([name,amount])=>({name,amount})).sort((a,b)=>b.amount-a.amount);
+$('analyticsTypes').innerHTML=ordered.length?ordered.slice(0,3).map(x=>bar(x.name,x.amount,total)).join(''):'<div class="empty">Начни записывать покупки</div>';
+$('analyticsAllTypes').innerHTML=ordered.length?ordered.map(x=>`<div class="lineitem"><span>${esc(x.name)}</span><span>${rub(x.amount)}</span></div>`).join(''):'<div class="empty">Пока нет данных</div>';
+const vals=[];for(let i=5;i>=0;i--){const key=iso(new Date(y,m-1-i,1)).slice(0,7);const v=data.expenses.filter(e=>e.date?.startsWith(key)).reduce((s,e)=>s+num(e.amount),0);vals.push({key,v});}
+const peak=Math.max(1,...vals.map(x=>x.v));$('analyticsMonths').innerHTML=vals.map(x=>bar(new Date(x.key+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'short',year:'2-digit'}),x.v,peak)).join('');
+ladderRender();
+}
+function setupCompactPanels(){
+// Hide secondary information behind disclosure, keep key controls directly visible.
+const wrap=(el,label)=>{if(!el||el.parentElement?.tagName==='DETAILS')return;const d=document.createElement('details');d.className='compact-disclosure';const summary=document.createElement('summary');summary.textContent=label;el.parentNode.insertBefore(d,el);d.append(summary,el)};
+const byView=(view,index,label)=>wrap(document.querySelectorAll('#v-'+view+' > .card')[index],label);
+// Find the proportions card by its heading, not by position: the payouts tab has
+// additional standalone cards above it and their order may change.
+const proportionCard=[...document.querySelectorAll('#v-plan > .card')].find(el=>
+ el.querySelector(':scope > .row > b')?.textContent?.trim()==='Пропорции остатка'
+);
+wrap(proportionCard,'Изменить пропорции распределения');
+const payoutPopup=proportionCard?.parentElement;
+if(payoutPopup?.tagName==='DETAILS'){
+ // Show the allocation table inside the expanded proportions popup, ABOVE
+ // the category settings, rather than only underneath the popup.
+ const preview=document.createElement('div');
+ preview.id='proportionDistributionPreview';
+ preview.className='payout-popup-preview';
+ preview.innerHTML='<div class="payout-popup-preview-title">Распределение по выплатам</div><div class="payout-popup-preview-content"></div>';
+ proportionCard.prepend(preview);
+ // Split the popup into two independently scrollable panes. The allocation
+ // stays in the top half; all adjustable categories stay visible below.
+ const settingsPane=document.createElement('div');
+ settingsPane.className='proportions-settings-pane';
+ for(const node of [...proportionCard.children].filter(node=>node!==preview))settingsPane.append(node);
+ proportionCard.append(settingsPane);
+ // The payouts view clips children to its one-screen layout on iPhone.
+ // Portal the *actual* details element to body while expanded so it can
+ // cover the advance card, and restore it to the same position on close.
+ const anchor=document.createComment('proportions-popup-anchor');
+ payoutPopup.before(anchor);
+ const refresh=()=>{if(payoutPopup.open)preview.querySelector('.payout-popup-preview-content').innerHTML=$('planTable').innerHTML;};
+ payoutPopup.addEventListener('toggle',()=>{
+  if(payoutPopup.open){
+   document.body.append(payoutPopup);
+   payoutPopup.classList.add('proportions-modal');
+   refresh();
+  }else{
+   payoutPopup.classList.remove('proportions-modal');
+   anchor.after(payoutPopup);
+  }
+ });
+ payoutPopup.addEventListener('click',event=>{
+  if(event.target===payoutPopup)payoutPopup.open=false;
+ });
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&payoutPopup.open){payoutPopup.open=false;payoutPopup.querySelector('summary')?.focus();}
+ });
+}
+const scheduleCard=[...document.querySelectorAll('#v-card > .card')].find(el=>
+ el.querySelector(':scope > b')?.textContent?.trim()==='График погашения'
+);
+wrap(scheduleCard,'График всех платежей');
+// История расходов уже оформлена раскрывающейся секцией сразу после формы.
+
+const settings=[...document.querySelectorAll('#v-settings > .card')];
+// Match panels by their own heading, not by their order: the salary settings card
+// was added later and shifted the previous index-based labels.
+settings.forEach(el=>{
+ if(el.classList.contains('theme-card'))return;
+ const heading=el.querySelector(':scope > b, :scope > .row > b');
+ const label=heading?.textContent?.trim()||'Дополнительные настройки';
+ wrap(el,label);
+});
+}
+
+
+let envelopeHistoryTrigger=null;
+function showEnvelopeHistory(id){
+ const cat=cats.find(c=>c.id===id);if(!cat)return;
+ const entries=[];const add=(date,title,detail,amount)=>{if(fromISO(date)&&Number.isFinite(amount)&&amount!==0)entries.push({date,title,detail,amount});};
+ if(data.startBalances&&fromISO(data.startBalances.date)){
+   add(data.startBalances.date,'Стартовый остаток','На начало учёта',num(data.startBalances.balances?.[id]));
+ }
+ for(const r of data.receipts||[]){
+  add(r.date,r.type==='advance'?'Распределение аванса':'Распределение зарплаты',r.month?'Выплата за '+r.month:'Поступление',num(r.amounts?.[id]));
+ }
+ for(const inc of data.extraIncomes||[]){
+  if(inc.destination===id)add(inc.date,'Дополнительный доход',[inc.source,inc.note].filter(Boolean).join(' · '),num(inc.amount));
+ }
+ for(const tr of data.transfers||[]){
+  if(tr.to===id){const source=cats.find(c=>c.id===tr.from)?.name||'другого конверта';add(tr.date,'Перевод из «'+source+'»',tr.note||'Пополнение конверта',num(tr.amount));}
+  if(tr.from===id){const target=cats.find(c=>c.id===tr.to)?.name||'другого конверта';add(tr.date,'Перевод в «'+target+'»',tr.note||'Перевод из конверта',-num(tr.amount));}
+ }
+ for(const e of data.expenses||[]){
+
+==== КОНЕЦ ФРАГМЕНТА ====
