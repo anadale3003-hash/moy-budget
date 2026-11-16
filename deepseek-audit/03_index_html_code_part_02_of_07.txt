@@ -1,0 +1,283 @@
+МОЙ БЮДЖЕТ 1.5.79 — ПРОДОЛЖЕНИЕ index.html
+ЧАСТЬ 2 ИЗ 7; СОДЕРЖИМОЕ СТРОГО В ПОРЯДКЕ
+Исходный файл: index.html, смещение символов [155725, 187686) (нумерация с нуля).
+Это буквальный фрагмент без изменений. Он может начинаться/заканчиваться внутри JS/CSS/HTML — не трактуй границы как границы синтаксиса.
+Для полного аудита объединяй все части по порядку и используй 01_Moy_Budget_Application_1.5.79.txt как источник начального CSS.
+==== НАЧАЛО ФРАГМЕНТА ====
+   <strong id="analyticsMonthlySaveAmount">—</strong>
+   <small id="analyticsMonthlySaveDeadline">—</small>
+  </div>
+  </div>
+  <button class="analytics-bottom-link analytics-goal-settings" type="button" data-anal-open="plan">⚙️ Настроить цель и срок <span>›</span></button>
+ </div>
+ 
+</section>
+<section class="view" id="v-settings">
+<div class="section-heading"><h2>Настройки</h2><span class="pill">v1.5.0</span></div>
+<div class="card" id="notifySettingsCard">
+ <div class="row"><b>🔔 Push-уведомления</b><span class="quiet">Автоматически</span></div>
+ <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. С 08:30 по Москве, затем повторная проверка днём. Если подтверждённое зачисление сохранено, напоминания по нему прекращаются. Неподтверждённые выплаты напоминаются не чаще одного раза в день.</div>
+ <label class="field"><span>Какие напоминания присылать</span><select id="notifyReminderChoice"><option value="all">Аванс, зарплата и итоги месяца</option><option value="pay">Только аванс и зарплата</option><option value="none">Выключены</option></select></label>
+ <button class="btn" type="button" id="notifyEnableBtn">Подключить push-уведомления</button>
+ <button class="btn" type="button" id="notifyTestBtn">Отправить тестовое push</button>
+ <button class="btn secondary" type="button" id="notifyDelayedTestBtn">🔒 Тест через 30 секунд</button>
+ <div class="foot" id="notifyStatus" role="status" aria-live="polite">Push ещё не подключён на этом устройстве.</div>
+</div>
+<div class="card theme-card"><div class="row"><b>Тема оформления</b><span class="quiet">Как в SQL Work Assistant</span></div><label class="field"><span>Выбери оформление</span><select id="themeSelect"></select></label></div>
+<div class="card" id="salarySettingsCard"><div class="row"><b>Оклад и рабочий календарь</b><span class="quiet">Расчёт выплат</span></div>
+<label class="field"><span>Месячный оклад, ₽</span><input id="baseSalary" type="number" min="0" step="100" inputmode="decimal" placeholder="Введи оклад"></label>
+<label class="field"><span>Как указан оклад</span><select id="salaryMode"><option value="gross">До вычета НДФЛ</option><option value="net">На руки (после НДФЛ)</option></select></label>
+<label class="field"><span>Расчётный НДФЛ, %</span><input id="salaryTaxRate" type="number" min="0" max="50" step="0.5" inputmode="decimal"></label>
+<div class="foot">Для расчёта используется пятидневная рабочая неделя и календарь РФ на 2026–2027 годы. При другом графике, отпуске, премии или повышенной ставке НДФЛ скорректируй расчёт вручную. Прогноз не является гарантированной выплатой.</div>
+<div class="two"><label class="field"><span>Рабочих дней в месяце (необязательно)</span><input id="manualDaysTotal" type="number" min="1" max="31" step="1" placeholder="Автоматически"></label><label class="field"><span>Из них с 1 по 15 (необязательно)</span><input id="manualDaysFirst" type="number" min="0" max="15" step="1" placeholder="Автоматически"></label></div>
+<div id="salaryCalendarInfo" class="hint"></div></div>
+<div class="card"><b>Старт с текущих остатков</b><p class="foot">Установи реальные деньги на счетах. Старые покупки до даты старта не будут вычтены ещё раз. Плановые зарплаты не считаются полученными.</p><label class="field"><span>Дата начала учёта</span><input id="startDate" type="date"></label><div class="two"><label class="field"><span>Семейные нужды, ₽</span><input id="start-family" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Коммуналка, ₽</span><input id="start-utilities" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Накопления, ₽</span><input id="start-savings" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Остальное, ₽</span><input id="start-other" type="number" min="0" inputmode="decimal"></label></div><label class="field"><span>Уже отложено на следующую ипотеку, ₽</span><input id="startMortgageFund" type="number" min="0" inputmode="decimal"></label><label class="field"><span>За какой месяц ипотека уже оплачена</span><input id="paidMortgageMonth" type="month"></label><button class="btn full" id="saveStart" type="button">Сохранить стартовые остатки</button><div id="startStatus" class="foot"></div></div>
+<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion">1.5.79</strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
+<div class="card"><b>Резервная копия</b><p class="foot">Сохрани данные перед обновлением или переносом на другой телефон.</p><div class="actions"><button class="btn secondary" id="exportData" type="button">Сохранить копию</button><button class="btn light" id="importClick" type="button">Восстановить</button></div><input type="file" id="importData" accept="application/json,.json" style="display:none"></div>
+<div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
+<div class="hint">Финансовые данные остаются в хранилище браузера на этом устройстве. Не очищай данные сайта, если не сохранил резервную копию.</div>
+</section></main><nav class="nav" aria-label="Разделы"><button type="button" class="tab active" data-go="home" aria-label="Главная"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m3 10 9-7 9 7"/><path d="M5 9.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5"/><path d="M9 21v-7h6v7"/></svg></span><span class="tab-label">Главная</span></button><button type="button" class="tab" data-go="plan" aria-label="Выплаты"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><path d="M7.5 15h3"/><path d="M16 13v4"/><path d="m14 15 2 2 2-2"/></svg></span><span class="tab-label">Выплаты</span></button><button type="button" class="tab" data-go="card" aria-label="Кредиты"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19"/><path d="M6.5 15h4.5"/><circle cx="17" cy="15" r="1.4"/></svg></span><span class="tab-label">Кредиты</span></button><button type="button" class="tab" data-go="expense" aria-label="Операции"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 7h15"/><path d="m15.5 3.5 3.5 3.5-3.5 3.5"/><path d="M20 17H5"/><path d="m8.5 13.5-3.5 3.5 3.5 3.5"/></svg></span><span class="tab-label">Операции</span></button><button type="button" class="tab" data-go="analytics" aria-label="Аналитика"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 20.5h18"/><rect x="5" y="12" width="3" height="8.5" rx="1"/><rect x="10.5" y="8" width="3" height="12.5" rx="1"/><rect x="16" y="4.5" width="3" height="16" rx="1"/></svg></span><span class="tab-label">Аналитика</span></button><button type="button" class="tab" data-go="settings" aria-label="Настройки"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.7 2.7h2.6l.6 2.2a7.3 7.3 0 0 1 1.7 1l2.2-.6 1.8 1.9-1 2a7.1 7.1 0 0 1 .2 3.8l1.9 1.2-.9 2.5-2.3-.1a7.5 7.5 0 0 1-2.4 2l-.4 2.3h-2.7l-.6-2.2a7.3 7.3 0 0 1-1.7-1l-2.2.6-1.8-1.9 1-2a7.1 7.1 0 0 1-.2-3.8L4.6 9.4l.9-2.5 2.3.1a7.5 7.5 0 0 1 2.4-2z" transform="translate(-.2 -.1) scale(.99)"/><circle cx="12" cy="12" r="3"/></svg></span><span class="tab-label">Настройки</span></button></nav></div>
+<div class="analytics-overlay" id="analyticsOverlay" hidden>
+  <section class="analytics-sheet" role="dialog" aria-modal="true" aria-labelledby="analyticsSheetTitle">
+   <div class="analytics-sheet-head"><h2 id="analyticsSheetTitle">Подробности</h2><button id="analyticsSheetClose" type="button" class="analytics-sheet-close" aria-label="Закрыть">×</button></div>
+   <div class="analytics-sheet-body">
+    <div class="analytics-sheet-page" id="analyticsModalEconomy" hidden>
+     <div class="analytics-modal-intro" id="analyticsEconomyExplanation">Где снизились траты</div>
+     <div id="analyticsEconomyFullList" class="analytics-full-list"></div>
+     <div class="analytics-pagination"><button type="button" id="analyticsEconomyPrev" aria-label="Предыдущие находки">‹</button><span id="analyticsEconomyPageLabel">—</span><button type="button" id="analyticsEconomyNext" aria-label="Следующие находки">›</button></div>
+     <div class="foot" id="ladderCompare">Это предварительная разница расходов, не свободные деньги на счёте.</div>
+     <button type="button" class="btn full" id="analyticsEconomyOpenTransfer" data-anal-open="transfer">Перевести доступную часть</button>
+    </div>
+    <div class="analytics-sheet-page" id="analyticsModalTransfer" hidden>
+     <p class="foot">Здесь записывается перевод между конвертами. Сначала выполни его в банке.</p>
+     <form id="ladderTransferForm">
+      <label class="field"><span>Откуда перевести</span><select id="ladderSource"></select></label>
+      <label class="field"><span>Сумма в накопления, ₽</span><input id="ladderTransferAmount" type="number" inputmode="decimal" step="0.01" min="0.01" required placeholder="Сумма"></label>
+      <div class="foot" id="ladderTransferLimit">Не превышай доступный остаток.</div>
+      <label class="analytics-utilities-check" id="analyticsUtilitiesWrap" hidden><input type="checkbox" id="analyticsUtilitiesPaid"><span>Подтверждаю, что обязательные счета по коммуналке оплачены</span></label>
+      <button class="btn full" type="submit" id="ladderTransferButton" disabled>Записать перевод в накопления</button>
+     </form>
+     <p class="foot">Это не доход и не банковский перевод. Ипотечные и кредитные резервы не затрагиваются.</p>
+    </div>
+    <div class="analytics-sheet-page" id="analyticsModalCapital" hidden>
+     <div class="analytics-capital-details"><div><span>🛡 Неприкосновенная подушка</span><b id="ladderReserve">500 000 ₽</b></div><div><span>🏦 Сверх подушки</span><b id="ladderExtra">—</b></div><div><span>Следующая ступень</span><b id="ladderGoal">1 000 000 ₽</b></div></div>
+     <p class="foot" id="ladderNote"></p>
+
+    </div>
+    
+    <div class="analytics-sheet-page" id="analyticsModalPlan" hidden>
+     <div class="analytics-plan-summary">
+      <div><span>Следующая цель</span><strong id="savingsPlanGoal">—</strong></div>
+      <div><span>Уже накоплено</span><strong id="savingsPlanCurrent">—</strong></div>
+      <div class="analytics-plan-left"><span>Осталось накопить</span><strong id="savingsPlanRemaining">—</strong></div>
+     </div>
+     <label class="field analytics-plan-input"><span>Размер подушки, ₽</span><input id="ladderReserveInput" type="number" inputmode="decimal" step="100" min="0" required value="500000"></label>
+     <label class="analytics-plan-included"><input id="ladderIncluded" type="checkbox"><span>Подушка уже входит в остаток категории «Накопления»</span></label>
+     <label class="field analytics-plan-input"><span>Моя цель, ₽ (включая подушку)</span><input id="savingsPlanTargetAmount" type="number" inputmode="numeric" min="0" max="1000000000" step="1000" required value="1000000"></label>
+     <label class="field analytics-plan-input"><span>За сколько месяцев накопить?</span><input id="savingsPlanMonths" type="number" inputmode="numeric" min="1" max="120" step="1" value="12"></label>
+     <div class="analytics-plan-presets" aria-label="Выбрать срок">
+      <button type="button" data-savings-months="6">6 мес.</button>
+      <button type="button" data-savings-months="12">1 год</button>
+      <button type="button" data-savings-months="18">18 мес.</button>
+      <button type="button" data-savings-months="24">2 года</button>
+     </div>
+     <div class="analytics-plan-result" aria-live="polite">
+      <span>Нужно откладывать в месяц</span>
+      <strong id="savingsPlanPerMonth">—</strong>
+      <small id="savingsPlanDeadline">—</small>
+     </div>
+     <div class="analytics-plan-paydays" id="savingsPlanSplit">—</div>
+     <p class="foot analytics-plan-hint">Цель включает подушку. Если подушка хранится в «Накоплениях», включи галочку, чтобы не считать её дважды. Проценты и премии не прогнозируются; аванс и зарплата делятся поровну.</p>
+     <button class="btn full analytics-plan-save" type="button" id="savingsPlanSave">Сохранить цель и срок</button>
+     <div class="foot analytics-plan-status" id="savingsPlanStatus" aria-live="polite"></div>
+    </div>
+    <div class="analytics-sheet-page" id="analyticsModalStats" hidden>
+     <div class="operations-modal-totals"><div><span>Потрачено</span><b id="opsModalExpense">—</b></div><div><span>Получено</span><b id="opsModalIncome">—</b></div><div><span>Разница</span><b id="opsModalDiff">—</b></div></div>
+     <div class="analytics-stats-tabs" role="group" aria-label="Раздел статистики"><button type="button" data-anal-stats="categories" class="active">Категории</button><button type="button" data-anal-stats="types">Виды</button><button type="button" data-anal-stats="income">Доходы</button><button type="button" data-anal-stats="months">6 месяцев</button></div>
+     <div class="analytics-report-sub"><span id="analyticsDaily">0 ₽ в день</span><span>Доп. доход: <b id="analyticsExtraIncome">0 ₽</b></span></div>
+     <div class="analytics-stats-block" id="analyticsStatsCategories"><div id="analyticsCategories"></div></div>
+     <div class="analytics-stats-block" id="analyticsStatsTypes" hidden>
+      <div id="analyticsTypes"></div>
+      <div id="analyticsPagedTypes"></div>
+      <div class="analytics-pagination"><button type="button" id="analyticsTypesPrev">‹</button><span id="analyticsTypesPageLabel">—</span><button type="button" id="analyticsTypesNext">›</button></div>
+     </div>
+     <div class="analytics-stats-block" id="analyticsStatsIncome" hidden><div id="operationsIncomeDetails"></div></div>
+     <div class="analytics-stats-block" id="analyticsStatsMonths" hidden><div id="analyticsMonths"></div></div>
+     <div class="analytics-hidden-data" aria-hidden="true"><span id="analyticsNet"></span><div id="analyticsAllTypes"></div></div>
+    </div>
+   </div>
+  </section>
+ </div>
+<div class="receipt-entry-overlay" id="receiptEntryOverlay" hidden>
+ <section class="receipt-entry-sheet" role="dialog" aria-modal="true" aria-labelledby="receiptEntryTitle">
+  <div class="receipt-entry-header"><h2 id="receiptEntryTitle">Подтверждение поступления</h2><button id="receiptEntryClose" class="envelope-history-close" type="button" aria-label="Закрыть">×</button></div>
+  <p class="foot" id="receiptEntryHint">Укажи фактические данные поступления.</p>
+  <form id="receiptEntryForm">
+   <label class="field"><span>Сумма поступления, ₽</span><input id="receiptEntryAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 25 000"></label>
+   <label class="field"><span>Дата фактического поступления</span><input id="receiptEntryDate" type="date" required></label>
+   <div class="receipt-entry-error" id="receiptEntryError" role="alert" hidden></div>
+   <button class="btn full" type="submit">✓ Подтвердить поступление</button>
+   <button class="btn secondary full" type="button" id="receiptEntryCancel">Отмена</button>
+  </form>
+ </section>
+</div>
+<div class="receipt-entry-overlay" id="paymentEntryOverlay" hidden>
+ <section class="receipt-entry-sheet" role="dialog" aria-modal="true" aria-labelledby="paymentEntryTitle">
+  <div class="receipt-entry-header"><h2 id="paymentEntryTitle">Подтверждение оплаты</h2><button id="paymentEntryClose" class="envelope-history-close" type="button" aria-label="Закрыть">×</button></div>
+  <p class="foot" id="paymentEntryHint">Введи фактические данные списания банком.</p>
+  <form id="paymentEntryForm">
+   <label class="field"><span>Сумма оплаты, ₽</span><input id="paymentEntryAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Сумма списания"></label>
+   <label class="field"><span>Дата списания банком</span><input id="paymentEntryDate" type="date" required></label>
+   <div id="creditPaymentFunding" class="credit-funding" hidden>
+    <div class="foot" id="creditPaymentFundingSummary"></div>
+    <label class="field" id="creditPaymentSourceWrap" hidden><span>Недостающую сумму списать из конверта</span><select id="creditPaymentSource"><option value="">Выбери конверт…</option></select></label>
+    <div class="foot" id="creditPaymentSourceAvailable"></div>
+   </div>
+   <div class="receipt-entry-error" id="paymentEntryError" role="alert" hidden></div>
+   <button class="btn full" type="submit">✓ Подтвердить оплату</button>
+   <button class="btn secondary full" type="button" id="paymentEntryCancel">Отмена</button>
+  </form>
+ </section>
+</div>
+<div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
+
+<script>
+/* Layout-only grouping. IDs/forms remain intact so accounting calculations and saved data are unchanged. */
+(function(){
+function group(section,title,nodes,extra){
+ const outer=document.createElement('div');outer.className='design-group'+(extra?' '+extra:'');
+ const heading=document.createElement('div');heading.className='section-heading';
+ const h=document.createElement('h2');h.textContent=title;heading.appendChild(h);
+ section.insertBefore(outer,nodes[0]);outer.appendChild(heading);
+ nodes.forEach(n=>outer.appendChild(n));return outer;
+}
+function groupHeadings(id){
+ const section=document.getElementById(id);if(!section)return;
+ const children=Array.from(section.children);let start=-1;
+ for(let i=0;i<children.length;i++){
+  if(children[i].classList.contains('section-heading')){
+   if(start>=0){const nodes=children.slice(start,i);if(nodes.length>1)groupExisting(section,nodes)}
+   start=i;
+  }
+ }
+ if(start>=0){const nodes=children.slice(start);if(nodes.length>1)groupExisting(section,nodes)}
+}
+function groupExisting(section,nodes){
+ const outer=document.createElement('div');outer.className='design-group';
+ section.insertBefore(outer,nodes[0]);nodes.forEach(n=>outer.appendChild(n));
+}
+function setup(){
+ const section=document.getElementById('v-card');
+ if(section){
+  Array.from(section.querySelectorAll(':scope > .section-heading')).forEach(h=>h.remove());
+  const pay=section.querySelector('.payment-obligations');
+  const mortgage=section.querySelector('.mortgage-monthly-settings');
+  const credit=pay?.nextElementSibling?.classList.contains('card')?pay.nextElementSibling:null;
+  // Credit form follows its heading in the original source.
+  const creditField=document.getElementById('debt');
+  const creditCard=creditField?.closest('.card');
+  if(pay)section.insertBefore(pay,section.firstElementChild);
+  if(pay)group(section,'Фактическая оплата',[pay],'credit-payments-group');
+  if(mortgage)group(section,'Ипотека',[mortgage],'credit-mortgage-group');
+  if(creditCard){creditCard.classList.add('credit-basic-card');group(section,'Кредитка',[creditCard],'credit-balance-group')}
+  const all=Array.from(section.children);
+  all.filter(n=>!n.classList.contains('design-group')).forEach(n=>n.classList.add('legacy-credit-extras'));
+ }
+ ['v-plan','v-expense','v-analytics','v-settings'].forEach(groupHeadings);
+ // Compress only the payouts section: advanced weights stay available in a closed disclosure.
+ const plan=document.getElementById('v-plan');
+ const distribution=plan?.querySelector('.payout-destinations');
+ const weightCard=plan?.querySelector('#weight-family')?.closest('.card');
+ if(distribution&&weightCard){
+   const fold=document.createElement('details');fold.className='compact-disclosure plan-weights-disclosure';
+   const summary=document.createElement('summary');summary.textContent='Пропорции остатка';
+   fold.appendChild(summary);distribution.parentElement.insertBefore(fold,weightCard);fold.appendChild(weightCard);
+ }
+ const history=document.getElementById('regularPaymentHistory');
+ if(history){
+   const fold=document.createElement('details');fold.className='compact-disclosure credit-history-disclosure';
+   const summary=document.createElement('summary');summary.textContent='История оплат';
+   history.parentElement.insertBefore(fold,history);fold.appendChild(summary);fold.appendChild(history);
+ }
+ // Separate history, charts and settings into individually framed groups.
+ function separateItems(id){
+  const section=document.getElementById(id),first=section?.querySelector(':scope > .design-group');
+  if(!first)return;
+  const content=Array.from(first.children);
+  const items=content.filter(el=>el.classList.contains('card')||el.matches('details.compact-disclosure'));
+  let insertionPoint=first;
+  items.slice(1).forEach((el,i)=>{
+   const wrap=document.createElement('div');wrap.className='design-group';
+   const isDetails=el.matches('details');
+   if(!isDetails){
+    const title=id==='v-analytics'?(i===0?'Поступления':i===1?'Основные категории':'Виды расходов'):
+      (el.querySelector('.row>b')?.textContent||'Параметры');
+    const heading=document.createElement('div');heading.className='section-heading';
+    const h=document.createElement('h2');h.textContent=title;heading.appendChild(h);wrap.appendChild(heading);
+    if(id==='v-settings'){const b=el.querySelector('.row>b');if(b)b.remove()}
+    if(id==='v-analytics'&&i>=1){const b=el.querySelector('.row>b');if(b)b.remove()}
+   }
+   first.parentElement.insertBefore(wrap,insertionPoint.nextElementSibling);
+   wrap.appendChild(el);insertionPoint=wrap;
+  });
+ }
+ ['v-expense','v-analytics','v-settings'].forEach(separateItems);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});
+else setup();
+})();
+</script>
+<script>
+(function(){'use strict';
+const THEMES={"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY='my-budget-v1';const fmt=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});const rub=n=>fmt.format(Math.round(n||0))+' ₽';const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
+let data;const defaults=()=>({months:{},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:10000,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
+try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();if(!data.expenseTypes||typeof data.expenseTypes!=='object')data.expenseTypes={};
+for(const c of cats){if(!Array.isArray(data.expenseTypes[c.id]))data.expenseTypes[c.id]=[];}
+for(const x of data.expenses){if(x.type&&cats.some(c=>c.id===x.category)){const a=data.expenseTypes[x.category];if(!a.some(y=>y.toLocaleLowerCase('ru')===String(x.type).toLocaleLowerCase('ru')))a.push(String(x.type));}}
+if(!data.startBalances||typeof data.startBalances!=='object')data.startBalances=null;
+if(!Array.isArray(data.receipts))data.receipts=[];
+if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];
+if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];
+if(!Array.isArray(data.transfers))data.transfers=[];
+if(!Array.isArray(data.regularPayments))data.regularPayments=[];
+if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
+if(!data.salaryConfig||typeof data.salaryConfig!=='object')data.salaryConfig={base:0,mode:'gross',taxRate:13};
+if(data.salaryConfig.taxRate===undefined)data.salaryConfig.taxRate=13;
+if(typeof data.paidMortgageMonth!=='string')data.paidMortgageMonth='';
+if(!Number.isFinite(Number(data.utilitiesAdvanceTarget))||Number(data.utilitiesAdvanceTarget)<0)data.utilitiesAdvanceTarget=15000;
+if(typeof data.utilitiesFromSalary!=='boolean')data.utilitiesFromSalary=true;
+// Первоначальные настройки старых версий были 15/30; для этого бюджета даты 16/1.
+if(!data.payDays||typeof data.payDays!=='object')data.payDays={advance:16,salary:1};
+if(!data.payDays2026Migrated){if(Number(data.payDays.advance)===15&&Number(data.payDays.salary)===30)data.payDays={advance:16,salary:1};data.payDays2026Migrated=true;}
+let month=currentMonth;
+function setTheme(name,shouldSave=true){const key=Object.prototype.hasOwnProperty.call(THEMES,name)?name:'Outlook Dusk';const t=THEMES[key],root=document.documentElement;for(const [k,v] of Object.entries(t)){root.style.setProperty('--'+k,v);}root.style.setProperty('--teal',t.blue);root.style.setProperty('--green',t.blue);root.style.setProperty('--orange',t.blue);root.style.setProperty('--accent-text',t.accentText);root.style.setProperty('--hero',t.hero);root.style.setProperty('--input',t.input);root.style.setProperty('--selected',t.selected);const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=t.hero;if(shouldSave){data.theme=key;save();}const select=$('themeSelect');if(select)select.value=key;}
+function initTheme(){const select=$('themeSelect');select.innerHTML=Object.keys(THEMES).map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join('');select.onchange=e=>setTheme(e.target.value);setTheme(data.theme||'Outlook Dusk',false)}
+
+function monthData(){
+ if(!data.months[month])data.months[month]={advance:0,salary:0,mortgage:Number.isFinite(Number(data.mortgageMonthly))&&data.mortgageMonthly!==undefined?num(data.mortgageMonthly):55000};
+ const m=data.months[month];
+ if(m.mortgage===undefined)m.mortgage=data.mortgageMonthly===undefined?55000:num(data.mortgageMonthly);
+ return m;
+}
+const RU_NONWORK=["2026-01-01", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-02-23", "2026-03-09", "2026-05-01", "2026-05-11", "2026-06-12", "2026-11-04", "2026-12-31", "2027-01-01", "2027-01-04", "2027-01-05", "2027-01-06", "2027-01-07", "2027-01-08", "2027-02-22", "2027-02-23", "2027-03-08", "2027-05-03", "2027-05-10", "2027-06-14", "2027-11-04", "2027-11-05", "2027-12-31"];
+const RU_WORK_SAT=["2027-02-20"];
+const RU_DAYS_OFF=new Set(RU_NONWORK),RU_SAT_WORK=new Set(RU_WORK_SAT);
+function countWorkdays(key){
+ const [y,mo]=key.split('-').map(Number);const last=new Date(y,mo,0).getDate();let total=0,first=0;
+ for(let d=1;d<=last;d++){
+  const x=new Date(y,mo-1,d),date=iso(x),day=x.getDay();
+  if((day!==0&&day!==6&&!RU_DAYS_OFF.has(date))||RU_SAT_WORK.has(date)){total++;if(d<=15)first++;}
+ }
+ return {total,first,official:y===2026||y===2027};
+}
+function payrollForecast(m,key=month){
+ const cfg=data.salaryConfig,base=num(cfg.base),work=countWorkdays(key);
+ const overrideTotal=Number(m.manualDaysTotal),overrideFirst=Number(m.manualDaysFirst);
+ const total=m.manualDaysTotal!==undefined&&m.manualDaysTotal!==''&&overrideTotal>0?Math.min(31,overrideTotal):work.total;
+ const first=m.manualDaysFirst!==undefined&&m.manualDaysFirst!==''&&overrideFirst>=0?Math.min(total,overrideFirst):work.first;
+ const rate=Math.min(50,num(cfg.taxRate));
+ const net=cfg.mode==='net'?base:base*(1-rate/100);
+ const advanceForecast=total>0?net*first/total:0;
+ // Legacy month.advance/month.salary may contain a stale or cancelled
+
+==== КОНЕЦ ФРАГМЕНТА ====
