@@ -2362,7 +2362,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="section-heading"><h2>Настройки</h2><span class="pill">v1.5.0</span></div>
 <div class="card" id="notifySettingsCard">
  <div class="row"><b>🔔 Push-уведомления</b><span class="quiet">Автоматически</span></div>
- <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. Время отправки — 08:30 по Москве. Даты аванса и зарплаты берутся из настроек приложения с переносом на предыдущий рабочий день по календарю РФ.</div>
+ <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. С 08:30 по Москве, затем повторная проверка днём. Если подтверждённое зачисление сохранено, напоминания по нему прекращаются. Неподтверждённые выплаты напоминаются не чаще одного раза в день.</div>
  <label class="field"><span>Какие напоминания присылать</span><select id="notifyReminderChoice"><option value="all">Аванс, зарплата и итоги месяца</option><option value="pay">Только аванс и зарплата</option><option value="none">Выключены</option></select></label>
  <button class="btn" type="button" id="notifyEnableBtn">Подключить push-уведомления</button>
  <button class="btn" type="button" id="notifyTestBtn">Отправить тестовое push</button>
@@ -2727,9 +2727,16 @@ function showSaveFeedback(message,button){
    setTimeout(()=>button.classList.remove('budget-action-saved'),490);
  }
 }
+let lastSavedReceiptSignature=JSON.stringify((data.receipts||[]).map(r=>r.id).sort());
 function save(){
  try{
    localStorage.setItem(KEY,JSON.stringify(data));
+   const receiptSignature=JSON.stringify((data.receipts||[]).map(r=>r.id).sort());
+   if(receiptSignature!==lastSavedReceiptSignature){
+     lastSavedReceiptSignature=receiptSignature;
+     // Emitted only AFTER a successful local save; no amounts or dates are sent.
+     window.dispatchEvent(new Event('budget:receipts-changed'));
+   }
    const intent=saveFeedbackIntent;
    saveFeedbackIntent=null;
    if(saveFeedbackClearTimer!==null){clearTimeout(saveFeedbackClearTimer);saveFeedbackClearTimer=null;}
@@ -4330,8 +4337,28 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    const reg=await navigator.serviceWorker.ready;
    return reg.pushManager.getSubscription();
   };
+  const confirmedPeriods=()=>{
+   const d=appSettings();
+   return (Array.isArray(d.receipts)?d.receipts:[])
+    .map(r=>r&&typeof r.id==='string'?r.id:'')
+    .filter(id=>/^20\\d{2}-(0[1-9]|1[0-2])-(advance|salary)$/.test(id));
+  };
+  // Serialize writes so an old confirmation state cannot overwrite a newer one.
+  let syncSequence=Promise.resolve();
   const saveSubscription=async(sub)=>{
-   await post('/subscribe',{subscription:sub.toJSON(),preferences:preferences()});
+   const payload={subscription:sub.toJSON(),preferences:preferences(),confirmedPeriods:confirmedPeriods()};
+   const operation=syncSequence.catch(()=>{}).then(()=>post('/subscribe',payload));
+   syncSequence=operation;
+   await operation;
+  };
+  const syncReceipts=async()=>{
+   if(!supported()||Notification.permission!=='granted')return;
+   try{
+    const sub=await currentSubscription();
+    if(sub)await saveSubscription(sub);
+   }catch(e){
+    status.textContent='Поступление сохранено в приложении, но сервер уведомлений не обновлён: '+e.message+'. Открой настройки при наличии интернета.';
+   }
   };
   const refresh=async()=>{
    if(!supported()){status.textContent='Push недоступен. На iPhone установи приложение на экран «Домой» и открой его оттуда.';return;}
@@ -4339,9 +4366,17 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    if(Notification.permission==='denied'){status.textContent='Уведомления запрещены в настройках iPhone. Разреши их для «Моего бюджета».';return;}
    try{
     const sub=await currentSubscription();
-    status.textContent=sub?'Push подключён. Сервер готов отправлять напоминания.':'Разрешение: '+Notification.permission+'. Нажми «Подключить push-уведомления».';
+    if(sub){
+     await saveSubscription(sub);
+     status.textContent='Push подключён. Подтверждённые выплаты исключены из напоминаний.';
+    }else{
+     status.textContent='Разрешение: '+Notification.permission+'. Нажми «Подключить push-уведомления».';
+    }
    }catch(e){status.textContent='Не удалось проверить подписку: '+e.message;}
   };
+  window.addEventListener('budget:receipts-changed',()=>{void syncReceipts();});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void syncReceipts();});
+  window.addEventListener('pageshow',()=>{void syncReceipts();});
   choice.addEventListener('change',async()=>{
    localStorage.setItem(preferenceKey,choice.value);
    try{const sub=await currentSubscription();if(sub){await saveSubscription(sub);status.textContent=choice.value==='none'?'Автоматические напоминания выключены.':'Настройки напоминаний обновлены на сервере.';}else status.textContent='Выбор сохранён. Подключи push, чтобы активировать расписание.';}
