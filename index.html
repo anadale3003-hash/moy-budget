@@ -2238,13 +2238,13 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div>
 <div class="section-heading"><h2>Аванс и зарплата</h2><span class="pill">Авторасчёт</span></div><div class="card payment-inputs">
 <div class="payment-grid">
-<div class="payment-receipt"><input id="advance" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💵</span> Аванс</div><button class="btn full receipt-button" id="receiveAdvance" type="button">✓ Аванс поступил</button><div class="receipt-note" id="advanceReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoAdvance" type="button">↶ Отменить зачисление</button></div>
-<div class="payment-receipt"><input id="salary" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💰</span> Зарплата</div><button class="btn full receipt-button secondary" id="receiveSalary" type="button">✓ Зарплата поступила</button><div class="receipt-note" id="salaryReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoSalary" type="button">↶ Отменить зачисление</button></div>
+<div class="payment-receipt"><input id="advance" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💵</span> Аванс</div><button class="btn full receipt-button" id="receiveAdvance" type="button">Подтвердить аванс</button><div class="receipt-note" id="advanceReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoAdvance" type="button">↶ Отменить зачисление</button></div>
+<div class="payment-receipt"><input id="salary" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💰</span> Зарплата</div><button class="btn full receipt-button secondary" id="receiveSalary" type="button">Подтвердить зарплату</button><div class="receipt-note" id="salaryReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoSalary" type="button">↶ Отменить зачисление</button></div>
 </div>
 <div class="payment-dates-note">
 <input id="advanceDate" type="date" hidden aria-hidden="true" tabindex="-1">
 <input id="salaryDate" type="date" hidden aria-hidden="true" tabindex="-1">
-<div class="foot">Плановые даты выплат учитывают выходные и праздники РФ (календарь 2026–2027). Фактические дату и сумму укажи при нажатии «Аванс поступил» или «Зарплата поступила».</div>
+<div class="foot">Плановые даты выплат учитывают выходные и праздники РФ (календарь 2026–2027). Фактические дату и сумму укажи при подтверждении поступления.</div>
 </div>
 </div><!-- End: advance and salary card -->
 <div class="section-heading"><h2>Куда перевести деньги</h2><span class="quiet">с каждой выплаты</span></div>
@@ -2258,12 +2258,12 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
     <div class="payment-confirm">
       <div class="payment-confirm-heading"><b>🏠 Ипотека</b><div class="receipt-note" id="mortgagePaymentStatus"></div></div>
       <input type="number" id="mortgagePayAmount" hidden aria-hidden="true" tabindex="-1"><input type="date" id="mortgagePayDate" hidden aria-hidden="true" tabindex="-1">
-      <button class="btn full" type="button" id="confirmMortgagePayment">✓ Подтвердить оплату</button>
+      <button class="btn full" type="button" id="confirmMortgagePayment">Подтвердить оплату</button>
     </div>
     <div class="payment-confirm">
       <div class="payment-confirm-heading"><b>💳 Кредитка</b><div class="receipt-note" id="creditPaymentStatus"></div></div>
       <input type="number" id="creditPayAmount" hidden aria-hidden="true" tabindex="-1"><input type="date" id="creditPayDate" hidden aria-hidden="true" tabindex="-1">
-      <button class="btn full secondary" type="button" id="confirmCreditPayment">✓ Подтвердить оплату</button>
+      <button class="btn full secondary" type="button" id="confirmCreditPayment">Подтвердить оплату</button>
     </div>
   </div>
   <div id="regularPaymentHistory"></div>
@@ -3050,7 +3050,9 @@ function receiptInfo(){
   const undo=$(type==='advance'?'undoAdvance':'undoSalary');
   undo.classList.toggle('visible',!!receipt);
   button.disabled=!!receipt;
-  button.textContent=receipt?'✓ Получено':(type==='advance'?'✓ Аванс поступил':'✓ Зарплата поступила');
+  button.textContent=receipt?'✓ Получено':(type==='advance'?'Подтвердить аванс':'Подтвердить зарплату');
+  button.classList.toggle('is-confirmed',!!receipt);
+  button.setAttribute('aria-label',receipt?(type==='advance'?'Аванс получен':'Зарплата получена'):(type==='advance'?'Подтвердить поступление аванса':'Подтвердить поступление зарплаты'));
   note.textContent=receipt?'Зачислено '+rub(receipt.amount)+' · '+receipt.date:(!data.startBalances?'Сначала укажи стартовые остатки в настройках.':'После фактического поступления нажми кнопку.');
   note.classList.toggle('received',!!receipt);
  }
@@ -4609,6 +4611,17 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
  }
  #v-analytics.active{height:auto!important;max-height:none!important}
 }
+
+/* Confirmation buttons are actions until the payment is actually recorded. */
+#v-plan .receipt-button.is-confirmed{
+ background:color-mix(in srgb,var(--card) 70%,#49b38d 30%)!important;
+ border:1px solid color-mix(in srgb,var(--line) 50%,#49b38d 50%)!important;
+ color:var(--ink)!important;
+}
+#v-plan .receipt-button:not(.is-confirmed){
+ border:1px solid color-mix(in srgb,var(--line) 65%,var(--blue) 35%)!important;
+}
+#v-plan .receipt-undo.visible{color:var(--muted)}
 </style>
 <dialog id="adviceDialog" aria-labelledby="advisorTitle"><div class="advisor-shell">
 <div class="advisor-head"><h2 id="advisorTitle">🤖 Финансовый советник</h2><button class="btn light" id="advisorClose" type="button" aria-label="Закрыть">✕</button></div>
