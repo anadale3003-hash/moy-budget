@@ -4368,6 +4368,12 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    }catch(e){status.textContent='Не удалось подключить push: '+e.message;}
    finally{enable.disabled=false;}
   });
+  for(const id of ['advanceDate','salaryDate']){
+   document.getElementById(id)?.addEventListener('change',async()=>{
+    try{const sub=await currentSubscription();if(sub){await saveSubscription(sub);status.textContent='Даты выплат обновлены на сервере.';}}
+    catch(e){status.textContent='Не удалось обновить даты выплат: '+e.message;}
+   });
+  }
   test.addEventListener('click',async()=>{
    if(!supported()||Notification.permission!=='granted'){await refresh();return;}
    test.disabled=true;
