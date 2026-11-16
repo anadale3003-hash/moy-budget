@@ -4341,7 +4341,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    const d=appSettings();
    return (Array.isArray(d.receipts)?d.receipts:[])
     .map(r=>r&&typeof r.id==='string'?r.id:'')
-    .filter(id=>/^20\\d{2}-(0[1-9]|1[0-2])-(advance|salary)$/.test(id));
+    .filter(id=>/^20\d{2}-(0[1-9]|1[0-2])-(advance|salary)$/.test(id));
   };
   // Serialize writes so an old confirmation state cannot overwrite a newer one.
   let syncSequence=Promise.resolve();
