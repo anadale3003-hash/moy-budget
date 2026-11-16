@@ -3156,7 +3156,7 @@ function renderEarlyAlerts(){
   }
  }
  // January advance: compare January's projected first-half workdays with December.
- const yy=now.getFullYear()+(now.getMonth()===11?1:0);
+ const yy=now.getFullYear()+(now.getMonth()>=10?1:0);
  const jan=new Date(yy,0,1),janKey=iso(jan).slice(0,7);
  const janPayday=plannedPayday(janKey,Number(data.payDays.advance)||16);
  const janRangeDays=daysUntil(janPayday);
