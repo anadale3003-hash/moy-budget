@@ -80,7 +80,7 @@ function addMonths(year, month, offset) {
   return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 };
 }
 // Only the latest active pay cycle per type can generate reminders.
-// A pending payment is reminded once daily for up to 35 days after its planned date.
+// A pending payment is reminded once daily for up to 14 days after its planned date.
 function duePaydays(today, prefs) {
   const [year, month] = today.split("-").map(Number);
   const advanceDay = Math.min(31, Math.max(1, Number(prefs.advanceDay) || 16));
@@ -98,7 +98,7 @@ function duePaydays(today, prefs) {
   const nowDay = Date.parse(today + "T00:00:00Z");
   return ["advance", "salary"].map(type => candidates.filter(item => {
     const difference = (nowDay - Date.parse(item.due + "T00:00:00Z")) / 86400000;
-    return item.type === type && difference >= 0 && difference <= 35;
+    return item.type === type && difference >= 0 && difference <= 14;
   }).sort((a, b) => b.due.localeCompare(a.due))[0]).filter(Boolean);
 }
 function isMonthEnd(iso) {
