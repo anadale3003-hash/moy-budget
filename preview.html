@@ -2248,6 +2248,11 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 </div><!-- End: advance and salary card -->
 <div class="section-heading"><h2>Куда перевести деньги</h2><span class="quiet">с каждой выплаты</span></div>
+<div class="goal-allocation-card" id="goalAllocationCard" aria-live="polite">
+ <div class="goal-allocation-main"><div class="goal-allocation-title">🎯 Накопления по цели <span class="goal-allocation-tag">ТЕСТ</span></div>
+ <strong id="goalAllocationAmount">—</strong><div id="goalAllocationNote" class="goal-allocation-note">Проверяем цель...</div></div>
+ <button id="goalAllocationAction" class="goal-allocation-action" type="button">Настроить</button>
+</div>
 <div class="card payout-destinations"><div id="planTable"></div><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two" id="categoryRules"></div><div class="foot">Сначала выделяются суммы в ₽, затем проценты от оставшейся части выплаты. Нераспределённый остаток — в «Остальное». Настройки действуют для следующих поступлений.</div></div></section>
 <section class="view" id="v-card"><div class="section-heading"><h2>Кредиты</h2></div>
 <div class="card mortgage-monthly-settings"><b>🏠 Ипотека</b><label class="field"><span>Ежемесячный платёж по ипотеке, ₽</span><input id="mortgage" type="number" min="0" step="100" inputmode="decimal"></label><div id="mortgageMonthlyStatus" class="foot">Изменение платежа применяется к будущим неподтверждённым поступлениям.</div></div>
@@ -2980,10 +2985,20 @@ function allocation(receiptDate=null,ruleOverrides=null){
   }
  };
  const ids=(mode,source)=>cats.filter(c=>rules[c.id]?.mode===mode&&rules[c.id]?.source===source).map(c=>c.id);
- for(const mode of ['rub','percent']){
-  allocateGroup(ids(mode,'advance'),['advance']);
-  allocateGroup(ids(mode,'salary'),['salary']);
-  allocateGroup(ids(mode,'both'),['advance','salary']);
+ if(linkedSavings!==null){
+  // In goal mode: essentials first, savings next, optional "Other" last.
+  // Previously ruble savings could displace percentage-based family funding.
+  for(const id of ['family','utilities','savings','other']){
+   const rule=rules[id];if(!rule)continue;
+   const types=rule.source==='advance'?['advance']:rule.source==='salary'?['salary']:['advance','salary'];
+   allocateGroup([id],types);
+  }
+ }else{
+  for(const mode of ['rub','percent']){
+   allocateGroup(ids(mode,'advance'),['advance']);
+   allocateGroup(ids(mode,'salary'),['salary']);
+   allocateGroup(ids(mode,'both'),['advance','salary']);
+  }
  }
  // Unallocated income remains available in "Other", so every actual
  // receipt still distributes exactly its full amount.
@@ -3134,7 +3149,7 @@ function fitTotalMoneyTile(){
   el.style.fontSize=Math.max(min,size)+'px';
  }
 }
-function render(){const m=monthData();const calc=allocation();const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advanceForecast):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
+function render(){const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advanceForecast):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
 $('envelopes').innerHTML=cats.map(cat=>{const line=calc.rows.find(x=>x.id===cat.id);const budget=(line?.a||0)+(line?.b||0);const used=sumExpenses(cat.id),balance=realBalance(cat.id),remaining=balance===null?budget-used:balance,pct=balance===null&&budget?Math.max(0,Math.min(100,used/budget*100)):0;return `<button type="button" class="card envelope-button" data-envelope="${cat.id}" aria-label="Открыть историю: ${cat.name}"><div class="row"><div class="row-title"><div class="emoji">${cat.icon}</div><div><div class="name">${cat.name}</div></div></div><div class="number" style="color:${remaining<0?'var(--red)':'var(--ink)'}">${rub(remaining)}</div></div><div class="track"><div class="fill" style="width:${pct}%;background:${cat.color}"></div></div><div class="tinyline"><span>За месяц потрачено ${rub(used)}</span><span>${balance===null?Math.round(pct)+'% от плана':'Учёт с '+esc(data.startBalances.date)}</span></div></button>`}).join('');
 const cc=credit();const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':'Откладывай '+rub(cc.per)+' с каждой предстоящей выплаты';$('obligations').innerHTML=`<div class="card"><div class="lineitem"><span>🏠 Ипотека: ${(data.paidMortgageMonth===month||regularPaidForMonth('mortgage',month)>=num(m.mortgage)&&num(m.mortgage)>0)?'оплачена':'платёж по плану'}</span><span>${rub(m.mortgage)}</span></div>${data.startBalances?`<div class="lineitem"><span>На следующую ипотеку отложено</span><span>${rub(mortgageFund())}</span></div>`:''}<div class="lineitem"><span>💳 Ещё накопить на кредитку</span><span>${rub(cc.debt)}</span></div><div class="sub" style="margin-top:10px">${esc(state)}</div></div>`;
 const visiblePlanRows=displayAllocationRows(calc.rows);
@@ -3670,6 +3685,52 @@ function categoryRules(){
  }
  return data.categoryRules;
 }
+
+function renderGoalLinkedPanel(calc){
+ const card=$('goalAllocationCard');
+ if(!card)return;
+ const settings=ladderSettings(),hasGoal=!!settings.targetMonth;
+ const on=hasGoal&&settings.autoAllocateSavings!==false;
+ const target=on?goalLinkedSavingsTarget():null;
+ const savingsRow=calc.rows.find(r=>r.id==='savings');
+ const planned=savingsRow?num(savingsRow.a)+num(savingsRow.b):0;
+ const action=$('goalAllocationAction'),amount=$('goalAllocationAmount'),note=$('goalAllocationNote');
+ card.classList.toggle('goal-is-active',target!==null);
+ card.classList.toggle('goal-is-disabled',!on);
+ if(!hasGoal){
+  amount.textContent='Цель не настроена';
+  note.textContent='Сохрани цель и срок в «Аналитике» — затем сумма накоплений будет рассчитана автоматически.';
+  action.textContent='Задать цель';
+ }else if(!on){
+  amount.textContent='Ручной режим';
+  note.textContent='Сейчас накопления распределяются по прежним правилам. Можно включить связь с целью.';
+  action.textContent='Включить';
+ }else if(target===null){
+  amount.textContent='Вне срока цели';
+  note.textContent='Выбранный месяц не входит в сохранённый период цели.';
+  action.textContent='Изменить цель';
+ }else{
+  amount.textContent=rub(planned)+' / месяц';
+  const goal=capitalSnapshot(),shortfall=Math.max(0,target-planned);
+  note.textContent=(goal.remaining<=0?'Цель уже достигнута.':
+   shortfall>1?'Нехватка свободных средств: '+rub(shortfall)+'. ':
+   'Расчёт выполнен. ')+
+   'Обязательные платежи и семейные нужды имеют приоритет. Перевод произойдёт только после подтверждения выплаты.';
+  action.textContent='Настроить';
+ }
+}
+$('goalAllocationAction').addEventListener('click',()=>{
+ const settings=ladderSettings();
+ if(!settings.targetMonth){
+  go('analytics');analyticsModalOpen('plan');return;
+ }
+ if(settings.autoAllocateSavings===false){
+  settings.autoAllocateSavings=true;
+  renderAll();return;
+ }
+ go('analytics');analyticsModalOpen('plan');
+});
+
 function renderCategoryRules(){
  const rules=categoryRules();
  const linkedSavings=goalLinkedSavingsTarget();
@@ -4599,6 +4660,27 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 #autoSavingsModeRow[hidden]{display:none!important}
 #autoSavingsModeRow>span{display:flex;align-items:center;gap:9px;font-weight:700}
 #autoSavingsMode{width:18px;height:18px;flex:0 0 18px;accent-color:var(--blue)}
+
+/* 1.5.80 TEST · visible goal-linked savings status on Payouts. */
+#v-plan .goal-allocation-card{
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+ padding:9px 11px;margin:6px 0 8px;
+ background:color-mix(in srgb,var(--card) 86%,#8b78d7 14%);
+ border:1px solid color-mix(in srgb,var(--line) 60%,#8b78d7 40%);
+ border-radius:13px;min-width:0;
+}
+#v-plan .goal-allocation-main{flex:1 1 auto;min-width:0}
+#v-plan .goal-allocation-title{font-size:12px;font-weight:750;color:var(--ink);margin-bottom:3px}
+#v-plan .goal-allocation-tag{font-size:9px;font-weight:800;color:var(--blue);padding:2px 5px;border:1px solid var(--line);border-radius:7px}
+#v-plan #goalAllocationAmount{display:block;font-size:clamp(16px,4.3vw,21px);font-weight:850;font-variant-numeric:tabular-nums;line-height:1.2}
+#v-plan .goal-allocation-note{font-size:10px;line-height:1.25;color:var(--muted);margin-top:3px}
+#v-plan .goal-allocation-action{flex:0 0 auto;max-width:102px;min-height:36px;border-radius:9px;padding:5px 8px;
+ border:1px solid var(--blue);color:var(--blue);font-size:11px;font-weight:750;background:var(--card)}
+@media (max-width:390px){
+ #v-plan .goal-allocation-card{padding:7px 8px;margin:4px 0 6px}
+ #v-plan .goal-allocation-note{font-size:9px}
+ #v-plan .goal-allocation-action{padding:4px 6px;max-width:90px}
+}
 </style>
 <dialog id="adviceDialog" aria-labelledby="advisorTitle"><div class="advisor-shell">
 <div class="advisor-head"><h2 id="advisorTitle">🤖 Финансовый советник</h2><button class="btn light" id="advisorClose" type="button" aria-label="Закрыть">✕</button></div>
