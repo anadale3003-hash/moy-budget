@@ -2509,7 +2509,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 <div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 
-<dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">Советы для твоего бюджета</h2><button type="button" class="btn light" id="budgetAlertsClose" aria-label="Закрыть">✕</button></div><p class="budget-alerts-help">По твоим записям на сегодня</p><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
+<dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">Советы для твоего бюджета</h2><button type="button" class="btn light" id="budgetAlertsClose" aria-label="Закрыть">✕</button></div><p class="budget-alerts-help" id="paidMilestone" hidden></p><section id="purchaseTrial" hidden><label for="trialAmount">Сколько останется после покупки?</label><input id="trialAmount" type="text" inputmode="decimal" autocomplete="off" placeholder="Сумма покупки, ₽"><p id="trialResult" aria-live="polite"></p></section><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
 <script>
 /* Layout-only grouping. IDs/forms remain intact so accounting calculations and saved data are unchanged. */
 (function(){
@@ -3160,6 +3160,14 @@ window.budgetAdvisorSnapshot=function(now){
  return {data,mortgage:upcomingMortgage(now),debt:Math.max(0,num(data.debt)-regularPaymentSum('credit',null,todayKey)-early),
  reserved:data.startBalances?Math.max(0,regularCreditAvailable(todayKey)):num(data.reserved)};
 };
+function purchaseTrialText(raw,available,days){
+ const value=raw.trim().replace(/\s/g,'').replace(',','.');
+ if(!value)return 'В семейном конверте доступно '+rub(available)+'.';
+ if(!/^\d+(\.\d{0,2})?$/.test(value)||!Number.isSafeInteger(Math.round(Number(value)*100)))return 'Введи сумму в рублях, например 1 500.';
+ const left=(Math.round(available*100)-Math.round(Number(value)*100))/100;
+ if(left<0)return 'В семейном бюджете не хватает '+rub(-left)+'.';
+ return 'Останется '+rub(left)+' до выплаты — около '+rub(Math.floor(left/days))+' в день, включая сегодня.';
+}
 function renderEarlyAlerts(){
  const host=$('budgetEarlyAlerts');if(!host)return;
  const now=new Date(),todayKey=iso(now),start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -3229,6 +3237,16 @@ function renderEarlyAlerts(){
  const priority=['critical','credit','daily','warn','saving','goal','info','season'];
  notes.sort((a,b)=>priority.indexOf(a.kind)-priority.indexOf(b.kind));
  if(!notes.length)push('info','Бюджет на сегодня','После записи поступлений и расходов здесь появятся персональные советы.');
+ const milestone=regularPaymentSum('credit',todayKey.slice(0,7)+'-01',todayKey);
+ $('paidMilestone').hidden=milestone<=0;
+ $('paidMilestone').textContent='В этом месяце ты уже внёс '+rub(milestone)+' на кредитку.';
+ $('purchaseTrial').hidden=!money||days<=0;
+ if(money&&days>0){
+  const available=Math.max(0,Math.min(money.available,categoryBalanceAt('family',todayKey)));
+  const input=$('trialAmount');
+  input.oninput=()=>{$('trialResult').textContent=purchaseTrialText(input.value,available,days);};
+  input.oninput();
+ }
  const first=notes.shift();
  const card=n=>'<article class="budget-early-alert '+n.kind+'"><b>'+esc(n.title)+'</b><p>'+esc(n.body)+'</p></article>';
  host.innerHTML=card(first)+(notes.length?'<details class="more-budget-tips"><summary>Другие советы · '+notes.length+'</summary>'+notes.map(card).join('')+'</details>':'');
@@ -5223,4 +5241,4 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  #homeEnvelopesPanel #envelopes>.envelope-button .number{position:static!important;margin:0!important;line-height:1.1}
  #homeEnvelopesPanel #envelopes>.envelope-button .track,#homeEnvelopesPanel #envelopes>.envelope-button .tinyline{position:static!important;margin:0!important}
  #homeEnvelopesPanel #envelopes>.envelope-button:has(.track[data-balance]) .track{display:none!important}
-}</style></body></html>
+}</style><style>#purchaseTrial:not([hidden]){display:grid;gap:8px;padding:14px;margin-bottom:12px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}#purchaseTrial label{font-weight:700}#trialAmount{width:100%;font-size:16px;padding:10px;color:var(--ink);background:var(--input);border:1px solid var(--line);border-radius:9px}#trialResult{margin:0;font-size:13px}#paidMilestone{color:var(--ink)}</style></body></html>
