@@ -2224,7 +2224,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  max-width:100%;
 }
 </style></head><body>
-<div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего в бюджете</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-heading"><span class="payday-title">До ближайшей выплаты</span><span class="payday-date" id="nextPaymentDate"></span></span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
+<div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего в бюджете</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-heading"><span class="payday-title">До ближайшей выплаты</span><span class="payday-date" id="nextPaymentDate"></span></span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div><button type="button" id="homeExpenseQuick">＋ Записать расход</button></div></header>
 <main class="main">
 <section class="view active" id="v-home">
 
@@ -2250,7 +2250,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="section-heading"><h2>Куда перевести деньги</h2><span class="quiet">с каждой выплаты</span></div>
 <div class="goal-allocation-card" id="goalAllocationCard" aria-live="polite">
  <div class="goal-allocation-heading">
-  <b>🎯 Накопления <span class="goal-allocation-tag">ТЕСТ</span></b>
+  <b>🎯 Накопления</b>
   <button id="goalAllocationAction" class="goal-allocation-action" type="button">Цель и срок ›</button>
  </div>
  <div class="goal-allocation-main">
@@ -2826,10 +2826,15 @@ function showPaydayCountdown(actual){
  if(dayCount===0){limit.textContent='Выплата сегодня';note.textContent='Если деньги ещё не поступили, дождись фактического зачисления';return;}
  const spendable=Math.max(0,actual.available);
  const dailyAmount=Math.floor(spendable/dayCount);
- limit.classList.add(dailyAmount>5000?'daily-good':dailyAmount>3000?'daily-medium':'daily-low');
- limit.textContent='Можно тратить ~'+rub(dailyAmount)+'/день';
- const family=Math.max(0,num(categoryBalanceAt('family',iso(now))));
- note.textContent='Из них на семейные нужды — до '+rub(Math.floor(Math.min(family,spendable)/dayCount))+' в день';
+ const family=Math.max(0,Math.min(spendable,num(categoryBalanceAt('family',iso(now)))));
+ const familyDaily=Math.floor(family/dayCount);
+ limit.textContent='На семью сегодня ';
+ const amount=document.createElement('strong');
+ amount.className=familyDaily>5000?'daily-good':familyDaily>3000?'daily-medium':'daily-low';
+ amount.textContent=rub(familyDaily);
+ limit.append(amount);
+ note.textContent='В семейном конверте '+rub(family)+' · общий ориентир '+rub(dailyAmount)+'/день';
+
 }
 function nextPaydays(now=new Date()){
   // A salary paid on the 1st of the next calendar month belongs to the previous
@@ -3101,7 +3106,7 @@ function receiptInfo(){
   button.textContent=receipt?'✓ Получено':(type==='advance'?'Подтвердить аванс':'Подтвердить зарплату');
   button.classList.toggle('is-confirmed',!!receipt);
   button.setAttribute('aria-label',receipt?(type==='advance'?'Аванс получен':'Зарплата получена'):(type==='advance'?'Подтвердить поступление аванса':'Подтвердить поступление зарплаты'));
-  note.textContent=receipt?'Зачислено '+rub(receipt.amount)+' · '+receipt.date:(!data.startBalances?'Сначала укажи стартовые остатки в настройках.':'После фактического поступления нажми кнопку.');
+  note.textContent=receipt?'Зачислено '+rub(receipt.amount)+' · '+(fromISO(receipt.date)?.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})||receipt.date):(!data.startBalances?'Сначала укажи стартовые остатки в настройках.':'После фактического поступления нажми кнопку.');
   note.classList.toggle('received',!!receipt);
  }
 }
@@ -3223,8 +3228,11 @@ function renderEarlyAlerts(){
  if(!money)push('daily','🛒 Сколько можно тратить до выплаты','Укажи стартовые остатки в настройках. Тогда здесь появится дневной ориентир для семейных покупок.');
  const priority=['critical','credit','daily','warn','saving','goal','info','season'];
  notes.sort((a,b)=>priority.indexOf(a.kind)-priority.indexOf(b.kind));
- host.innerHTML=notes.map(n=>'<article class="budget-early-alert '+n.kind+'"><b>'+esc(n.title)+'</b><p>'+esc(n.body)+'</p></article>').join('');
- const count=$('budgetAlertsCount');count.textContent=String(notes.length);count.hidden=!notes.length;
+ if(!notes.length)push('info','Бюджет на сегодня','После записи поступлений и расходов здесь появятся персональные советы.');
+ const first=notes.shift();
+ const card=n=>'<article class="budget-early-alert '+n.kind+'"><b>'+esc(n.title)+'</b><p>'+esc(n.body)+'</p></article>';
+ host.innerHTML=card(first)+(notes.length?'<details class="more-budget-tips"><summary>Другие советы · '+notes.length+'</summary>'+notes.map(card).join('')+'</details>':'');
+ const count=$('budgetAlertsCount');count.textContent=String(notes.length+1);count.hidden=false;
 }
 
 const budgetAlertsDialog=$('budgetAlertsDialog');
@@ -3970,7 +3978,7 @@ $('expenseForm').onsubmit=e=>{e.preventDefault();const amount=num($('expenseAmou
 let type=$('expenseType').value;if(type==='__new__'){type=$('newExpenseType').value.trim().replace(/\s+/g,' ');if(!type){alert('Введи название нового вида расхода');$('newExpenseType').focus();return;}if(type.length>50)return;}
 if(!type){alert('Выбери вид расхода');return;}
 const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===type.toLocaleLowerCase('ru'));if(existing)type=existing;else data.expenseTypes[category].push(type);
-data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);renderAll()};
+data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);if(renderAll())window.dispatchEvent(new Event('budget:expense-saved'))};
 $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b||!confirm('Удалить этот расход?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(new Date())+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
@@ -4459,12 +4467,20 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    overlay.hidden=true;document.documentElement.classList.remove('ops-sheet-shown');
    if(trigger&&trigger.isConnected)trigger.focus({preventScroll:true});
   };
-  const showSheet=type=>{
-   if(!parts[type])return;trigger=grid.querySelector('[data-ops-action="'+type+'"]');
+  const showSheet=(type,source)=>{
+   if(!parts[type])return;trigger=source||grid.querySelector('[data-ops-action="'+type+'"]');
    Object.entries(parts).forEach(([name,card])=>{card.hidden=name!==type});
    title.textContent=type==='expense'?'Новый расход':type==='income'?'Новый доход':'Новый перевод';
    overlay.hidden=false;body.scrollTop=0;
   };
+  const homeExpense=document.getElementById('homeExpenseQuick');
+  homeExpense.addEventListener('click',()=>{
+   showSheet('expense',homeExpense);
+   document.getElementById('expenseAmount').focus({preventScroll:true});
+  });
+  window.addEventListener('budget:expense-saved',()=>{
+   if(trigger===homeExpense&&!overlay.hidden)closeSheet();
+  });
   grid.addEventListener('click',event=>{
    const button=event.target.closest('[data-ops-action]');if(button)showSheet(button.dataset.opsAction);
   });
@@ -5186,4 +5202,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .orchid-gold .budget-alerts-top h2{font-family:Georgia,serif;font-weight:500;color:#f5dcba}
 .orchid-gold .budget-alerts-dialog .budget-early-alert:first-child{background:linear-gradient(120deg,#3f303e,#2a242d);border-color:#8e7458}
 .orchid-gold :focus-visible{outline:2px solid #f4ce96;outline-offset:2px}
+</style><style>
+#homeExpenseQuick{appearance:none;border:1px solid var(--line);border-radius:12px;color:var(--ink);background:var(--panel);font:inherit;font-size:14px;font-weight:650;min-height:44px;padding:6px 14px;cursor:pointer}
+.app .payday-counter{position:relative}
+#dailySpendingLimit{color:var(--ink);letter-spacing:-.025em}
+#dailySpendingLimit .daily-low{color:var(--red)}
+#dailySpendingLimit .daily-medium{color:var(--orange)}
+#dailySpendingLimit .daily-good{color:var(--green)}
+.more-budget-tips summary{padding:14px 2px;font-weight:650;cursor:pointer}
+.more-budget-tips article+article{margin-top:8px}
 </style></body></html>
