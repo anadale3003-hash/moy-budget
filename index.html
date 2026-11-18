@@ -2371,7 +2371,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  
 </section>
 <section class="view" id="v-settings">
-<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.85</span></div>
+<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.86</span></div>
 <div class="card" id="notifySettingsCard">
  <div class="row"><b>🔔 Push-уведомления</b><span class="quiet">Автоматически</span></div>
  <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. С 08:30 по Москве, затем повторная проверка днём. Если подтверждённое зачисление сохранено, напоминания по нему прекращаются. Неподтверждённые выплаты напоминаются каждый час с 08:30 до 20:30 по Москве в дни напоминаний, пока поступление не подтверждено.</div>
@@ -3130,6 +3130,23 @@ function fitTotalMoneyTile(){
 }
 
 /* Financial risk notices: use actual records for balances, label forecasts, never spend reserve. */
+function upcomingMortgage(now){
+ const todayKey=iso(now);
+ const due=new Date(now.getFullYear(),now.getMonth()+(now.getDate()===1?0:1),1);
+ const cycle=iso(new Date(due.getFullYear(),due.getMonth()-1,1)).slice(0,7);
+ const plan=num(data.months[cycle]?.mortgage??data.mortgageMonthly??55000);
+ const payments=(data.regularPayments||[]).filter(p=>p.target==='mortgage'&&p.month===cycle&&p.date<=todayKey);
+ const paid=payments.length?payments.reduce((sum,p)=>sum+num(p.amount),0):data.paidMortgageMonth===cycle?plan:0;
+ const reserve=data.startBalances?.date<=todayKey?Math.max(0,regularMortgageAvailable(todayKey)):null;
+ const remaining=Math.max(0,plan-paid);
+ return {due,plan,paid,reserve,remaining,gap:reserve===null?null:Math.max(0,remaining-reserve)};
+}
+window.budgetAdvisorSnapshot=function(now){
+ const todayKey=iso(now);
+ const early=(data.earlyRepayments||[]).filter(p=>p.target==='credit'&&p.date<=todayKey).reduce((v,p)=>v+num(p.amount),0);
+ return {data,mortgage:upcomingMortgage(now),debt:Math.max(0,num(data.debt)-regularPaymentSum('credit',null,todayKey)-early),
+ reserved:data.startBalances?Math.max(0,regularCreditAvailable(todayKey)):num(data.reserved)};
+};
 function renderEarlyAlerts(){
  const host=$('budgetEarlyAlerts');if(!host)return;
  const now=new Date(),todayKey=iso(now),start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -3137,22 +3154,11 @@ function renderEarlyAlerts(){
  const dateLabel=d=>d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
  const notes=[];
  const push=(kind,title,body)=>notes.push({kind,title,body});
- // Next mortgage payment is the first of the coming month, not an income forecast.
- const dueDate=new Date(now.getFullYear(),now.getMonth()+(now.getDate()>=1?1:0),1);
- const dueKey=iso(dueDate).slice(0,7);
- const duePlan=data.months[dueKey];
- const mortgageAmount=num(duePlan?.mortgage===undefined?(data.mortgageMonthly===undefined?55000:data.mortgageMonthly):duePlan.mortgage);
- const daysMortgage=daysUntil(dueDate);
- const mortgageAvailable=data.startBalances&&data.startBalances.date<=todayKey?Math.max(0,regularMortgageAvailable(todayKey)):null;
- if(mortgageAmount>0&&daysMortgage<=45){
-  if(mortgageAvailable!==null&&mortgageAvailable+0.01<mortgageAmount){
-   const gap=mortgageAmount-mortgageAvailable;
-   push(daysMortgage<=15?'critical':'warn','🏠 На ипотеку ещё не всё отложено',
-     'К '+dateLabel(dueDate)+' потребуется '+rub(mortgageAmount)+'. По записям отложено '+rub(mortgageAvailable)+'. Не хватает '+rub(gap)+'. Проверь остаток счёта и отложи разницу заранее.');
-  }else if(mortgageAvailable===null){
-   push('info','🏠 Проверь деньги на ипотеку',
-     'К '+dateLabel(dueDate)+' нужен платёж '+rub(mortgageAmount)+'. Остаток ипотечного счёта не подтверждён — проверь, что сумма уже отложена.');
-  }
+ const mortgage=upcomingMortgage(now);
+ if(mortgage.plan>0){
+  const title=mortgage.remaining===0?'🏠 Платёж по ипотеке закрыт':mortgage.gap===0?'🏠 На ипотеку всё собрано':'🏠 Ипотека к '+dateLabel(mortgage.due);
+  const action=mortgage.remaining===0?'Платёж за этот период внесён полностью.':mortgage.gap===0?'Деньги на остаток платежа уже собраны. Подтверди оплату после списания.':mortgage.reserve===null?'Сверь остаток ипотечного счёта с суммой к оплате.':'Осталось отложить '+rub(mortgage.gap)+'.';
+  push(mortgage.gap>0?'warn':'info',title,'Уже оплачено '+rub(mortgage.paid)+' из '+rub(mortgage.plan)+'. '+(mortgage.reserve===null?'К оплате '+rub(mortgage.remaining)+'. ':'В резерве '+rub(mortgage.reserve)+'. ')+action);
  }
  // January advance: compare January's projected first-half workdays with December.
  const yy=now.getFullYear()+(now.getMonth()>=10?1:0);
@@ -3943,7 +3949,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(new Date())+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.85';
+const APP_VERSION='1.5.86';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -5041,18 +5047,16 @@ function setupAdvisor(){
  };
  function report(){
   // Read-only snapshot. No records, dates or app settings are changed.
-  const d=typeof data==='object'&&data?data:JSON.parse(localStorage.getItem('my-budget-v1')||'{}');
-  const today=new Date().toLocaleDateString('sv-SE');
+  const asOf=new Date();
+  const {data:d,mortgage,debt,reserved}=window.budgetAdvisorSnapshot(asOf);
+  const today=asOf.toLocaleDateString('sv-SE');
   const month=today.slice(0,7);
   const expenses=Array.isArray(d.expenses)?d.expenses.filter(x=>validDate(x.date)&&x.date<=today):[];
   const incomes=Array.isArray(d.extraIncomes)?d.extraIncomes.filter(x=>validDate(x.date)&&x.date<=today):[];
   const receipts=Array.isArray(d.receipts)?d.receipts.filter(x=>validDate(x.date)&&x.date<=today):[];
   const periods=[...new Set([...expenses.map(x=>x.date.slice(0,7)),...receipts.map(x=>x.date.slice(0,7)),...incomes.map(x=>x.date.slice(0,7))])].filter(x=>x<=month).sort().slice(-6);
   if(!periods.includes(month)) periods.push(month);
-  const mortgage=amount(d.months?.[month]?.mortgage??d.mortgageMonthly??55000);
   const reserve=amount(d.ladder?.reserve);
-  const debt=Math.max(0,num(d.debt)-regularPaymentSum('credit',null,today)-(d.earlyRepayments||[]).filter(p=>p.target==='credit'&&p.date<=today).reduce((v,p)=>v+num(p.amount),0));
-  const reserved=d.startBalances?Math.max(0,regularCreditAvailable(today)):amount(d.reserved);
   const catNames={family:'Семейные нужды',utilities:'Коммуналка',savings:'Накопления',other:'Остальное'};
   const monthExpense=expenses.filter(x=>x.date.startsWith(month));
   const monthIncome=incomes.filter(x=>x.date.startsWith(month));
@@ -5070,6 +5074,7 @@ function setupAdvisor(){
    'Не предлагай акции, криптовалюту, спекуляции и рискованный бизнес.',
    'Неприкосновенная подушка — 500 000 ₽; её фактический остаток может быть неизвестен.',
    'Не выдумывай данные. Различай факты, планы, гипотезы, проценты и доходы. Переводы между счетами — не доход.',
+   'Начни с одного подтверждённого достижения в рублях, если оно есть. Предложи один посильный шаг до следующей выплаты. Учитывай расходы семьи. Не обещай экономию без подтверждения.',
    'Проверь долг и сроки кредитки, сохранность резерва и реалистичность платежей.',
    'Отвечай простым разговорным языком, без финансового жаргона. Предупреждай заранее о будущей нехватке денег: январский аванс после праздников, ближайшая ипотека, кредитка. Называй дату, конкретную сумму и действие. Прогноз отделяй от фактов.',
    'Не сравнивай ипотеку и вклад без ставки ипотеки, чистой ставки вклада, налогов и ограничений.',
@@ -5089,7 +5094,7 @@ function setupAdvisor(){
    ]),
    '',
    'СОСТОЯНИЕ:',
-   'Ипотека — план ежемесячного платежа: '+ru(mortgage),
+   'Ипотека к '+mortgage.due.toLocaleDateString('ru-RU')+' — платёж '+ru(mortgage.plan)+', оплачено '+ru(mortgage.paid)+', к оплате '+ru(mortgage.remaining)+(mortgage.reserve===null?' (резерв неизвестен)':', в резерве '+ru(mortgage.reserve)+', ещё собрать '+ru(mortgage.gap)),
    'Кредитная карта — учтённый долг: '+ru(debt)+'; отдельно отложено: '+ru(reserved)+'; срок: '+(d.deadline||'не указан'),
    'Подушка безопасности — значение в настройках: '+ru(reserve)+' (может быть не равно остатку на счёте)',
    'Накопления: точный свободный остаток не выводится, если он неотличим от бюджетных переводов.',
