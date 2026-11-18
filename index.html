@@ -2224,7 +2224,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  max-width:100%;
 }
 </style></head><body>
-<div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего в бюджете</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-heading"><span class="payday-title">До ближайшей выплаты</span><span class="payday-date" id="nextPaymentDate"></span></span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div><button type="button" id="homeExpenseQuick">＋ Записать расход</button></div></header>
+<div class="app home-active"><header class="hero"><div class="hero-overview dashboard-frame"><div class="hero-balance"><div class="hero-label hero-primary-label">ДОСТУПНЫЙ БЮДЖЕТ</div><div class="hero-amount" id="heroTotal">—</div><div class="hero-label" id="heroLabel">На текущие расходы · без накоплений и обязательных платежей</div></div><div class="hero-grid hero-breakdown"><div class="hero-mini hero-all"><span>Всего в бюджете</span><b id="heroAll">—</b></div></div></div><div class="payday-counter" aria-live="polite"><div class="payday-row"><span class="payday-heading"><span class="payday-title">До ближайшей выплаты</span><span class="payday-date" id="nextPaymentDate"></span></span><span class="payday-when" id="nextPaymentWhen">—</span></div><div class="payday-per-day" id="dailySpendingLimit">—</div><div class="payday-explain" id="dailySpendingNote">Лимит по доступному бюджету, без накоплений и денег на обязательные платежи</div></div></header>
 <main class="main">
 <section class="view active" id="v-home">
 
@@ -2371,7 +2371,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  
 </section>
 <section class="view" id="v-settings">
-<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.89</span></div>
+<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.90</span></div>
 <div class="card" id="notifySettingsCard">
  <div class="row"><b>🔔 Push-уведомления</b><span class="quiet">Автоматически</span></div>
  <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. С 08:30 по Москве, затем повторная проверка днём. Если подтверждённое зачисление сохранено, напоминания по нему прекращаются. Неподтверждённые выплаты напоминаются каждый час с 08:30 до 20:30 по Москве в дни напоминаний, пока поступление не подтверждено.</div>
@@ -3988,12 +3988,12 @@ $('expenseForm').onsubmit=e=>{e.preventDefault();const amount=num($('expenseAmou
 let type=$('expenseType').value;if(type==='__new__'){type=$('newExpenseType').value.trim().replace(/\s+/g,' ');if(!type){alert('Введи название нового вида расхода');$('newExpenseType').focus();return;}if(type.length>50)return;}
 if(!type){alert('Выбери вид расхода');return;}
 const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===type.toLocaleLowerCase('ru'));if(existing)type=existing;else data.expenseTypes[category].push(type);
-data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);if(renderAll())window.dispatchEvent(new Event('budget:expense-saved'))};
+data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);renderAll()};
 $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b||!confirm('Удалить этот расход?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(new Date())+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.89';
+const APP_VERSION='1.5.90';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -4477,20 +4477,12 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    overlay.hidden=true;document.documentElement.classList.remove('ops-sheet-shown');
    if(trigger&&trigger.isConnected)trigger.focus({preventScroll:true});
   };
-  const showSheet=(type,source)=>{
-   if(!parts[type])return;trigger=source||grid.querySelector('[data-ops-action="'+type+'"]');
+  const showSheet=type=>{
+   if(!parts[type])return;trigger=grid.querySelector('[data-ops-action="'+type+'"]');
    Object.entries(parts).forEach(([name,card])=>{card.hidden=name!==type});
    title.textContent=type==='expense'?'Новый расход':type==='income'?'Новый доход':'Новый перевод';
    overlay.hidden=false;body.scrollTop=0;
   };
-  const homeExpense=document.getElementById('homeExpenseQuick');
-  homeExpense.addEventListener('click',()=>{
-   showSheet('expense',homeExpense);
-   document.getElementById('expenseAmount').focus({preventScroll:true});
-  });
-  window.addEventListener('budget:expense-saved',()=>{
-   if(trigger===homeExpense&&!overlay.hidden)closeSheet();
-  });
   grid.addEventListener('click',event=>{
    const button=event.target.closest('[data-ops-action]');if(button)showSheet(button.dataset.opsAction);
   });
@@ -5213,7 +5205,6 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .orchid-gold .budget-alerts-dialog .budget-early-alert:first-child{background:linear-gradient(120deg,#3f303e,#2a242d);border-color:#8e7458}
 .orchid-gold :focus-visible{outline:2px solid #f4ce96;outline-offset:2px}
 </style><style>
-#homeExpenseQuick{appearance:none;border:1px solid var(--line);border-radius:12px;color:var(--ink);background:var(--panel);font:inherit;font-size:14px;font-weight:650;min-height:44px;padding:6px 14px;cursor:pointer}
 .app .payday-counter{position:relative}
 #dailySpendingLimit{color:var(--ink);letter-spacing:-.025em}
 #dailySpendingLimit .daily-low{color:var(--red)}
