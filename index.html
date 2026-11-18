@@ -2228,7 +2228,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <main class="main">
 <section class="view active" id="v-home">
 
-<div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайшие обязательства</h2><button class="analytics-icon-button alert-bell home-alert-trigger" type="button" id="budgetAlertsOpen" aria-label="Открыть финансовые предупреждения" title="Предупреждения">🔔 <span class="home-alert-label">Советы</span><span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button></div><div id="obligations"></div></div>
+<div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайшие обязательства</h2><button class="analytics-icon-button alert-bell home-alert-trigger" type="button" id="budgetAlertsOpen" aria-label="Открыть советы для бюджета" title="Советы">🔔 <span class="home-alert-label">Советы</span><span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button></div><div id="obligations"></div></div>
 <div class="home-envelopes-visible dashboard-frame" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты и остатки</h2><span class="quiet">План − расходы</span></div><div id="envelopes"></div></div>
 </section>
 <section class="view" id="v-plan">
@@ -2371,7 +2371,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  
 </section>
 <section class="view" id="v-settings">
-<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.86</span></div>
+<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.87</span></div>
 <div class="card" id="notifySettingsCard">
  <div class="row"><b>🔔 Push-уведомления</b><span class="quiet">Автоматически</span></div>
  <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. С 08:30 по Москве, затем повторная проверка днём. Если подтверждённое зачисление сохранено, напоминания по нему прекращаются. Неподтверждённые выплаты напоминаются каждый час с 08:30 до 20:30 по Москве в дни напоминаний, пока поступление не подтверждено.</div>
@@ -2509,7 +2509,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 <div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 
-<dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">🔔 Финансовые предупреждения</h2><button type="button" class="btn light" id="budgetAlertsClose" aria-label="Закрыть">✕</button></div><p class="budget-alerts-help">Проверяем ипотеку, кредитку и будущие выплаты по записям приложения.</p><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
+<dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">Советы для твоего бюджета</h2><button type="button" class="btn light" id="budgetAlertsClose" aria-label="Закрыть">✕</button></div><p class="budget-alerts-help">По твоим записям на сегодня</p><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
 <script>
 /* Layout-only grouping. IDs/forms remain intact so accounting calculations and saved data are unchanged. */
 (function(){
@@ -3178,27 +3178,45 @@ function renderEarlyAlerts(){
     const febPlan=data.months[febKey];
     const febMortgage=num(febPlan?.mortgage===undefined?(data.mortgageMonthly===undefined?55000:data.mortgageMonthly):febPlan.mortgage);
     const estimateText=smaller?'По расчёту аванс может быть около '+rub(janEstimate.advanceForecast)+' вместо декабрьских '+rub(decEstimate.advanceForecast)+'. ':'Из-за новогодних праздников аванс может быть меньше обычного. ';
-    push('warn','🎄 Подготовь деньги к январю',
+    push('season','🎄 Подготовь деньги к январю',
       estimateText+'На ипотеку к '+dateLabel(febDue)+' потребуется '+rub(febMortgage)+'. По возможности отложи деньги из декабрьских поступлений. Прогноз не учитывает все особенности расчёта работодателя.');
    }
   }
  }
- // Credit due: report the outstanding balance and known reserves only.
- const creditDue=fromISO(data.deadline),outstanding=creditOutstanding();
- if(creditDue&&outstanding>0){
-  const days=daysUntil(creditDue);
-  const reserved=Math.max(0,num(data.reserved)+incomeAmountFor('credit'));
-  const gap=Math.max(0,outstanding-reserved);
-  if(days<=90){
-   const deadlineText=days<0?'Срок погашения по настройкам уже прошёл.':days<=30?'До срока осталось '+days+' дн.':'Срок '+dateLabel(creditDue)+'.';
-   push(days<=30?'critical':'warn','💳 Проверь кредитку',
-     deadlineText+' Учтённый долг '+rub(outstanding)+', отдельно зарезервировано '+rub(reserved)+'. '+(gap>0?'До полного погашения не хватает '+rub(gap)+'. ':'')+'Проверь льготный период, обязательный платёж и данные банка.');
-  }
+ const next=nearestPayday(now),money=actualMoneyToday();
+ const days=next?daysUntil(next.date):0;
+ if(money&&days>0){
+  const family=Math.max(0,Math.min(money.available,categoryBalanceAt('family',todayKey)));
+  push('daily','🛒 До '+dateLabel(next.date)+' на семью — '+rub(Math.floor(family/days))+' в день',
+   'В семейном конверте '+rub(family)+' на '+days+' дн. Перед закупкой сравни сумму корзины с остатком конверта.');
  }
- // No fabricated savings or inferred cushion balance.
- if(notes.length===0){host.innerHTML='<div class="foot">✅ Пока нет предупреждений.</div>';const count=$('budgetAlertsCount');count.hidden=true;return;}
- host.innerHTML=notes.slice(0,3).map(n=>'<div class="budget-early-alert '+n.kind+'"><b>'+esc(n.title)+'</b><p>'+esc(n.body)+'</p></div>').join('');
- const count=$('budgetAlertsCount');count.textContent=String(Math.min(notes.length,3));count.hidden=false;
+ const snapshot=window.budgetAdvisorSnapshot(now);
+ if(snapshot.debt>0){
+  const due=fromISO(data.deadline),gap=Math.max(0,snapshot.debt-snapshot.reserved);
+  const paid=regularPaymentSum('credit',todayKey.slice(0,7)+'-01',todayKey);
+  const upcoming=nextPaydays(now);
+  const creditRow=next&&next.month===month?displayAllocationRows(allocation().rows).find(r=>r.name==='Кредитная карта'):null;
+  const action=gap===0?'Весь остаток уже обеспечен. После списания отметь оплату.':
+   due&&upcoming.length&&creditRow?'С '+(next.type==='advance'?'аванса ':'зарплаты ')+dateLabel(next.date)+' по плану отложи '+rub(creditRow[next.type==='advance'?'a':'b'])+'.':
+   due&&upcoming.length?'До '+dateLabel(due)+' нужно собрать '+rub(gap)+' за '+upcoming.length+' выплат.':
+   due?'До срока больше нет запланированных выплат. Сверь дату и сумму платежа с банком.':'Укажи дату окончания льготного периода в «Кредитах».';
+  push(due&&daysUntil(due)<=14&&gap>0?'critical':'credit',paid?'💳 В этом месяце ты погасил '+rub(paid):'💳 План по кредитке',
+   'Остаток долга '+rub(snapshot.debt)+'. '+action);
+ }
+ const capital=capitalSnapshot(),monthsLeft=savingsPlanMonthsLeft(capital.settings.targetMonth);
+ if(capital.settings.targetMonth&&monthsLeft>0){
+  const percent=Math.min(100,Math.floor(100*capital.total/Math.max(1,capital.goal)));
+  push('goal','🎯 '+percent+'% пути к цели', 'По данным приложения собрано '+rub(capital.total)+' из '+rub(capital.goal)+'. '+(capital.remaining===0?'Цель достигнута. В «Аналитике» можно выбрать следующую.':snapshot.debt>0?'Пока гасишь кредитку, можно сохранить накопленное. Вернись к темпу накоплений после погашения.':'Чтобы уложиться в срок, ориентир — '+rub(Math.ceil(capital.remaining/monthsLeft))+' в месяц.'));
+ }
+ const economy=analyticsEconomy();
+ if(economy.isCurrent&&economy.available>=1){
+  push('saving','🌱 Расходы снизились','По записям за те же дни прошлого месяца можно рассмотреть до '+rub(economy.available)+'. Перед переводом проверь, что все покупки внесены и денег хватит до выплаты.');
+ }
+ if(!money)push('daily','🛒 Сколько можно тратить до выплаты','Укажи стартовые остатки в настройках. Тогда здесь появится дневной ориентир для семейных покупок.');
+ const priority=['critical','credit','daily','warn','saving','goal','info','season'];
+ notes.sort((a,b)=>priority.indexOf(a.kind)-priority.indexOf(b.kind));
+ host.innerHTML=notes.map(n=>'<article class="budget-early-alert '+n.kind+'"><b>'+esc(n.title)+'</b><p>'+esc(n.body)+'</p></article>').join('');
+ const count=$('budgetAlertsCount');count.textContent=String(notes.length);count.hidden=!notes.length;
 }
 
 const budgetAlertsDialog=$('budgetAlertsDialog');
@@ -3949,7 +3967,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(new Date())+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.86';
+const APP_VERSION='1.5.87';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -5001,7 +5019,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
 .budget-early-alerts:empty{display:none}
 .budget-early-alerts{display:grid;gap:8px;margin-bottom:11px}
 .budget-early-alert{border:1px solid var(--line);border-left:3px solid #d78b38;border-radius:13px;background:var(--card);padding:10px 12px}
-.budget-early-alert.critical{border-left-color:#cf5555}
+.budget-early-alert.daily{border-left-color:#56b3af}.budget-early-alert.credit{border-left-color:#be8bed}.budget-early-alert.goal,.budget-early-alert.saving{border-left-color:#75b98a}.budget-alerts-dialog .budget-early-alert{padding:13px 14px;background:var(--panel)}.budget-alerts-dialog .budget-early-alert p{line-height:1.5}.budget-early-alert.critical{border-left-color:#cf5555}
 .budget-early-alert.info{border-left-color:var(--blue)}
 .budget-early-alert b{display:block;font-size:13px;margin-bottom:4px}
 .budget-early-alert p{margin:0;font-size:12px;line-height:1.4;color:var(--ink)}
