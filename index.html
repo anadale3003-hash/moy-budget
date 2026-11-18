@@ -2371,7 +2371,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  
 </section>
 <section class="view" id="v-settings">
-<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.88</span></div>
+<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.89</span></div>
 <div class="card" id="notifySettingsCard">
  <div class="row"><b>🔔 Push-уведомления</b><span class="quiet">Автоматически</span></div>
  <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. С 08:30 по Москве, затем повторная проверка днём. Если подтверждённое зачисление сохранено, напоминания по нему прекращаются. Неподтверждённые выплаты напоминаются каждый час с 08:30 до 20:30 по Москве в дни напоминаний, пока поступление не подтверждено.</div>
@@ -2509,7 +2509,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 <div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 
-<dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">Советы для твоего бюджета</h2><button type="button" class="btn light" id="budgetAlertsClose" aria-label="Закрыть">✕</button></div><p class="budget-alerts-help">По твоим записям на сегодня</p><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
+<dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">Советы для твоего бюджета</h2><button type="button" class="btn light" id="budgetAlertsClose" aria-label="Закрыть">✕</button></div><p class="budget-alerts-help" id="adviceOpening"></p><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
 <script>
 /* Layout-only grouping. IDs/forms remain intact so accounting calculations and saved data are unchanged. */
 (function(){
@@ -3221,10 +3221,28 @@ function renderEarlyAlerts(){
  const priority=['critical','credit','daily','warn','saving','goal','info','season'];
  notes.sort((a,b)=>priority.indexOf(a.kind)-priority.indexOf(b.kind));
  if(!notes.length)push('info','Бюджет на сегодня','После записи поступлений и расходов здесь появятся персональные советы.');
- const first=notes.shift();
+ const milestone=regularPaymentSum('credit',todayKey.slice(0,7)+'-01',todayKey);
+ const urgent=notes.find(n=>n.kind==='critical');
+ const wins=[];
+ if(mortgage.paid>0)wins.push('на ипотеку уже внесено '+rub(mortgage.paid));
+ if(milestone>0)wins.push('по кредитке за месяц погашено '+rub(milestone));
+ $('adviceOpening').textContent=wins.length?'Есть за что себя похвалить: '+wins.join(', ')+'.':'Давай посмотрим, что можно сделать с ближайшей выплаты.';
+ const options=[];
+ if(money&&days>0){
+  const family=Math.max(0,Math.min(money.available,categoryBalanceAt('family',todayKey)));
+  options.push({kind:'daily',title:'Оставить запас семье',body:family>0?'До '+dateLabel(next.date)+' в семейном конверте '+rub(family)+'. Можно оставить их на обычные покупки и вернуться к накоплениям после выплаты.':'В семейном конверте сейчас нет доступных денег. Сначала прикинь расходы на продукты до выплаты.'});
+ }
+ if(mortgage.gap>0)options.push({kind:'warn',title:'Подготовить ближайший платёж',body:'До '+dateLabel(mortgage.due)+' осталось собрать '+rub(mortgage.gap)+'. Сверь эту сумму с планом во «Выплатах», чтобы понимать, сколько оставить на ипотеку.'});
+ const creditNote=notes.find(n=>n.kind==='credit');
+ if(creditNote)options.push({...creditNote,title:'Продолжить погашать кредитку по плану'});
+ const goalNote=notes.find(n=>n.kind==='goal');
+ if(goalNote&&options.length<3)options.push(goalNote);
  const card=n=>'<article class="budget-early-alert '+n.kind+'"><b>'+esc(n.title)+'</b><p>'+esc(n.body)+'</p></article>';
- host.innerHTML=card(first)+(notes.length?'<details class="more-budget-tips"><summary>Другие советы · '+notes.length+'</summary>'+notes.map(card).join('')+'</details>':'');
- const count=$('budgetAlertsCount');count.textContent=String(notes.length+1);count.hidden=false;
+ const visible=options.slice(0,3);
+ if(!visible.length&&!urgent)visible.push(notes[0]);
+ const rest=notes.filter(n=>n!==urgent&&!visible.includes(n)&&!visible.some(v=>v.kind===n.kind));
+ host.innerHTML=(urgent?card(urgent):'')+(visible.length?'<p class="budget-alerts-help">'+(visible.length>1?'Можно выбрать один из этих шагов.':'Ближайший шаг')+'</p>'+visible.map(card).join(''):'')+(rest.length?'<details class="more-budget-tips"><summary>Ещё по бюджету · '+rest.length+'</summary>'+rest.map(card).join('')+'</details>':'');
+ const count=$('budgetAlertsCount');count.textContent=String(visible.length+rest.length+(urgent?1:0));count.hidden=false;
 }
 
 const budgetAlertsDialog=$('budgetAlertsDialog');
@@ -3975,7 +3993,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(new Date())+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.88';
+const APP_VERSION='1.5.89';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
