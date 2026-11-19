@@ -2224,9 +2224,10 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  max-width:100%;
 }
 </style></head><body>
-<div class="app home-active"><header class="hero"><div class="daily-summary"><div class="daily-headline"><span id="dailySpendingLimit">—</span><span id="nextPaymentDate">На семейные покупки</span><span id="nextPaymentWhen"></span></div><div hidden><p id="dailySpendingNote"></p><small id="heroLabel"></small></div></div><div class="home-balances"><div>Доступно на расходы<strong id="heroTotal">—</strong></div><div>Всего в бюджете<strong id="heroAll">—</strong></div></div></header>
+<div class="app home-active"><header class="hero"><div class="daily-summary"><div class="daily-headline"><span id="dailySpendingLimit">—</span><span id="nextPaymentDate">На семейные покупки</span><span id="nextPaymentWhen"></span></div><div hidden><p id="dailySpendingNote"></p><small id="heroLabel"></small></div></div></header>
 <main class="main">
 <section class="view active" id="v-home">
+<div class="home-balances"><div>Доступно на расходы<strong id="heroTotal">—</strong></div><div>Всего в бюджете<strong id="heroAll">—</strong></div></div>
 
 <div class="home-envelopes-visible dashboard-frame" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты</h2></div><div id="envelopes"></div></div>
 <div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайший платёж</h2><button class="analytics-icon-button alert-bell home-alert-trigger" type="button" id="budgetAlertsOpen" aria-label="Открыть советы для бюджета" title="Советы">🔔 <span class="home-alert-label">Советы</span><span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button></div><div id="obligations"></div></div>
@@ -5269,9 +5270,18 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .app #v-settings.active>.design-group>details{background:transparent!important;border:0!important}.app #v-settings.active details>summary{font-weight:650;line-height:1.22}.app #v-settings.active .field select{border-radius:12px}
 @media(max-height:740px){.home-balances div{padding:4px 9px}.daily-summary summary{padding:5px}}
 .daily-headline{padding:8px;text-align:center}.daily-headline>span{display:block}.daily-headline #nextPaymentWhen{font-size:14px;font-weight:600;margin-top:4px}
-.app header .home-balances{margin:6px 0 0;gap:0;border-radius:16px;background:var(--card);padding:10px 0}.app header .home-balances>div{min-width:0;padding:0 10px;border-radius:0;background:transparent}.home-balances>div+div{border-inline-start:1px solid var(--line)}
-.app header .home-balances :is(#heroTotal,#heroAll){font:700 clamp(17px,5vw,23px)/1.2 system-ui!important;letter-spacing:-.035em!important;color:var(--ink);margin:3px 0 0!important}
+.app #v-home .home-balances{margin:6px 0 0;gap:0;border-radius:16px;background:var(--card);padding:10px 0}.app #v-home .home-balances>div{min-width:0;padding:0 10px;border-radius:0;background:transparent}.home-balances>div+div{border-inline-start:1px solid var(--line)}
+.app #v-home .home-balances :is(#heroTotal,#heroAll){font:700 clamp(17px,5vw,23px)/1.2 system-ui!important;letter-spacing:-.035em!important;color:var(--ink);margin:3px 0 0!important}
 .app #v-plan.active>.design-group{padding:10px!important}.app #v-plan.active>.design-group :is(.payroll-preview,.month-strip,.payment-inputs,.payout-destinations){background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
 .app #v-plan.active .payroll-grid>div{padding:10px!important;background:color-mix(in srgb,var(--card) 88%,var(--teal))!important;border-radius:14px}.app #v-plan.active .payroll-grid b{font-size:clamp(18px,5.4vw,26px)!important}
 .app #v-plan.active .payment-inputs .payment-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;align-items:start}.app #v-plan.active>.design-group:has(.payment-inputs) .payment-receipt{display:flex!important;flex-direction:column;align-items:stretch;gap:5px;min-width:0;background:var(--panel)!important;border:0!important;border-radius:14px;padding:9px!important}.app #v-plan.active .payment-receipt .receipt-note{min-height:0!important;height:auto!important}.app #v-plan.active .payment-receipt button{white-space:normal}.app #v-plan.active .goal-allocation-card{border:0!important;border-inline-start:3px solid var(--teal)!important;background:var(--panel)!important}.app #v-plan.active .month-buttons{border:0!important;background:transparent!important}
+
+.app #v-home .home-balances{width:100%;margin:0 0 5px;flex:none}
+.app #v-plan.active .payment-inputs .payment-grid{align-items:stretch}
+.app #v-plan.active>.design-group:has(.payment-inputs) .payment-receipt{
+ display:grid!important;grid-template-rows:1.6em 3em 3.6em 2.6em;align-content:start;align-items:center
+}
+.app #v-plan.active .payment-receipt>.receipt-button{grid-row:2;height:100%}
+.app #v-plan.active .payment-receipt>.receipt-note{grid-row:3}
+.app #v-plan.active .payment-receipt>.receipt-undo{grid-row:4}
 </style></body></html>
