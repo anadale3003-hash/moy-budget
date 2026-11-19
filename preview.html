@@ -3108,7 +3108,7 @@ function receiptInfo(){
   button.textContent=receipt?'✓ Получено':(type==='advance'?'Подтвердить аванс':'Подтвердить зарплату');
   button.classList.toggle('is-confirmed',!!receipt);
   button.setAttribute('aria-label',receipt?(type==='advance'?'Аванс получен':'Зарплата получена'):(type==='advance'?'Подтвердить поступление аванса':'Подтвердить поступление зарплаты'));
-  note.textContent=receipt?'Зачислено '+rub(receipt.amount)+' · '+(fromISO(receipt.date)?.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})||receipt.date):(!data.startBalances?'Сначала укажи стартовые остатки в настройках.':'После фактического поступления нажми кнопку.');
+  note.textContent=receipt?rub(receipt.amount)+'\n'+(fromISO(receipt.date)?.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})||receipt.date):(!data.startBalances?'Сначала укажи стартовые остатки в настройках.':'После фактического поступления нажми кнопку.');
   note.classList.toggle('received',!!receipt);
  }
 }
@@ -5279,9 +5279,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .app #v-home .home-balances{width:100%;margin:0 0 5px;flex:none}
 .app #v-plan.active .payment-inputs .payment-grid{align-items:stretch}
 .app #v-plan.active>.design-group:has(.payment-inputs) .payment-receipt{
- display:grid!important;grid-template-rows:1.6em 3em 3.6em 2.6em;align-content:start;align-items:center
+ display:grid!important;box-sizing:border-box;width:100%;aspect-ratio:1;height:auto!important;min-height:0!important;align-self:start;grid-template-rows:auto minmax(32px,1fr) minmax(0,1fr) auto;align-content:stretch;align-items:center
 }
 .app #v-plan.active .payment-receipt>.receipt-button{grid-row:2;height:100%}
-.app #v-plan.active .payment-receipt>.receipt-note{grid-row:3}
+.app #v-plan.active .payment-receipt>.receipt-note{grid-row:3;white-space:pre-line;line-height:1.2}
 .app #v-plan.active .payment-receipt>.receipt-undo{grid-row:4}
 </style></body></html>
