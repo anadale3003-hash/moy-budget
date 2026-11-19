@@ -2657,7 +2657,7 @@ function payrollForecast(m,key=month){
  // exists. When the salary is configured, the remaining amount is a forecast.
  const advanceReceipt=(data.receipts||[]).find(r=>r.id===key+'-advance');
  const advancePlan=advanceReceipt?num(advanceReceipt.amount):advanceForecast;
- const salaryForecast=Math.max(0,net-advancePlan);
+ const salaryForecast=Math.max(0,Math.round(net*100)-Math.round(advancePlan*100))/100;
  return {net,advanceForecast,advancePlan,salaryForecast,total,first,official:work.official,configured:base>0};
 }
 function plannedAdvance(m,key=month){
@@ -3110,7 +3110,8 @@ function receiptInfo(){
   const amountLine = document.createElement('strong');
   amountLine.textContent = receipt ? rub(receipt.amount) : forecast.configured ? rub(expected) : '—';
   const detail = document.createElement('span');
-  detail.textContent = receipt ? (fromISO(receipt.date)?.toLocaleDateString('ru-RU',{day:'numeric',month:'long'}) || receipt.date) : !data.startBalances ? 'Укажи стартовые остатки' : forecast.configured ? 'Ожидается по прогнозу' : 'Укажи оклад в настройках';
+  const advanceReceived = type === 'salary' && data.receipts.some(r => r.id === month + '-advance');
+  detail.textContent = receipt ? (fromISO(receipt.date)?.toLocaleDateString('ru-RU',{day:'numeric',month:'long'}) || receipt.date) : !data.startBalances ? 'Укажи стартовые остатки' : forecast.configured ? (advanceReceived ? 'Остаток после аванса' : 'Ожидается по прогнозу') : 'Укажи оклад в настройках';
   note.replaceChildren(amountLine, detail);
   note.classList.toggle('received',!!receipt);
  }
@@ -3265,7 +3266,7 @@ $('budgetAlertsOpen').addEventListener('click',()=>{
 });
 $('budgetAlertsClose').addEventListener('click',()=>budgetAlertsDialog.close());
 budgetAlertsDialog.addEventListener('click',e=>{if(e.target===budgetAlertsDialog)budgetAlertsDialog.close()});
-function render(){renderEarlyAlerts();const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advanceForecast):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
+function render(){renderEarlyAlerts();const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('forecastAdvance').textContent=pf.configured?rub(pf.advancePlan):'—';$('forecastSalary').textContent=pf.configured?rub(plannedSalary(m)):'—';$('salaryForecastBadge').textContent=isForecast(m)?'Прогноз':'Фактические суммы';$('salaryForecastNote').textContent=!pf.configured?'Укажи оклад в настройках. Без него прогноз не рассчитывается.':(isForecast(m)?'План на руки '+rub(pf.net)+', рабочих дней '+pf.first+' из '+pf.total+'. Прогноз НЕ является полученной зарплатой.':'Зарплата введена фактически, прогноз по окладу не подменяет её.');$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
 $('envelopes').innerHTML=cats.map(cat=>{
  const row=calc.rows.find(r=>r.id===cat.id);
  const balance=realBalance(cat.id)??(num(row?.a)+num(row?.b)-sumExpenses(cat.id));
@@ -4050,7 +4051,7 @@ function receive(type){
  $('receiptEntryHint').textContent='За '+period+'. '+(proposed>0?'Прогноз: '+rub(proposed)+'. ':'')+
    'Введи сумму, которая действительно поступила на счёт.';
  const amountField=$('receiptEntryAmount');
- amountField.value=proposed>0?String(Math.round(proposed*100)/100):'';
+ amountField.value='';
  amountField.defaultValue='';
  amountField.placeholder='Фактически получено, ₽';
  $('receiptEntryDate').max=iso(new Date());
@@ -4058,8 +4059,7 @@ function receive(type){
  $('receiptEntryDate').value=iso(new Date());
  $('receiptEntryError').hidden=true;
  $('receiptEntryOverlay').hidden=false;
- // The proposed amount exactly matches the payroll preview. The user can
- // edit it before confirming the actual receipt.
+
 }
 $('receiptEntryForm').addEventListener('submit',e=>{
  e.preventDefault();
