@@ -928,9 +928,7 @@ button,a,input,select,textarea,summary{touch-action:manipulation}
 #v-card.active .credit-history-disclosure{margin:4px 0 0}
 #v-card.active .credit-history-disclosure>summary{min-height:26px;padding:5px 8px;font-size:11px}
 #v-card.active .credit-history-disclosure[open]{
- position:absolute;left:12px;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));
- z-index:35;background:var(--card);box-shadow:0 8px 35px #0005;
- padding:8px;max-height:60dvh;overflow-y:auto;
+ position:static;display:block;flex:none;max-height:none;overflow:visible;
 }
 #v-card.active .design-group .receipt-note{font-size:10px;line-height:1.15}
 #v-card.active .mortgage-monthly-settings .foot{display:none}
