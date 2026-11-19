@@ -5284,7 +5284,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .app #v-home .home-balances{width:100%;margin:0 0 5px;flex:none}
 .app #v-plan.active .payment-inputs .payment-grid{align-items:stretch}
 .app #v-plan.active>.design-group:has(.payment-inputs) .payment-receipt{
- display:grid!important;box-sizing:border-box;width:100%;aspect-ratio:1;height:auto!important;min-height:0!important;align-self:start;grid-template-rows:auto minmax(32px,1fr) minmax(0,1fr) auto;align-content:stretch;align-items:center
+ display:grid!important;box-sizing:border-box;width:100%;aspect-ratio:1;height:auto!important;min-height:0!important;align-self:start;grid-template-rows:22px minmax(0,1fr) 36px 25px;align-content:stretch;align-items:center
 }
 .app #v-plan.active .payment-receipt>.receipt-button{grid-row:2;height:100%}
 .app #v-plan.active .payment-receipt>.receipt-note{grid-row:3;white-space:pre-line;line-height:1.2}
@@ -5316,11 +5316,19 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .app .main #v-analytics.active .analytics-economy-total strong {font-size:clamp(24px,7vw,34px)!important;color:var(--ink)}
 .app .main #v-settings.active .field :is(input:not([type=checkbox]),select) {border-radius:10px;background:var(--panel);color:var(--ink)}
 </style><style>
-.app .main #v-plan.active .payment-receipt>.receipt-note{grid-row:2;align-self:center}
+.app .main #v-plan.active .payment-receipt>.receipt-note{grid-row:2;align-self:start;margin:0!important}
 .app .main #v-plan.active .payment-receipt>.receipt-note strong{display:block;font:700 clamp(20px,5.7vw,28px)/1.15 system-ui;letter-spacing:-.04em;color:var(--ink)}
 .app .main #v-plan.active .payment-receipt>.receipt-note span{display:block;margin-top:3px;font:500 13px/1.18 system-ui;color:var(--muted)}
 .app .main #v-plan.active .payment-receipt>.receipt-button{grid-row:3;align-self:center}
 .app .main #v-plan.active .pay-more{background:var(--card);border-radius:14px;padding:0 12px;margin:6px 0}
 .app .main #v-plan.active .pay-more>summary{cursor:pointer;padding:12px 0;font:650 16px/1.25 system-ui}
 .app .main #v-plan.active .section-heading h2{font-size:18px!important}
+</style><style>
+.app .main #v-plan.active .design-group:has(.payout-destinations){flex:none!important;height:auto!important;min-height:0!important;justify-content:flex-start!important}
+.app .main #v-plan.active .payout-destinations{padding:0!important;min-height:0!important;flex:none!important;background:transparent!important}
+.app .main #v-plan.active .payout-destinations .pay-more{margin:0}
+.app .main #v-plan.active .pay-more>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.app .main #v-plan.active .pay-more>summary::-webkit-details-marker{display:none}
+.app .main #v-plan.active .pay-more>summary::after{content:"⌄";color:var(--muted)}
+.app .main #v-plan.active .pay-more[open]>summary::after{transform:rotate(180deg)}
 </style></body></html>
