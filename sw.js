@@ -1,4 +1,4 @@
-const CACHE='family-budget-v1-5-91';
+const CACHE='family-budget-v1-5-91-r2';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./version.json','./icon.svg','./icon.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('family-budget-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
@@ -8,18 +8,26 @@ self.addEventListener('fetch',event=>{
  if(request.method!=='GET'||new URL(request.url).origin!==self.location.origin)return;
  const url=new URL(request.url);
  if(url.pathname.endsWith('/version.json')){event.respondWith(fetch(request,{cache:'no-store'}));return;}
- // Keep the preview isolated from the production entrypoint cache.
- // Network-first without HTTP cache allows an installed Home Screen shortcut to see updates.
- if(url.pathname.endsWith('/preview.html')){
-  event.respondWith(fetch(request,{cache:'no-store'}).then(response=>{
-   if(response.ok){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put('./preview.html',copy)));}
-   return response;
-  }).catch(()=>caches.match('./preview.html')));
+ const scope=self.registration.scope;
+ const entry=['./','./index.html','./preview.html','./preview-real-1582.html','./preview-goal-1580.html']
+   .find(path=>new URL(path,scope).pathname===url.pathname);
+ if(entry){
+  const key=entry==='./'?'./index.html':entry;
+  event.respondWith((async()=>{
+   const cache=await caches.open(CACHE);
+   try{
+    const response=await fetch(request,{cache:'no-store'});
+    if(response.ok)await cache.put(key,response.clone());
+    return response;
+   }catch(error){
+    const saved=await cache.match(key);
+    if(saved)return saved;
+    throw error;
+   }
+  })());
   return;
  }
- if(request.mode==='navigate'||url.pathname.endsWith('/index.html')){
-  event.respondWith(fetch(request,{cache:'no-store'}).then(response=>{if(response.ok){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put('./index.html',copy)));}return response}).catch(()=>caches.match('./index.html')));return;
- }
+ if(request.mode==='navigate')return;
  event.respondWith(caches.match(request).then(hit=>hit||fetch(request)));
 });
 
