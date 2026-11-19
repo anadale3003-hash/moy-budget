@@ -5284,4 +5284,30 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .app #v-plan.active .payment-receipt>.receipt-button{grid-row:2;height:100%}
 .app #v-plan.active .payment-receipt>.receipt-note{grid-row:3;white-space:pre-line;line-height:1.2}
 .app #v-plan.active .payment-receipt>.receipt-undo{grid-row:4}
+</style><style>
+/* Use the dashboard's open sections and single card surface on secondary screens. */
+.app .main :is(#v-plan,#v-card,#v-expense,#v-analytics,#v-settings).active > .design-group {
+ background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0 0 12px!important
+}
+.app .main .view.active:not(#v-home) .section-heading {padding:3px 0 6px!important;background:transparent!important}
+.app .main .view.active:not(#v-home) .section-heading h2 {font:650 15px/1.25 system-ui!important;letter-spacing:-.02em}
+.app .main #v-plan.active .payroll-grid>div,
+.app .main #v-plan.active>.design-group:has(.payment-inputs) .payment-receipt,
+.app .main #v-card.active .payment-confirm,
+.app .main #v-expense.active :is(.ops-action-tile,.analytics-mini-card),
+.app .main #v-analytics.active :is(.analytics-economy-card,.analytics-capital-unified),
+.app .main #v-settings.active>.design-group>:is(details,.card),
+.app .main #v-card.active>.design-group>:is(.mortgage-monthly-settings,.credit-basic-card) {
+ background:var(--card)!important;color:var(--ink);border:0!important;border-radius:16px!important;box-shadow:none!important
+}
+.app .main #v-card.active .payment-obligations,.app .main #v-expense.active .operations-hub,.app .main #v-analytics.active .analytics-one-screen {
+ background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important
+}
+.app .main #v-card.active .payment-obligations .payment-grid {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+.app .main #v-card.active .payment-confirm {min-width:0;display:flex;flex-direction:column;padding:11px!important;gap:8px}
+.app .main #v-card.active .payment-confirm>.btn {margin-top:auto;white-space:normal;min-height:38px}
+.app .main #v-plan.active .payment-receipt>.receipt-button {height:36px!important;align-self:start}
+.app .main #v-plan.active .goal-allocation-card,.app .main #v-plan.active .payout-destinations {background:var(--card)!important;border:0!important;border-radius:16px!important;padding:10px!important}
+.app .main #v-analytics.active .analytics-economy-total strong {font-size:clamp(24px,7vw,34px)!important;color:var(--ink)}
+.app .main #v-settings.active .field :is(input:not([type=checkbox]),select) {border-radius:10px;background:var(--panel);color:var(--ink)}
 </style></body></html>
