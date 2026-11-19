@@ -2233,13 +2233,10 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайший платёж</h2><button class="analytics-icon-button alert-bell home-alert-trigger" type="button" id="budgetAlertsOpen" aria-label="Открыть советы для бюджета" title="Советы">🔔 <span class="home-alert-label">Советы</span><span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button></div><div id="obligations"></div></div>
 </section>
 <section class="view" id="v-plan">
-<div class="section-heading"><h2>Прогноз по окладу</h2><span class="quiet" id="salaryForecastBadge">Предварительно</span></div>
-<div class="payroll-preview"><div class="payroll-grid"><div><span class="quiet">Аванс</span><b id="forecastAdvance">—</b></div><div><span class="quiet">Зарплата</span><b id="forecastSalary">—</b></div></div><div class="foot" id="salaryForecastNote">Оклад и тип суммы настраиваются во вкладке «Настройки».</div></div>
-
 <div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div>
-<div class="section-heading"><h2>Аванс и зарплата</h2><span class="pill">Авторасчёт</span></div><div class="card payment-inputs">
+<div class="section-heading"><h2>Аванс и зарплата</h2></div><div class="card payment-inputs">
 <div class="payment-grid">
-<div class="payment-receipt"><input id="advance" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💵</span> Аванс</div><button class="btn full receipt-button" id="receiveAdvance" type="button">Подтвердить аванс</button><div class="receipt-note" id="advanceReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoAdvance" type="button">↶ Отменить зачисление</button></div>
+<div class="payment-receipt"><input id="advance" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💵</span> Аванс</div><button class="btn full receipt-button" id="receiveAdvance" type="button">Подтвердить аванс</button><div class="receipt-note" id="advanceReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoAdvance" type="button">Отменить зачисление</button></div>
 <div class="payment-receipt"><input id="salary" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💰</span> Зарплата</div><button class="btn full receipt-button secondary" id="receiveSalary" type="button">Подтвердить зарплату</button><div class="receipt-note" id="salaryReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoSalary" type="button">↶ Отменить зачисление</button></div>
 </div>
 <div class="payment-dates-note">
@@ -2247,7 +2244,8 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <input id="salaryDate" type="date" hidden aria-hidden="true" tabindex="-1">
 <div class="foot">Плановые даты выплат учитывают выходные и праздники РФ (календарь 2026–2027). Фактические дату и сумму укажи при подтверждении поступления.</div>
 </div>
-</div><!-- End: advance and salary card -->
+</div><!-- End: advance and salary card --><details class="pay-more"><summary>Прогноз по окладу</summary><div class="section-heading"><span class="quiet" id="salaryForecastBadge">Предварительно</span></div>
+<div class="payroll-preview"><div class="payroll-grid"><div><span class="quiet">Аванс</span><b id="forecastAdvance">—</b></div><div><span class="quiet">Зарплата</span><b id="forecastSalary">—</b></div></div><div class="foot" id="salaryForecastNote">Оклад и тип суммы настраиваются во вкладке «Настройки».</div></div></details>
 <div class="section-heading"><h2>Куда перевести деньги</h2><span class="quiet">с каждой выплаты</span></div>
 <div class="goal-allocation-card" id="goalAllocationCard" aria-live="polite">
  <div class="goal-allocation-heading">
@@ -2261,7 +2259,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div id="goalNeeded" class="goal-needed">—</div>
 <div id="goalAllocationNote" class="goal-allocation-note">Проверяем цель...</div>
 </div>
-<div class="card payout-destinations"><div id="planTable"></div><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two" id="categoryRules"></div><div class="foot">Сначала выделяются суммы в ₽, затем проценты от оставшейся части выплаты. Нераспределённый остаток — в «Остальное». Настройки действуют для следующих поступлений.</div></div></section>
+<div class="card payout-destinations"><details class="pay-more"><summary>Суммы по категориям</summary><div id="planTable"></div></details><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two" id="categoryRules"></div><div class="foot">Сначала выделяются суммы в ₽, затем проценты от оставшейся части выплаты. Нераспределённый остаток — в «Остальное». Настройки действуют для следующих поступлений.</div></div></section>
 <section class="view" id="v-card"><div class="section-heading"><h2>Кредиты</h2></div>
 <div class="card mortgage-monthly-settings"><b>🏠 Ипотека</b><label class="field"><span>Ежемесячный платёж по ипотеке, ₽</span><input id="mortgage" type="number" min="0" step="100" inputmode="decimal"></label><div id="mortgageMonthlyStatus" class="foot">Изменение платежа применяется к будущим неподтверждённым поступлениям.</div></div>
 <div class="section-heading"><h2>Ипотека и кредитка</h2></div>
@@ -3108,7 +3106,14 @@ function receiptInfo(){
   button.textContent=receipt?'✓ Получено':(type==='advance'?'Подтвердить аванс':'Подтвердить зарплату');
   button.classList.toggle('is-confirmed',!!receipt);
   button.setAttribute('aria-label',receipt?(type==='advance'?'Аванс получен':'Зарплата получена'):(type==='advance'?'Подтвердить поступление аванса':'Подтвердить поступление зарплаты'));
-  note.textContent=receipt?rub(receipt.amount)+'\n'+(fromISO(receipt.date)?.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})||receipt.date):(!data.startBalances?'Сначала укажи стартовые остатки в настройках.':'После фактического поступления нажми кнопку.');
+  const plan = monthData();
+  const forecast = payrollForecast(plan);
+  const expected = type === 'advance' ? forecast.advanceForecast : plannedSalary(plan);
+  const amountLine = document.createElement('strong');
+  amountLine.textContent = receipt ? rub(receipt.amount) : forecast.configured ? rub(expected) : '—';
+  const detail = document.createElement('span');
+  detail.textContent = receipt ? (fromISO(receipt.date)?.toLocaleDateString('ru-RU',{day:'numeric',month:'long'}) || receipt.date) : !data.startBalances ? 'Укажи стартовые остатки' : forecast.configured ? 'Ожидается по прогнозу' : 'Укажи оклад в настройках';
+  note.replaceChildren(amountLine, detail);
   note.classList.toggle('received',!!receipt);
  }
 }
@@ -5310,4 +5315,12 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .app .main #v-plan.active .goal-allocation-card,.app .main #v-plan.active .payout-destinations {background:var(--card)!important;border:0!important;border-radius:16px!important;padding:10px!important}
 .app .main #v-analytics.active .analytics-economy-total strong {font-size:clamp(24px,7vw,34px)!important;color:var(--ink)}
 .app .main #v-settings.active .field :is(input:not([type=checkbox]),select) {border-radius:10px;background:var(--panel);color:var(--ink)}
+</style><style>
+.app .main #v-plan.active .payment-receipt>.receipt-note{grid-row:2;align-self:center}
+.app .main #v-plan.active .payment-receipt>.receipt-note strong{display:block;font:700 clamp(20px,5.7vw,28px)/1.15 system-ui;letter-spacing:-.04em;color:var(--ink)}
+.app .main #v-plan.active .payment-receipt>.receipt-note span{display:block;margin-top:3px;font:500 13px/1.18 system-ui;color:var(--muted)}
+.app .main #v-plan.active .payment-receipt>.receipt-button{grid-row:3;align-self:center}
+.app .main #v-plan.active .pay-more{background:var(--card);border-radius:14px;padding:0 12px;margin:6px 0}
+.app .main #v-plan.active .pay-more>summary{cursor:pointer;padding:12px 0;font:650 16px/1.25 system-ui}
+.app .main #v-plan.active .section-heading h2{font-size:18px!important}
 </style></body></html>
