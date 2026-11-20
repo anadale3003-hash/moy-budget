@@ -2226,7 +2226,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 #budgetSaveLabel{white-space:normal}
 #milestoneProgress{overflow-wrap:anywhere}
 .milestone-card [hidden]{display:none!important}
-</style><style>@media(max-width:560px){#transferForm .transfer-envelopes{grid-template-columns:minmax(0,1fr)!important}}</style></head><body>
+</style><style>@media(max-width:560px){#transferForm .transfer-envelopes{grid-template-columns:minmax(0,1fr)!important}}</style><style>#personalGoals{overflow:auto;max-height:52dvh;padding:8px 4px;flex-shrink:0}#personalGoals .field{display:grid;gap:4px;margin:8px 0}#personalGoals summary{padding:9px 0;color:var(--accent);cursor:pointer}#goalBalances>div{padding:5px 0;overflow-wrap:anywhere}</style></head><body>
 <div class="app home-active"><header class="hero"><div class="daily-summary"><div class="daily-headline"><span id="dailySpendingLimit">—</span><span id="nextPaymentDate">На семейные покупки</span><span id="nextPaymentWhen"></span></div><div hidden><p id="dailySpendingNote"></p><small id="heroLabel"></small></div></div></header>
 <main class="main">
 <section class="view active" id="v-home">
@@ -2514,7 +2514,15 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
   </form>
  </section>
 </div>
-<div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div id="wifePanel" hidden><p id="wifeSummary"></p><button class="btn secondary" onclick="editWifeFunds(false)">Перевод жене</button> <button class="btn secondary" onclick="editWifeFunds(true)">Уточнить остаток</button></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
+<div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div id="personalGoals" hidden>
+ <div id="goalReserve"></div><div id="goalBalances"></div>
+ <label class="field" id="goalChoiceField">Цель для новых пополнений<select id="goalChoice"></select></label>
+ <details id="newGoal"><summary>Новая цель</summary><form id="newGoalForm">
+ <label class="field">Название<input id="purposeName" required maxlength="60" placeholder="Например, поездка"></label>
+ <label class="field">Нужно накопить, ₽<input id="purposeTarget" required type="number" step=".01" min=".01" inputmode="decimal"></label>
+ <label class="field">Выделить из свободных накоплений, ₽<input id="purposeStart" type="number" min="0" step=".01" inputmode="decimal" placeholder="0"></label>
+ <button class="btn full" type="submit">Создать цель</button></form></details>
+ </div><div id="wifePanel" hidden><p id="wifeSummary"></p><button class="btn secondary" onclick="editWifeFunds(false)">Перевод жене</button> <button class="btn secondary" onclick="editWifeFunds(true)">Уточнить остаток</button></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 
 <dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">Советы для твоего бюджета</h2><button type="button" class="btn light" id="budgetAlertsClose" aria-label="Закрыть">✕</button></div><p class="budget-alerts-help" id="adviceOpening"></p><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
 <script>
@@ -3483,6 +3491,66 @@ function capitalSnapshot(goalOverride){
  return {settings,reserve,savings,extra,total,goal,automatic:!override&&!userGoal,
    remaining:Math.max(0,goal-total)};
 }
+function purposeBalances(snapshot=capitalSnapshot()){
+ const cents=value=>Math.round(num(value)*100);
+ let free=cents(snapshot.extra);
+ const booked=new Map();
+ const todayKey=iso(new Date());
+ for(const rows of [data.receipts,data.extraIncomes,data.transfers]){
+  for(const entry of rows||[]){
+   if(entry.purposeId&&entry.date<=todayKey)
+    booked.set(entry.purposeId,(booked.get(entry.purposeId)||0)+cents(entry.purposeAmount));
+  }
+ }
+ const goals=(data.purposes||[]).map(goal=>{
+  const assigned=Math.min(free,cents(goal.target),cents(goal.start)+(booked.get(goal.id)||0));
+  free-=assigned;
+  return {...goal,saved:assigned/100};
+ });
+ return {goals,free:free/100,active:goals.find(g=>g.id===data.activePurpose)};
+}
+function assignContribution(entry,amount){
+ if(!amount||!data.activePurpose)return;
+ const {active}=purposeBalances();
+ if(!active)return;
+ entry.purposeId=active.id;
+ entry.purposeAmount=Math.min(amount,Math.max(0,Math.round((active.target-active.saved)*100)/100));
+}
+function homeGoal(snapshot=capitalSnapshot()){
+ const active=data.activePurpose&&purposeBalances(snapshot).active;
+ return active?{total:active.saved,goal:active.target,name:active.name}:{
+  total:snapshot.total,goal:snapshot.goal,name:snapshot.settings.name};
+}
+function renderPurposes(){
+ const snapshot=capitalSnapshot(),{goals,free}=purposeBalances(snapshot);
+ $('goalReserve').textContent='Подушка · '+rub(snapshot.reserve)+' · Свободно для целей '+rub(free);
+ $('goalBalances').replaceChildren(...goals.map(goal=>{
+  const row=document.createElement('div');
+  row.textContent=goal.name+' · '+rub(goal.saved)+' из '+rub(goal.target)+(goal.saved>=goal.target?' ✓':'');
+  return row;
+ }));
+ const choice=$('goalChoice');
+ choice.replaceChildren(new Option('Общие накопления',''),...goals.map(g=>new Option(g.name,g.id)));
+ choice.value=data.activePurpose||'';
+ $('goalChoiceField').hidden=!goals.length;
+}
+$('goalChoice').onchange=e=>{
+ data.activePurpose=e.target.value;
+ renderAll();renderPurposes();
+};
+$('newGoalForm').onsubmit=e=>{
+ e.preventDefault();
+ const name=$('purposeName').value.trim(),target=Number($('purposeTarget').value),start=Number($('purposeStart').value);
+ const {free}=purposeBalances();
+ if(!name||!Number.isFinite(target)||target<=0||!Number.isFinite(start)||start<0||start>Math.min(free,target)){
+  alert('Проверь название и суммы. Свободно для цели '+rub(free)+'.');return;
+ }
+ const goal={id:crypto.randomUUID(),name,target,start};
+ (data.purposes||=[]).push(goal);
+ data.activePurpose=goal.id;
+ if(!renderAll())return;
+ e.target.reset();$('newGoal').open=false;renderPurposes();
+};
 function nextCapitalMilestone(total,goal){
  return Math.min(goal,(Math.floor(total/10000)+1)*10000);
 }
@@ -3492,10 +3560,11 @@ function milestoneText(total,goal){
  return 'До '+rub(next)+' осталось '+rub((Math.round(next*100)-Math.round(total*100))/100);
 }
 function recordEnvelopeTransfer(transfer){
- const before=transfer.to==='savings'?capitalSnapshot():null;
+ const before=transfer.to==='savings'?homeGoal():null;
+ if(before)assignContribution(transfer,transfer.amount);
  data.transfers.push(transfer);
  if(!before||!saveFeedbackIntent)return;
- const after=capitalSnapshot();
+ const after=homeGoal();
  const reached=nextCapitalMilestone(before.total,before.goal);
  const crossed=before.total<reached&&after.total>=reached&&after.total<before.goal;
  const progress=crossed?'Рубеж '+rub(reached)+' достигнут. ':'';
@@ -3608,11 +3677,13 @@ function ladderRender(){
  const creditLine=$('milestoneCredit');
  creditLine.hidden=paid<=0;
  creditLine.textContent=paid>0?'За месяц погашено по кредитке '+rub(paid):'';
- title.parentElement.hidden=savings===null&&paid<=0;
- title.hidden=savings===null;
- $('milestoneProgress').hidden=savings===null;
- title.textContent=milestoneText(total,goal);
- $('milestoneProgress').textContent=(settings.name?settings.name+' · собрано ':'Уже собрано ')+rub(total)+' из '+rub(goal);
+ const focus=homeGoal();
+ const noGoalBalance=savings===null&&!data.activePurpose;
+ title.parentElement.hidden=noGoalBalance&&paid<=0;
+ title.hidden=noGoalBalance;
+ $('milestoneProgress').hidden=noGoalBalance;
+ title.textContent=milestoneText(focus.total,focus.goal);
+ $('milestoneProgress').textContent=(focus.name?focus.name+' · собрано ':'Уже собрано ')+rub(focus.total)+' из '+rub(focus.goal);
  $('ladderTotal').textContent=rub(total);
  $('analyticsGoalAmount').textContent=rub(goal);
  $('analyticsGoalCurrent').textContent=rub(total);
@@ -3846,6 +3917,8 @@ function showEnvelopeHistory(id){
  }
  entries.sort((a,b)=>b.date.localeCompare(a.date));
  $('envelopeHistoryTitle').textContent=cat.icon+' '+cat.name;
+ $('personalGoals').hidden=id!=='savings';
+ if(id==='savings'){renderPurposes();$('newGoal').open=false;}
  $('wifePanel').hidden=id!=='family';
  if(id==='family'){
   const date=iso(new Date()),held=wifeFunds(date);
@@ -4102,7 +4175,9 @@ $('incomeForm').addEventListener('submit',e=>{
  const amount=num($('incomeAmount').value),date=$('incomeDate').value,source=$('incomeSource').value,destination=$('incomeDestination').value,note=$('incomeNote').value.trim();
  if(amount<=0||!fromISO(date)||!['family','utilities','savings','other','mortgage','credit','reserve'].includes(destination))return;
  if(date<data.startBalances.date){alert('Дата дохода раньше начала учёта. Измени дату или включи эти деньги в стартовые остатки.');return;}
- data.extraIncomes.push({id:'inc-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),amount,date,source,destination,note});
+ const income={id:'inc-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),amount,date,source,destination,note};
+ if(destination==='savings')assignContribution(income,amount);
+ data.extraIncomes.push(income);
  month=date.slice(0,7);$('incomeAmount').value='';$('incomeNote').value='';
  renderAll();
 });
@@ -4212,6 +4287,7 @@ $('receiptEntryForm').addEventListener('submit',e=>{
   const verified=Object.values(amounts).reduce((sum,v)=>sum+v,0);
   if(Object.values(amounts).some(v=>!Number.isFinite(v)||v<0)||
      Math.abs(verified-amount)>0.011)throw Error('Сумма поступления не совпадает с распределением. Ничего не сохранено; попробуй ещё раз.');
+  assignContribution(receipt,amounts.savings);
   receipt.amounts=amounts;
   if(amounts.credit)data.reserved=num(data.reserved)+amounts.credit;
   closeReceiptEntry();renderAll();
