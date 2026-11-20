@@ -4048,10 +4048,15 @@ $('earlyForm').addEventListener('submit',e=>{
 });
 $('earlyHistory').addEventListener('click',e=>{const b=e.target.closest('[data-del-early]');if(!b)return;if(!confirm('Удалить запись о досрочном погашении? Остаток накоплений восстановится.'))return;data.earlyRepayments=data.earlyRepayments.filter(x=>x.id!==b.dataset.delEarly);renderAll();});
 $('transferDate').value=iso(new Date());
+const transferCurrency=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});
+function transferableKopeks(from,date){
+ const balance=fromISO(date)?categoryBalanceAt(from,date):null;
+ return balance===null?null:Math.max(0,Math.round(balance*100));
+}
 function updateTransferAvailable(){
  const from=$('transferFrom').value, date=$('transferDate').value;
- const balance=fromISO(date)?categoryBalanceAt(from,date):null;
- $('transferAvailable').textContent='Доступно в категории на эту дату: '+(balance===null?'укажи стартовые остатки и корректную дату':rub(Math.max(0,balance)));
+ const balance=transferableKopeks(from,date);
+ $('transferAvailable').textContent='Доступно в категории на эту дату: '+(balance===null?'укажи стартовые остатки и корректную дату':transferCurrency.format(balance/100));
 }
 $('transferFrom').addEventListener('change',updateTransferAvailable);
 $('transferDate').addEventListener('change',updateTransferAvailable);
@@ -4063,10 +4068,10 @@ $('transferForm').addEventListener('submit',e=>{
  if(from===to){alert('Выбери разные категории.');return;}
  if(date>iso(new Date())){alert('Будущие переводы пока не учитываются.');return;}
  if(date<data.startBalances.date){alert('Дата перевода раньше начала учёта.');return;}
- const available=categoryBalanceAt(from,date);
- if(available===null||amount>available+0.001){alert('Недостаточно средств в исходной категории. Доступно: '+rub(Math.max(0,available||0)));return;}
+ const available=transferableKopeks(from,date);
+ if(available===null||Math.round(amount*100)>available){alert('Недостаточно средств в исходной категории. Доступно: '+transferCurrency.format((available||0)/100)+' · Введено: '+transferCurrency.format(amount));return;}
  const fromName=cats.find(c=>c.id===from).name,toName=cats.find(c=>c.id===to).name;
- if(!confirm('Перевести '+rub(amount)+' из «'+fromName+'» в «'+toName+'»?'))return;
+ if(!confirm('Перевести '+transferCurrency.format(amount)+' из «'+fromName+'» в «'+toName+'»?'))return;
  recordEnvelopeTransfer({id:'tr-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),from,to,date,amount,note});
  $('transferAmount').value='';$('transferNote').value='';month=date.slice(0,7);renderAll();
 });
