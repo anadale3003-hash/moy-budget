@@ -2440,6 +2440,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div id="personalGoals"><strong>Цели накоплений</strong>
  <div id="goalReserve"></div><div id="goalBalances"></div>
  <label class="field" id="goalChoiceField">Цель для новых пополнений<select id="goalChoice"></select></label>
+ <button class="btn secondary" type="button" id="deletePurpose" hidden>Удалить цель</button>
  <details id="newGoal"><summary>Новая цель</summary><form id="newGoalForm">
  <label class="field">Название<input id="purposeName" required maxlength="60" placeholder="Например, поездка"></label>
  <label class="field">Нужно накопить, ₽<input id="purposeTarget" required type="number" step=".01" min=".01" inputmode="decimal"></label>
@@ -3534,10 +3535,26 @@ function renderPurposes(){
  choice.replaceChildren(new Option('Общие накопления',''),...goals.map(g=>new Option(g.name,g.id)));
  choice.value=data.activePurpose||'';
  $('goalChoiceField').hidden=!goals.length;
+ $('deletePurpose').hidden=!choice.value;
 }
 $('goalChoice').onchange=e=>{
  data.activePurpose=e.target.value;
  renderAll();renderPurposes();
+};
+$('deletePurpose').onclick=()=>{
+ const id=$('goalChoice').value;
+ const goals=data.purposes||[];
+ const goal=goals.find(item=>item.id===id);
+ if(!goal||!confirm('Удалить цель «'+goal.name+'»? Деньги останутся в конверте «Накопления».'))return;
+ const previousActive=data.activePurpose;
+ data.purposes=goals.filter(item=>item.id!==id);
+ if(previousActive===id)data.activePurpose='';
+ if(!renderAll()){
+  data.purposes=goals;
+  data.activePurpose=previousActive;
+  ladderRender();
+ }
+ renderPurposes();
 };
 $('newGoalForm').onsubmit=e=>{
  e.preventDefault();
