@@ -2226,7 +2226,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 #budgetSaveLabel{white-space:normal}
 #milestoneProgress{overflow-wrap:anywhere}
 .milestone-card [hidden]{display:none!important}
-</style></head><body>
+</style><style>@media(max-width:560px){#transferForm .transfer-envelopes{grid-template-columns:minmax(0,1fr)!important}}</style></head><body>
 <div class="app home-active"><header class="hero"><div class="daily-summary"><div class="daily-headline"><span id="dailySpendingLimit">—</span><span id="nextPaymentDate">На семейные покупки</span><span id="nextPaymentWhen"></span></div><div hidden><p id="dailySpendingNote"></p><small id="heroLabel"></small></div></div></header>
 <main class="main">
 <section class="view active" id="v-home">
@@ -2316,7 +2316,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 <div class="card"><form id="expenseForm">
  <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
-<div class="two"><label class="field"><span>Откуда</span><select id="transferFrom"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Куда</span><select id="transferTo"><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label></div>
+<div class="two transfer-envelopes"><label class="field"><span>Откуда</span><select id="transferFrom"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Куда</span><select id="transferTo"><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label></div>
 <div class="two"><label class="field"><span>Сумма, ₽</span><input id="transferAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 5000"></label><label class="field"><span>Дата перевода</span><input id="transferDate" type="date" required></label></div>
 <label class="field"><span>Примечание (необязательно)</span><input id="transferNote" maxlength="120" placeholder="Остаток коммуналки"></label>
 <div class="foot" id="transferAvailable"></div><div class="foot">Перевод меняет только остатки категорий. Не учитывается как доход или расход. Делай запись после фактического перевода денег.</div><button type="submit" class="btn full">Перевести деньги</button>
@@ -2613,7 +2613,7 @@ try{
   localStorage.setItem(KEY,JSON.stringify(snapshot));
  }
 }catch(_){}
-const fmt=new Intl.NumberFormat('ru-RU',{maximumFractionDigits:0});const rub=n=>fmt.format(Math.round(Number.isFinite(n)?n:0))+' ₽';const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
+const fmt=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});const rub=n=>fmt.format(Number.isFinite(n)?n:0);const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
 let data;const defaults=()=>({months:{},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:10000,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
 try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();if(!data.expenseTypes||typeof data.expenseTypes!=='object')data.expenseTypes={};
 for(const c of cats){if(!Array.isArray(data.expenseTypes[c.id]))data.expenseTypes[c.id]=[];}
@@ -3027,15 +3027,15 @@ function allocation(receiptDate=null,ruleOverrides=null,pendingReceipt=null){
  return {rows,total,mortgage,credit:ac+bc,deficit,unfundedMortgage:Math.max(0,due-(base.advance+base.salary)),weightTotal,offsets};
 }
 function displayAllocationRows(rows){
- // Balanced whole-ruble rounding for the UI; stored allocations keep kopecks.
+ // Balance the displayed columns to the nearest kopeck.
  const shown=rows.map(r=>({...r}));
  for(const key of ['a','b']){
-  const raw=rows.map(r=>Math.max(0,num(r[key])));
+  const raw=rows.map(r=>Math.max(0,num(r[key]))*100);
   const bases=raw.map(Math.floor);
   const remaining=Math.round(raw.reduce((a,v)=>a+v,0))-bases.reduce((a,v)=>a+v,0);
   const order=raw.map((v,i)=>({i,fraction:v-bases[i]})).sort((a,b)=>b.fraction-a.fraction||a.i-b.i);
   for(let k=0;k<remaining&&k<order.length;k++)bases[order[k].i]++;
-  shown.forEach((r,i)=>r[key]=bases[i]);
+  shown.forEach((r,i)=>r[key]=bases[i]/100);
  }
  return shown;
 }
@@ -3879,7 +3879,7 @@ $('envelopeHistoryClose').addEventListener('click',closeEnvelopeHistory);
 $('envelopeHistoryOverlay').addEventListener('click',e=>{if(e.target===$('envelopeHistoryOverlay'))closeEnvelopeHistory()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('envelopeHistoryOverlay').hidden)closeEnvelopeHistory()});
 
-function renderAll(){syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();return save()}
+function renderAll(){syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();updateExpenseOptions();return save()}
 function go(page){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));document.querySelector('.app').classList.toggle('home-active',page==='home');const main=document.querySelector('.main');if(main)main.scrollTop=0;}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 
@@ -4048,15 +4048,29 @@ $('earlyForm').addEventListener('submit',e=>{
 });
 $('earlyHistory').addEventListener('click',e=>{const b=e.target.closest('[data-del-early]');if(!b)return;if(!confirm('Удалить запись о досрочном погашении? Остаток накоплений восстановится.'))return;data.earlyRepayments=data.earlyRepayments.filter(x=>x.id!==b.dataset.delEarly);renderAll();});
 $('transferDate').value=iso(new Date());
-const transferCurrency=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});
+
 function transferableKopeks(from,date){
  const balance=fromISO(date)?categoryBalanceAt(from,date):null;
  return balance===null?null:Math.max(0,Math.round(balance*100));
 }
+function labelEnvelopeOptions(selectIds,date){
+ for(const category of cats){
+  const balance=fromISO(date)?categoryBalanceAt(category.id,date):null;
+  const label=category.name+' · '+(balance===null?'остаток неизвестен':rub(balance));
+  for(const id of selectIds){
+   const option=Array.from($(id).options).find(item=>item.value===category.id);
+   if(option)option.textContent=label;
+  }
+ }
+}
+function updateExpenseOptions(){
+ labelEnvelopeOptions(['expenseCategory'],$('expenseDate').value);
+}
 function updateTransferAvailable(){
  const from=$('transferFrom').value, date=$('transferDate').value;
+ labelEnvelopeOptions(['transferFrom','transferTo'],date);
  const balance=transferableKopeks(from,date);
- $('transferAvailable').textContent='Доступно в категории на эту дату: '+(balance===null?'укажи стартовые остатки и корректную дату':transferCurrency.format(balance/100));
+ $('transferAvailable').textContent='Доступно в категории на эту дату: '+(balance===null?'укажи стартовые остатки и корректную дату':rub(balance/100));
 }
 $('transferFrom').addEventListener('change',updateTransferAvailable);
 $('transferDate').addEventListener('change',updateTransferAvailable);
@@ -4069,9 +4083,9 @@ $('transferForm').addEventListener('submit',e=>{
  if(date>iso(new Date())){alert('Будущие переводы пока не учитываются.');return;}
  if(date<data.startBalances.date){alert('Дата перевода раньше начала учёта.');return;}
  const available=transferableKopeks(from,date);
- if(available===null||Math.round(amount*100)>available){alert('Недостаточно средств в исходной категории. Доступно: '+transferCurrency.format((available||0)/100)+' · Введено: '+transferCurrency.format(amount));return;}
+ if(available===null||Math.round(amount*100)>available){alert('Недостаточно средств в исходной категории. Доступно: '+rub((available||0)/100)+' · Введено: '+rub(amount));return;}
  const fromName=cats.find(c=>c.id===from).name,toName=cats.find(c=>c.id===to).name;
- if(!confirm('Перевести '+transferCurrency.format(amount)+' из «'+fromName+'» в «'+toName+'»?'))return;
+ if(!confirm('Перевести '+rub(amount)+' из «'+fromName+'» в «'+toName+'»?'))return;
  recordEnvelopeTransfer({id:'tr-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),from,to,date,amount,note});
  $('transferAmount').value='';$('transferNote').value='';month=date.slice(0,7);renderAll();
 });
@@ -4097,6 +4111,8 @@ $('incomeList').addEventListener('click',e=>{
  data.extraIncomes=data.extraIncomes.filter(i=>i.id!==b.dataset.delIncome);renderAll();
 });
 $('expenseDate').value=iso(new Date());
+$('expenseDate').addEventListener('input',updateExpenseOptions);
+$('expenseDate').addEventListener('change',updateExpenseOptions);
 $('expenseCategory').addEventListener('change',()=>refreshTypes());
 $('expenseType').addEventListener('change',toggleNewType);
 refreshTypes();
@@ -5198,7 +5214,8 @@ function setupAdvisor(){
  if(!open||!dialog)return;
  const $a=id=>document.getElementById(id);
  const amount=v=>Number.isFinite(Number(v))?Math.max(0,Number(v)):0;
- const ru=v=>Math.round(v).toLocaleString('ru-RU')+' ₽';
+ const reportCurrency=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});
+ const ru=v=>reportCurrency.format(v);
  const now=()=>new Date().toISOString().slice(0,10);
  const current=()=>new Date().toLocaleDateString('sv-SE').slice(0,7);
  const validDate=d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d);
