@@ -3473,7 +3473,7 @@ function capitalSnapshot(goalOverride){
  const savings=goalSavingsBalance();
  const booked=savings===null?0:Math.max(0,savings);
  const extra=settings.included?Math.max(0,booked-baseReserve):booked;
- const total=reserve+extra;
+ const total=Math.round((reserve+extra)*100)/100;
  const automaticGoal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
  const userGoal=typeof settings.targetAmount==='number'&&Number.isFinite(settings.targetAmount)
    &&settings.targetAmount>=reserve&&settings.targetAmount<=1000000000;
@@ -3489,7 +3489,7 @@ function nextCapitalMilestone(total,goal){
 function milestoneText(total,goal){
  if(total>=goal)return 'Цель достигнута · '+rub(goal);
  const next=nextCapitalMilestone(total,goal);
- return 'До '+rub(next)+' осталось '+rub(Math.ceil(next-total));
+ return 'До '+rub(next)+' осталось '+rub((Math.round(next*100)-Math.round(total*100))/100);
 }
 function recordEnvelopeTransfer(transfer){
  const before=transfer.to==='savings'?capitalSnapshot():null;
@@ -3557,7 +3557,7 @@ function savingsPlanRender(){
  const savings=goalSavingsBalance();
  const booked=savings===null?0:Math.max(0,savings);
  const baseReserve=Math.max(0,reserve-incoming);
- const total=reserve+($('ladderIncluded').checked?Math.max(0,booked-baseReserve):booked);
+ const total=Math.round((reserve+($('ladderIncluded').checked?Math.max(0,booked-baseReserve):booked))*100)/100;
  const validGoal=targetInput.value.trim()!==''&&Number.isInteger(proposedGoal)
    &&proposedGoal>=reserve&&proposedGoal<=1000000000;
  const info={goal:proposedGoal,total,remaining:Math.max(0,proposedGoal-total),reserve};
