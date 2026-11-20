@@ -2224,6 +2224,8 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 .milestone-card{flex:0 0 auto;padding:8px 12px;border-radius:14px;background:var(--panel);border-left:3px solid var(--accent)}
 .milestone-card small{display:block;color:var(--muted);margin-top:2px}
 #budgetSaveLabel{white-space:normal}
+#milestoneProgress{overflow-wrap:anywhere}
+.milestone-card [hidden]{display:none!important}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="daily-summary"><div class="daily-headline"><span id="dailySpendingLimit">—</span><span id="nextPaymentDate">На семейные покупки</span><span id="nextPaymentWhen"></span></div><div hidden><p id="dailySpendingNote"></p><small id="heroLabel"></small></div></div></header>
 <main class="main">
@@ -2234,6 +2236,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <section class="milestone-card" aria-labelledby="milestoneTitle" hidden>
  <strong id="milestoneTitle"></strong>
  <small id="milestoneProgress"></small>
+ <small id="milestoneCredit" hidden></small>
 </section>
 <div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайший платёж</h2><button class="analytics-icon-button alert-bell home-alert-trigger" type="button" id="budgetAlertsOpen" aria-label="Открыть советы для бюджета" title="Советы">🔔 <span class="home-alert-label">Советы</span><span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button></div><div id="obligations"></div></div>
 </section>
@@ -2444,6 +2447,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
       <div class="foot" id="confirmedSavingsMessage" role="status" aria-live="polite"></div>
       <div id="confirmedSavingsHistory"></div>
      </div>
+     <label class="field analytics-plan-input"><span>Название цели</span><input id="savingsGoalName" maxlength="60" placeholder="Например, Запас для семьи"></label>
      <label class="field analytics-plan-input"><span>Моя цель, ₽ (включая подушку)</span><input id="savingsPlanTargetAmount" type="number" inputmode="numeric" min="0" max="1000000000" step="1000" required value="1000000"></label>
      <label class="field analytics-plan-input"><span>За сколько месяцев накопить?</span><input id="savingsPlanMonths" type="number" inputmode="numeric" min="1" max="120" step="1" value="12"></label>
      <div class="analytics-plan-presets" aria-label="Выбрать срок">
@@ -2753,7 +2757,7 @@ function showSaveFeedback(message,button){
    saveFeedbackFinishTimer=setTimeout(()=>{
      if(!toast.classList.contains('is-visible'))toast.hidden=true;
    },220);
- },message?.startsWith('В накопления +')?5000:1450);
+ },(message?.startsWith('В накопления +')||message?.startsWith('Долг по кредитке'))?5000:1450);
  if(button?.classList&&button.isConnected){
    button.classList.remove('budget-action-saved');
    void button.offsetWidth;
@@ -2860,6 +2864,15 @@ function nextPaydays(now=new Date()){
     }
   }
   return arr.sort((a,b)=>a.date-b.date);
+}
+function creditPaidThisMonth(asOf){
+ const start=asOf.slice(0,7)+'-01';
+ return [...(data.regularPayments||[]),...(data.earlyRepayments||[])]
+  .filter(p=>p.target==='credit'&&p.date>=start&&p.date<=asOf)
+  .reduce((sum,p)=>sum+num(p.amount),0);
+}
+function creditPaymentFeedback(amount){
+ if(saveFeedbackIntent)saveFeedbackIntent.message='Долг по кредитке уменьшился на '+rub(amount)+'. Осталось '+rub(creditOutstanding())+'.';
 }
 function creditOutstanding(){
  return Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
@@ -3572,6 +3585,7 @@ function savingsPlanOpen(){
  const settings=ladderSettings();
  renderConfirmedSavings();
  const remaining=savingsPlanMonthsLeft(settings.targetMonth);
+ $('savingsGoalName').value=settings.name||'';
  $('savingsPlanTargetAmount').value=String(capitalSnapshot().goal);
  $('ladderReserveInput').value=String(actualReserve());
  $('ladderIncluded').checked=!!settings.included;
@@ -3585,9 +3599,15 @@ function ladderRender(){
  const base=automatic&&total>=1000000?goal-500000:0;
  const progress=Math.max(0,Math.min(100,goal>base?Math.round((total-base)/(goal-base)*100):100));
  const title=$('milestoneTitle');
- title.parentElement.hidden=savings===null;
+ const paid=creditPaidThisMonth(iso(new Date()));
+ const creditLine=$('milestoneCredit');
+ creditLine.hidden=paid<=0;
+ creditLine.textContent=paid>0?'За месяц погашено по кредитке '+rub(paid):'';
+ title.parentElement.hidden=savings===null&&paid<=0;
+ title.hidden=savings===null;
+ $('milestoneProgress').hidden=savings===null;
  title.textContent=milestoneText(total,goal);
- $('milestoneProgress').textContent='Уже собрано '+rub(total)+' из '+rub(goal);
+ $('milestoneProgress').textContent=(settings.name?settings.name+' · собрано ':'Уже собрано ')+rub(total)+' из '+rub(goal);
  $('ladderTotal').textContent=rub(total);
  $('analyticsGoalAmount').textContent=rub(goal);
  $('analyticsGoalCurrent').textContent=rub(total);
@@ -4013,10 +4033,11 @@ $('earlyForm').addEventListener('submit',e=>{
  -(data.earlyRepayments||[]).filter(x=>x.date<=date&&x.date>=data.startBalances.date).reduce((a,x)=>a+num(x.amount),0)
  +transferDelta('savings',data.startBalances.date,date);
  if(amount>Math.round((savingsAtDate+0.000001)*100)/100){alert('Недостаточно накоплений на дату платежа. Доступно: '+rub(savingsAtDate));return;}
- if(target==='credit'&&amount>Math.max(0,num(data.debt)-repaymentTotal('credit'))+0.001){alert('Сумма превышает остаток долга по кредитке. Проверь задолженность.');return;}
+ if(target==='credit'&&amount>creditOutstanding()+0.001){alert('Сумма превышает остаток долга по кредитке. Проверь задолженность.');return;}
  const label=target==='credit'?'кредитную карту':'ипотеку';
  if(!confirm('Подтвердить фактически выполненное погашение '+rub(amount)+' по '+label+' из накоплений?'))return;
  data.earlyRepayments.push({id:'early-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),date,amount,target,note});
+ if(target==='credit')creditPaymentFeedback(amount);
  $('earlyAmount').value='';$('earlyNote').value='';month=date.slice(0,7);renderAll();
  if(target==='mortgage')alert('Погашение записано. После подтверждения банка вручную обнови ежемесячный платёж по ипотеке, если он изменился.');
 });
@@ -4224,7 +4245,10 @@ function confirmRegularPayment(target,amount,date,extraSource='',part=''){
  }
  data.regularPayments.push({id:'payment-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
   month,target,part:part==='advance'||part==='salary'?part:'',amount,date,reserveUsed,extraSource:extraAmount>0?extraSource:'',extraAmount});
- if(target==='credit')data.reserved=Math.max(0,Math.round((num(data.reserved)-reserveUsed)*100)/100);
+ if(target==='credit'){
+  data.reserved=Math.max(0,Math.round((num(data.reserved)-reserveUsed)*100)/100);
+  creditPaymentFeedback(amount);
+ }
  closePaymentEntry();renderAll();
  return null;
 }
@@ -4432,6 +4456,7 @@ $('savingsPlanSave').addEventListener('click',()=>{
  const settings=ladderSettings();
  settings.reserve=Math.round((reserve-incoming)*100)/100;
  settings.included=$('ladderIncluded').checked;
+ settings.name=$('savingsGoalName').value.trim();
  settings.targetAmount=goal;
  settings.targetMonth=savingsPlanTarget(months);
  if(settings.autoAllocateSavings===undefined)settings.autoAllocateSavings=true;
