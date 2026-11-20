@@ -2221,6 +2221,11 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  line-height:1.15!important;
  max-width:100%;
 }
+.milestone-card{flex:0 0 auto;padding:8px 12px;border-radius:14px;background:var(--panel);border-left:3px solid var(--accent)}
+.milestone-card small{display:block;color:var(--muted);margin-top:2px}
+#budgetSaveLabel{white-space:normal}
+#milestoneProgress{overflow-wrap:anywhere}
+.milestone-card [hidden]{display:none!important}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="daily-summary"><div class="daily-headline"><span id="dailySpendingLimit">—</span><span id="nextPaymentDate">На семейные покупки</span><span id="nextPaymentWhen"></span></div><div hidden><p id="dailySpendingNote"></p><small id="heroLabel"></small></div></div></header>
 <main class="main">
@@ -2228,6 +2233,11 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="home-balances"><div>Доступно на расходы<strong id="heroTotal">—</strong></div><div>Всего в бюджете<strong id="heroAll">—</strong></div></div>
 
 <div class="home-envelopes-visible dashboard-frame" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты</h2></div><div id="envelopes"></div></div>
+<section class="milestone-card" aria-labelledby="milestoneTitle" hidden>
+ <strong id="milestoneTitle"></strong>
+ <small id="milestoneProgress"></small>
+ <small id="milestoneCredit" hidden></small>
+</section>
 <div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайший платёж</h2><button class="analytics-icon-button alert-bell home-alert-trigger" type="button" id="budgetAlertsOpen" aria-label="Открыть советы для бюджета" title="Советы">🔔 <span class="home-alert-label">Советы</span><span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button></div><div id="obligations"></div></div>
 </section>
 <section class="view" id="v-plan">
@@ -2367,7 +2377,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  
 </section>
 <section class="view" id="v-settings">
-<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.92</span></div>
+<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.93</span></div>
 <div class="card" id="notifySettingsCard">
  <div class="row"><b>🔔 Push-уведомления</b><span class="quiet">Автоматически</span></div>
  <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. С 08:30 по Москве, затем повторная проверка днём. Если подтверждённое зачисление сохранено, напоминания по нему прекращаются. Неподтверждённые выплаты напоминаются каждый час с 08:30 до 20:30 по Москве в дни напоминаний, пока поступление не подтверждено.</div>
@@ -2386,7 +2396,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="two"><label class="field"><span>Рабочих дней в месяце (необязательно)</span><input id="manualDaysTotal" type="number" min="1" max="31" step="1" placeholder="Автоматически"></label><label class="field"><span>Из них с 1 по 15 (необязательно)</span><input id="manualDaysFirst" type="number" min="0" max="15" step="1" placeholder="Автоматически"></label></div>
 <div id="salaryCalendarInfo" class="hint"></div></div>
 <div class="card"><b>Старт с текущих остатков</b><p class="foot">Установи реальные деньги на счетах. Старые покупки до даты старта не будут вычтены ещё раз. Плановые зарплаты не считаются полученными.</p><label class="field"><span>Дата начала учёта</span><input id="startDate" type="date"></label><div class="two"><label class="field"><span>Семейные нужды, ₽</span><input id="start-family" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Коммуналка, ₽</span><input id="start-utilities" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Накопления, ₽</span><input id="start-savings" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Остальное, ₽</span><input id="start-other" type="number" min="0" inputmode="decimal"></label></div><label class="field"><span>Уже отложено на следующую ипотеку, ₽</span><input id="startMortgageFund" type="number" min="0" inputmode="decimal"></label><label class="field"><span>За какой месяц ипотека уже оплачена</span><input id="paidMortgageMonth" type="month"></label><button class="btn full" id="saveStart" type="button">Сохранить стартовые остатки</button><div id="startStatus" class="foot"></div></div>
-<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion">1.5.80</strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
+<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion">1.5.93</strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
 <div class="card"><b>Резервная копия</b><p class="foot">Сохрани данные перед обновлением или переносом на другой телефон.</p><div class="actions"><button class="btn secondary" id="exportData" type="button">Сохранить копию</button><button class="btn light" id="importClick" type="button">Восстановить</button></div><input type="file" id="importData" accept="application/json,.json" style="display:none"></div>
 <div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
 <div class="hint">Финансовые данные остаются в хранилище браузера на этом устройстве. Не очищай данные сайта, если не сохранил резервную копию.</div>
@@ -2437,6 +2447,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
       <div class="foot" id="confirmedSavingsMessage" role="status" aria-live="polite"></div>
       <div id="confirmedSavingsHistory"></div>
      </div>
+     <label class="field analytics-plan-input"><span>Название цели</span><input id="savingsGoalName" maxlength="60" placeholder="Например, Запас для семьи"></label>
      <label class="field analytics-plan-input"><span>Моя цель, ₽ (включая подушку)</span><input id="savingsPlanTargetAmount" type="number" inputmode="numeric" min="0" max="1000000000" step="1000" required value="1000000"></label>
      <label class="field analytics-plan-input"><span>За сколько месяцев накопить?</span><input id="savingsPlanMonths" type="number" inputmode="numeric" min="1" max="120" step="1" value="12"></label>
      <div class="analytics-plan-presets" aria-label="Выбрать срок">
@@ -2738,7 +2749,7 @@ function showSaveFeedback(message,button){
    saveFeedbackFinishTimer=setTimeout(()=>{
      if(!toast.classList.contains('is-visible'))toast.hidden=true;
    },220);
- },1450);
+ },(message?.startsWith('В накопления +')||message?.startsWith('Долг по кредитке'))?5000:1450);
  if(button?.classList&&button.isConnected){
    button.classList.remove('budget-action-saved');
    void button.offsetWidth;
@@ -2825,7 +2836,7 @@ function showPaydayCountdown(actual){
  note.textContent=rub(family)+' ÷ '+dayCount+' дн. = '+rub(familyDaily)+' в день · общий ориентир '+rub(dailyAmount)+'/день';
 
 }
-function nextPaydays(now=new Date()){
+function nextPaydays(now=new Date(),pendingReceipt=null){
   // A salary paid on the 1st of the next calendar month belongs to the previous
   // planning cycle, whose advance was paid on the 16th. Keep calendar dates for
   // the credit deadline but associate both payments with the same plan month.
@@ -2844,12 +2855,26 @@ function nextPaydays(now=new Date()){
       if(when>=start&&when<=due&&!data.receipts.some(r=>r.id===cycle+'-'+type))arr.push({date:when,type,month:cycle});
     }
   }
+  // The receipt being distributed already exists in data.receipts, so its
+  // scheduled slot was skipped above. Count its actual payday exactly once.
+  if(pendingReceipt&&start<=due){
+    arr.push({date:start,type:pendingReceipt.type,month:pendingReceipt.month});
+  }
   return arr.sort((a,b)=>a.date-b.date);
+}
+function creditPaidThisMonth(asOf){
+ const start=asOf.slice(0,7)+'-01';
+ return [...(data.regularPayments||[]),...(data.earlyRepayments||[])]
+  .filter(p=>p.target==='credit'&&p.date>=start&&p.date<=asOf)
+  .reduce((sum,p)=>sum+num(p.amount),0);
+}
+function creditPaymentFeedback(amount){
+ if(saveFeedbackIntent)saveFeedbackIntent.message='Долг по кредитке уменьшился на '+rub(amount)+'. Осталось '+rub(creditOutstanding())+'.';
 }
 function creditOutstanding(){
  return Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
 }
-function credit(){const debt=Math.max(0,creditOutstanding()-num(data.reserved)-incomeAmountFor('credit'));const due=fromISO(data.deadline);const pays=nextPaydays();const per=pays.length?Math.ceil(debt/pays.length*100)/100:0;return {debt,due,pays,per}}
+function credit(pendingReceipt=null){const debt=Math.max(0,creditOutstanding()-num(data.reserved)-incomeAmountFor('credit'));const due=fromISO(data.deadline);const pays=pendingReceipt?nextPaydays(fromISO(pendingReceipt.date),pendingReceipt):nextPaydays();const per=pays.length?Math.ceil(debt/pays.length*100)/100:0;return {debt,due,pays,per}}
 // Mortgage top-ups from envelopes are already paid. Offset only the EXTRA
 // funding from subsequent UNCONFIRMED wage distributions, in payment order.
 // Past receipts retain their original confirmed allocations.
@@ -2904,7 +2929,7 @@ function goalSavingsGuidance(){
  const snapshot=capitalSnapshot();
  return {required:Math.ceil(snapshot.remaining/months),months};
 }
-function allocation(receiptDate=null,ruleOverrides=null){
+function allocation(receiptDate=null,ruleOverrides=null,pendingReceipt=null){
  const m=monthData(),salaryPlan=plannedSalary(m),advancePlan=plannedAdvance(m),total=advancePlan+salaryPlan;
  const base=mortgageDistributionBase(month),offsets=mortgageDistributionOffsets(month);
  const receipts={
@@ -2913,7 +2938,7 @@ function allocation(receiptDate=null,ruleOverrides=null){
  };
  const mortgageA=receipts.advance?num(receipts.advance.amounts?.mortgage):Math.max(0,base.advance-offsets.advance);
  const mortgageB=receipts.salary?num(receipts.salary.amounts?.mortgage):Math.max(0,base.salary-offsets.salary);
- const cc=credit(),creditForMonth=cc.pays.filter(p=>p.month===month);
+ const cc=credit(pendingReceipt),creditForMonth=cc.pays.filter(p=>p.month===month);
  // Distribute the outstanding credit debt in proportion to the forecast
  // spendable income on each remaining payday, not as identical payments.
  // Confirmed receipt allocations are frozen and never redistributed.
@@ -3450,6 +3475,24 @@ function capitalSnapshot(goalOverride){
  return {settings,reserve,savings,extra,total,goal,automatic:!override&&!userGoal,
    remaining:Math.max(0,goal-total)};
 }
+function nextCapitalMilestone(total,goal){
+ return Math.min(goal,(Math.floor(total/10000)+1)*10000);
+}
+function milestoneText(total,goal){
+ if(total>=goal)return 'Цель достигнута · '+rub(goal);
+ const next=nextCapitalMilestone(total,goal);
+ return 'До '+rub(next)+' осталось '+rub(Math.ceil(next-total));
+}
+function recordEnvelopeTransfer(transfer){
+ const before=transfer.to==='savings'?capitalSnapshot():null;
+ data.transfers.push(transfer);
+ if(!before||!saveFeedbackIntent)return;
+ const after=capitalSnapshot();
+ const reached=nextCapitalMilestone(before.total,before.goal);
+ const crossed=before.total<reached&&after.total>=reached&&after.total<before.goal;
+ const progress=crossed?'Рубеж '+rub(reached)+' достигнут. ':'';
+ saveFeedbackIntent.message='В накопления +'+rub(transfer.amount)+'. '+progress+milestoneText(after.total,before.goal);
+}
 function savingsPlanTarget(months){
  const now=new Date(),d=new Date(now.getFullYear(),now.getMonth()+months-1,1);
  return iso(d).slice(0,7);
@@ -3539,6 +3582,7 @@ function savingsPlanOpen(){
  const settings=ladderSettings();
  renderConfirmedSavings();
  const remaining=savingsPlanMonthsLeft(settings.targetMonth);
+ $('savingsGoalName').value=settings.name||'';
  $('savingsPlanTargetAmount').value=String(capitalSnapshot().goal);
  $('ladderReserveInput').value=String(actualReserve());
  $('ladderIncluded').checked=!!settings.included;
@@ -3551,6 +3595,16 @@ function ladderRender(){
  const {settings,reserve,savings,extra,total,goal,automatic}=capitalSnapshot();
  const base=automatic&&total>=1000000?goal-500000:0;
  const progress=Math.max(0,Math.min(100,goal>base?Math.round((total-base)/(goal-base)*100):100));
+ const title=$('milestoneTitle');
+ const paid=creditPaidThisMonth(iso(new Date()));
+ const creditLine=$('milestoneCredit');
+ creditLine.hidden=paid<=0;
+ creditLine.textContent=paid>0?'За месяц погашено по кредитке '+rub(paid):'';
+ title.parentElement.hidden=savings===null&&paid<=0;
+ title.hidden=savings===null;
+ $('milestoneProgress').hidden=savings===null;
+ title.textContent=milestoneText(total,goal);
+ $('milestoneProgress').textContent=(settings.name?settings.name+' · собрано ':'Уже собрано ')+rub(total)+' из '+rub(goal);
  $('ladderTotal').textContent=rub(total);
  $('analyticsGoalAmount').textContent=rub(goal);
  $('analyticsGoalCurrent').textContent=rub(total);
@@ -3940,10 +3994,11 @@ $('earlyForm').addEventListener('submit',e=>{
  -(data.earlyRepayments||[]).filter(x=>x.date<=date&&x.date>=data.startBalances.date).reduce((a,x)=>a+num(x.amount),0)
  +transferDelta('savings',data.startBalances.date,date);
  if(amount>Math.round((savingsAtDate+0.000001)*100)/100){alert('Недостаточно накоплений на дату платежа. Доступно: '+rub(savingsAtDate));return;}
- if(target==='credit'&&amount>Math.max(0,num(data.debt)-repaymentTotal('credit'))+0.001){alert('Сумма превышает остаток долга по кредитке. Проверь задолженность.');return;}
+ if(target==='credit'&&amount>creditOutstanding()+0.001){alert('Сумма превышает остаток долга по кредитке. Проверь задолженность.');return;}
  const label=target==='credit'?'кредитную карту':'ипотеку';
  if(!confirm('Подтвердить фактически выполненное погашение '+rub(amount)+' по '+label+' из накоплений?'))return;
  data.earlyRepayments.push({id:'early-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),date,amount,target,note});
+ if(target==='credit')creditPaymentFeedback(amount);
  $('earlyAmount').value='';$('earlyNote').value='';month=date.slice(0,7);renderAll();
  if(target==='mortgage')alert('Погашение записано. После подтверждения банка вручную обнови ежемесячный платёж по ипотеке, если он изменился.');
 });
@@ -3968,7 +4023,7 @@ $('transferForm').addEventListener('submit',e=>{
  if(available===null||amount>available+0.001){alert('Недостаточно средств в исходной категории. Доступно: '+rub(Math.max(0,available||0)));return;}
  const fromName=cats.find(c=>c.id===from).name,toName=cats.find(c=>c.id===to).name;
  if(!confirm('Перевести '+rub(amount)+' из «'+fromName+'» в «'+toName+'»?'))return;
- data.transfers.push({id:'tr-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),from,to,date,amount,note});
+ recordEnvelopeTransfer({id:'tr-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),from,to,date,amount,note});
  $('transferAmount').value='';$('transferNote').value='';month=date.slice(0,7);renderAll();
 });
 $('transferList').addEventListener('click',e=>{
@@ -4005,7 +4060,7 @@ $('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-de
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(new Date())+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
 $('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.92';
+const APP_VERSION='1.5.93';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -4080,7 +4135,7 @@ $('receiptEntryForm').addEventListener('submit',e=>{
  data.receipts.push(receipt);
  m[type]=amount;
  try{
-  const calc=allocation(date),col=type==='advance'?'a':'b',amounts={};
+  const calc=allocation(date,null,receipt),col=type==='advance'?'a':'b',amounts={};
   for(const row of calc.rows){
    const dest=row.id||(row.name==='Ипотека'?'mortgage':'credit');
    amounts[dest]=Math.round(num(row[col])*100)/100;
@@ -4151,7 +4206,10 @@ function confirmRegularPayment(target,amount,date,extraSource='',part=''){
  }
  data.regularPayments.push({id:'payment-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
   month,target,part:part==='advance'||part==='salary'?part:'',amount,date,reserveUsed,extraSource:extraAmount>0?extraSource:'',extraAmount});
- if(target==='credit')data.reserved=Math.max(0,Math.round((num(data.reserved)-reserveUsed)*100)/100);
+ if(target==='credit'){
+  data.reserved=Math.max(0,Math.round((num(data.reserved)-reserveUsed)*100)/100);
+  creditPaymentFeedback(amount);
+ }
  closePaymentEntry();renderAll();
  return null;
 }
@@ -4359,6 +4417,7 @@ $('savingsPlanSave').addEventListener('click',()=>{
  const settings=ladderSettings();
  settings.reserve=Math.round((reserve-incoming)*100)/100;
  settings.included=$('ladderIncluded').checked;
+ settings.name=$('savingsGoalName').value.trim();
  settings.targetAmount=goal;
  settings.targetMonth=savingsPlanTarget(months);
  if(settings.autoAllocateSavings===undefined)settings.autoAllocateSavings=true;
@@ -4403,7 +4462,7 @@ $('ladderTransferForm').addEventListener('submit',event=>{
  if(!confirm('Записать перевод '+rub(amount)+' из «'+name+'» в «Накопления»?\n\nЭто запись в бюджете, не перевод в банке. Сначала переведи деньги фактически.'))return;
  const fresh=ladderEconomy(source),balance=categoryBalanceAt(source,iso(new Date()));
  if(amount>fresh.max+0.001||balance===null||amount>balance+0.001){alert('Остаток изменился. Проверь сумму.');ladderRender();return;}
- data.transfers.push({
+ recordEnvelopeTransfer({
    id:'tr-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
    from:source,to:'savings',date:iso(new Date()),amount:Math.round(amount*100)/100,
    note:'Экономия за '+month,kind:'economy',period:month
