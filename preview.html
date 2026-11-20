@@ -2844,7 +2844,7 @@ function showPaydayCountdown(actual){
  note.textContent=rub(family)+' ÷ '+dayCount+' дн. = '+rub(familyDaily)+' в день · общий ориентир '+rub(dailyAmount)+'/день';
 
 }
-function nextPaydays(now=new Date()){
+function nextPaydays(now=new Date(),pendingReceipt=null){
   // A salary paid on the 1st of the next calendar month belongs to the previous
   // planning cycle, whose advance was paid on the 16th. Keep calendar dates for
   // the credit deadline but associate both payments with the same plan month.
@@ -2863,6 +2863,11 @@ function nextPaydays(now=new Date()){
       if(when>=start&&when<=due&&!data.receipts.some(r=>r.id===cycle+'-'+type))arr.push({date:when,type,month:cycle});
     }
   }
+  // The receipt being distributed already exists in data.receipts, so its
+  // scheduled slot was skipped above. Count its actual payday exactly once.
+  if(pendingReceipt&&start<=due){
+    arr.push({date:start,type:pendingReceipt.type,month:pendingReceipt.month});
+  }
   return arr.sort((a,b)=>a.date-b.date);
 }
 function creditPaidThisMonth(asOf){
@@ -2877,7 +2882,7 @@ function creditPaymentFeedback(amount){
 function creditOutstanding(){
  return Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
 }
-function credit(){const debt=Math.max(0,creditOutstanding()-num(data.reserved)-incomeAmountFor('credit'));const due=fromISO(data.deadline);const pays=nextPaydays();const per=pays.length?Math.ceil(debt/pays.length*100)/100:0;return {debt,due,pays,per}}
+function credit(pendingReceipt=null){const debt=Math.max(0,creditOutstanding()-num(data.reserved)-incomeAmountFor('credit'));const due=fromISO(data.deadline);const pays=pendingReceipt?nextPaydays(fromISO(pendingReceipt.date),pendingReceipt):nextPaydays();const per=pays.length?Math.ceil(debt/pays.length*100)/100:0;return {debt,due,pays,per}}
 // Mortgage top-ups from envelopes are already paid. Offset only the EXTRA
 // funding from subsequent UNCONFIRMED wage distributions, in payment order.
 // Past receipts retain their original confirmed allocations.
@@ -2932,7 +2937,7 @@ function goalSavingsGuidance(){
  const snapshot=capitalSnapshot();
  return {required:Math.ceil(snapshot.remaining/months),months};
 }
-function allocation(receiptDate=null,ruleOverrides=null){
+function allocation(receiptDate=null,ruleOverrides=null,pendingReceipt=null){
  const m=monthData(),salaryPlan=plannedSalary(m),advancePlan=plannedAdvance(m),total=advancePlan+salaryPlan;
  const base=mortgageDistributionBase(month),offsets=mortgageDistributionOffsets(month);
  const receipts={
@@ -2941,7 +2946,7 @@ function allocation(receiptDate=null,ruleOverrides=null){
  };
  const mortgageA=receipts.advance?num(receipts.advance.amounts?.mortgage):Math.max(0,base.advance-offsets.advance);
  const mortgageB=receipts.salary?num(receipts.salary.amounts?.mortgage):Math.max(0,base.salary-offsets.salary);
- const cc=credit(),creditForMonth=cc.pays.filter(p=>p.month===month);
+ const cc=credit(pendingReceipt),creditForMonth=cc.pays.filter(p=>p.month===month);
  // Distribute the outstanding credit debt in proportion to the forecast
  // spendable income on each remaining payday, not as identical payments.
  // Confirmed receipt allocations are frozen and never redistributed.
@@ -4174,7 +4179,7 @@ $('receiptEntryForm').addEventListener('submit',e=>{
  data.receipts.push(receipt);
  m[type]=amount;
  try{
-  const calc=allocation(date),col=type==='advance'?'a':'b',amounts={};
+  const calc=allocation(date,null,receipt),col=type==='advance'?'a':'b',amounts={};
   for(const row of calc.rows){
    const dest=row.id||(row.name==='Ипотека'?'mortgage':'credit');
    amounts[dest]=Math.round(num(row[col])*100)/100;
