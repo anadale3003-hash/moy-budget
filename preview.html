@@ -3094,7 +3094,7 @@ function categoryBalanceAt(id,date){
  const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start&&p.date<=date).reduce((a,p)=>a+num(p.extraAmount),0);
  return base+received+income+wifeCorrection-spent-early-creditExtra+transferDelta(id,start,date);
 }
-function realBalance(id){if(!data.startBalances)return null;const start=data.startBalances.date;const base=num(data.startBalances.balances[id]);const received=data.receipts.filter(r=>r.date>=start).reduce((a,r)=>a+num(r.amounts?.[id]),0);const spent=data.expenses.filter(e=>e.date>=start&&e.category===id).reduce((a,e)=>a+num(e.amount),0);const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start).reduce((a,p)=>a+num(p.extraAmount),0);return base+received+incomeAmountFor(id,start)-spent-(id==='savings'?repaymentSavingsSpent(start):0)-creditExtra+transferDelta(id,start)}
+function realBalance(id){if(!data.startBalances)return null;const start=data.startBalances.date;const base=num(data.startBalances.balances[id]);const received=data.receipts.filter(r=>r.date>=start).reduce((a,r)=>a+num(r.amounts?.[id]),0);const spent=data.expenses.filter(e=>e.date>=start&&e.category===id).reduce((a,e)=>a+num(e.amount),0);const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start).reduce((a,p)=>a+num(p.extraAmount),0);return base+received+incomeAmountFor(id,start)+(id==='family'?(data.wifeAdjustments||[]).filter(a=>a.date>=start).reduce((sum,a)=>sum+num(a.amount),0):0)-spent-(id==='savings'?repaymentSavingsSpent(start):0)-creditExtra+transferDelta(id,start)}
 // Фактический остаток на сегодня, без планируемых и датированных будущим операций.
 // Бюджетные конверты, ипотечный резерв и резерв кредитки не пересекаются.
 function actualMoneyToday(){
@@ -3926,6 +3926,19 @@ $('supportForm').addEventListener('submit',event=>{
  if(renderAll()){$('opsSheet').querySelector('.ops-sheet-close').click();showSaveFeedback('Доход жены учтён',$('supportOpen'))}
 });
 function wifeFunds(date){
+ // A confirmed balance is the source of truth. Earlier income, transfers
+ // and reconciled expenses must never be counted again over that snapshot.
+ const reports=(data.wifeBalanceReports||[])
+  .filter(r=>r.date<=date&&(!data.startBalances||r.date>=data.startBalances.date)&&Number.isFinite(Number(r.family??r.total)))
+  .sort((a,b)=>b.date.localeCompare(a.date)||String(b.checkedAt||'').localeCompare(String(a.checkedAt||'')));
+ const last=reports[0];
+ if(last){
+  const cutoff=last.checkedAt||'';
+  const afterSnapshot=entry=>entry.date>last.date||(entry.date===last.date&&cutoff&&entry.createdAt&&entry.createdAt>cutoff);
+  const laterTransfers=(data.wifeMoves||[]).filter(afterSnapshot).reduce((sum,m)=>sum+num(m.amount),0);
+  const laterPurchases=data.expenses.filter(e=>e.wifeCheck&&afterSnapshot(e)).reduce((sum,e)=>sum+num(e.amount),0);
+  return Math.max(0,Math.round((num(last.family??last.total)+laterTransfers-laterPurchases)*100)/100);
+ }
  const moves=(data.wifeMoves||[]).filter(m=>m.date<=date&&(!data.startBalances||m.date>=data.startBalances.date));
  const sent=moves.reduce((sum,m)=>sum+num(m.amount),0);
  const food=data.extraIncomes.filter(i=>i.supportTotal!=null&&i.date<=date&&i.date>=data.startBalances?.date).reduce((sum,i)=>sum+num(i.amount),0);
@@ -3969,7 +3982,8 @@ $('wifeCheckForm').addEventListener('submit',event=>{
  if(categoryBalanceAt('family',date)===null){alert('Укажи стартовые остатки в настройках.');return;}
  if(!reconcileWifePurchases(date,wifeFunds(date),amount))return;
  const reports=(data.wifeBalanceReports||=[]),existing=reports.find(r=>r.date===date);
- if(existing){existing.total=amount;existing.family=amount;}else reports.push({date,total:amount,family:amount});
+ const checkedAt=new Date().toISOString();
+ if(existing){existing.total=amount;existing.family=amount;existing.checkedAt=checkedAt;}else reports.push({date,total:amount,family:amount,checkedAt});
  if(renderAll()){form.reset();$('opsSheet').querySelector('.ops-sheet-close').click();showSaveFeedback('Сверка сохранена',$('wifeCheckOpen'));}
 });
 $('wifeTransferOpen').addEventListener('click',recordWifeTransfer);
@@ -3989,7 +4003,7 @@ function recordWifeTransfer(){
  const amount=Number(raw);
  if(amount<=0||amount>family-held){alert('Проверь сумму и остаток на своей карте в семейном конверте.');return;}
  if(!confirm('Записать перевод жене '+rub(amount)+'?'))return;
- (data.wifeMoves||=[]).push({date,amount});
+ (data.wifeMoves||=[]).push({date,amount,createdAt:new Date().toISOString()});
  if(renderAll())showSaveFeedback('Перевод жене записан',document.activeElement);
 }
 
@@ -4300,7 +4314,7 @@ $('expenseList').addEventListener('click',e=>{
   const expense=data.expenses.find(x=>String(x.id)===move.dataset.wifeMove);
   if(!expense||expense.category!=='family'||!data.startBalances||expense.date<data.startBalances.date||expense.date>iso(new Date()))return alert('Выбери расход в текущем периоде учёта.');
   if(!confirm('Считать '+rub(expense.amount)+' переводом? Эта сумма вернётся в семейный остаток. Уже потраченное можно записать через «Сверить остаток у жены».'))return;
-  (data.wifeMoves||=[]).push({date:expense.date,amount:expense.amount});
+  (data.wifeMoves||=[]).push({date:expense.date,amount:expense.amount,createdAt:new Date().toISOString()});
   data.expenses=data.expenses.filter(x=>x!==expense);
   renderAll();return;
  }
@@ -5656,9 +5670,9 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .family-split span,.family-split strong{display:block}
 .family-split span{font-size:11px;color:var(--muted)}
 .family-split strong{font-size:clamp(13px,3.8vw,20px);line-height:1.2;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-#wifeCheckOpen{grid-column:1/-1}
-.family-actions{margin-top:6px;grid-template-columns:repeat(2,minmax(0,1fr))}
+#wifeCheckOpen{grid-column:auto}
+.family-actions{margin-top:8px;grid-template-columns:minmax(0,1fr);gap:8px}
 #wifeReportedBalance{grid-column:1/-1;color:var(--muted);font-size:11px}
-.family-actions .btn{min-width:0;white-space:normal;line-height:1.15;padding:6px;font-size:13px}
+.family-actions .btn{width:100%;min-width:0;min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center;white-space:normal;line-height:1.2;padding:10px 12px;font-size:13px}
 #supportForm label{display:grid;gap:4px;margin-bottom:8px}
 </style></body></html>
