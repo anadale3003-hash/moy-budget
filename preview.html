@@ -2347,7 +2347,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <button class="btn" type="submit">Учесть поступление</button>
 </form></div>
 <div class="card"><form id="expenseForm">
- <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
+ <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><p class="foot" id="expenseWifeTransferAvailable" hidden></p><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
 <div class="two transfer-envelopes"><label class="field"><span>Откуда</span><select id="transferFrom"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Куда</span><select id="transferTo"><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label></div>
 <div class="two"><label class="field"><span>Сумма, ₽</span><input id="transferAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 5000"></label><label class="field"><span>Дата перевода</span><input id="transferDate" type="date" required></label></div>
 <label class="field"><span>Примечание (необязательно)</span><input id="transferNote" maxlength="120" placeholder="Остаток коммуналки"></label>
@@ -3190,7 +3190,20 @@ function isWifeTransferType(label){
 }
 function refreshTypes(preferred){const category=$('expenseCategory').value;const types=(data.expenseTypes?.[category]||[]).filter(type=>!isWifeTransferType(type));types.push('Отправил жене');const old=preferred??$('expenseType').value;const options=types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');$('expenseType').innerHTML='<option value="">Выбери вид расхода</option>'+options+'<option value="__new__">＋ Добавить новый…</option>';
 $('expenseType').value=types.includes(old)||old==='__new__'?old:'';toggleNewType();}
-function toggleNewType(){$('newTypeWrap').style.display=$('expenseType').value==='__new__'?'block':'none';if($('expenseType').value!=='__new__')$('newExpenseType').value='';}
+function toggleNewType(){
+ $('newTypeWrap').style.display=$('expenseType').value==='__new__'?'block':'none';
+ if($('expenseType').value!=='__new__')$('newExpenseType').value='';
+ const note=$('expenseWifeTransferAvailable');
+ if(!note)return;
+ const isMove=isWifeTransferType($('expenseType').value);
+ note.hidden=!isMove;
+ const source=$('expenseCategory').value,date=$('expenseDate').value;
+ if(isMove){
+  const balance=fromISO(date)?categoryBalanceAt(source,date):null;
+  const mine=balance===null?null:source==='family'?Math.max(0,Math.round((balance-wifeFunds(date))*100)/100):Math.max(0,balance);
+  note.textContent='Это перевод, не расход семьи. У тебя доступно для перевода: '+(mine===null?'укажи начальные остатки':rub(mine));
+ }
+}
 function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=Math.round(creditOutstanding()*100)/100;$('reserved').value=data.reserved;$('deadline').value=data.deadline;renderCategoryRules();}
 // Fit the label and amount to the actual available tile width, including large balances.
 function fitTotalMoneyTile(){
@@ -4274,6 +4287,7 @@ function labelEnvelopeOptions(selectIds,date){
 }
 function updateExpenseOptions(){
  labelEnvelopeOptions(['expenseCategory'],$('expenseDate').value);
+ toggleNewType();
 }
 function updateTransferAvailable(){
  const from=$('transferFrom').value, date=$('transferDate').value;
@@ -4324,24 +4338,35 @@ $('incomeList').addEventListener('click',e=>{
 $('expenseDate').value=iso(new Date());
 $('expenseDate').addEventListener('input',updateExpenseOptions);
 $('expenseDate').addEventListener('change',updateExpenseOptions);
-$('expenseCategory').addEventListener('change',()=>refreshTypes());
+$('expenseCategory').addEventListener('change',()=>{refreshTypes();toggleNewType();});
 $('expenseType').addEventListener('change',toggleNewType);
 refreshTypes();
 $('expenseForm').onsubmit=e=>{e.preventDefault();const amount=num($('expenseAmount').value),date=$('expenseDate').value,category=$('expenseCategory').value,note=$('expenseNote').value.trim();if(!amount||!fromISO(date)||!cats.some(c=>c.id===category))return;
 let type=$('expenseType').value;if(type==='__new__'){type=$('newExpenseType').value.trim().replace(/\s+/g,' ');if(!type){alert('Введи название нового вида расхода');$('newExpenseType').focus();return;}if(type.length>50)return;}
 if(!type){alert('Выбери вид расхода');return;}
 if(isWifeTransferType(type))type='Отправил жене';
-const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===type.toLocaleLowerCase('ru'));if(existing)type=existing;else data.expenseTypes[category].push(type);
+const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===type.toLocaleLowerCase('ru'));if(existing)type=existing;
 if(type==='Отправил жене'){
  const available=categoryBalanceAt(category,date);
  const held=wifeFunds(date);
  const mine=category==='family'?(available===null?null:available-held):available;
- if(mine===null||amount>mine+0.005){alert('Недостаточно денег в выбранном конверте: '+rub(Math.max(0,mine||0)));return;}
+ if(mine===null||amount>mine+0.005){alert('Перевод не записан. У тебя в выбранном конверте доступно '+rub(Math.max(0,mine||0))+', а перевод составляет '+rub(amount)+'. Выбери другой источник или меньшую сумму.');return;}
+ if(date>iso(new Date())||date<data.startBalances.date){alert('Перевод можно записать только в период фактического учёта до сегодняшнего дня.');return;}
  const id='wife-expense-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
  if(category!=='family')(data.transfers||=[]).push({id:'wife-transfer-'+id,date,from:category,to:'family',amount,note:'Отправил жене',wifeMoveId:id});
  (data.wifeMoves||=[]).push({id,date,amount,source:category,createdAt:new Date().toISOString(),note,fromExpense:true});
- }else data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});
- month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);renderAll()};
+ }else{
+ if(!existing)data.expenseTypes[category].push(type);
+ data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});
+ }
+ month=date.slice(0,7);
+ $('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);
+ if(renderAll()){
+  const isMove=type==='Отправил жене';
+  if(isMove){$('expenseHistoryPanel').open=true;showSaveFeedback('Перевод жене '+rub(amount)+' записан',$('expenseForm').querySelector('button[type="submit"]'));}
+  else showSaveFeedback('Расход сохранён',$('expenseForm').querySelector('button[type="submit"]'));
+  if($('opsSheet')&&!$('opsSheet').hidden)$('opsSheet').querySelector('.ops-sheet-close')?.click();
+ }};
 $('expenseList').addEventListener('click',e=>{
  const wifeDelete=e.target.closest('[data-del-wife]');
  if(wifeDelete){
