@@ -3956,7 +3956,7 @@ function wifeFunds(date){
  const last=reports[0];
  if(last){
   const cutoff=last.checkedAt||'';
-  const afterSnapshot=entry=>entry.date>last.date||(entry.date===last.date&&cutoff&&entry.createdAt&&entry.createdAt>cutoff);
+  const afterSnapshot=entry=>entry.date<=date&&(entry.date>last.date||(entry.date===last.date&&!!entry.createdAt&&(!cutoff||entry.createdAt>cutoff)));
   const laterTransfers=(data.wifeMoves||[]).filter(afterSnapshot).reduce((sum,m)=>sum+num(m.amount),0);
   const laterPurchases=data.expenses.filter(e=>e.wifeCheck&&afterSnapshot(e)).reduce((sum,e)=>sum+num(e.amount),0);
   const laterWifeIncome=(data.extraIncomes||[]).filter(i=>(i.wifeIncome||i.source==='Доход жены')&&afterSnapshot(i)).reduce((sum,i)=>sum+num(i.amount),0);
@@ -4278,7 +4278,9 @@ function transferableKopeks(from,date){
 function labelEnvelopeOptions(selectIds,date){
  for(const category of cats){
   const balance=fromISO(date)?categoryBalanceAt(category.id,date):null;
-  const label=category.name+' · '+(balance===null?'остаток неизвестен':rub(balance));
+  const isExpense=selectIds.includes('expenseCategory');
+  const own=category.id==='family'&&balance!==null&&isExpense?Math.max(0,Math.round((balance-wifeFunds(date))*100)/100):balance;
+  const label=category.name+' · '+(own===null?'остаток неизвестен':rub(own))+(category.id==='family'&&isExpense?' у тебя':'');
   for(const id of selectIds){
    const option=Array.from($(id).options).find(item=>item.value===category.id);
    if(option)option.textContent=label;
@@ -4349,7 +4351,7 @@ const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===t
 if(type==='Отправил жене'){
  const available=categoryBalanceAt(category,date);
  const held=wifeFunds(date);
- const mine=category==='family'?(available===null?null:available-held):available;
+ const mine=category==='family'?(available===null?null:Math.max(0,Math.round((available-held)*100)/100)):available;
  if(mine===null||amount>mine+0.005){alert('Перевод не записан. У тебя в выбранном конверте доступно '+rub(Math.max(0,mine||0))+', а перевод составляет '+rub(amount)+'. Выбери другой источник или меньшую сумму.');return;}
  if(date>iso(new Date())||date<data.startBalances.date){alert('Перевод можно записать только в период фактического учёта до сегодняшнего дня.');return;}
  const id='wife-expense-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
