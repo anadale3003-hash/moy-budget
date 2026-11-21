@@ -4823,7 +4823,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
   // The existing grouping script has run; remove only wrappers, never the forms or history content.
   const intro=document.createElement('div');intro.className='design-group ops-action-group';intro.id='opsActions';
   const introTitle=document.createElement('div');introTitle.className='section-heading';
-  introTitle.innerHTML='<h2>Операции</h2>';intro.append(introTitle);
+  introTitle.innerHTML='<h2>Операции <small style="font-size:11px;color:var(--muted);font-weight:500">Тест · 21.11 · проверка переводов</small></h2>';intro.append(introTitle);
   const grid=document.createElement('div');grid.className='ops-action-grid';
   const actions=[
    ['expense','Расход','↘'],['income','Доход','↗'],['transfer','Между конвертами','⇄']
