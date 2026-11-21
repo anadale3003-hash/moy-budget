@@ -2321,11 +2321,11 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  <div class="operations-quick" role="group" aria-label="Быстрые действия"><button type="button" data-ops-open="expense">＋ Расход</button><button type="button" data-ops-open="income">＋ Доход</button><button type="button" data-ops-open="history">▤ История</button></div>
 </div>
 <div id="familyActions" class="family-actions" role="group" aria-label="Деньги у жены">
-<button type="button" class="btn secondary" id="wifeTransferOpen">Перевод жене</button>
+<button type="button" class="btn secondary" id="wifeTransferOpen" hidden style="display:none!important">Перевод жене</button>
 <button type="button" class="btn secondary" id="supportOpen" hidden style="display:none!important">Доход жены</button>
 <button type="button" class="btn secondary" id="wifeCheckOpen">Сверить остаток у жены</button>
 </div>
-<div class="card" id="wifeTransferCard"><form id="wifeTransferForm">
+<div class="card" id="wifeTransferCard" hidden style="display:none!important"><form id="wifeTransferForm">
 <label class="field"><span>Откуда переводишь</span><select id="wifeTransferSource" required>
 <option value="family">Семейные нужды</option><option value="other">Остальное</option><option value="savings">Накопления</option><option value="utilities">Коммуналка</option>
 </select></label>
@@ -2361,7 +2361,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <label class="field"><span>Сумма, ₽</span><input id="incomeAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 1500"></label>
 <label class="field"><span>Дата поступления</span><input id="incomeDate" type="date" required></label>
 </div>
-<label class="field"><span>Источник дохода</span><select id="incomeSource"><option>Проценты по вкладу</option><option>Премия</option><option>Кэшбэк</option><option>Возврат покупки</option><option>Подработка</option><option>Подарок</option><option>Другое</option></select></label>
+<label class="field"><span>Источник дохода</span><select id="incomeSource"><option>Проценты по вкладу</option><option>Премия</option><option>Кэшбэк</option><option>Возврат покупки</option><option>Подработка</option><option>Подарок</option><option>Доход жены</option><option>Другое</option></select></label>
 <label class="field"><span>Куда зачислить</span><select id="incomeDestination">
 <option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option>
 <option value="savings">Накопления</option><option value="reserve">🛡 Подушка безопасности</option><option value="other">Доступный бюджет (Остальное)</option>
@@ -3188,7 +3188,7 @@ function isWifeTransferType(label){
  const name=String(label).trim().replace(/\s+/g,' ').toLocaleLowerCase('ru').replace(/ё/g,'е');
  return /^(?:отправил|отправить|перевод|перевел|перевести)(?: деньги)? жене$/.test(name);
 }
-function refreshTypes(preferred){const category=$('expenseCategory').value;const types=(data.expenseTypes?.[category]||[]).filter(type=>!isWifeTransferType(type));const old=preferred??$('expenseType').value;const options=types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');$('expenseType').innerHTML='<option value="">Выбери вид расхода</option>'+options+'<option value="__new__">＋ Добавить новый…</option>';
+function refreshTypes(preferred){const category=$('expenseCategory').value;const types=(data.expenseTypes?.[category]||[]).filter(type=>!isWifeTransferType(type));types.push('Отправил жене');const old=preferred??$('expenseType').value;const options=types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');$('expenseType').innerHTML='<option value="">Выбери вид расхода</option>'+options+'<option value="__new__">＋ Добавить новый…</option>';
 $('expenseType').value=types.includes(old)||old==='__new__'?old:'';toggleNewType();}
 function toggleNewType(){$('newTypeWrap').style.display=$('expenseType').value==='__new__'?'block':'none';if($('expenseType').value!=='__new__')$('newExpenseType').value='';}
 function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=Math.round(creditOutstanding()*100)/100;$('reserved').value=data.reserved;$('deadline').value=data.deadline;renderCategoryRules();}
@@ -3380,7 +3380,7 @@ $('incomeList').innerHTML=incomeRows.length?incomeRows.map(i=>{
  const cat=cats.find(c=>c.id===i.destination),dest=cat?.name||(i.destination==='reserve'?'Подушка безопасности':i.destination==='mortgage'?'Ипотека':'Кредитная карта');
  return `<div class="transaction"><div><b>${esc(i.source)}</b><small>${esc(i.date)} · ${esc(dest)}${i.note?' · '+esc(i.note):''}</small></div><div class="row"><b style="color:var(--green)">+${rub(i.amount)}</b><button type="button" class="delete" data-del-income="${esc(i.id)}" title="Удалить доход">✕</button></div></div>`;
 }).join(''):'<div class="empty">Пока нет дополнительных доходов за месяц</div>';
-const rows=data.expenses.filter(e=>e.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));$('expenseCount').textContent=String(rows.length);$('expenseList').innerHTML=rows.length?rows.map(e=>{const c=cats.find(c=>c.id===e.category);return `<div class="transaction"><div><b>${esc(e.note||e.type||c?.name||'Покупка')}</b><small>${esc(e.date)} · ${esc(c?.name||'Категория')}${e.type?' · '+esc(e.type):''}</small></div><div class="row"><b>${rub(e.amount)}</b>${e.category==='family'&&/жене/i.test((e.type||'')+' '+(e.note||''))?'<button class="btn secondary" data-wife-move="'+esc(e.id)+'">Это перевод</button>':''}<button class="delete" data-del="${esc(e.id)}" title="Удалить">✕</button></div></div>`}).join(''):'<div class="empty">Пока нет расходов за выбранный месяц</div>';}
+const rows=[...data.expenses.filter(e=>e.date?.startsWith(month)),...(data.wifeMoves||[]).filter(m=>m.fromExpense&&m.date?.startsWith(month)).map(m=>({...m,type:'Отправил жене',category:m.source||'family',isWifeMove:true}))].sort((a,b)=>b.date.localeCompare(a.date));$('expenseCount').textContent=String(rows.length);$('expenseList').innerHTML=rows.length?rows.map(e=>{const c=cats.find(c=>c.id===e.category);return `<div class="transaction"><div><b>${esc(e.note||e.type||c?.name||'Покупка')}</b><small>${esc(e.date)} · ${esc(c?.name||'Категория')}${e.type?' · '+esc(e.type):''}</small></div><div class="row"><b>${rub(e.amount)}</b><button class="delete" ${e.isWifeMove?'data-del-wife':'data-del'}="${esc(e.id)}" title="Удалить">✕</button></div></div>`}).join(''):'<div class="empty">Пока нет расходов за выбранный месяц</div>';}
 
 
 /* Capital goals use the existing savings category, plus any external protected deposit. */
@@ -3946,11 +3946,12 @@ function wifeFunds(date){
   const afterSnapshot=entry=>entry.date>last.date||(entry.date===last.date&&cutoff&&entry.createdAt&&entry.createdAt>cutoff);
   const laterTransfers=(data.wifeMoves||[]).filter(afterSnapshot).reduce((sum,m)=>sum+num(m.amount),0);
   const laterPurchases=data.expenses.filter(e=>e.wifeCheck&&afterSnapshot(e)).reduce((sum,e)=>sum+num(e.amount),0);
-  return Math.max(0,Math.round((num(last.family??last.total)+laterTransfers-laterPurchases)*100)/100);
+  const laterWifeIncome=(data.extraIncomes||[]).filter(i=>(i.wifeIncome||i.source==='Доход жены')&&afterSnapshot(i)).reduce((sum,i)=>sum+num(i.amount),0);
+  return Math.max(0,Math.round((num(last.family??last.total)+laterTransfers+laterWifeIncome-laterPurchases)*100)/100);
  }
  const moves=(data.wifeMoves||[]).filter(m=>m.date<=date&&(!data.startBalances||m.date>=data.startBalances.date));
  const sent=moves.reduce((sum,m)=>sum+num(m.amount),0);
- const food=data.extraIncomes.filter(i=>i.supportTotal!=null&&i.date<=date&&i.date>=data.startBalances?.date).reduce((sum,i)=>sum+num(i.amount),0);
+ const food=data.extraIncomes.filter(i=>(i.supportTotal!=null||i.wifeIncome||i.source==='Доход жены')&&i.date<=date&&i.date>=data.startBalances?.date).reduce((sum,i)=>sum+num(i.amount),0);
  const spent=data.expenses.filter(e=>e.wifeCheck&&e.date<=date&&(!data.startBalances||e.date>=data.startBalances.date)).reduce((sum,e)=>sum+num(e.amount),0);
  const adjustments=(data.wifeAdjustments||[]).filter(a=>a.date<=date&&(!data.startBalances||a.date>=data.startBalances.date)).reduce((sum,a)=>sum+num(a.amount),0);
  return Math.max(0,Math.round((sent+food+adjustments-spent)*100)/100);
@@ -4310,8 +4311,8 @@ $('incomeForm').addEventListener('submit',e=>{
  const amount=num($('incomeAmount').value),date=$('incomeDate').value,source=$('incomeSource').value,destination=$('incomeDestination').value,note=$('incomeNote').value.trim();
  if(amount<=0||!fromISO(date)||!['family','utilities','savings','other','mortgage','credit','reserve'].includes(destination))return;
  if(date<data.startBalances.date){alert('Дата дохода раньше начала учёта. Измени дату или включи эти деньги в стартовые остатки.');return;}
- const income={id:'inc-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),amount,date,source,destination,note};
- if(destination==='savings')assignContribution(income,amount);
+ const income={id:'inc-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),amount,date,source,destination:source==='Доход жены'?'family':destination,note,createdAt:new Date().toISOString(),wifeIncome:source==='Доход жены'};
+ if(income.destination==='savings')assignContribution(income,amount);
  data.extraIncomes.push(income);
  month=date.slice(0,7);$('incomeAmount').value='';$('incomeNote').value='';
  renderAll();
@@ -4329,17 +4330,25 @@ refreshTypes();
 $('expenseForm').onsubmit=e=>{e.preventDefault();const amount=num($('expenseAmount').value),date=$('expenseDate').value,category=$('expenseCategory').value,note=$('expenseNote').value.trim();if(!amount||!fromISO(date)||!cats.some(c=>c.id===category))return;
 let type=$('expenseType').value;if(type==='__new__'){type=$('newExpenseType').value.trim().replace(/\s+/g,' ');if(!type){alert('Введи название нового вида расхода');$('newExpenseType').focus();return;}if(type.length>50)return;}
 if(!type){alert('Выбери вид расхода');return;}
-if(isWifeTransferType(type)){alert('Чтобы записать перевод, выбери «Операции» → «Перевод жене».');return;}
+if(isWifeTransferType(type))type='Отправил жене';
 const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===type.toLocaleLowerCase('ru'));if(existing)type=existing;else data.expenseTypes[category].push(type);
-data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);renderAll()};
+if(type==='Отправил жене'){
+ const available=categoryBalanceAt(category,date);
+ const held=wifeFunds(date);
+ const mine=category==='family'?(available===null?null:available-held):available;
+ if(mine===null||amount>mine+0.005){alert('Недостаточно денег в выбранном конверте: '+rub(Math.max(0,mine||0)));return;}
+ const id='wife-expense-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+ if(category!=='family')(data.transfers||=[]).push({id:'wife-transfer-'+id,date,from:category,to:'family',amount,note:'Отправил жене',wifeMoveId:id});
+ (data.wifeMoves||=[]).push({id,date,amount,source:category,createdAt:new Date().toISOString(),note,fromExpense:true});
+ }else data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});
+ month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);renderAll()};
 $('expenseList').addEventListener('click',e=>{
- const move=e.target.closest('[data-wife-move]');
- if(move){
-  const expense=data.expenses.find(x=>String(x.id)===move.dataset.wifeMove);
-  if(!expense||expense.category!=='family'||!data.startBalances||expense.date<data.startBalances.date||expense.date>iso(new Date()))return alert('Выбери расход в текущем периоде учёта.');
-  if(!confirm('Считать '+rub(expense.amount)+' переводом? Эта сумма вернётся в семейный остаток. Уже потраченное можно записать через «Сверить остаток у жены».'))return;
-  (data.wifeMoves||=[]).push({date:expense.date,amount:expense.amount,createdAt:new Date().toISOString()});
-  data.expenses=data.expenses.filter(x=>x!==expense);
+ const wifeDelete=e.target.closest('[data-del-wife]');
+ if(wifeDelete){
+  if(!confirm('Удалить запись перевода жене?'))return;
+  const id=wifeDelete.dataset.delWife;
+  data.wifeMoves=(data.wifeMoves||[]).filter(m=>String(m.id)!==id);
+  data.transfers=(data.transfers||[]).filter(t=>String(t.wifeMoveId)!==id);
   renderAll();return;
  }
  const b=e.target.closest('[data-del]');if(!b||!confirm('Удалить этот расход?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
