@@ -2232,6 +2232,12 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <section class="view active" id="v-home">
 <div class="home-balances"><div>Доступно на расходы<strong id="heroTotal">—</strong></div><div>Всего в бюджете<strong id="heroAll">—</strong></div></div>
 
+<section class="family-split" aria-label="Остаток на семейные покупки">
+<div><span>На семейные покупки</span><strong id="familyTotalNow">—</strong></div>
+<div><span>У меня</span><strong id="familyMineNow">—</strong></div>
+<div><span>У жены</span><strong id="familyWifeNow">—</strong></div>
+<small id="wifeReportedBalance" hidden></small>
+</section>
 <div class="home-envelopes-visible dashboard-frame" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты</h2></div><div id="envelopes"></div></div>
 <section class="milestone-card" aria-labelledby="milestoneTitle" hidden>
  <strong id="milestoneTitle"></strong>
@@ -2314,6 +2320,24 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  <div class="operations-overview-foot"><span id="operationsExpenseItems">0 записей расходов</span><span id="operationsIncomeItems">0 поступлений</span></div>
  <div class="operations-quick" role="group" aria-label="Быстрые действия"><button type="button" data-ops-open="expense">＋ Расход</button><button type="button" data-ops-open="income">＋ Доход</button><button type="button" data-ops-open="history">▤ История</button></div>
 </div>
+<div id="familyActions" class="family-actions" role="group" aria-label="Деньги у жены">
+<button type="button" class="btn secondary" id="wifeTransferOpen">Перевод жене</button>
+<button type="button" class="btn secondary" id="wifeRemainingOpen">Уточнить остаток</button>
+<button type="button" class="btn secondary" id="supportOpen">Доход жены</button>
+<button type="button" class="btn secondary" id="wifeCheckOpen">Сверить деньги у жены</button>
+</div>
+<div class="card" id="wifeCheckCard"><form id="wifeCheckForm">
+<label class="field"><span>Сколько всего денег у жены сегодня, ₽</span><input id="wifeActualTotal" type="number" step="0.01" min="0" inputmode="decimal" required></label>
+<label class="field"><span>Из них на семейные покупки, ₽</span><input id="wifeActualFamily" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Можно пропустить"></label>
+<p class="foot">Если знаешь только общую сумму, достаточно первого поля.</p>
+<button class="btn full" type="submit">Сохранить сверку</button>
+</form><p class="foot" id="wifeCheckPrevious"></p></div>
+<div class="card" id="supportCard"><p class="foot" id="supportMonthInfo"></p><form id="supportForm">
+<label>Дата поступления<input id="supportDate" type="date" required></label>
+<label>Всего получила, ₽<input id="supportTotal" type="number" step="0.01" min="0.01" required></label>
+<label>Из них на продукты, ₽<input id="supportFood" type="number" step="0.01" min="0" required></label>
+<button class="btn" type="submit">Учесть поступление</button>
+</form></div>
 <div class="card"><form id="expenseForm">
  <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
 <div class="two transfer-envelopes"><label class="field"><span>Откуда</span><select id="transferFrom"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Куда</span><select id="transferTo"><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label></div>
@@ -2377,7 +2401,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  
 </section>
 <section class="view" id="v-settings">
-<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.95</span></div>
+<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.99</span></div>
 <div class="card" id="notifySettingsCard">
  <div class="row"><b>🔔 Push-уведомления</b><span class="quiet">Автоматически</span></div>
  <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. С 08:30 по Москве, затем повторная проверка днём. Если подтверждённое зачисление сохранено, напоминания по нему прекращаются. Неподтверждённые выплаты напоминаются каждый час с 08:30 до 20:30 по Москве в дни напоминаний, пока поступление не подтверждено.</div>
@@ -2396,7 +2420,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="two"><label class="field"><span>Рабочих дней в месяце (необязательно)</span><input id="manualDaysTotal" type="number" min="1" max="31" step="1" placeholder="Автоматически"></label><label class="field"><span>Из них с 1 по 15 (необязательно)</span><input id="manualDaysFirst" type="number" min="0" max="15" step="1" placeholder="Автоматически"></label></div>
 <div id="salaryCalendarInfo" class="hint"></div></div>
 <div class="card"><b>Старт с текущих остатков</b><p class="foot">Установи реальные деньги на счетах. Старые покупки до даты старта не будут вычтены ещё раз. Плановые зарплаты не считаются полученными.</p><label class="field"><span>Дата начала учёта</span><input id="startDate" type="date"></label><div class="two"><label class="field"><span>Семейные нужды, ₽</span><input id="start-family" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Коммуналка, ₽</span><input id="start-utilities" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Накопления, ₽</span><input id="start-savings" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Остальное, ₽</span><input id="start-other" type="number" min="0" inputmode="decimal"></label></div><label class="field"><span>Уже отложено на следующую ипотеку, ₽</span><input id="startMortgageFund" type="number" min="0" inputmode="decimal"></label><label class="field"><span>За какой месяц ипотека уже оплачена</span><input id="paidMortgageMonth" type="month"></label><button class="btn full" id="saveStart" type="button">Сохранить стартовые остатки</button><div id="startStatus" class="foot"></div></div>
-<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion">1.5.95</strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
+<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion">1.5.99</strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
 <div class="card"><b>Резервная копия</b><p class="foot">Сохрани данные перед обновлением или переносом на другой телефон.</p><div class="actions"><button class="btn secondary" id="exportData" type="button">Сохранить копию</button><button class="btn light" id="importClick" type="button">Восстановить</button></div><input type="file" id="importData" accept="application/json,.json" style="display:none"></div>
 <div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
 <div class="hint">Финансовые данные остаются в хранилище браузера на этом устройстве. Не очищай данные сайта, если не сохранил резервную копию.</div>
@@ -2524,7 +2548,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
   </form>
  </section>
 </div>
-<div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div id="wifePanel" hidden><p id="wifeSummary"></p><button class="btn secondary" onclick="editWifeFunds(false)">Перевод жене</button> <button class="btn secondary" onclick="editWifeFunds(true)">Уточнить остаток</button></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
+<div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 
 <dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">Советы для твоего бюджета</h2><button type="button" class="btn light" id="budgetAlertsClose" aria-label="Закрыть">✕</button></div><p class="budget-alerts-help" id="adviceOpening"></p><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
 <script>
@@ -2622,7 +2646,7 @@ for(const c of cats){if(!Array.isArray(data.expenseTypes[c.id]))data.expenseType
 for(const x of data.expenses){if(x.type&&cats.some(c=>c.id===x.category)){const a=data.expenseTypes[x.category];if(!a.some(y=>y.toLocaleLowerCase('ru')===String(x.type).toLocaleLowerCase('ru')))a.push(String(x.type));}}
 if(!data.startBalances||typeof data.startBalances!=='object')data.startBalances=null;
 if(!Array.isArray(data.receipts))data.receipts=[];
-if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];
+normalizeIncomeRecords();
 if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];
 if(!Array.isArray(data.transfers))data.transfers=[];
 if(!Array.isArray(data.regularPayments))data.regularPayments=[];
@@ -2835,14 +2859,14 @@ function showPaydayCountdown(actual){
  if(dayCount===0){limit.textContent='Выплата сегодня';note.textContent='Если деньги ещё не поступили, дождись фактического зачисления';return;}
  const spendable=Math.max(0,actual.available);
  const dailyAmount=Math.floor(spendable/dayCount);
- const family=Math.max(0,Math.min(spendable,num(categoryBalanceAt('family',iso(now)))-wifeFunds(iso(now))));
+ const family=Math.max(0,Math.min(spendable,num(categoryBalanceAt('family',iso(now)))));
  const familyDaily=Math.floor(family/dayCount);
  limit.textContent='';
  const amount=document.createElement('strong');
  amount.className=familyDaily>5000?'daily-good':familyDaily>3000?'daily-medium':'daily-low';
  amount.textContent=rub(familyDaily);
  limit.append(amount,' в день');
- dateEl.textContent='Со своей карты на семейные покупки до '+next.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+ dateEl.textContent='На семейные покупки с обеих карт до '+next.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
  note.textContent=rub(family)+' ÷ '+dayCount+' дн. = '+rub(familyDaily)+' в день · общий ориентир '+rub(dailyAmount)+'/день';
 
 }
@@ -3292,7 +3316,7 @@ $('budgetAlertsOpen').addEventListener('click',()=>{
 });
 $('budgetAlertsClose').addEventListener('click',()=>budgetAlertsDialog.close());
 budgetAlertsDialog.addEventListener('click',e=>{if(e.target===budgetAlertsDialog)budgetAlertsDialog.close()});
-function render(){renderEarlyAlerts();const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);
+function render(){renderEarlyAlerts();const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);renderFamilyBalances();
 $('envelopes').innerHTML=cats.map(cat=>{
  const row=calc.rows.find(r=>r.id===cat.id);
  const balance=realBalance(cat.id)??(num(row?.a)+num(row?.b)-sumExpenses(cat.id));
@@ -3335,7 +3359,7 @@ $('incomeList').innerHTML=incomeRows.length?incomeRows.map(i=>{
  const cat=cats.find(c=>c.id===i.destination),dest=cat?.name||(i.destination==='reserve'?'Подушка безопасности':i.destination==='mortgage'?'Ипотека':'Кредитная карта');
  return `<div class="transaction"><div><b>${esc(i.source)}</b><small>${esc(i.date)} · ${esc(dest)}${i.note?' · '+esc(i.note):''}</small></div><div class="row"><b style="color:var(--green)">+${rub(i.amount)}</b><button type="button" class="delete" data-del-income="${esc(i.id)}" title="Удалить доход">✕</button></div></div>`;
 }).join(''):'<div class="empty">Пока нет дополнительных доходов за месяц</div>';
-const rows=data.expenses.filter(e=>e.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));$('expenseCount').textContent=String(rows.length);$('expenseList').innerHTML=rows.length?rows.map(e=>{const c=cats.find(c=>c.id===e.category);return `<div class="transaction"><div><b>${esc(e.note||e.type||c?.name||'Покупка')}</b><small>${esc(e.date)} · ${esc(c?.name||'Категория')}${e.type?' · '+esc(e.type):''}</small></div><div class="row"><b>${rub(e.amount)}</b><button class="delete" data-del="${esc(e.id)}" title="Удалить">✕</button></div></div>`}).join(''):'<div class="empty">Пока нет расходов за выбранный месяц</div>';}
+const rows=data.expenses.filter(e=>e.date?.startsWith(month)).sort((a,b)=>b.date.localeCompare(a.date));$('expenseCount').textContent=String(rows.length);$('expenseList').innerHTML=rows.length?rows.map(e=>{const c=cats.find(c=>c.id===e.category);return `<div class="transaction"><div><b>${esc(e.note||e.type||c?.name||'Покупка')}</b><small>${esc(e.date)} · ${esc(c?.name||'Категория')}${e.type?' · '+esc(e.type):''}</small></div><div class="row"><b>${rub(e.amount)}</b>${e.category==='family'&&/жене/i.test((e.type||'')+' '+(e.note||''))?'<button class="btn secondary" data-wife-move="'+esc(e.id)+'">Это перевод</button>':''}<button class="delete" data-del="${esc(e.id)}" title="Удалить">✕</button></div></div>`}).join(''):'<div class="empty">Пока нет расходов за выбранный месяц</div>';}
 
 
 /* Capital goals use the existing savings category, plus any external protected deposit. */
@@ -3875,33 +3899,98 @@ settings.forEach(el=>{
 }
 
 
+$('supportForm').addEventListener('submit',event=>{
+ event.preventDefault();
+ const date=$('supportDate').value,total=Number($('supportTotal').value),food=Number($('supportFood').value);
+ const today=iso(new Date());
+ if(!data.startBalances||date<data.startBalances.date||date>today){
+  alert('Выбери дату поступления от начала учёта до сегодняшнего дня.');return;
+ }
+ if(!(total>0&&food>=0&&food<=total)){alert('Сумма на продукты должна быть в пределах дохода жены.');return;}
+ const monthKey=date.slice(0,7);
+ if(data.extraIncomes.some(i=>i.supportTotal!=null&&i.date.startsWith(monthKey))&&!confirm('За этот месяц уже есть запись. Добавить отдельное поступление?'))return;
+ data.extraIncomes.push({id:'support-'+Date.now(),date,source:'Доход жены',supportTotal:total,amount:food,destination:'family',note:'Получено '+rub(total)+' · на продукты '+rub(food)});
+ event.target.reset();
+ if(renderAll()){$('opsSheet').querySelector('.ops-sheet-close').click();showSaveFeedback('Доход жены учтён',$('supportOpen'))}
+});
 function wifeFunds(date){
  const moves=(data.wifeMoves||[]).filter(m=>m.date<=date);
  const sent=moves.reduce((sum,m)=>sum+num(m.amount),0);
+ const food=data.extraIncomes.filter(i=>i.supportTotal!=null&&i.date<=date&&i.date>=data.startBalances?.date).reduce((sum,i)=>sum+num(i.amount),0);
  const spent=data.expenses.filter(e=>e.wifeCheck&&e.date<=date).reduce((sum,e)=>sum+num(e.amount),0);
- return Math.max(0,Math.round((sent-spent)*100)/100);
+ return Math.max(0,Math.round((sent+food-spent)*100)/100);
+}
+function renderFamilyBalances(){
+ const today=iso(new Date()),total=categoryBalanceAt('family',today),held=wifeFunds(today);
+ for(const [id,value] of [['familyTotalNow',total],['familyMineNow',total-held],['familyWifeNow',held]]){
+  $(id).textContent=total===null?'—':rub(value);
+ }
+ const reports=data.wifeBalanceReports||[];
+ const last=reports.filter(r=>r.date<=today).sort((a,b)=>b.date.localeCompare(a.date))[0];
+ const message=last?'Всего у жены на '+fromISO(last.date).toLocaleDateString('ru-RU')+' — '+rub(last.total):'';
+ $('wifeReportedBalance').textContent=message;
+ $('wifeReportedBalance').hidden=!last;
+ $('wifeCheckPrevious').textContent=message;
+ $('supportDate').max=today;
+ $('supportDate').min=data.startBalances?.date||'';
+ if(!$('supportDate').value)$('supportDate').value=today;
+ const food=data.extraIncomes.filter(i=>i.supportTotal!=null&&i.date.startsWith(today.slice(0,7))&&i.date<=today).reduce((sum,i)=>sum+num(i.amount),0);
+ $('supportMonthInfo').textContent='Из дохода жены на продукты в этом месяце выделено '+rub(food)+'.';
+}
+function reconcileWifePurchases(date,held,amount){
+  if(amount>held){alert('Остаток больше учтённой суммы. Проверь, все ли переводы записаны.');return false;}
+  const spent=Math.round((held-amount)*100)/100;
+  if(spent&&!confirm('Записать '+rub(spent)+' в семейные расходы по сверке?'))return false;
+  if(spent)data.expenses.push({id:'wife-'+Date.now(),date,category:'family',type:'Покупки жены',note:'По сверке остатка',amount:spent,wifeCheck:true});
+  data.wifeChecked=date;
+  return true;
+}
+$('wifeCheckForm').addEventListener('submit',event=>{
+ event.preventDefault();
+ const form=event.currentTarget;
+ if(!form.reportValidity())return;
+ const date=iso(new Date()),total=$('wifeActualTotal').valueAsNumber;
+ const share=$('wifeActualFamily');
+ if(share.value!==''){
+  const amount=share.valueAsNumber;
+  if(amount>total){alert('Сумма на семейные покупки больше общего остатка. Проверь обе суммы.');return;}
+  if(categoryBalanceAt('family',date)===null){alert('Для сверки семейных покупок укажи стартовые остатки или оставь второе поле пустым.');return;}
+  if(!reconcileWifePurchases(date,wifeFunds(date),amount))return;
+ }
+ const reports=(data.wifeBalanceReports||=[]);
+ const existing=reports.find(r=>r.date===date);
+ if(existing)existing.total=total;
+ else reports.push({date,total});
+ if(renderAll()){
+  form.reset();
+  $('opsSheet').querySelector('.ops-sheet-close').click();
+  showSaveFeedback('Сверка сохранена',$('wifeCheckOpen'));
+ }
+});
+$('wifeTransferOpen').addEventListener('click',()=>editWifeFunds(false));
+$('wifeRemainingOpen').addEventListener('click',()=>editWifeFunds(true));
+function normalizeIncomeRecords(){
+ if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];
+ for(const income of data.extraIncomes){
+  if(income?.supportTotal!=null&&income.source==='Алименты')income.source='Доход жены';
+ }
 }
 function editWifeFunds(check){
  const date=iso(new Date()),held=wifeFunds(date),family=categoryBalanceAt('family',date);
  if(family===null){alert('Укажи стартовые остатки в настройках.');return;}
- const input=prompt(check?'Сколько осталось из денег на семейные покупки, переведённых жене?':'Сколько перевёл жене на семейные покупки?');
+ const input=prompt(check?'Сколько денег на семейные покупки сейчас осталось у жены?':'Сколько перевёл жене на семейные покупки?');
  if(input===null)return;
  const raw=input.trim().replace(/\s/g,'').replace(',','.');
  if(!/^\d+(\.\d{1,2})?$/.test(raw)){alert('Введи сумму в рублях.');return;}
  const amount=Number(raw);
  if(check){
-  if(amount>held){alert('Остаток больше учтённой суммы. Проверь, все ли переводы записаны.');return;}
-  const spent=Math.round((held-amount)*100)/100;
-  if(spent&&!confirm('Записать '+rub(spent)+' в семейные расходы по сверке?'))return;
-  if(spent)data.expenses.push({id:'wife-'+Date.now(),date,category:'family',type:'Покупки жены',note:'По сверке остатка',amount:spent,wifeCheck:true});
-  data.wifeChecked=date;
+  if(!reconcileWifePurchases(date,held,amount))return;
  }else{
   if(amount<=0||amount>family-held){alert('Проверь сумму и остаток на своей карте в семейном конверте.');return;}
   if(!confirm('Записать перевод жене '+rub(amount)+'?'))return;
   (data.wifeMoves||=[]).push({date,amount});
  }
- renderAll();
- showEnvelopeHistory('family');
+ if(renderAll())showSaveFeedback(check?'Остаток у жены уточнён':'Перевод жене записан',document.activeElement);
 }
 
 let envelopeHistoryTrigger=null;
@@ -3915,6 +4004,7 @@ function showEnvelopeHistory(id){
   add(r.date,r.type==='advance'?'Распределение аванса':'Распределение зарплаты',r.month?'Выплата за '+r.month:'Поступление',num(r.amounts?.[id]));
  }
  for(const inc of data.extraIncomes||[]){
+  if(inc.destination===id&&inc.supportTotal!=null&&inc.amount===0)entries.push({date:inc.date,title:'Доход жены',detail:inc.note,amount:0});
   if(inc.destination===id)add(inc.date,'Дополнительный доход',[inc.source,inc.note].filter(Boolean).join(' · '),num(inc.amount));
  }
  for(const tr of data.transfers||[]){
@@ -3929,10 +4019,7 @@ function showEnvelopeHistory(id){
  }
  entries.sort((a,b)=>b.date.localeCompare(a.date));
  $('envelopeHistoryTitle').textContent=cat.icon+' '+cat.name;
- $('wifePanel').hidden=id!=='family';
  if(id==='family'){
-  const date=iso(new Date()),held=wifeFunds(date);
-  $('wifeSummary').textContent='У меня: '+rub(Math.max(0,(categoryBalanceAt(id,date)||0)-held))+' · У жены по записям: '+rub(held)+(data.wifeChecked?' · Сверка '+fromISO(data.wifeChecked).toLocaleDateString('ru-RU'):' · Ещё не сверяли');
   for(const move of data.wifeMoves||[])entries.push({date:move.date,title:'Перевод жене',detail:rub(move.amount)+' внутри семейного конверта',amount:0});
   entries.sort((a,b)=>b.date.localeCompare(a.date));
  }
@@ -4206,11 +4293,21 @@ let type=$('expenseType').value;if(type==='__new__'){type=$('newExpenseType').va
 if(!type){alert('Выбери вид расхода');return;}
 const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===type.toLocaleLowerCase('ru'));if(existing)type=existing;else data.expenseTypes[category].push(type);
 data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});month=date.slice(0,7);$('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);renderAll()};
-$('expenseList').addEventListener('click',e=>{const b=e.target.closest('[data-del]');if(!b||!confirm('Удалить этот расход?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
+$('expenseList').addEventListener('click',e=>{
+ const move=e.target.closest('[data-wife-move]');
+ if(move){
+  const expense=data.expenses.find(x=>String(x.id)===move.dataset.wifeMove);
+  if(!expense||expense.category!=='family'||!data.startBalances||expense.date<data.startBalances.date||expense.date>iso(new Date()))return alert('Выбери расход в текущем периоде учёта.');
+  if(!confirm('Считать '+rub(expense.amount)+' переводом? Эта сумма вернётся в семейный остаток. Уже потраченное можно записать через «Уточнить остаток».'))return;
+  (data.wifeMoves||=[]).push({date:expense.date,amount:expense.amount});
+  data.expenses=data.expenses.filter(x=>x!==expense);
+  renderAll();return;
+ }
+ const b=e.target.closest('[data-del]');if(!b||!confirm('Удалить этот расход?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
 $('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(new Date())+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
-$('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
+$('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;normalizeIncomeRecords();if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
 
-const APP_VERSION='1.5.95';
+const APP_VERSION='1.5.99';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -4639,6 +4736,8 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
   const parts={
    expense:document.getElementById('expenseForm')?.closest('.card'),
    income:document.getElementById('incomeForm')?.closest('.card'),
+   wifeCheck:document.getElementById('wifeCheckCard'),
+   support:document.getElementById('supportCard'),
    transfer:document.getElementById('transferForm')?.closest('.card')
   };
   if(!parts.expense||!parts.income||!parts.transfer)return;
@@ -4662,7 +4761,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    const name=document.createElement('strong');name.textContent=label;
    button.append(pic,name);grid.append(button);
   }
-  intro.append(grid);
+  intro.append(grid,document.getElementById('familyActions'));
   const historyGroup=document.createElement('div');historyGroup.className='design-group ops-history-group';
   const historyTitle=document.createElement('div');historyTitle.className='section-heading';historyTitle.innerHTML='<h2>История операций</h2>';historyGroup.append(historyTitle);
   for(const panel of histories){panel.open=false;historyGroup.append(panel)}
@@ -4699,11 +4798,16 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    if(trigger&&trigger.isConnected)trigger.focus({preventScroll:true});
   };
   const showSheet=type=>{
-   if(!parts[type])return;trigger=grid.querySelector('[data-ops-action="'+type+'"]');
+   if(!parts[type])return;trigger=type==='wifeCheck'?document.getElementById('wifeCheckOpen'):type==='support'?document.getElementById('supportOpen'):grid.querySelector('[data-ops-action="'+type+'"]');
    Object.entries(parts).forEach(([name,card])=>{card.hidden=name!==type});
-   title.textContent=type==='expense'?'Новый расход':type==='income'?'Новый доход':'Новый перевод';
+   title.textContent=type==='wifeCheck'?'Сверить деньги у жены':type==='support'?'Доход жены':type==='expense'?'Новый расход':type==='income'?'Новый доход':'Новый перевод';
    overlay.hidden=false;body.scrollTop=0;
   };
+  document.getElementById('wifeCheckOpen').addEventListener('click',()=>{
+   document.getElementById('wifeCheckForm').reset();
+   showSheet('wifeCheck');
+  });
+  document.getElementById('supportOpen').addEventListener('click',()=>showSheet('support'));
   grid.addEventListener('click',event=>{
    const button=event.target.closest('[data-ops-action]');if(button)showSheet(button.dataset.opsAction);
   });
@@ -5545,4 +5649,14 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .app .main #v-settings.active .foot{font-size:13px;line-height:1.4;color:var(--muted)}
 .app .main #v-settings.active .btn{min-height:40px;border-radius:12px;white-space:normal}
 .app .main #v-settings.active summary{font-size:15px;font-weight:650}
+</style><style>
+.family-split,.family-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.family-split{flex:none;padding:7px 9px;border-radius:14px;background:var(--card);text-align:center;align-items:end}
+.family-split span,.family-split strong{display:block}
+.family-split span{font-size:11px;color:var(--muted)}
+.family-split strong{font-size:clamp(13px,3.8vw,20px);line-height:1.2;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.family-actions{margin-top:6px;grid-template-columns:repeat(2,minmax(0,1fr))}
+#wifeReportedBalance{grid-column:1/-1;color:var(--muted);font-size:11px}
+.family-actions .btn{min-width:0;white-space:normal;line-height:1.15;padding:6px;font-size:13px}
+#supportForm label{display:grid;gap:4px;margin-bottom:8px}
 </style></body></html>
