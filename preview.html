@@ -2325,6 +2325,15 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <button type="button" class="btn secondary" id="supportOpen" hidden style="display:none!important">Доход жены</button>
 <button type="button" class="btn secondary" id="wifeCheckOpen">Сверить остаток у жены</button>
 </div>
+<div class="card" id="wifeTransferCard"><form id="wifeTransferForm">
+<label class="field"><span>Откуда переводишь</span><select id="wifeTransferSource" required>
+<option value="family">Семейные нужды</option><option value="other">Остальное</option><option value="savings">Накопления</option><option value="utilities">Коммуналка</option>
+</select></label>
+<p class="foot" id="wifeTransferAvailable"></p>
+<label class="field"><span>Сумма перевода, ₽</span><input id="wifeTransferAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Например, 3000" required></label>
+<button class="btn full" type="submit">Записать перевод жене</button>
+<p class="foot">Деньги переходят жене на семейные покупки. Общая сумма семьи не меняется.</p>
+</form></div>
 <div class="card" id="wifeCheckCard"><form id="wifeCheckForm">
 <label class="field"><span>Сколько у жены осталось на семейные покупки, ₽</span><input id="wifeActualTotal" type="number" step="0.01" min="0" inputmode="decimal" required></label>
 <label class="field" hidden style="display:none!important"><span>Осталось на семейные покупки, ₽</span><input id="wifeActualFamily" type="number" step="0.01" min="0" inputmode="decimal"></label>
@@ -3986,26 +3995,41 @@ $('wifeCheckForm').addEventListener('submit',event=>{
  if(existing){existing.total=amount;existing.family=amount;existing.checkedAt=checkedAt;}else reports.push({date,total:amount,family:amount,checkedAt});
  if(renderAll()){form.reset();$('opsSheet').querySelector('.ops-sheet-close').click();showSaveFeedback('Сверка сохранена',$('wifeCheckOpen'));}
 });
-$('wifeTransferOpen').addEventListener('click',recordWifeTransfer);
+
 function normalizeIncomeRecords(){
  if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];
  for(const income of data.extraIncomes){
   if(income?.supportTotal!=null&&income.source==='Алименты')income.source='Доход жены';
  }
 }
-function recordWifeTransfer(){
- const date=iso(new Date()),held=wifeFunds(date),family=categoryBalanceAt('family',date);
- if(family===null){alert('Укажи стартовые остатки в настройках.');return;}
- const input=prompt('Сколько перевёл жене на семейные покупки?');
- if(input===null)return;
- const raw=input.trim().replace(/\s/g,'').replace(',','.');
- if(!/^\d+(\.\d{1,2})?$/.test(raw)){alert('Введи сумму в рублях.');return;}
- const amount=Number(raw);
- if(amount<=0||amount>family-held){alert('Проверь сумму и остаток на своей карте в семейном конверте.');return;}
- if(!confirm('Записать перевод жене '+rub(amount)+'?'))return;
- (data.wifeMoves||=[]).push({date,amount,createdAt:new Date().toISOString()});
- if(renderAll())showSaveFeedback('Перевод жене записан',document.activeElement);
+function updateWifeTransferAvailable(){
+ const source=$('wifeTransferSource').value,date=iso(new Date()),balance=categoryBalanceAt(source,date);
+ const available=source==='family'?(balance===null?null:Math.max(0,Math.round((balance-wifeFunds(date))*100)/100)):balance;
+ $('wifeTransferAvailable').textContent=available===null?'Сначала укажи стартовые остатки':'Доступно для перевода: '+rub(available);
+ $('wifeTransferAmount').max=available===null?'':String(Math.max(0,available));
 }
+$('wifeTransferSource').addEventListener('change',updateWifeTransferAvailable);
+$('wifeTransferForm').addEventListener('submit',event=>{
+ event.preventDefault();
+ const date=iso(new Date()),source=$('wifeTransferSource').value,amount=$('wifeTransferAmount').valueAsNumber;
+ if(!cats.some(c=>c.id===source)||!Number.isFinite(amount)||amount<=0||Math.round(amount*100)!==amount*100){alert('Проверь источник и сумму перевода.');return;}
+ const balance=categoryBalanceAt(source,date);
+ if(balance===null){alert('Сначала укажи стартовые остатки.');return;}
+ const available=source==='family'?Math.max(0,Math.round((balance-wifeFunds(date))*100)/100):balance;
+ if(amount>available+0.001){alert('В выбранном конверте недостаточно средств. Доступно: '+rub(available));return;}
+ const label=cats.find(c=>c.id===source).name;
+ if(!confirm('Перевод жене '+rub(amount)+' из «'+label+'». Подтвердить?'))return;
+ const createdAt=new Date().toISOString(),id='wife-move-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+ // The transfer from another envelope is reallocated into the family envelope,
+ // then moved within that envelope to the wife's card. Neither creates income.
+ if(source!=='family')(data.transfers||=[]).push({id:'wife-envelope-'+id,date,from:source,to:'family',amount,note:'Для перевода жене',wifeMoveId:id});
+ (data.wifeMoves||=[]).push({id,date,amount,source,createdAt});
+ if(renderAll()){
+  $('wifeTransferForm').reset();
+  $('opsSheet').querySelector('.ops-sheet-close').click();
+  showSaveFeedback('Перевод жене записан',$('wifeTransferOpen'));
+ }
+});
 
 let envelopeHistoryTrigger=null;
 function showEnvelopeHistory(id){
@@ -4034,7 +4058,7 @@ function showEnvelopeHistory(id){
  entries.sort((a,b)=>b.date.localeCompare(a.date));
  $('envelopeHistoryTitle').textContent=cat.icon+' '+cat.name;
  if(id==='family'){
-  for(const move of data.wifeMoves||[])entries.push({date:move.date,title:'Перевод жене',detail:rub(move.amount)+' внутри семейного конверта',amount:0});
+  for(const move of data.wifeMoves||[])entries.push({date:move.date,title:'Перевод жене',detail:rub(move.amount)+' · из «'+(cats.find(c=>c.id===(move.source||'family'))?.name||'Семейные нужды')+'»',amount:0});
   entries.sort((a,b)=>b.date.localeCompare(a.date));
  }
  const balance=realBalance(id);
@@ -4752,6 +4776,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    expense:document.getElementById('expenseForm')?.closest('.card'),
    income:document.getElementById('incomeForm')?.closest('.card'),
    wifeCheck:document.getElementById('wifeCheckCard'),
+   wifeTransfer:document.getElementById('wifeTransferCard'),
    support:document.getElementById('supportCard'),
    transfer:document.getElementById('transferForm')?.closest('.card')
   };
@@ -4813,11 +4838,16 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    if(trigger&&trigger.isConnected)trigger.focus({preventScroll:true});
   };
   const showSheet=type=>{
-   if(!parts[type])return;trigger=type==='wifeCheck'?document.getElementById('wifeCheckOpen'):type==='support'?document.getElementById('supportOpen'):grid.querySelector('[data-ops-action="'+type+'"]');
+   if(!parts[type])return;trigger=type==='wifeTransfer'?document.getElementById('wifeTransferOpen'):type==='wifeCheck'?document.getElementById('wifeCheckOpen'):type==='support'?document.getElementById('supportOpen'):grid.querySelector('[data-ops-action="'+type+'"]');
    Object.entries(parts).forEach(([name,card])=>{card.hidden=name!==type});
-   title.textContent=type==='wifeCheck'?'Сверить остаток у жены':type==='support'?'Доход жены':type==='expense'?'Новый расход':type==='income'?'Новый доход':'Новый перевод';
+   title.textContent=type==='wifeTransfer'?'Перевод жене':type==='wifeCheck'?'Сверить остаток у жены':type==='support'?'Доход жены':type==='expense'?'Новый расход':type==='income'?'Новый доход':'Новый перевод';
    overlay.hidden=false;body.scrollTop=0;
   };
+  document.getElementById('wifeTransferOpen').addEventListener('click',()=>{
+    document.getElementById('wifeTransferForm').reset();
+    updateWifeTransferAvailable();
+    showSheet('wifeTransfer');
+   });
   document.getElementById('wifeCheckOpen').addEventListener('click',()=>{
    document.getElementById('wifeCheckForm').reset();
    showSheet('wifeCheck');
