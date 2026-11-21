@@ -3917,10 +3917,10 @@ $('supportForm').addEventListener('submit',event=>{
  if(renderAll()){$('opsSheet').querySelector('.ops-sheet-close').click();showSaveFeedback('Доход жены учтён',$('supportOpen'))}
 });
 function wifeFunds(date){
- const moves=(data.wifeMoves||[]).filter(m=>m.date<=date);
+ const moves=(data.wifeMoves||[]).filter(m=>m.date<=date&&(!data.startBalances||m.date>=data.startBalances.date));
  const sent=moves.reduce((sum,m)=>sum+num(m.amount),0);
  const food=data.extraIncomes.filter(i=>i.supportTotal!=null&&i.date<=date&&i.date>=data.startBalances?.date).reduce((sum,i)=>sum+num(i.amount),0);
- const spent=data.expenses.filter(e=>e.wifeCheck&&e.date<=date).reduce((sum,e)=>sum+num(e.amount),0);
+ const spent=data.expenses.filter(e=>e.wifeCheck&&e.date<=date&&(!data.startBalances||e.date>=data.startBalances.date)).reduce((sum,e)=>sum+num(e.amount),0);
  return Math.max(0,Math.round((sent+food-spent)*100)/100);
 }
 function renderFamilyBalances(){
@@ -4747,7 +4747,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
   introTitle.innerHTML='<h2>Операции</h2>';intro.append(introTitle);
   const grid=document.createElement('div');grid.className='ops-action-grid';
   const actions=[
-   ['expense','Расход','↘'],['income','Доход','↗'],['transfer','Перевод','⇄']
+   ['expense','Расход','↘'],['income','Доход','↗'],['transfer','Между конвертами','⇄']
   ];
   for(const [type,label,symbol] of actions){
    const button=document.createElement('button');button.type='button';button.className='ops-action-tile';
