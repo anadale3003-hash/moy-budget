@@ -2236,7 +2236,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div><span>На семейные покупки</span><strong id="familyTotalNow">—</strong></div>
 <div><span>У меня</span><strong id="familyMineNow">—</strong></div>
 <div><span>У жены</span><strong id="familyWifeNow">—</strong></div>
-<small id="wifeReportedBalance" hidden></small>
+<small id="wifeReportedBalance" hidden style="display:none!important"></small>
 </section>
 <div class="home-envelopes-visible dashboard-frame" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты</h2></div><div id="envelopes"></div></div>
 <section class="milestone-card" aria-labelledby="milestoneTitle" hidden>
@@ -2322,16 +2322,16 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 <div id="familyActions" class="family-actions" role="group" aria-label="Деньги у жены">
 <button type="button" class="btn secondary" id="wifeTransferOpen">Перевод жене</button>
-<button type="button" class="btn secondary" id="supportOpen">Доход жены</button>
+<button type="button" class="btn secondary" id="supportOpen" hidden style="display:none!important">Доход жены</button>
 <button type="button" class="btn secondary" id="wifeCheckOpen">Сверить остаток у жены</button>
 </div>
 <div class="card" id="wifeCheckCard"><form id="wifeCheckForm">
-<label class="field"><span>Сколько всего денег у жены сегодня, ₽</span><input id="wifeActualTotal" type="number" step="0.01" min="0" inputmode="decimal"></label>
-<label class="field"><span>Осталось на семейные покупки, ₽</span><input id="wifeActualFamily" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Можно пропустить"></label>
-<p class="foot">Укажи общий остаток, деньги на семейные покупки или обе суммы.</p>
+<label class="field"><span>Сколько у жены осталось на семейные покупки, ₽</span><input id="wifeActualTotal" type="number" step="0.01" min="0" inputmode="decimal" required></label>
+<label class="field" hidden style="display:none!important"><span>Осталось на семейные покупки, ₽</span><input id="wifeActualFamily" type="number" step="0.01" min="0" inputmode="decimal"></label>
+<p class="foot">Сверка обновит остаток у жены внутри «Семейных нужд». Переводы между вами не считаются расходами.</p>
 <button class="btn full" type="submit">Сохранить сверку</button>
 </form><p class="foot" id="wifeCheckPrevious"></p></div>
-<div class="card" id="supportCard"><p class="foot" id="supportMonthInfo"></p><form id="supportForm">
+<div class="card" id="supportCard" hidden style="display:none!important"><p class="foot" id="supportMonthInfo"></p><form id="supportForm">
 <label>Дата поступления<input id="supportDate" type="date" required></label>
 <label>Всего получила, ₽<input id="supportTotal" type="number" step="0.01" min="0.01" required></label>
 <label>Из них на продукты, ₽<input id="supportFood" type="number" step="0.01" min="0" required></label>
@@ -3081,9 +3081,10 @@ function categoryBalanceAt(id,date){
  const received=data.receipts.filter(r=>r.date>=start&&r.date<=date).reduce((a,r)=>a+num(r.amounts?.[id]),0);
  const spent=data.expenses.filter(e=>e.date>=start&&e.date<=date&&e.category===id).reduce((a,e)=>a+num(e.amount),0);
  const income=data.extraIncomes.filter(i=>i.destination===id&&i.date>=start&&i.date<=date).reduce((a,i)=>a+num(i.amount),0);
+ const wifeCorrection=id==='family'?(data.wifeAdjustments||[]).filter(a=>a.date>=start&&a.date<=date).reduce((sum,a)=>sum+num(a.amount),0):0;
  const early=id==='savings'?(data.earlyRepayments||[]).filter(x=>x.date>=start&&x.date<=date).reduce((a,x)=>a+num(x.amount),0):0;
  const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start&&p.date<=date).reduce((a,p)=>a+num(p.extraAmount),0);
- return base+received+income-spent-early-creditExtra+transferDelta(id,start,date);
+ return base+received+income+wifeCorrection-spent-early-creditExtra+transferDelta(id,start,date);
 }
 function realBalance(id){if(!data.startBalances)return null;const start=data.startBalances.date;const base=num(data.startBalances.balances[id]);const received=data.receipts.filter(r=>r.date>=start).reduce((a,r)=>a+num(r.amounts?.[id]),0);const spent=data.expenses.filter(e=>e.date>=start&&e.category===id).reduce((a,e)=>a+num(e.amount),0);const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start).reduce((a,p)=>a+num(p.extraAmount),0);return base+received+incomeAmountFor(id,start)-spent-(id==='savings'?repaymentSavingsSpent(start):0)-creditExtra+transferDelta(id,start)}
 // Фактический остаток на сегодня, без планируемых и датированных будущим операций.
@@ -3917,11 +3918,12 @@ $('supportForm').addEventListener('submit',event=>{
  if(renderAll()){$('opsSheet').querySelector('.ops-sheet-close').click();showSaveFeedback('Доход жены учтён',$('supportOpen'))}
 });
 function wifeFunds(date){
- const moves=(data.wifeMoves||[]).filter(m=>m.date<=date);
+ const moves=(data.wifeMoves||[]).filter(m=>m.date<=date&&(!data.startBalances||m.date>=data.startBalances.date));
  const sent=moves.reduce((sum,m)=>sum+num(m.amount),0);
  const food=data.extraIncomes.filter(i=>i.supportTotal!=null&&i.date<=date&&i.date>=data.startBalances?.date).reduce((sum,i)=>sum+num(i.amount),0);
- const spent=data.expenses.filter(e=>e.wifeCheck&&e.date<=date).reduce((sum,e)=>sum+num(e.amount),0);
- return Math.max(0,Math.round((sent+food-spent)*100)/100);
+ const spent=data.expenses.filter(e=>e.wifeCheck&&e.date<=date&&(!data.startBalances||e.date>=data.startBalances.date)).reduce((sum,e)=>sum+num(e.amount),0);
+ const adjustments=(data.wifeAdjustments||[]).filter(a=>a.date<=date&&(!data.startBalances||a.date>=data.startBalances.date)).reduce((sum,a)=>sum+num(a.amount),0);
+ return Math.max(0,Math.round((sent+food+adjustments-spent)*100)/100);
 }
 function renderFamilyBalances(){
  const today=iso(new Date()),total=categoryBalanceAt('family',today),held=wifeFunds(today);
@@ -3930,9 +3932,9 @@ function renderFamilyBalances(){
  }
  const reports=data.wifeBalanceReports||[];
  const last=reports.filter(r=>r.date<=today).sort((a,b)=>b.date.localeCompare(a.date))[0];
- const message=last?'Всего у жены на '+fromISO(last.date).toLocaleDateString('ru-RU')+' — '+rub(last.total):'';
+ const message=last?'Последняя сверка '+fromISO(last.date).toLocaleDateString('ru-RU')+': '+rub(last.family??last.total):'';
  $('wifeReportedBalance').textContent=message;
- $('wifeReportedBalance').hidden=!last;
+ $('wifeReportedBalance').hidden=true;
  $('wifeCheckPrevious').textContent=message;
  $('supportDate').max=today;
  $('supportDate').min=data.startBalances?.date||'';
@@ -3941,38 +3943,26 @@ function renderFamilyBalances(){
  $('supportMonthInfo').textContent='Из дохода жены на продукты в этом месяце выделено '+rub(food)+'.';
 }
 function reconcileWifePurchases(date,held,amount){
-  if(amount>held){alert('Остаток больше учтённой суммы. Проверь, все ли переводы записаны.');return false;}
-  const spent=Math.round((held-amount)*100)/100;
-  if(spent&&!confirm('Записать '+rub(spent)+' в семейные расходы по сверке?'))return false;
-  if(spent)data.expenses.push({id:'wife-'+Date.now(),date,category:'family',type:'Покупки жены',note:'По сверке остатка',amount:spent,wifeCheck:true});
-  data.wifeChecked=date;
-  return true;
+ if(!Number.isFinite(amount)||amount<0){alert('Введи корректный остаток у жены.');return false;}
+ const diff=Math.round((amount-held)*100)/100;
+ if(diff<0){
+  if(!confirm('По сверке жена потратила '+rub(-diff)+'. Записать в семейные расходы?'))return false;
+  data.expenses.push({id:'wife-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),date,category:'family',type:'Покупки жены',note:'По сверке остатка',amount:-diff,wifeCheck:true});
+ }else if(diff>0){
+  if(!confirm('Остаток у жены выше расчётного на '+rub(diff)+'. Добавить эту разницу к семейным средствам как корректировку? Сначала убедись, что перевод не был учтён дважды.'))return false;
+  (data.wifeAdjustments||=[]).push({id:'wife-adjust-'+Date.now(),date,amount:diff,note:'Сверка остатка жены'});
+ }
+ data.wifeChecked=date;return true;
 }
 $('wifeCheckForm').addEventListener('submit',event=>{
- event.preventDefault();
- const form=event.currentTarget;
- if(!form.reportValidity())return;
- const date=iso(new Date()),totalField=$('wifeActualTotal');
- const total=totalField.value===''?null:totalField.valueAsNumber;
- const share=$('wifeActualFamily');
- if(total===null&&share.value===''){alert('Введи хотя бы одну сумму.');totalField.focus();return;}
- if(share.value!==''){
-  const amount=share.valueAsNumber;
-  if(total!==null&&amount>total){alert('Сумма на семейные покупки больше общего остатка. Проверь обе суммы.');return;}
-  if(categoryBalanceAt('family',date)===null){alert('Для сверки семейных покупок укажи стартовые остатки или оставь второе поле пустым.');return;}
-  if(!reconcileWifePurchases(date,wifeFunds(date),amount))return;
- }
- if(total!==null){
-  const reports=(data.wifeBalanceReports||=[]);
-  const existing=reports.find(r=>r.date===date);
-  if(existing)existing.total=total;
-  else reports.push({date,total});
- }
- if(renderAll()){
-  form.reset();
-  $('opsSheet').querySelector('.ops-sheet-close').click();
-  showSaveFeedback('Сверка сохранена',$('wifeCheckOpen'));
- }
+ event.preventDefault();const form=event.currentTarget;if(!form.reportValidity())return;
+ const date=iso(new Date()),amount=$('wifeActualTotal').valueAsNumber;
+ if(!Number.isFinite(amount)||amount<0){alert('Введи остаток у жены.');return;}
+ if(categoryBalanceAt('family',date)===null){alert('Укажи стартовые остатки в настройках.');return;}
+ if(!reconcileWifePurchases(date,wifeFunds(date),amount))return;
+ const reports=(data.wifeBalanceReports||=[]),existing=reports.find(r=>r.date===date);
+ if(existing){existing.total=amount;existing.family=amount;}else reports.push({date,total:amount,family:amount});
+ if(renderAll()){form.reset();$('opsSheet').querySelector('.ops-sheet-close').click();showSaveFeedback('Сверка сохранена',$('wifeCheckOpen'));}
 });
 $('wifeTransferOpen').addEventListener('click',recordWifeTransfer);
 function normalizeIncomeRecords(){
@@ -4755,7 +4745,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
   introTitle.innerHTML='<h2>Операции</h2>';intro.append(introTitle);
   const grid=document.createElement('div');grid.className='ops-action-grid';
   const actions=[
-   ['expense','Расход','↘'],['income','Доход','↗'],['transfer','Перевод','⇄']
+   ['expense','Расход','↘'],['income','Доход','↗'],['transfer','Между конвертами','⇄']
   ];
   for(const [type,label,symbol] of actions){
    const button=document.createElement('button');button.type='button';button.className='ops-action-tile';
