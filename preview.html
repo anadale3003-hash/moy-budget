@@ -2230,7 +2230,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="app home-active"><header class="hero"><div class="daily-summary"><div class="daily-headline"><span id="dailySpendingLimit">—</span><span id="nextPaymentDate">На семейные покупки</span><span id="nextPaymentWhen"></span></div><div hidden><p id="dailySpendingNote"></p><small id="heroLabel"></small></div></div></header>
 <main class="main">
 <section class="view active" id="v-home">
-<div class="home-balances"><div>Доступно на расходы<strong id="heroTotal">—</strong></div><div>Всего в бюджете<strong id="heroAll">—</strong></div></div>
+<div class="home-balances"><div><span>Доступно на расходы</span><strong id="heroTotal">—</strong></div><div><span>Всего в бюджете</span><strong id="heroAll">—</strong></div></div>
 
 <section class="family-split" aria-label="Остаток на семейные покупки">
 <div hidden style="display:none!important"><span>На семейные покупки</span><strong id="familyTotalNow">—</strong></div>
@@ -5763,6 +5763,21 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #v-home .family-split>div:not([hidden]) strong{display:block;width:100%;text-align:center}
 /* The two monetary overview tiles also center their values. */
 .app #v-home .home-balances>div strong{width:100%;text-align:center}
+/* Shared typography for the two overview balance groups. */
+.app #v-home .home-balances>div,
+.app #v-home .family-split>div:not([hidden]){min-width:0}
+.app #v-home .home-balances>div>span,
+.app #v-home .family-split>div:not([hidden])>span{
+ display:block;text-align:left;font-size:clamp(11px,2.8vw,14px);
+ font-weight:400;line-height:1.25;color:var(--muted)
+}
+.app #v-home .home-balances>div>strong,
+.app #v-home .family-split>div:not([hidden])>strong{
+ display:block;width:100%;text-align:center;
+ font:700 clamp(16px,4.5vw,22px)/1.2 system-ui!important;
+ letter-spacing:-.035em!important;font-variant-numeric:tabular-nums;
+ color:var(--ink);margin:6px 0 0!important;overflow-wrap:anywhere
+}
 /* Center only the payout amounts inside Advance and Salary cards. */
 #v-plan .payment-receipt .receipt-note>strong{display:block;width:100%;text-align:center;font-variant-numeric:tabular-nums}
 </style></body></html>
