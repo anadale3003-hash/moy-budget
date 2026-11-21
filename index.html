@@ -2328,7 +2328,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="card" id="wifeCheckCard"><form id="wifeCheckForm">
 <label class="field"><span>Сколько всего денег у жены сегодня, ₽</span><input id="wifeActualTotal" type="number" step="0.01" min="0" inputmode="decimal"></label>
 <label class="field"><span>Осталось на семейные покупки, ₽</span><input id="wifeActualFamily" type="number" step="0.01" min="0" inputmode="decimal" placeholder="Можно пропустить"></label>
-<p class="foot">Укажи общий остаток, деньги на семейные покупки или обе суммы.</p>
+<p class="foot">Если заполнен только общий остаток, считаем его остатком на семейные покупки. Если у жены есть личные деньги, отдельно укажи сумму на семейные покупки во втором поле.</p>
 <button class="btn full" type="submit">Сохранить сверку</button>
 </form><p class="foot" id="wifeCheckPrevious"></p></div>
 <div class="card" id="supportCard"><p class="foot" id="supportMonthInfo"></p><form id="supportForm">
@@ -3930,7 +3930,7 @@ function renderFamilyBalances(){
  }
  const reports=data.wifeBalanceReports||[];
  const last=reports.filter(r=>r.date<=today).sort((a,b)=>b.date.localeCompare(a.date))[0];
- const message=last?'Всего у жены на '+fromISO(last.date).toLocaleDateString('ru-RU')+' — '+rub(last.total):'';
+ const message=last?'Сверка '+fromISO(last.date).toLocaleDateString('ru-RU')+': у жены '+rub(last.total)+(last.family!=null?' · на семейные покупки '+rub(last.family):''):'';
  $('wifeReportedBalance').textContent=message;
  $('wifeReportedBalance').hidden=!last;
  $('wifeCheckPrevious').textContent=message;
@@ -3941,38 +3941,30 @@ function renderFamilyBalances(){
  $('supportMonthInfo').textContent='Из дохода жены на продукты в этом месяце выделено '+rub(food)+'.';
 }
 function reconcileWifePurchases(date,held,amount){
-  if(amount>held){alert('Остаток больше учтённой суммы. Проверь, все ли переводы записаны.');return false;}
-  const spent=Math.round((held-amount)*100)/100;
-  if(spent&&!confirm('Записать '+rub(spent)+' в семейные расходы по сверке?'))return false;
-  if(spent)data.expenses.push({id:'wife-'+Date.now(),date,category:'family',type:'Покупки жены',note:'По сверке остатка',amount:spent,wifeCheck:true});
-  data.wifeChecked=date;
-  return true;
+ if(!Number.isFinite(amount)||amount<0){alert('Укажи корректный остаток на семейные покупки.');return false;}
+ if(amount>held+0.005){alert('У жены осталось '+rub(amount)+', но из записанных переводов и доходов на семейные покупки должно быть '+rub(held)+'. Сначала запиши пропущенный перевод или доход жены, чтобы не создавать деньги из сверки.');return false;}
+ const spent=Math.round(Math.max(0,held-amount)*100)/100;
+ if(spent&&!confirm('По сверке жена потратила '+rub(spent)+'. Записать эту сумму в семейные расходы?'))return false;
+ if(spent)data.expenses.push({id:'wife-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),date,category:'family',type:'Покупки жены',note:'По сверке остатка',amount:spent,wifeCheck:true});
+ data.wifeChecked=date;return true;
 }
 $('wifeCheckForm').addEventListener('submit',event=>{
- event.preventDefault();
- const form=event.currentTarget;
- if(!form.reportValidity())return;
- const date=iso(new Date()),totalField=$('wifeActualTotal');
+ event.preventDefault();const form=event.currentTarget;if(!form.reportValidity())return;
+ const date=iso(new Date()),totalField=$('wifeActualTotal'),share=$('wifeActualFamily');
  const total=totalField.value===''?null:totalField.valueAsNumber;
- const share=$('wifeActualFamily');
- if(total===null&&share.value===''){alert('Введи хотя бы одну сумму.');totalField.focus();return;}
- if(share.value!==''){
-  const amount=share.valueAsNumber;
-  if(total!==null&&amount>total){alert('Сумма на семейные покупки больше общего остатка. Проверь обе суммы.');return;}
-  if(categoryBalanceAt('family',date)===null){alert('Для сверки семейных покупок укажи стартовые остатки или оставь второе поле пустым.');return;}
-  if(!reconcileWifePurchases(date,wifeFunds(date),amount))return;
- }
- if(total!==null){
-  const reports=(data.wifeBalanceReports||=[]);
-  const existing=reports.find(r=>r.date===date);
-  if(existing)existing.total=total;
-  else reports.push({date,total});
- }
- if(renderAll()){
-  form.reset();
-  $('opsSheet').querySelector('.ops-sheet-close').click();
-  showSaveFeedback('Сверка сохранена',$('wifeCheckOpen'));
- }
+ const explicitShare=share.value===''?null:share.valueAsNumber;
+ if(total===null&&explicitShare===null){alert('Введи хотя бы одну сумму.');totalField.focus();return;}
+ if(total!==null&&(!Number.isFinite(total)||total<0)){alert('Введи корректный общий остаток.');return;}
+ if(explicitShare!==null&&(!Number.isFinite(explicitShare)||explicitShare<0)){alert('Введи корректный остаток на семейные покупки.');return;}
+ if(total!==null&&explicitShare!==null&&explicitShare>total){alert('Сумма на семейные покупки больше общего остатка. Проверь обе суммы.');return;}
+ // No second figure means all reported money is allocated to family shopping.
+ // Transfers between spouses never create income or reduce family assets.
+ const familyShare=explicitShare===null?total:explicitShare;
+ if(categoryBalanceAt('family',date)===null){alert('Для сверки укажи стартовые остатки в настройках.');return;}
+ if(!reconcileWifePurchases(date,wifeFunds(date),familyShare))return;
+ if(total!==null){const reports=(data.wifeBalanceReports||=[]),existing=reports.find(r=>r.date===date);
+  if(existing){existing.total=total;existing.family=familyShare;}else reports.push({date,total,family:familyShare});}
+ if(renderAll()){form.reset();$('opsSheet').querySelector('.ops-sheet-close').click();showSaveFeedback('Сверка сохранена',$('wifeCheckOpen'));}
 });
 $('wifeTransferOpen').addEventListener('click',recordWifeTransfer);
 function normalizeIncomeRecords(){
