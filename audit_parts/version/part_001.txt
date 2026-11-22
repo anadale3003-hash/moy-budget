@@ -1,0 +1,9 @@
+SOURCE: version.json
+PART: 1
+SOURCE LINES: 1-5
+SOURCE BLOB SHA: fb039da4fc0e603f8a9636b4f8f0786c4adc20d4
+
+{
+  "version": "1.5.104",
+  "notes": "Единое оформление верхних блоков и карточек: подписи слева, суммы по центру; выплаты и конверты выровнены."
+}

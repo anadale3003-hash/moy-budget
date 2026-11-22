@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 36
+SOURCE LINES: 5040-5189
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+     status.textContent='Push подключён. Подтверждённые выплаты исключены из напоминаний.';
+    }else{
+     status.textContent='Разрешение: '+Notification.permission+'. Нажми «Подключить push-уведомления».';
+    }
+   }catch(e){status.textContent='Не удалось проверить подписку: '+e.message;}
+  };
+  window.addEventListener('budget:receipts-changed',()=>{void syncReceipts();});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void syncReceipts();});
+  window.addEventListener('pageshow',()=>{void syncReceipts();});
+  choice.addEventListener('change',async()=>{
+   localStorage.setItem(preferenceKey,choice.value);
+   try{const sub=await currentSubscription();if(sub){await saveSubscription(sub);status.textContent=choice.value==='none'?'Автоматические напоминания выключены.':'Настройки напоминаний обновлены на сервере.';}else status.textContent='Выбор сохранён. Подключи push, чтобы активировать расписание.';}
+   catch(e){status.textContent='Не удалось обновить настройки: '+e.message;}
+  });
+  enable.addEventListener('click',async()=>{
+   if(!supported()){await refresh();return;}
+   if(!isInstalled()){status.textContent='Открой «Мой бюджет» с иконки на экране «Домой». Push на iPhone работает для установленного веб-приложения.';return;}
+   enable.disabled=true;status.textContent='Подключаем push…';
+   try{
+    if(Notification.permission!=='granted'){
+     const permission=await Notification.requestPermission();
+     if(permission!=='granted')throw new Error('Разрешение на уведомления не получено.');
+    }
+    const reg=await navigator.serviceWorker.ready;
+    if(!reg.pushManager)throw new Error('PushManager недоступен в этом браузере.');
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub){
+     const keyResponse=await fetch(API+'/vapid-public-key',{cache:'no-store'});
+     if(!keyResponse.ok)throw new Error('Не удалось получить ключ сервера (HTTP '+keyResponse.status+').');
+     const keyData=await keyResponse.json();
+     sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToBytes(keyData.publicKey)});
+    }
+    await saveSubscription(sub);
+    status.textContent='Готово! iPhone подписан на push. Можно отправить тест.';
+   }catch(e){status.textContent='Не удалось подключить push: '+e.message;}
+   finally{enable.disabled=false;}
+  });
+  for(const id of ['advanceDate','salaryDate']){
+   document.getElementById(id)?.addEventListener('change',async()=>{
+    try{const sub=await currentSubscription();if(sub){await saveSubscription(sub);status.textContent='Даты выплат обновлены на сервере.';}}
+    catch(e){status.textContent='Не удалось обновить даты выплат: '+e.message;}
+   });
+  }
+  delayed.addEventListener('click',async()=>{
+   if(!supported()||Notification.permission!=='granted'){
+    await refresh();
+    return;
+   }
+   delayed.disabled=true;
+   try{
+    const sub=await currentSubscription();
+    if(!sub)throw new Error('Сначала подключи push-уведомления.');
+    const result=await post('/test-delayed',{endpoint:sub.endpoint,auth:sub.toJSON().keys.auth});
+    if(!result.ok)throw new Error('Сервер не подтвердил запланированную отправку.');
+    status.textContent='Тест назначен: через 30 секунд. Заблокируй iPhone и дождись push на экране блокировки.';
+   }catch(e){
+    status.textContent='Не удалось запланировать тест: '+e.message;
+   }finally{
+    delayed.disabled=false;
+   }
+  });
+  test.addEventListener('click',async()=>{
+   if(!supported()||Notification.permission!=='granted'){await refresh();return;}
+   test.disabled=true;
+   try{
+    const sub=await currentSubscription();
+    if(sub){
+     await post('/test',{endpoint:sub.endpoint,auth:sub.toJSON().keys.auth});
+     status.textContent='Тестовый push отправлен сервером. Проверь уведомления iPhone.';
+    }else{
+     const reg=await navigator.serviceWorker.ready;
+     await reg.showNotification('Мой бюджет — локальный тест 🔔',{body:'Локальные уведомления работают. Для серверного push сначала подключи подписку.',icon:'./icon.png',badge:'./icon.png',tag:'budget-local-test'});
+     status.textContent='Показан локальный тест. Сначала подключи серверный push.';
+    }
+   }catch(e){status.textContent='Тестовый push не отправлен: '+e.message;}
+   finally{test.disabled=false;}
+  });
+  refresh();
+ };
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready();
+})();
+</script>
+
+<style>
+#adviceDialog{border:0;padding:0;background:transparent;width:min(560px,calc(100vw - 20px));max-height:min(90dvh,850px);color:var(--ink)}
+#adviceDialog::backdrop{background:#0b1b32b8}
+.advisor-shell{background:var(--card);border-radius:20px;padding:17px;max-height:90dvh;overflow:auto;box-shadow:0 12px 50px #0003}
+.advisor-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:8px}
+.advisor-head h2{margin:0;font-size:20px}
+.advisor-desc{font-size:13px;color:var(--muted);margin:8px 0 12px}
+#adviceText{white-space:pre-wrap;overflow:auto;width:100%;min-height:150px;max-height:32dvh;resize:vertical;border:1px solid var(--line);border-radius:12px;background:var(--bg);color:var(--ink);font-size:12px;line-height:1.45;padding:10px}
+.advisor-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.advisor-actions .btn{padding:11px 7px;font-size:13px}
+#adviceStatus{min-height:18px;margin-top:8px;font-size:12px;color:var(--muted)}
+#advisorOpen{display:inline-flex;align-items:center;justify-content:center;min-height:37px;border:1.5px solid var(--blue);background:var(--blue);color:white;box-shadow:0 3px 9px #2965eb30;transition:transform .12s,filter .12s}
+#advisorOpen:active,#advisorOpen:focus-visible{transform:scale(.96);filter:brightness(1.12)}
+.advisor-actions .btn{min-height:47px;border:1px solid transparent;box-shadow:0 2px 8px #00000012;transition:transform .12s,filter .12s,background .12s}
+.advisor-actions .btn:active,.advisor-actions .btn:focus-visible{transform:scale(.96);filter:brightness(.94);outline:2px solid var(--blue);outline-offset:2px}
+.advisor-actions .btn.light{border-color:var(--line)}
+.advisor-actions .btn.done{background:#147b59!important;color:#fff!important;border-color:#147b59!important}
+#adviceStatus{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;min-height:36px}
+
+
+/* 1.5.80 TEST — visual polish after independent six-screen review.
+   Scope: visual hierarchy, compactness and clarity; no financial state mutation. */
+:root{--budget-ui-stroke:color-mix(in srgb,var(--line) 75%,transparent)}
+#v-home .dashboard-frame,
+#v-plan .design-group,
+#v-card .design-group,
+#v-expense .design-group,
+#v-settings .design-group,
+#v-analytics .analytics-capital-card,
+#v-analytics .analytics-economy-card{
+ box-shadow:none!important;
+}
+#v-home .dashboard-frame,
+#v-home .home-envelopes-visible,
+#v-card .payment-obligations,
+#v-card .mortgage-monthly-settings,
+#v-card .credit-settings,
+#v-settings .card,
+#v-expense .operations-hub,
+#v-expense .operations-statistics,
+#v-expense .operations-history{
+ border-width:1px!important;
+}
+#v-home .hero-grid .hero-amount,
+#v-home .hero-amount,
+#v-analytics .analytics-capital-card strong{
+ font-variant-numeric:tabular-nums;
+ letter-spacing:-.025em;
+}
+#v-home #obligations,
+#v-plan #planTable,
+#v-card .payment-obligations,
+#v-expense .operations-history{
+ font-variant-numeric:tabular-nums;
+}
+#v-home .dashboard-obligations>.section-heading h2,
+#v-home #homeEnvelopesPanel>.section-heading h2,
+#v-plan>.section-heading h2,
+#v-card .section-heading h2,
+#v-expense .section-heading h2,
+#v-settings .section-heading h2{
+ letter-spacing:-.012em;
+}
+#v-home #homeEnvelopesPanel #envelopes .card,
+#v-home #homeEnvelopesPanel #envelopes>div{
+ box-shadow:none!important;
+}

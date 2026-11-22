@@ -1,0 +1,155 @@
+SOURCE: preview.html
+PART: 12
+SOURCE LINES: 1568-1717
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+}
+#analyticsModalPlan{gap:8px}
+.analytics-plan-summary{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;
+}
+.analytics-plan-summary>div{
+ min-width:0;padding:10px 11px;background:color-mix(in srgb,var(--card) 91%,#9778d5 9%);
+ border:1px solid var(--line);border-radius:11px;
+}
+.analytics-plan-summary>div span{display:block;color:var(--muted);font-size:11px;line-height:1.25}
+.analytics-plan-summary>div strong{display:block;font-size:clamp(17px,5vw,22px);font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:3px;line-height:1.2}
+.analytics-plan-summary>.analytics-plan-left{grid-column:1/-1;padding:8px 11px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:color-mix(in srgb,var(--card) 82%,#9778d5 18%)}
+.analytics-plan-summary>.analytics-plan-left strong{font-size:clamp(20px,6vw,26px);color:var(--ink);margin:0}
+#analyticsModalPlan .analytics-plan-input{margin:4px 0 0}
+#analyticsModalPlan .analytics-plan-input span{font-weight:700}
+#analyticsModalPlan #savingsPlanMonths{font-size:16px!important;min-height:40px}
+.analytics-plan-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.analytics-plan-presets button{
+ border:1px solid var(--line);background:var(--card);color:var(--ink);
+ border-radius:9px;padding:8px 2px;font:inherit;font-weight:700;font-size:12px;min-width:0;
+}
+.analytics-plan-presets button.active{background:color-mix(in srgb,var(--card) 77%,#9778d5 23%);border-color:#9778d5}
+.analytics-plan-result{
+ text-align:center;padding:12px 9px;background:color-mix(in srgb,var(--card) 79%,#20a98d 21%);
+ border:1px solid color-mix(in srgb,var(--line) 65%,#20a98d 35%);border-radius:14px;
+}
+.analytics-plan-result>span{display:block;font-size:12px;color:var(--muted);font-weight:700}
+.analytics-plan-result>strong{display:block;font-size:clamp(27px,8.5vw,36px);letter-spacing:-.7px;line-height:1.2;white-space:nowrap;font-variant-numeric:tabular-nums;margin:4px 0}
+.analytics-plan-result>small{display:block;font-size:11px;color:var(--muted)}
+.analytics-plan-paydays{text-align:center;font-size:12px;line-height:1.25;font-weight:650}
+#analyticsModalPlan .analytics-plan-hint{margin:0!important;font-size:11px;line-height:1.35}
+#analyticsModalPlan .analytics-plan-save{margin:0!important;flex:0 0 auto}
+#analyticsModalPlan .analytics-plan-status{min-height:0;margin:0!important;font-size:11px;line-height:1.25}
+@media(max-height:650px){
+ #analyticsModalPlan{gap:5px}
+ .analytics-plan-summary>div{padding:6px 8px}
+ .analytics-plan-summary>.analytics-plan-left{padding:6px 8px}
+ .analytics-plan-presets button{padding:5px 2px}
+ .analytics-plan-result{padding:8px 7px}
+ .analytics-plan-result>strong{font-size:25px;margin:2px 0}
+ #analyticsModalPlan .analytics-plan-hint{display:none}
+ #analyticsModalPlan .analytics-plan-status{font-size:10px}
+}
+
+/* 1.5.36: custom capital goal, compact on iPhone without dashboard scrolling. */
+#analyticsModalPlan #savingsPlanTargetAmount{font-size:16px!important;min-height:40px}
+#analyticsModalPlan .analytics-plan-summary>div:first-child{background:color-mix(in srgb,var(--card) 86%,#9877db 14%)}
+@media(max-height:720px){
+ #analyticsModalPlan{gap:5px}
+ #analyticsModalPlan .analytics-plan-summary>div{padding:6px 9px}
+ #analyticsModalPlan .analytics-plan-summary>.analytics-plan-left{padding:6px 9px}
+ #analyticsModalPlan .analytics-plan-input{margin:1px 0 0}
+ #analyticsModalPlan #savingsPlanMonths,
+ #analyticsModalPlan #savingsPlanTargetAmount{min-height:35px;padding:5px 8px}
+ #analyticsModalPlan .analytics-plan-presets button{padding:5px 2px}
+ #analyticsModalPlan .analytics-plan-result{padding:8px 9px}
+ #analyticsModalPlan .analytics-plan-result>strong{font-size:26px;margin:2px 0}
+ #analyticsModalPlan .analytics-plan-save{min-height:35px}
+}
+@media(max-height:650px){
+ #analyticsModalPlan .analytics-plan-summary>div:first-child{display:none}
+ #analyticsModalPlan .analytics-plan-summary{grid-template-columns:1fr}
+ #analyticsModalPlan .analytics-plan-summary>div:nth-child(2){display:flex;align-items:center;justify-content:space-between;gap:6px}
+ #analyticsModalPlan .analytics-plan-summary>div:nth-child(2) strong{margin:0}
+ #analyticsModalPlan .analytics-plan-hint{display:none}
+}
+@media(max-height:540px){
+ #analyticsModalPlan{overflow-y:auto;overscroll-behavior:contain}
+}
+
+/* Preview 1.5.37 — save success confirmation, no changes to card layout. */
+.budget-save-toast[hidden]{display:none!important}
+.budget-save-toast{
+ position:fixed;left:50%;bottom:calc(77px + env(safe-area-inset-bottom));
+ z-index:360;box-sizing:border-box;max-width:min(92vw,390px);
+ display:flex;align-items:center;justify-content:center;gap:10px;
+ pointer-events:none;user-select:none;-webkit-user-select:none;
+ padding:10px 17px 10px 11px;border-radius:16px;
+ background:color-mix(in srgb,var(--card) 90%,#23a780 10%);
+ border:1px solid color-mix(in srgb,var(--line) 50%,#23a780 50%);
+ color:var(--ink);box-shadow:0 10px 32px #00000028,0 2px 8px #00000010;
+ font:inherit;font-size:13px;font-weight:750;line-height:1.2;
+ opacity:0;transform:translate(-50%,13px) scale(.94);
+ transition:opacity .15s ease,transform .19s cubic-bezier(.17,.88,.36,1.2)
+}
+.budget-save-toast.is-visible{opacity:1;transform:translate(-50%,0) scale(1)}
+.budget-save-toast .budget-save-symbol{
+ width:29px;height:29px;flex:0 0 29px;display:grid;place-items:center;
+ border-radius:50%;background:#219d76;color:#fff;
+ box-shadow:0 0 0 3px color-mix(in srgb,#219d76 14%,transparent)
+}
+.budget-save-toast .budget-save-symbol svg{width:19px;height:19px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;display:block}
+.budget-save-toast .budget-save-symbol path{stroke-dasharray:27;stroke-dashoffset:27}
+.budget-save-toast.is-visible .budget-save-symbol{animation:budgetCheckPop .34s cubic-bezier(.2,1.5,.5,1) both}
+.budget-save-toast.is-visible .budget-save-symbol path{animation:budgetCheckDraw .25s .08s ease-out both}
+@keyframes budgetCheckPop{0%{transform:scale(.6)}58%{transform:scale(1.14)}100%{transform:scale(1)}}
+@keyframes budgetCheckDraw{to{stroke-dashoffset:0}}
+button.budget-action-saved:not(:disabled){animation:budgetActionGlow .46s ease-out}
+@keyframes budgetActionGlow{0%{filter:brightness(1)}36%{filter:brightness(1.15)}100%{filter:brightness(1)}}
+@media(orientation:landscape){
+ .budget-save-toast{bottom:calc(57px + env(safe-area-inset-bottom));padding:7px 13px;font-size:12px}
+ .budget-save-toast .budget-save-symbol{width:23px;height:23px;flex-basis:23px}
+}
+@media(prefers-reduced-motion:reduce){
+ .budget-save-toast,.budget-save-toast.is-visible{transition:none}
+ .budget-save-toast.is-visible .budget-save-symbol,
+ .budget-save-toast.is-visible .budget-save-symbol path,
+ button.budget-action-saved:not(:disabled){animation:none}
+ .budget-save-toast.is-visible .budget-save-symbol path{stroke-dashoffset:0}
+}
+
+/* v1.5.41: prominently visible confirmation on iPhone and in overlay dialogs. */
+.budget-save-toast{
+ top:42%!important;bottom:auto!important;
+ min-width:min(230px,calc(100vw - 40px));max-width:calc(100vw - 32px);
+ min-height:66px;padding:12px 19px 12px 14px;
+ gap:12px;border-radius:20px;
+ font-size:16px;font-weight:820;letter-spacing:-.15px;
+ background:color-mix(in srgb,var(--card) 88%,#22ab7d 12%);
+ border:2px solid color-mix(in srgb,#24a87c 58%,var(--line));
+ box-shadow:0 16px 50px #00000042,0 5px 15px #00000020;
+}
+.budget-save-toast .budget-save-symbol{
+ width:42px;height:42px;flex:0 0 42px;
+ box-shadow:0 0 0 4px color-mix(in srgb,#219d76 20%,transparent);
+}
+.budget-save-toast .budget-save-symbol svg{width:26px;height:26px}
+@media(orientation:landscape){
+ .budget-save-toast{top:36%!important;bottom:auto!important;min-height:54px;padding:8px 13px}
+ .budget-save-toast .budget-save-symbol{width:36px;height:36px;flex-basis:36px}
+ .budget-save-toast .budget-save-symbol svg{width:23px;height:23px}
+}
+@media(max-height:570px) and (orientation:portrait){
+ .budget-save-toast{top:30%!important}
+}
+
+/* v1.5.43: compact two-part payment confirmation. */
+#paymentEntryForm .payment-split-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:11px 0 6px}
+#paymentEntryForm .payment-split-choice{min-width:0;min-height:61px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:7px 5px;border:1px solid var(--line);border-radius:12px;color:var(--ink);background:var(--card);font:inherit}
+#paymentEntryForm .payment-split-choice span{font-size:12px;font-weight:650;color:var(--muted)}
+#paymentEntryForm .payment-split-choice b{font-size:17px;line-height:1.2;font-weight:800;white-space:nowrap;font-variant-numeric:tabular-nums}
+#paymentEntryForm .payment-split-choice.active{background:color-mix(in srgb,var(--card) 78%,#548de1 22%);border:2px solid #548de1;padding:6px 4px}
+#paymentEntryForm .payment-split-choice.active b{color:var(--ink)}
+#paymentEntryOverlay .receipt-entry-sheet{max-height:min(92dvh,850px)}
+@media(max-height:660px){#paymentEntryForm .payment-split-choices{margin:6px 0 3px}#paymentEntryForm .payment-split-choice{min-height:50px;padding:5px 4px}#paymentEntryForm .field{margin:10px 0 7px}}
+
+/* Preview 1.5.44: Operations becomes the home for movement totals + detail. */
+#v-expense .operations-hub{width:100%;flex:0 0 auto;display:flex;flex-direction:column;gap:7px;padding:0 0 8px}
+#v-expense .operations-head{display:flex;align-items:center;justify-content:space-between;gap:6px;min-width:0;min-height:32px}
+#v-expense .operations-head>strong{font-size:17px;font-weight:800;letter-spacing:-.4px;white-space:nowrap}

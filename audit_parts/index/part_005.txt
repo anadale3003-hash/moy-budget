@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 5
+SOURCE LINES: 518-667
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+#v-plan>.payment-obligations>.row{margin-bottom:10px}
+#v-plan>.payment-obligations>.payment-grid{margin-top:0}
+#v-plan>.payment-obligations>#regularPaymentHistory{margin-top:10px}
+#v-plan>.payment-obligations>.foot{margin:10px 0 0;line-height:1.45}
+
+/* Preview: optional envelope funding in the payment confirmation sheet. */
+#creditPaymentFunding{padding:8px 0 2px}
+#creditPaymentFunding .field{margin-top:10px}
+#creditPaymentFunding select{width:100%;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--input);color:var(--ink);font-size:16px;padding:9px 11px}
+#creditPaymentFunding .foot{margin:5px 0}
+
+/* Credits screen hosts the confirmation panel after migration from payouts. */
+#v-card>.mortgage-monthly-settings{margin-bottom:14px}
+#v-card>.mortgage-monthly-settings>.field{margin-top:12px}
+#v-card>.payment-obligations{box-sizing:border-box;width:auto;padding:12px 13px 14px;margin:0 0 16px;border:1px solid var(--line);border-radius:var(--radius,16px);background:var(--card)}
+#v-card>.payment-obligations>.row{margin-bottom:10px}
+#v-card>.payment-obligations>.payment-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+#v-card>.payment-obligations>.payment-grid>.payment-confirm{display:flex;flex-direction:column;gap:7px;padding:10px;min-width:0;justify-content:center}
+#v-card .payment-confirm-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0;margin-bottom:8px}
+#v-card .payment-confirm-heading>b{white-space:nowrap;font-size:15px}
+#v-card .payment-confirm-heading .receipt-note{min-width:0;text-align:right;font-size:11px;line-height:1.35;margin:0}
+#v-card .payment-confirm>input[hidden]{display:none!important}
+#v-card .payment-confirm .btn{width:100%;min-height:40px;margin-top:3px}
+#v-card>.payment-obligations>#regularPaymentHistory{margin-top:10px}
+#v-card>.payment-obligations>.foot{margin:10px 0 0;line-height:1.45}
+@media(max-width:370px){#v-card .payment-confirm-heading{display:block}#v-card .payment-confirm-heading .receipt-note{text-align:left;margin-top:3px}}
+
+/* Preview: payouts use one non-scrolling phone screen; secondary controls float
+   above the plan instead of pushing its content downward. */
+.app:has(#v-plan.active)>.main{overflow-y:hidden!important;padding-top:max(15px,env(safe-area-inset-top));padding-bottom:calc(66px + env(safe-area-inset-bottom))!important}
+#v-plan.active{height:100%;min-height:0;display:flex!important;flex-direction:column;gap:0;overflow:hidden}
+#v-plan>.section-heading{flex:0 0 auto;margin:4px 0 3px}
+#v-plan>.section-heading:first-child{margin-top:8px;margin-bottom:7px}
+#v-plan>.section-heading h2{font-size:clamp(12px,3.6vw,15px);line-height:1.2}
+#v-plan>.section-heading .quiet,#v-plan>.section-heading .pill{font-size:10px}
+#v-plan>.payroll-preview{flex:0 0 auto;margin:0 0 4px;padding:7px 10px;border-radius:12px}
+#v-plan>.payroll-preview .payroll-grid{margin:0;gap:8px}
+#v-plan>.payroll-preview .payroll-grid b{font-size:clamp(15px,4.2vw,19px);line-height:1.1;margin:1px 0}
+#v-plan>.payroll-preview .payroll-grid .quiet{font-size:10px}
+#v-plan #salaryForecastNote{display:none}
+#v-plan>.month-strip{flex:0 0 auto;margin:0 0 4px;padding:3px 5px;min-height:32px}
+#v-plan>.month-strip .month-buttons{min-height:27px}
+#v-plan>.payment-inputs{flex:0 0 auto!important;min-height:0!important;overflow:visible!important;padding:7px 8px;margin:0 0 5px}
+#v-plan>.payment-inputs .payment-grid{gap:7px}
+#v-plan .payment-receipt{padding:3px 4px}
+#v-plan .payment-receipt>.receipt-action-label{font-size:11px;line-height:1.1;margin:0 0 4px}
+#v-plan .payment-receipt .receipt-button{font-size:11px;min-height:33px;padding:5px 4px;border-radius:9px}
+#v-plan .payment-receipt .receipt-note{font-size:10px;line-height:1.15;margin:4px 0 0}
+#v-plan .payment-receipt .receipt-undo{font-size:10px;margin:3px 0 0;padding:3px 0}
+#v-plan .payment-dates-note{display:none}
+#v-plan>.payout-destinations{display:flex;flex-direction:column;flex:0 0 auto;min-height:0;overflow:hidden;padding:5px 8px 6px;margin:0 0 5px;border-radius:12px}
+#v-plan #planTable{flex:0 1 auto;min-height:0;overflow:hidden}
+#v-plan #planTable table{width:100%;table-layout:fixed;font-size:clamp(9px,2.65vw,11px);border-collapse:collapse}
+#v-plan #planTable th,#v-plan #planTable td{padding:clamp(2px,.5dvh,4px) 2px;line-height:1.15}
+#v-plan #planTable th:first-child,#v-plan #planTable td:first-child{width:38%}
+#v-plan #planWarnings{flex:0 0 auto;max-height:43px;overflow:hidden}
+#v-plan #planWarnings .hint,#v-plan #planWarnings .warning{font-size:9px;line-height:1.2;padding:3px 6px;margin:3px 0}
+#v-plan>details.compact-disclosure{flex:0 0 auto;min-height:33px;border-radius:11px;margin:0}
+#v-plan>details.compact-disclosure>summary{font-size:11px;min-height:32px;padding:6px 11px}
+#v-plan>details.compact-disclosure[open]{position:fixed;inset:0;z-index:95;display:flex!important;align-items:center;justify-content:center;flex-direction:column;padding:max(12px,env(safe-area-inset-top)) 14px max(18px,env(safe-area-inset-bottom));background:rgba(4,12,25,.63);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:0;border-radius:0;margin:0}
+#v-plan>details.compact-disclosure[open]>summary{width:min(100%,520px);background:var(--card);border-radius:15px 15px 0 0;padding:13px 16px;font-size:15px;min-height:48px;box-sizing:border-box}
+#v-plan>details.compact-disclosure[open]>summary:after{content:'✕'}
+#v-plan>details.compact-disclosure[open]>.card{width:min(100%,520px);max-height:min(65dvh,500px);flex:0 1 auto;overflow-y:auto;min-height:0;margin:0;background:var(--card);padding:12px 15px 18px;border:0;border-radius:0 0 15px 15px;box-shadow:0 20px 50px #0004}
+@media(max-height:730px){
+ #v-plan>.section-heading{margin:2px 0}
+ #v-plan>.payroll-preview{padding:5px 9px;margin-bottom:3px}
+ #v-plan>.month-strip{min-height:28px}
+ #v-plan>.payment-inputs{padding:5px 7px;margin-bottom:3px}
+ #v-plan .payment-receipt .receipt-button{min-height:29px}
+ #v-plan #planTable th,#v-plan #planTable td{padding:2px}
+ #v-plan #planWarnings{max-height:30px}
+}
+
+/* Preview: balanced full-height payouts dashboard (no dead space below).
+   Allow the meaningful contents of every card to grow with the screen. */
+#v-plan.active{justify-content:stretch;gap:0}
+#v-plan>.section-heading{margin-top:clamp(5px,.7dvh,10px);margin-bottom:clamp(5px,.65dvh,9px)}
+#v-plan>.section-heading:first-child{margin-top:clamp(10px,1.4dvh,18px);margin-bottom:clamp(6px,.8dvh,11px)}
+#v-plan>.section-heading h2{font-size:clamp(14px,3.8vw,18px)}
+#v-plan>.section-heading .quiet,#v-plan>.section-heading .pill{font-size:clamp(10px,2.6vw,12px)}
+#v-plan>.payroll-preview{
+ flex:.55 1 0;min-height:68px;
+ display:flex;flex-direction:column;justify-content:center;
+ padding:clamp(11px,1.5dvh,18px) clamp(12px,2vw,20px);
+ margin-bottom:clamp(6px,.9dvh,11px);border-radius:16px
+}
+#v-plan>.payroll-preview .payroll-grid{width:100%;gap:14px}
+#v-plan>.payroll-preview .payroll-grid .quiet{font-size:clamp(12px,3vw,15px)}
+#v-plan>.payroll-preview .payroll-grid b{font-size:clamp(21px,5.3vw,27px);margin-top:5px;line-height:1.2}
+#v-plan>.month-strip{
+ flex:.4 1 0;min-height:44px;
+ display:flex;align-items:center;padding:5px 9px;
+ margin-bottom:clamp(6px,.8dvh,10px);border-radius:16px
+}
+#v-plan>.month-strip .month-buttons{width:100%;min-height:39px}
+#v-plan>.month-strip .month-buttons button{min-width:39px;min-height:39px}
+#v-plan>.payment-inputs{
+ flex:1.2 1 0!important;min-height:115px!important;
+ display:flex!important;align-items:center;
+ padding:clamp(12px,1.6dvh,20px) clamp(11px,1.6vw,17px);
+ margin-bottom:clamp(6px,.8dvh,10px);border-radius:16px
+}
+#v-plan>.payment-inputs>.payment-grid{width:100%;gap:10px}
+#v-plan .payment-receipt{padding:5px 3px}
+#v-plan .payment-receipt>.receipt-action-label{font-size:clamp(13px,3.2vw,16px);margin-bottom:clamp(7px,1dvh,12px)}
+#v-plan .payment-receipt .receipt-button{font-size:clamp(11px,3vw,14px);min-height:clamp(39px,5dvh,53px);padding:8px 6px}
+#v-plan .payment-receipt .receipt-note{font-size:clamp(10px,2.6vw,12px);line-height:1.3;margin-top:7px}
+#v-plan .payment-receipt .receipt-undo{font-size:11px;margin-top:5px}
+#v-plan>.payout-destinations{
+ flex:2.5 1 0;min-height:275px;
+ display:flex;flex-direction:column;justify-content:stretch;
+ padding:clamp(10px,1.35dvh,16px) 12px;
+ margin-bottom:clamp(7px,.9dvh,12px);border-radius:16px
+}
+#v-plan #planTable{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;overflow:hidden}
+#v-plan #planTable table{height:100%;width:100%;table-layout:fixed;font-size:clamp(11px,3vw,14px)}
+#v-plan #planTable th,#v-plan #planTable td{padding:clamp(5px,.8dvh,10px) 3px;line-height:1.23}
+#v-plan #planWarnings{flex:0 0 auto;max-height:92px;overflow:visible}
+#v-plan #planWarnings .hint,#v-plan #planWarnings .warning{font-size:clamp(10px,2.5vw,12px);padding:5px 8px;line-height:1.25}
+#v-plan>details.compact-disclosure:not([open]){
+ flex:.4 1 0;min-height:42px;max-height:68px;
+ display:flex;align-items:stretch;margin:0;border-radius:14px
+}
+#v-plan>details.compact-disclosure:not([open])>summary{
+ flex:1;display:flex;align-items:center;padding:9px 13px;
+ font-size:clamp(12px,3.2vw,15px)
+}
+@media(max-height:760px){
+ #v-plan>.section-heading{margin:3px 0 4px}
+ #v-plan>.section-heading:first-child{margin-top:6px}
+ #v-plan>.payroll-preview{min-height:59px;padding:6px 11px;margin-bottom:4px}
+ #v-plan>.payroll-preview .payroll-grid b{font-size:clamp(18px,4.6vw,23px);margin-top:2px}
+ #v-plan>.month-strip{min-height:36px;padding:3px 6px;margin-bottom:4px}
+ #v-plan>.month-strip .month-buttons,#v-plan>.month-strip .month-buttons button{min-height:30px}
+ #v-plan>.payment-inputs{min-height:94px!important;padding:7px 10px;margin-bottom:4px}
+ #v-plan .payment-receipt>.receipt-action-label{margin-bottom:3px}
+ #v-plan .payment-receipt .receipt-button{min-height:33px}
+ #v-plan>.payout-destinations{min-height:229px;padding:6px 10px;margin-bottom:4px}
+ #v-plan #planTable th,#v-plan #planTable td{padding:3px 2px}
+ #v-plan>details.compact-disclosure:not([open]){min-height:36px}
+}
+
+/* Preview: remove the marked excess padding in the income card; keep forecast
+   and distribution description readable above the bottom navigation. */
+#v-plan>.payment-inputs{
+ flex:0 0 auto!important;
+ min-height:0!important;
+ height:auto!important;
+ align-items:stretch;
+ padding:9px 11px 10px!important;

@@ -1,0 +1,155 @@
+SOURCE: preview.html
+PART: 28
+SOURCE LINES: 3845-3994
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+const y=Number(month.slice(0,4)),m=Number(month.slice(5,7));const prev=iso(new Date(y,m-2,1)).slice(0,7);
+const previous=data.expenses.filter(e=>e.date?.startsWith(prev)).reduce((s,e)=>s+num(e.amount),0);
+const extraIncome=incomeTotalMonth(month);
+const wagesReceived=data.receipts.filter(r=>r.date?.startsWith(month)).reduce((a,r)=>a+num(r.amount),0);
+const allIncome=extraIncome+wagesReceived;
+const wageRows=data.receipts.filter(r=>r.date?.startsWith(month));
+const incomeRows=data.extraIncomes.filter(r=>r.date?.startsWith(month));
+$('operationsMonthName').textContent=new Date(y,m-1,1).toLocaleDateString('ru-RU',{month:'short'}).replace(/\.$/,'')+' '+y;
+$('operationsExpenseItems').textContent=rows.length+' '+(rows.length%10===1&&rows.length%100!==11?'запись':rows.length%10>=2&&rows.length%10<=4&&(rows.length%100<12||rows.length%100>14)?'записи':'записей')+' расходов';
+const incomeCount=wageRows.length+incomeRows.length;
+$('operationsIncomeItems').textContent=incomeCount+' '+(incomeCount%10===1&&incomeCount%100!==11?'поступление':incomeCount%10>=2&&incomeCount%10<=4&&(incomeCount%100<12||incomeCount%100>14)?'поступления':'поступлений');
+$('analyticsCount').textContent=$('operationsIncomeItems').textContent;
+$('opsModalExpense').textContent=rub(total);
+$('opsModalIncome').textContent=rub(allIncome);
+$('opsModalDiff').textContent=rub(allIncome-total);
+const incomeEntries=[
+ ...wageRows.map(r=>({label:r.type==='advance'?'Аванс':'Зарплата',amount:num(r.amount),date:r.date,note:'Выплаты'})),
+ ...incomeRows.map(r=>({label:String(r.source||'Дополнительный доход'),amount:num(r.amount),date:r.date,note:String(r.note||'Дополнительный доход')}))
+].sort((a,b)=>b.date.localeCompare(a.date));
+$('operationsIncomeDetails').innerHTML=incomeEntries.length?
+ incomeEntries.map(r=>'<div class="operations-income-row"><div><b>'+esc(r.label)+'</b><small>'+esc(r.date)+(r.note?' · '+esc(r.note):'')+'</small></div><strong>'+rub(r.amount)+'</strong></div>').join('')
+ :'<div class="foot">За этот месяц поступления ещё не записаны.</div>';
+$('analyticsIncomeTotal').textContent=rub(allIncome);
+$('analyticsExtraIncome').textContent=rub(extraIncome);
+$('analyticsNet').textContent='Доходы − расходы: '+rub(allIncome-total);
+$('analyticsTotal').textContent=rub(total);
+const now=new Date();const isCurrent=month===iso(now).slice(0,7);const denominator=isCurrent?now.getDate():new Date(y,m,0).getDate();
+$('analyticsDaily').textContent=rub(total/Math.max(1,denominator))+' в день';
+$('analyticsChange').textContent=!previous?'Нет сравнения':(total>=previous?'+':'−')+Math.abs(Math.round((total-previous)/previous*100))+'%';
+const bar=(label,val,max)=>`<div class="analytics-line"><div class="row"><span>${esc(label)}</span><b>${rub(val)}</b></div><div class="track"><div class="fill" style="width:${max>0?Math.min(100,val/max*100):0}%;background:var(--blue)"></div></div></div>`;
+const byCat=cats.map(c=>({name:c.name,amount:rows.filter(e=>e.category===c.id).reduce((s,e)=>s+num(e.amount),0)})).sort((a,b)=>b.amount-a.amount);
+$('analyticsCategories').innerHTML=total?byCat.filter(x=>x.amount>0).map(x=>bar(x.name,x.amount,total)).join(''):'<div class="empty">Пока нет покупок за этот месяц</div>';
+const byType=new Map();for(const e of rows){const name=String(e.type||cats.find(c=>c.id===e.category)?.name||'Без вида').trim();byType.set(name,(byType.get(name)||0)+num(e.amount));}
+const ordered=[...byType].map(([name,amount])=>({name,amount})).sort((a,b)=>b.amount-a.amount);
+$('analyticsTypes').innerHTML=ordered.length?ordered.slice(0,3).map(x=>bar(x.name,x.amount,total)).join(''):'<div class="empty">Начни записывать покупки</div>';
+$('analyticsAllTypes').innerHTML=ordered.length?ordered.map(x=>`<div class="lineitem"><span>${esc(x.name)}</span><span>${rub(x.amount)}</span></div>`).join(''):'<div class="empty">Пока нет данных</div>';
+const vals=[];for(let i=5;i>=0;i--){const key=iso(new Date(y,m-1-i,1)).slice(0,7);const v=data.expenses.filter(e=>e.date?.startsWith(key)).reduce((s,e)=>s+num(e.amount),0);vals.push({key,v});}
+const peak=Math.max(1,...vals.map(x=>x.v));$('analyticsMonths').innerHTML=vals.map(x=>bar(new Date(x.key+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'short',year:'2-digit'}),x.v,peak)).join('');
+ladderRender();
+}
+function setupCompactPanels(){
+// Hide secondary information behind disclosure, keep key controls directly visible.
+const wrap=(el,label)=>{if(!el||el.parentElement?.tagName==='DETAILS')return;const d=document.createElement('details');d.className='compact-disclosure';const summary=document.createElement('summary');summary.textContent=label;el.parentNode.insertBefore(d,el);d.append(summary,el)};
+const byView=(view,index,label)=>wrap(document.querySelectorAll('#v-'+view+' > .card')[index],label);
+// Find the proportions card by its heading, not by position: the payouts tab has
+// additional standalone cards above it and their order may change.
+const proportionCard=[...document.querySelectorAll('#v-plan > .card')].find(el=>
+ el.querySelector(':scope > .row > b')?.textContent?.trim()==='Пропорции остатка'
+);
+wrap(proportionCard,'Изменить пропорции распределения');
+const payoutPopup=proportionCard?.parentElement;
+if(payoutPopup?.tagName==='DETAILS'){
+ // Show the allocation table inside the expanded proportions popup, ABOVE
+ // the category settings, rather than only underneath the popup.
+ const preview=document.createElement('div');
+ preview.id='proportionDistributionPreview';
+ preview.className='payout-popup-preview';
+ preview.innerHTML='<div class="payout-popup-preview-title">Распределение по выплатам</div><div class="payout-popup-preview-content"></div>';
+ proportionCard.prepend(preview);
+ // Split the popup into two independently scrollable panes. The allocation
+ // stays in the top half; all adjustable categories stay visible below.
+ const settingsPane=document.createElement('div');
+ settingsPane.className='proportions-settings-pane';
+ for(const node of [...proportionCard.children].filter(node=>node!==preview))settingsPane.append(node);
+ proportionCard.append(settingsPane);
+ // The payouts view clips children to its one-screen layout on iPhone.
+ // Portal the *actual* details element to body while expanded so it can
+ // cover the advance card, and restore it to the same position on close.
+ const anchor=document.createComment('proportions-popup-anchor');
+ payoutPopup.before(anchor);
+ const refresh=()=>{if(payoutPopup.open)preview.querySelector('.payout-popup-preview-content').innerHTML=$('planTable').innerHTML;};
+ payoutPopup.addEventListener('toggle',()=>{
+  if(payoutPopup.open){
+   document.body.append(payoutPopup);
+   payoutPopup.classList.add('proportions-modal');
+   refresh();
+  }else{
+   payoutPopup.classList.remove('proportions-modal');
+   anchor.after(payoutPopup);
+  }
+ });
+ payoutPopup.addEventListener('click',event=>{
+  if(event.target===payoutPopup)payoutPopup.open=false;
+ });
+ document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&payoutPopup.open){payoutPopup.open=false;payoutPopup.querySelector('summary')?.focus();}
+ });
+}
+const scheduleCard=[...document.querySelectorAll('#v-card > .card')].find(el=>
+ el.querySelector(':scope > b')?.textContent?.trim()==='График погашения'
+);
+wrap(scheduleCard,'График всех платежей');
+// История расходов уже оформлена раскрывающейся секцией сразу после формы.
+
+const settings=[...document.querySelectorAll('#v-settings > .card')];
+// Match panels by their own heading, not by their order: the salary settings card
+// was added later and shifted the previous index-based labels.
+settings.forEach(el=>{
+ if(el.classList.contains('theme-card'))return;
+ const heading=el.querySelector(':scope > b, :scope > .row > b');
+ const label=heading?.textContent?.trim()||'Дополнительные настройки';
+ wrap(el,label);
+});
+}
+
+
+$('supportForm').addEventListener('submit',event=>{
+ event.preventDefault();
+ const date=$('supportDate').value,total=Number($('supportTotal').value),food=Number($('supportFood').value);
+ const today=iso(new Date());
+ if(!data.startBalances||date<data.startBalances.date||date>today){
+  alert('Выбери дату поступления от начала учёта до сегодняшнего дня.');return;
+ }
+ if(!(total>0&&food>=0&&food<=total)){alert('Сумма на продукты должна быть в пределах дохода жены.');return;}
+ const monthKey=date.slice(0,7);
+ if(data.extraIncomes.some(i=>i.supportTotal!=null&&i.date.startsWith(monthKey))&&!confirm('За этот месяц уже есть запись. Добавить отдельное поступление?'))return;
+ data.extraIncomes.push({id:'support-'+Date.now(),date,source:'Доход жены',supportTotal:total,amount:food,destination:'family',note:'Получено '+rub(total)+' · на продукты '+rub(food)});
+ event.target.reset();
+ if(renderAll()){$('opsSheet').querySelector('.ops-sheet-close').click();showSaveFeedback('Доход жены учтён',$('supportOpen'))}
+});
+function wifeFunds(date){
+ // A confirmed balance is the source of truth. Earlier income, transfers
+ // and reconciled expenses must never be counted again over that snapshot.
+ const reports=(data.wifeBalanceReports||[])
+  .filter(r=>r.date<=date&&(!data.startBalances||r.date>=data.startBalances.date)&&Number.isFinite(Number(r.family??r.total)))
+  .sort((a,b)=>b.date.localeCompare(a.date)||String(b.checkedAt||'').localeCompare(String(a.checkedAt||'')));
+ const last=reports[0];
+ if(last){
+  const cutoff=last.checkedAt||'';
+  const afterSnapshot=entry=>entry.date<=date&&(entry.date>last.date||(entry.date===last.date&&!!entry.createdAt&&(!cutoff||entry.createdAt>cutoff)));
+  const laterTransfers=(data.wifeMoves||[]).filter(afterSnapshot).reduce((sum,m)=>sum+num(m.amount),0);
+  const laterPurchases=data.expenses.filter(e=>e.wifeCheck&&afterSnapshot(e)).reduce((sum,e)=>sum+num(e.amount),0);
+  const laterWifeIncome=(data.extraIncomes||[]).filter(i=>(i.wifeIncome||i.source==='Доход жены')&&afterSnapshot(i)).reduce((sum,i)=>sum+num(i.amount),0);
+  return Math.max(0,Math.round((num(last.family??last.total)+laterTransfers+laterWifeIncome-laterPurchases)*100)/100);
+ }
+ const moves=(data.wifeMoves||[]).filter(m=>m.date<=date&&(!data.startBalances||m.date>=data.startBalances.date));
+ const sent=moves.reduce((sum,m)=>sum+num(m.amount),0);
+ const food=data.extraIncomes.filter(i=>(i.supportTotal!=null||i.wifeIncome||i.source==='Доход жены')&&i.date<=date&&i.date>=data.startBalances?.date).reduce((sum,i)=>sum+num(i.amount),0);
+ const spent=data.expenses.filter(e=>e.wifeCheck&&e.date<=date&&(!data.startBalances||e.date>=data.startBalances.date)).reduce((sum,e)=>sum+num(e.amount),0);
+ const adjustments=(data.wifeAdjustments||[]).filter(a=>a.date<=date&&(!data.startBalances||a.date>=data.startBalances.date)).reduce((sum,a)=>sum+num(a.amount),0);
+ return Math.max(0,Math.round((sent+food+adjustments-spent)*100)/100);
+}
+function renderFamilyBalances(){
+ const today=iso(new Date()),total=categoryBalanceAt('family',today),held=wifeFunds(today);
+ for(const [id,value] of [['familyTotalNow',total],['familyMineNow',total-held],['familyWifeNow',held]]){
+  $(id).textContent=total===null?'—':rub(value);
+ }
+ const reports=data.wifeBalanceReports||[];
+ const last=reports.filter(r=>r.date<=today).sort((a,b)=>b.date.localeCompare(a.date))[0];
+ const message=last?'Последняя сверка '+fromISO(last.date).toLocaleDateString('ru-RU')+': '+rub(last.family??last.total):'';

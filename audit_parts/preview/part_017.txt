@@ -1,0 +1,114 @@
+SOURCE: preview.html
+PART: 17
+SOURCE LINES: 2318-2426
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+   <div class="analytics-mini-card"><span>Получено за месяц</span><strong id="analyticsIncomeTotal">0 ₽</strong><small id="analyticsCount">0 расходов</small></div>
+  </div>
+ <div class="operations-overview-foot"><span id="operationsExpenseItems">0 записей расходов</span><span id="operationsIncomeItems">0 поступлений</span></div>
+ <div class="operations-quick" role="group" aria-label="Быстрые действия"><button type="button" data-ops-open="expense">＋ Расход</button><button type="button" data-ops-open="income">＋ Доход</button><button type="button" data-ops-open="history">▤ История</button></div>
+</div>
+<div id="familyActions" class="family-actions" role="group" aria-label="Деньги у жены">
+<button type="button" class="btn secondary" id="wifeTransferOpen" hidden style="display:none!important">Перевод жене</button>
+<button type="button" class="btn secondary" id="supportOpen" hidden style="display:none!important">Доход жены</button>
+<button type="button" class="btn secondary" id="wifeCheckOpen">Сверить остаток у жены</button>
+</div>
+<div class="card" id="wifeTransferCard" hidden style="display:none!important"><form id="wifeTransferForm">
+<label class="field"><span>Откуда переводишь</span><select id="wifeTransferSource" required>
+<option value="family">Семейные нужды</option><option value="other">Остальное</option><option value="savings">Накопления</option><option value="utilities">Коммуналка</option>
+</select></label>
+<p class="foot" id="wifeTransferAvailable"></p>
+<label class="field"><span>Сумма перевода, ₽</span><input id="wifeTransferAmount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Например, 3000" required></label>
+<button class="btn full" type="submit">Записать перевод жене</button>
+<p class="foot">Деньги переходят жене на семейные покупки. Общая сумма семьи не меняется.</p>
+</form></div>
+<div class="card" id="wifeCheckCard"><form id="wifeCheckForm">
+<label class="field"><span>Сколько у жены осталось на семейные покупки, ₽</span><input id="wifeActualTotal" type="number" step="0.01" min="0" inputmode="decimal" required></label>
+<label class="field" hidden style="display:none!important"><span>Осталось на семейные покупки, ₽</span><input id="wifeActualFamily" type="number" step="0.01" min="0" inputmode="decimal"></label>
+<p class="foot">Сверка обновит остаток у жены внутри «Семейных нужд». Переводы между вами не считаются расходами.</p>
+<button class="btn full" type="submit">Сохранить сверку</button>
+</form><p class="foot" id="wifeCheckPrevious"></p></div>
+<div class="card" id="supportCard" hidden style="display:none!important"><p class="foot" id="supportMonthInfo"></p><form id="supportForm">
+<label>Дата поступления<input id="supportDate" type="date" required></label>
+<label>Всего получила, ₽<input id="supportTotal" type="number" step="0.01" min="0.01" required></label>
+<label>Из них на продукты, ₽<input id="supportFood" type="number" step="0.01" min="0" required></label>
+<button class="btn" type="submit">Учесть поступление</button>
+</form></div>
+<div class="card"><form id="expenseForm">
+ <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><p class="foot" id="expenseWifeTransferAvailable" hidden></p><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="history-sort-control"><label for="expenseListSort">По дате</label><select id="expenseListSort" data-history-sort="expenseList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
+<div class="two transfer-envelopes"><label class="field"><span>Откуда</span><select id="transferFrom"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Куда</span><select id="transferTo"><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label></div>
+<div class="two"><label class="field"><span>Сумма, ₽</span><input id="transferAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 5000"></label><label class="field"><span>Дата перевода</span><input id="transferDate" type="date" required></label></div>
+<label class="field"><span>Примечание (необязательно)</span><input id="transferNote" maxlength="120" placeholder="Остаток коммуналки"></label>
+<div class="foot" id="transferAvailable"></div><div class="foot">Перевод меняет только остатки категорий. Не учитывается как доход или расход. Делай запись после фактического перевода денег.</div><button type="submit" class="btn full">Перевести деньги</button>
+</form></div></details>
+<details class="compact-disclosure operation-disclosure" id="transferHistoryPanel"><summary><span class="disclosure-title">История переводов</span><span class="disclosure-count" id="transferCount">0</span></summary><div class="history-sort-control"><label for="transferListSort">По дате</label><select id="transferListSort" data-history-sort="transferList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="card" id="transferList"></div></details>
+<details class="compact-disclosure income-disclosure operation-disclosure" id="incomePanel"><summary><span class="disclosure-title">＋ Записать дополнительный доход</span></summary>
+<div class="card">
+<form id="incomeForm">
+<div class="two">
+<label class="field"><span>Сумма, ₽</span><input id="incomeAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 1500"></label>
+<label class="field"><span>Дата поступления</span><input id="incomeDate" type="date" required></label>
+</div>
+<label class="field"><span>Источник дохода</span><select id="incomeSource"><option>Проценты по вкладу</option><option>Премия</option><option>Кэшбэк</option><option>Возврат покупки</option><option>Подработка</option><option>Подарок</option><option>Доход жены</option><option>Другое</option></select></label>
+<label class="field"><span>Куда зачислить</span><select id="incomeDestination">
+<option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option>
+<option value="savings">Накопления</option><option value="reserve">🛡 Подушка безопасности</option><option value="other">Доступный бюджет (Остальное)</option>
+<option value="mortgage">На ипотеку</option><option value="credit">На кредитку</option>
+</select></label>
+<label class="field"><span>Примечание (необязательно)</span><input id="incomeNote" maxlength="120" placeholder="Например, проценты за октябрь"></label>
+<div class="foot">Записывай только фактически полученные деньги. При выборе «Подушка безопасности» доход пополнит защищённую подушку, не затронув доступный бюджет и накопления. Переводы между своими счетами не являются доходом. Премию, внесённую здесь, не учитывай второй раз в зарплате.</div>
+<button class="btn full" type="submit">Зачислить доход</button>
+</form></div></details>
+<details class="compact-disclosure operation-disclosure" id="incomeHistoryPanel"><summary><span class="disclosure-title">История дополнительных доходов</span><span class="disclosure-count" id="incomeCount">0</span></summary><div class="history-sort-control"><label for="incomeListSort">По дате</label><select id="incomeListSort" data-history-sort="incomeList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="card" id="incomeList"></div></details>
+</section>
+
+<section class="view" id="v-analytics">
+ <div class="analytics-one-screen">
+  <div class="analytics-dash-header"><h2>Накопления</h2><button type="button" class="analytics-icon-button" id="advisorOpen">🤖 Советник</button></div>
+  <div class="analytics-economy-card">
+   <div class="analytics-panel-top"><b>💡 Найденная экономия</b><button type="button" class="analytics-text-button" data-anal-open="economy">Подробнее ›</button></div>
+   <div class="analytics-economy-total"><strong id="ladderSaving">—</strong><span id="ladderPeriod">Сравнение с прошлым месяцем</span></div>
+   <div class="analytics-economy-peek" id="analyticsEconomyPreview"><div class="foot">Анализируем расходы…</div></div>
+   <div class="analytics-economy-sub" id="analyticsEconomyNote">Только предварительное снижение затрат</div>
+   <button type="button" class="btn full analytics-economy-cta" id="analyticsEconomyToSavings" data-anal-open="transfer" disabled>Перевести свободное в накопления</button>
+  </div>
+  <div class="analytics-capital-unified" aria-label="План накоплений">
+  <div class="analytics-capital-card">
+   <div class="analytics-panel-top"><b>🎯 Лестница капитала</b><button type="button" class="analytics-text-button" data-anal-open="capital">Подробнее ›</button></div>
+   <div class="analytics-capital-numbers"><strong id="ladderTotal">—</strong><span id="ladderBadge">Цель: 1 млн ₽</span></div>
+   <div class="ladder-track" role="progressbar" aria-label="Прогресс накоплений" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ladderTrack"><div id="ladderFill"></div></div>
+   <div class="analytics-capital-note" id="ladderRemaining">До следующей ступени —</div>
+  </div>
+  <div class="analytics-goal-overview" aria-label="Сводка цели накоплений">
+   <div class="analytics-goal-top">
+    <div class="analytics-goal-tile"><span>Следующая цель</span><strong id="analyticsGoalAmount">—</strong></div>
+    <div class="analytics-goal-tile"><span>Уже накоплено</span><strong id="analyticsGoalCurrent">—</strong></div>
+   </div>
+   <div class="analytics-goal-rest"><span>Осталось накопить</span><strong id="analyticsGoalRemaining">—</strong></div>
+  </div>
+  <div class="analytics-monthly-save" aria-label="Нужно откладывать в месяц">
+   <span>Нужно откладывать в месяц</span>
+   <strong id="analyticsMonthlySaveAmount">—</strong>
+   <small id="analyticsMonthlySaveDeadline">—</small>
+  </div>
+  </div>
+  <button class="analytics-bottom-link analytics-goal-settings" type="button" data-anal-open="plan">⚙️ Настроить цель и срок <span>›</span></button>
+ </div>
+ 
+</section>
+<section class="view" id="v-settings">
+<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.101</span></div>
+<div class="card" id="notifySettingsCard">
+ <div class="row"><b>🔔 Push-уведомления</b><span class="quiet">Автоматически</span></div>
+ <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. С 08:30 по Москве, затем повторная проверка днём. Если подтверждённое зачисление сохранено, напоминания по нему прекращаются. Неподтверждённые выплаты напоминаются каждый час с 08:30 до 20:30 по Москве в дни напоминаний, пока поступление не подтверждено.</div>
+ <label class="field"><span>Какие напоминания присылать</span><select id="notifyReminderChoice"><option value="all">Аванс, зарплата и итоги месяца</option><option value="pay">Только аванс и зарплата</option><option value="none">Выключены</option></select></label>
+ <button class="btn" type="button" id="notifyEnableBtn">Подключить push-уведомления</button>
+ <button class="btn" type="button" id="notifyTestBtn">Отправить тестовое push</button>
+ <button class="btn secondary" type="button" id="notifyDelayedTestBtn">🔒 Тест через 30 секунд</button>
+ <div class="foot" id="notifyStatus" role="status" aria-live="polite">Push ещё не подключён на этом устройстве.</div>
+</div>
+<div class="card theme-card"><div class="row"><b>Тема оформления</b><span class="quiet">Как в SQL Work Assistant</span></div><label class="field"><span>Выбери оформление</span><select id="themeSelect"></select></label></div>
+<div class="card" id="salarySettingsCard"><div class="row"><b>Оклад и рабочий календарь</b><span class="quiet">Расчёт выплат</span></div>
+<label class="field"><span>Месячный оклад, ₽</span><input id="baseSalary" type="number" min="0" step="100" inputmode="decimal" placeholder="Введи оклад"></label>
+<label class="field"><span>Как указан оклад</span><select id="salaryMode"><option value="gross">До вычета НДФЛ</option><option value="net">На руки (после НДФЛ)</option></select></label>
+<label class="field"><span>Расчётный НДФЛ, %</span><input id="salaryTaxRate" type="number" min="0" max="50" step="0.5" inputmode="decimal"></label>

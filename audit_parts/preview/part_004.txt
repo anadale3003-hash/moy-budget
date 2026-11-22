@@ -1,0 +1,155 @@
+SOURCE: preview.html
+PART: 4
+SOURCE LINES: 368-517
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+ .envelope-history-overlay,.envelope-history-sheet{transition:none!important}
+ .envelope-history-entry{animation:none!important}
+}
+
+/* Test layout: total-money tile fills the remaining top-summary column. */
+.hero .hero-overview{align-items:stretch}
+.hero .hero-overview .hero-breakdown{height:100%;align-self:stretch}
+.hero .hero-overview .hero-breakdown .hero-all{
+ flex:1 1 auto;width:100%;box-sizing:border-box;
+ display:flex;align-items:center;justify-content:center;flex-direction:column;
+ text-align:center;min-height:0;
+}
+.hero .hero-overview .hero-breakdown .hero-all{
+ min-width:0;overflow:hidden;padding:8px 5px;
+}
+.hero .hero-overview .hero-breakdown .hero-all span,
+.hero .hero-overview .hero-breakdown .hero-all b{
+ display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box;
+ white-space:nowrap;overflow:hidden;text-overflow:clip;
+ text-align:center;line-height:1.2;
+}
+.hero .hero-overview .hero-breakdown .hero-all span{font-size:16px;font-weight:600;letter-spacing:0}
+.hero .hero-overview .hero-breakdown .hero-all b{font-size:30px;font-weight:750;font-variant-numeric:tabular-nums;letter-spacing:-.35px}
+
+/* Preview: equal perceived spacing above and below the spending card.
+   The main area already adds 7px of space below the hero. */
+.app.home-active>.hero{padding-bottom:5px}
+.app.home-active>.hero .payday-counter{margin-top:12px}
+@media(max-height:800px){
+ .app.home-active>.hero{padding-bottom:4px}
+ .app.home-active>.hero .payday-counter{margin-top:11px}
+}
+
+/* Preview: payments tab top-to-bottom layout, keeping existing input and receipt IDs. */
+#v-plan>.payroll-preview{margin:0 0 12px;padding:15px 14px;border-radius:15px}
+#v-plan>.month-strip{margin:0 0 12px}
+#v-plan>.payment-inputs{margin-bottom:14px}
+#v-plan>.payment-obligations{padding-top:12px}
+#v-plan>.payment-obligations>.mortgage-field{display:flex;flex-direction:column;margin:0 0 10px}
+#v-plan>.payment-obligations>.payment-confirm-card{margin-bottom:0}
+
+/* Distinct payout cards: independently bordered, with a clear visual gap. */
+#v-plan>.payment-inputs{display:block;position:relative;margin:0 0 19px;border:1px solid var(--line);border-radius:16px;background:var(--card);box-shadow:0 5px 16px rgba(0,0,0,.06)}
+#v-plan>.payment-obligations{margin-top:0;margin-bottom:16px}
+#v-plan>.section-heading{margin:10px 0 9px}
+#v-plan>.payment-inputs>.payment-confirm-card{border-radius:12px}
+
+/* Preview: input actual income in a confirmation sheet; keep the card compact. */
+#v-plan .payment-receipt>.receipt-action-label{font-size:14px;font-weight:700;margin:2px 0 10px;color:var(--ink)}
+#v-plan .payment-receipt>input[hidden],#v-plan .payment-dates-note>input[hidden]{display:none!important}
+#v-plan .payment-dates-note{width:100%;display:block;margin-top:14px;grid-column:1/-1}
+#v-plan .payment-dates-note .foot{width:100%;max-width:none;box-sizing:border-box;line-height:1.45}
+.receipt-entry-overlay[hidden]{display:none!important}
+.receipt-entry-overlay{position:fixed;inset:0;z-index:120;display:flex;align-items:flex-end;justify-content:center;background:rgba(4,12,25,.67);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)}
+.receipt-entry-sheet{box-sizing:border-box;width:min(100%,600px);max-height:92dvh;overflow-y:auto;background:var(--bg);color:var(--ink);padding:20px 18px calc(20px + env(safe-area-inset-bottom));border-radius:20px 20px 0 0;box-shadow:0 -12px 40px #0005}
+.receipt-entry-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.receipt-entry-header h2{font-size:19px;margin:0}
+.receipt-entry-sheet .field{display:flex;flex-direction:column;gap:7px;margin:16px 0 12px}
+.receipt-entry-sheet .field input{font-size:16px;width:100%;box-sizing:border-box;min-height:48px}
+.receipt-entry-sheet .btn{margin-top:10px}
+.receipt-entry-error{color:var(--red);margin:10px 0;font-size:13px}
+
+/* Preview: remove unused title space from cards with external headings. */
+#v-plan>.payroll-preview{padding:10px 13px 11px}
+#v-plan>.payroll-preview .payroll-grid{margin-top:0;align-items:start}
+#v-plan>.payroll-preview .payroll-grid b{margin-top:3px}
+#v-plan>.payout-destinations{padding:10px 12px 12px;margin-top:0}
+#v-plan>.payout-destinations #planTable{margin:0;padding:0}
+#v-plan>.payout-destinations #planTable>:first-child{margin-top:0}
+#v-plan>.payout-destinations #planWarnings:empty{display:none}
+
+/* Preview: keep vertical scrolling and taps, suppress double-tap page zoom. */
+html,body,.app{touch-action:pan-x pan-y}
+button,a,input,select,textarea,summary{touch-action:manipulation}
+
+/* Preview: more legible available-budget heading and balanced dashboard height. */
+.app.home-active .hero-overview .hero-primary-label{
+ font-size:clamp(12px,3.25vw,14px);
+ font-weight:750;
+ letter-spacing:.12px;
+ line-height:1.35;
+ margin:3px 0 5px;
+}
+
+/* Preview: use the available envelope height for readable category titles and amounts. */
+#homeEnvelopesPanel #envelopes>.envelope-button{
+ padding:10px 12px;
+ justify-content:center;
+}
+#homeEnvelopesPanel #envelopes>.envelope-button>.row{
+ display:flex;
+ flex-direction:column;
+ align-items:stretch;
+ justify-content:center;
+ gap:10px;
+ min-width:0;
+ width:100%;
+}
+#homeEnvelopesPanel #envelopes>.envelope-button .row-title{
+ display:flex;
+ align-items:center;
+ gap:8px;
+ min-width:0;
+}
+#homeEnvelopesPanel #envelopes>.envelope-button .emoji{
+ width:30px;height:30px;min-width:30px;
+ border-radius:10px;font-size:18px;
+}
+#homeEnvelopesPanel #envelopes>.envelope-button .name{
+ font-size:clamp(13px,3.65vw,16px);
+ font-weight:750;
+ line-height:1.18;
+ letter-spacing:-.18px;
+}
+#homeEnvelopesPanel #envelopes>.envelope-button .number{
+ font-size:clamp(18px,5.2vw,25px);
+ font-weight:800;
+ line-height:1.15;
+ letter-spacing:-.5px;
+ font-variant-numeric:tabular-nums;
+ white-space:nowrap;
+ margin:0;
+ max-width:100%;
+}
+@media(max-width:370px){
+ #homeEnvelopesPanel #envelopes>.envelope-button{padding:7px 8px}
+ #homeEnvelopesPanel #envelopes>.envelope-button>.row{gap:7px}
+ #homeEnvelopesPanel #envelopes>.envelope-button .number{font-size:clamp(16px,4.8vw,21px)}
+}
+@media(max-height:730px){
+ #homeEnvelopesPanel #envelopes>.envelope-button>.row{gap:6px}
+ #homeEnvelopesPanel #envelopes>.envelope-button .emoji{width:25px;height:25px;min-width:25px;font-size:15px}
+}
+
+/* Preview: payment entry fields live in the confirmation sheet. */
+#v-plan .payment-confirm>input[hidden]{display:none!important}
+#v-plan .payment-confirm{justify-content:center}
+#v-plan .payment-confirm .payment-confirm-heading{margin-bottom:10px}
+#v-plan .payment-confirm>.btn{margin-top:4px}
+
+/* Preview: single same-width standard card for payment confirmations. */
+#v-plan>.payment-obligations{
+ width:auto;
+ box-sizing:border-box;
+ padding:12px 13px 14px;
+ margin:0 0 16px;
+ border:1px solid var(--line);
+ border-radius:var(--radius,16px);
+ background:var(--card);
+}

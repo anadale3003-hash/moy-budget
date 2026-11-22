@@ -1,0 +1,155 @@
+SOURCE: preview.html
+PART: 25
+SOURCE LINES: 3395-3544
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+$('debtRemaining').textContent=rub(cc.debt);$('payCount').textContent=cc.pays.length;$('perPay').textContent=rub(cc.per);let alert='';if(cc.debt===0)alert='<div class="success">Оставшаяся сумма к накоплению равна нулю. Проверь фактический долг и платежи в банке.</div>';else if(!cc.due||cc.pays.length===0)alert='<div class="warning">До указанного срока нет будущих выплат. Нужен другой источник денег или перенос срока с банком.</div>';else alert=`<div class="hint">До ${cc.due.toLocaleDateString('ru-RU')} нужно накопить ${rub(cc.debt)}. В расчёте ${cc.pays.length} будущих поступлений.</div>`;$('debtAlert').innerHTML=alert;
+let saved=0;$('debtSchedule').innerHTML=cc.pays.slice(0,28).map((p,i)=>{const n=Math.min(cc.per,Math.max(0,cc.debt-saved));saved+=n;return `<div class="lineitem"><span>${p.date.toLocaleDateString('ru-RU')} · ${p.type==='advance'?'Аванс':'Зарплата'}</span><span>${rub(n)}</span></div>`}).join('')||'<div class="empty">Запланированных выплат нет</div>';
+const savingsAvailable=realBalance('savings');
+$('earlyAvailable').textContent='Доступно из накоплений: '+(savingsAvailable===null?'сначала задай начальные остатки':rub(Math.max(0,savingsAvailable)));
+const earlyRows=sortHistoryRows((data.earlyRepayments||[]).filter(x=>x.date?.startsWith(month)),'earlyHistory');
+$('earlyCount').textContent='· '+earlyRows.length;
+$('earlyHistory').innerHTML=earlyRows.length?earlyRows.map(x=>`<div class="transaction"><div><b>${x.target==='credit'?'Кредитная карта':'Ипотека'}</b><small>${esc(x.date)} · Из накоплений${x.note?' · '+esc(x.note):''}</small></div><div class="row"><b>${rub(x.amount)}</b><button class="delete" type="button" data-del-early="${esc(x.id)}" title="Удалить запись">✕</button></div></div>`).join(''):'<div class="empty">Нет досрочных погашений за месяц</div>';
+const transferRows=sortHistoryRows((data.transfers||[]).filter(t=>t.date?.startsWith(month)),'transferList');
+$('transferCount').textContent=String(transferRows.length);
+$('transferList').innerHTML=transferRows.length?transferRows.map(t=>{const from=cats.find(c=>c.id===t.from)?.name||'Категория',to=cats.find(c=>c.id===t.to)?.name||'Категория';return `<div class="transaction"><div><b>${esc(from)} → ${esc(to)}</b><small>${esc(t.date)}${t.note?' · '+esc(t.note):''}</small></div><div class="row"><b>${rub(t.amount)}</b><button type="button" class="delete" data-del-transfer="${esc(t.id)}" title="Отменить перевод">✕</button></div></div>`}).join(''):'<div class="empty">За этот месяц переводов нет</div>';
+const incomeRows=sortHistoryRows(data.extraIncomes.filter(i=>i.date?.startsWith(month)),'incomeList');
+$('incomeCount').textContent=String(incomeRows.length);
+$('incomeList').innerHTML=incomeRows.length?incomeRows.map(i=>{
+ const cat=cats.find(c=>c.id===i.destination),dest=cat?.name||(i.destination==='reserve'?'Подушка безопасности':i.destination==='mortgage'?'Ипотека':'Кредитная карта');
+ return `<div class="transaction"><div><b>${esc(i.source)}</b><small>${esc(i.date)} · ${esc(dest)}${i.note?' · '+esc(i.note):''}</small></div><div class="row"><b style="color:var(--green)">+${rub(i.amount)}</b><button type="button" class="delete" data-del-income="${esc(i.id)}" title="Удалить доход">✕</button></div></div>`;
+}).join(''):'<div class="empty">Пока нет дополнительных доходов за месяц</div>';
+const rows=[...data.expenses.filter(e=>e.date?.startsWith(month)),...(data.wifeMoves||[]).filter(m=>m.fromExpense&&m.date?.startsWith(month)).map(m=>({...m,type:'Отправил жене',category:m.source||'family',isWifeMove:true}))]; const sortedExpenseRows=sortHistoryRows(rows,'expenseList');$('expenseCount').textContent=String(rows.length);$('expenseList').innerHTML=sortedExpenseRows.length?sortedExpenseRows.map(e=>{const c=cats.find(c=>c.id===e.category);return `<div class="transaction"><div><b>${esc(e.note||e.type||c?.name||'Покупка')}</b><small>${esc(e.date)} · ${esc(c?.name||'Категория')}${e.type?' · '+esc(e.type):''}</small></div><div class="row"><b>${rub(e.amount)}</b><button class="delete" ${e.isWifeMove?'data-del-wife':'data-del'}="${esc(e.id)}" title="Удалить">✕</button></div></div>`}).join(''):'<div class="empty">Пока нет расходов за выбранный месяц</div>';}
+
+
+/* Capital goals use the existing savings category, plus any external protected deposit. */
+function ladderSettings(){
+ if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
+ return data.ladder;
+}
+/* Extra income credited directly to the protected cushion stays outside savings envelopes. */
+function reserveIncomeTotal(asOf=iso(new Date())){
+ const start=data.startBalances?.date||'0000-01-01';
+ return (data.extraIncomes||[]).filter(i=>i.destination==='reserve'&&i.date>=start&&i.date<=asOf)
+   .reduce((sum,i)=>sum+num(i.amount),0);
+}
+function actualReserve(asOf=iso(new Date())){
+ return num(ladderSettings().reserve)+reserveIncomeTotal(asOf);
+}
+
+/* v1.5.32: automatic, conservative economy discovery from recorded expenses.
+   Only comparable categories with expenses in both periods are used;
+   growth elsewhere offsets reductions, and transfers never exceed recorded funds. */
+function analyticsEconomy(){
+ const selected=month,nowDay=iso(new Date());
+ const [year,m]=selected.split('-').map(Number);
+ const previous=iso(new Date(year,m-2,1)).slice(0,7);
+ const isCurrent=selected===currentMonth;
+ const cutoff=isCurrent?new Date().getDate():31;
+ const previousCutoff=isCurrent?Math.min(cutoff,new Date(year,m-1,0).getDate()):31;
+ const groups=[],sources=['family','utilities','other'];
+ const match=(entry,key,day)=>entry.date?.startsWith(key)&&Number(entry.date.slice(8,10))<=day;
+ for(const id of sources){
+   const past=data.expenses.filter(e=>e.category===id&&match(e,previous,previousCutoff));
+   const present=data.expenses.filter(e=>e.category===id&&match(e,selected,cutoff));
+   // Missing current records may mean purchases have not yet been entered.
+   if(!past.length||!present.length)continue;
+   const pastTotal=past.reduce((a,e)=>a+num(e.amount),0);
+   const presentTotal=present.reduce((a,e)=>a+num(e.amount),0);
+   const signed=pastTotal-presentTotal;
+   const saved=(data.transfers||[]).filter(t=>t.kind==='economy'&&t.to==='savings'&&t.from===id&&t.period===selected)
+    .reduce((a,t)=>a+num(t.amount),0);
+   const balance=categoryBalanceAt(id,nowDay);
+   const pastTypes=new Map(),presentTypes=new Map();
+   for(const e of past){const key=String(e.type||'Без вида').trim()||'Без вида';pastTypes.set(key,(pastTypes.get(key)||0)+num(e.amount))}
+   for(const e of present){const key=String(e.type||'Без вида').trim()||'Без вида';presentTypes.set(key,(presentTypes.get(key)||0)+num(e.amount))}
+   const types=[...pastTypes.entries()].map(([name,value])=>({
+     name,delta:Math.max(0,Math.round((value-(presentTypes.get(name)||0))*100)/100)
+   })).filter(t=>t.delta>0).sort((x,y)=>y.delta-x.delta);
+   groups.push({id,name:cats.find(c=>c.id===id)?.name||id,past:pastTotal,present:presentTotal,
+     signed,decline:Math.max(0,signed),saved,balance,types,allocated:0,max:0});
+ }
+ const grossReduction=Math.max(0,Math.round(groups.reduce((a,g)=>a+g.signed,0)*100)/100);
+ // Distribute the actual net improvement, not a sum of isolated reductions.
+ const sorted=[...groups].sort((a,b)=>b.decline-a.decline);
+ let uncovered=grossReduction;
+ for(const group of sorted){
+   group.allocated=Math.min(uncovered,group.decline);
+   uncovered=Math.max(0,Math.round((uncovered-group.allocated)*100)/100);
+ }
+ const previouslyTransferred=groups.reduce((a,g)=>a+g.saved,0);
+ let transferLeft=Math.max(0,Math.round((grossReduction-previouslyTransferred)*100)/100);
+ const todayMonth=isCurrent;
+ for(const group of sorted){
+   const categoryRemaining=Math.max(0,group.allocated-group.saved);
+   group.max=todayMonth&&group.balance!==null
+     ?Math.max(0,Math.floor(Math.min(transferLeft,categoryRemaining,group.balance)*100)/100):0;
+   transferLeft=Math.max(0,Math.round((transferLeft-group.max)*100)/100);
+ }
+ // Assign explanatory type declines only up to their category's allocated net savings.
+ const lines=[];
+ for(const group of sorted){
+   let cap=group.allocated;
+   for(const t of group.types){
+     const value=Math.min(cap,t.delta);
+     if(value>0.009)lines.push({category:group.id,label:group.name+' · '+t.name,amount:value});
+     cap=Math.max(0,Math.round((cap-value)*100)/100);
+     if(cap<0.01)break;
+   }
+ }
+ lines.sort((x,y)=>y.amount-x.amount);
+ return {selected,previous,cutoff,isCurrent,groups,lines,total:grossReduction,
+   available:groups.reduce((a,g)=>a+g.max,0),comparable:groups.length,
+   previousSaved:previouslyTransferred};
+}
+function ladderEconomy(source){
+ const auto=analyticsEconomy(),found=auto.groups.find(g=>g.id===source);
+ if(!found)return {error:'Для этой категории пока недостаточно записей в обоих месяцах.',max:0};
+ return {last:found.past,now:found.present,delta:found.allocated,saved:found.saved,
+   remaining:Math.max(0,found.allocated-found.saved),balance:found.balance,max:found.max};
+}
+let analyticsEconomyPage=0,analyticsTypePage=0,analyticsStatsTab='categories';
+function analyticsPageSize(){return window.matchMedia('(orientation:landscape)').matches?3:4}
+function analyticsBreakdownRender(auto){
+ const list=$('analyticsEconomyFullList'),per=analyticsPageSize();
+ const count=Math.max(1,Math.ceil(auto.lines.length/per));
+ analyticsEconomyPage=Math.max(0,Math.min(analyticsEconomyPage,count-1));
+ const items=auto.lines.slice(analyticsEconomyPage*per,(analyticsEconomyPage+1)*per);
+ list.innerHTML=items.length?items.map(x=>
+   '<div class="analytics-economy-row"><span>'+esc(x.label)+'</span><b>−'+rub(x.amount)+'</b></div>'
+ ).join(''):'<div class="foot">Пока нет подтверждённого сравнения по видам расходов.</div>';
+ $('analyticsEconomyPrev').disabled=analyticsEconomyPage===0;
+ $('analyticsEconomyNext').disabled=analyticsEconomyPage>=count-1;
+ $('analyticsEconomyPageLabel').textContent=auto.lines.length?'Страница '+(analyticsEconomyPage+1)+' из '+count:'Нет находок';
+}
+function analyticsReportRender(){
+ const views={categories:'analyticsStatsCategories',types:'analyticsStatsTypes',income:'analyticsStatsIncome',months:'analyticsStatsMonths'};
+ for(const key of Object.keys(views))$(views[key]).hidden=key!==analyticsStatsTab;
+ document.querySelectorAll('[data-anal-stats]').forEach(b=>b.classList.toggle('active',b.dataset.analStats===analyticsStatsTab));
+ const totals=new Map();
+ data.expenses.filter(e=>e.date?.startsWith(month)).forEach(e=>{
+   const type=String(e.type||cats.find(c=>c.id===e.category)?.name||'Без вида').trim()||'Без вида';
+   totals.set(type,(totals.get(type)||0)+num(e.amount));
+ });
+ const arr=[...totals].sort((a,b)=>b[1]-a[1]),per=4,pages=Math.max(1,Math.ceil(arr.length/per));
+ analyticsTypePage=Math.max(0,Math.min(analyticsTypePage,pages-1));
+ $('analyticsPagedTypes').innerHTML=arr.length?arr.slice(analyticsTypePage*per,(analyticsTypePage+1)*per)
+   .map(([label,value])=>'<div class="lineitem"><span>'+esc(label)+'</span><span>'+rub(value)+'</span></div>').join('')
+   :'<div class="foot">В этом месяце пока нет расходов.</div>';
+ $('analyticsTypesPrev').disabled=analyticsTypePage===0;
+ $('analyticsTypesNext').disabled=analyticsTypePage>=pages-1;
+ $('analyticsTypesPageLabel').textContent=arr.length?'Страница '+(analyticsTypePage+1)+' из '+pages:'Нет записей';
+}
+
+/* v1.5.35: capital goal planner. Same reserve accounting as the ladder above. */
+/* Actual external savings are confirmed manually; planning allocations
+   remain budget earmarks, not evidence of a bank transfer. */
+function confirmedSavingsBalance(){
+ const v=data.confirmedSavings;
+ if(!v||!Number.isFinite(Number(v.base))||Number(v.base)<0)return null;
+ return Math.max(0,num(v.base)+(v.entries||[]).reduce((sum,e)=>sum+(e.kind==='withdrawal'?-num(e.amount):num(e.amount)),0));
+}
+function goalSavingsBalance(){
+ const envelope=categoryBalanceAt('savings',iso(new Date()));
+ return envelope===null?confirmedSavingsBalance():envelope;
+}

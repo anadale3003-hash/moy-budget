@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 33
+SOURCE LINES: 4590-4739
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+$('confirmCreditPayment').addEventListener('click',()=>openPaymentEntry('credit'));
+$('paymentEntryForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ if(!paymentEntryTarget||paymentEntryMonth!==month)return;
+ const amount=Number($('paymentEntryAmount').value),date=$('paymentEntryDate').value;
+ const error=confirmRegularPayment(paymentEntryTarget,amount,date,$('creditPaymentSource').value,'');
+ if(error){$('paymentEntryError').textContent=error;$('paymentEntryError').hidden=false;}
+});
+$('paymentEntryClose').addEventListener('click',closePaymentEntry);
+$('paymentEntryCancel').addEventListener('click',closePaymentEntry);
+$('paymentEntryOverlay').addEventListener('click',e=>{if(e.target===$('paymentEntryOverlay'))closePaymentEntry()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('paymentEntryOverlay').hidden)closePaymentEntry()});
+$('regularPaymentHistory').addEventListener('click',e=>{
+ const button=e.target.closest('[data-undo-regular]');if(!button)return;
+ const record=data.regularPayments.find(x=>x.id===button.dataset.undoRegular);if(!record)return;
+ const extraDescription=num(record.extraAmount)>0?' и '+rub(record.extraAmount)+' в конверт «'+(cats.find(c=>c.id===record.extraSource)?.name||'источник')+'»':'';
+ if(!confirm('Отменить подтверждение оплаты '+rub(record.amount)+'? Израсходованные средства вернутся в резерв'+extraDescription+', а учёт платежа восстановится.'))return;
+ data.regularPayments=data.regularPayments.filter(x=>x.id!==record.id);
+ if(record.target==='credit')data.reserved=num(data.reserved)+num(record.reserveUsed===undefined?record.amount:record.reserveUsed);
+ renderAll();
+});
+$('receiveAdvance').addEventListener('click',()=>receive('advance'));
+$('receiveSalary').addEventListener('click',()=>receive('salary'));
+
+function undoReceipt(type){
+ const key=month+'-'+type;
+ const receipt=data.receipts.find(r=>r.id===key);
+ if(!receipt){alert('Поступление не найдено.');return;}
+ const title=type==='advance'?'аванс':'зарплату';
+ if((num(receipt.amounts?.mortgage)>0&&regularMortgageAvailable(iso(new Date()))-num(receipt.amounts?.mortgage)<-0.001)||(num(receipt.amounts?.credit)>0&&regularCreditAvailable(iso(new Date()))-num(receipt.amounts?.credit)<-0.001)){alert('Нельзя отменить поступление: часть отложенных средств уже использована для подтверждённых платежей. Сначала отмени соответствующий платёж.');return;}
+ if(!confirm('Отменить зачисление '+rub(receipt.amount)+' ('+title+') за '+month+'? Суммы будут вычтены из категорий. Уже записанные покупки и погашения сохранятся.'))return;
+ data.receipts=data.receipts.filter(r=>r.id!==key);
+ // Restore the planning amount too. Removing only the receipt used to leave
+ // its large value in monthData(), forcing the salary forecast down to zero.
+ const currentPlan=monthData();
+ if(Math.abs(num(currentPlan[type])-num(receipt.amount))<0.001){
+  currentPlan[type]=receipt.previousMonthAmount===undefined?0:num(receipt.previousMonthAmount);
+ }
+ // Only the credit-card allocation is also tracked in reserved; other allocations
+ // are computed from receipts directly, so reversing them here would count twice.
+ data.reserved=Math.max(0,num(data.reserved)-num(receipt.amounts?.credit));
+ renderAll();
+}
+$('undoAdvance').addEventListener('click',()=>undoReceipt('advance'));
+$('undoSalary').addEventListener('click',()=>undoReceipt('salary'));
+
+
+// When returning to the app, start from the month on the device clock.
+// Arrows still allow browsing any month for the remainder of this open session.
+function restoreCurrentMonth(){
+ const actualMonth=iso(new Date()).slice(0,7);
+ if(month!==actualMonth){
+  month=actualMonth;
+  renderAll();
+ }
+}
+let wasBackgrounded=false;
+document.addEventListener('visibilitychange',()=>{
+ if(document.visibilityState==='hidden'){wasBackgrounded=true;return;}
+ if(document.visibilityState==='visible'){
+  if(wasBackgrounded){wasBackgrounded=false;restoreCurrentMonth();}
+  
+ }
+});
+window.addEventListener('pageshow',e=>{
+ if(e.persisted)restoreCurrentMonth();
+ 
+});
+
+// iOS Safari may ignore the viewport zoom limit for pinch gestures.
+for(const eventName of ['gesturestart','gesturechange','gestureend']){
+ document.addEventListener(eventName,e=>e.preventDefault(),{passive:false});
+}
+document.addEventListener('touchmove',e=>{
+ if(e.touches.length>1)e.preventDefault();
+},{passive:false});
+$('checkUpdate').addEventListener('click',async()=>{
+  updateMessage('Проверяем новую версию…');
+  if(!/^https:/.test(location.protocol)&&location.hostname!=='localhost'){
+    updateMessage('Проверка работает после публикации приложения на HTTPS-сайте.');return;
+  }
+  try {
+    const response=await fetch('./version.json?check='+Date.now(),{cache:'no-store'});
+    if(!response.ok)throw new Error('HTTP '+response.status+' — файл version.json недоступен на сайте');
+    const meta=await response.json();
+    if(typeof meta.version!=='string')throw new Error('Некорректный формат version.json');
+    const newer=(a,b)=>{const x=a.split('.').map(Number),y=b.split('.').map(Number);return x.some((n,i)=>n>(y[i]||0)&&x.slice(0,i).every((v,j)=>v===(y[j]||0)));};
+    if(!newer(meta.version,APP_VERSION)){updateMessage('У тебя актуальная версия '+APP_VERSION);$('applyUpdate').style.display='none';return;}
+    updateMessage('Доступна версия '+meta.version+'. Перед обновлением сохрани резервную копию.');
+    $('applyUpdate').style.display='block';
+    if('serviceWorker' in navigator){const reg=await navigator.serviceWorker.getRegistration();if(reg){await reg.update();pendingWorker=reg.waiting||reg.installing;}}
+  }catch(err){updateMessage('Проверка не выполнена: '+(err?.message||'ошибка сети')+'. Проверь адрес /version.json на своём сайте.');}
+});
+$('applyUpdate').addEventListener('click',async()=>{
+  updateMessage('Обновляем приложение…');
+  if('serviceWorker' in navigator){
+    const reg=await navigator.serviceWorker.getRegistration();
+    if(reg){await reg.update();pendingWorker=reg.waiting||reg.installing;if(pendingWorker?.state==='installed')pendingWorker.postMessage({type:'SKIP_WAITING'});}
+  }
+  location.replace('./index.html?refresh='+Date.now());
+});
+
+
+
+/* Analytics modal interactions; no dashboard scroll. */
+function analyticsModalOpen(page){
+ const map={economy:['analyticsModalEconomy','Где нашлась экономия'],
+   transfer:['analyticsModalTransfer','Перевод в накопления'],
+   capital:['analyticsModalCapital','Лестница капитала'],
+   plan:['analyticsModalPlan','План накоплений'],
+   stats:['analyticsModalStats','Детали операций']};
+ if(!map[page])return;
+ for(const key of Object.keys(map))$(map[key][0]).hidden=page!==key;
+ $('analyticsSheetTitle').textContent=page==='stats'?'Детали · '+$('operationsMonthName').textContent:map[page][1];
+ if(page==='transfer'||page==='economy'||page==='capital')ladderRender();
+ if(page==='stats')analyticsReportRender();
+ if(page==='plan')savingsPlanOpen();
+ $('analyticsOverlay').hidden=false;
+}
+function analyticsModalClose(){$('analyticsOverlay').hidden=true}
+document.querySelectorAll('[data-anal-open]').forEach(button=>{
+ button.addEventListener('click',()=>analyticsModalOpen(button.dataset.analOpen));
+});
+
+$('savingsPlanMonths').addEventListener('input',()=>{
+ $('savingsPlanStatus').textContent='Сохрани цель и срок, чтобы использовать их дальше.';
+ savingsPlanRender();
+});
+$('savingsPlanTargetAmount').addEventListener('input',()=>{
+ $('savingsPlanStatus').textContent='Сохрани цель и срок, чтобы использовать их дальше.';
+ savingsPlanRender();
+});
+$('ladderReserveInput').addEventListener('input',()=>{
+ $('savingsPlanStatus').textContent='Сохрани размер подушки и параметры цели.';
+ savingsPlanRender();
+});
+$('ladderIncluded').addEventListener('change',()=>{
+ $('savingsPlanStatus').textContent='Сохрани параметры подушки и цели.';
+ savingsPlanRender();
+});
+document.querySelectorAll('[data-savings-months]').forEach(btn=>btn.addEventListener('click',()=>{
+ $('savingsPlanMonths').value=btn.dataset.savingsMonths;
+ $('savingsPlanStatus').textContent='Сохрани цель и срок, чтобы использовать их дальше.';
+ savingsPlanRender();
+}));
+$('savingsPlanSave').addEventListener('click',()=>{
+ const months=Number($('savingsPlanMonths').value);
+ const targetInput=$('savingsPlanTargetAmount');
+ const reserveInput=$('ladderReserveInput');
+ const reserve=Number(reserveInput.value);

@@ -1,0 +1,117 @@
+SOURCE: preview.html
+PART: 42
+SOURCE LINES: 5672-5784
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+.app .view.active:not(#v-home) .section-heading h2,.analytics-dash-header h2{letter-spacing:-.035em}.app .view.active:not(#v-home)>.design-group{background:var(--card)!important;border:0!important;border-radius:18px!important;box-shadow:none!important}
+.app #v-plan.active .payroll-grid>div{background:var(--panel);border-radius:12px;padding:5px 9px}.app #v-plan.active .payroll-grid b{font-variant-numeric:tabular-nums;letter-spacing:-.045em}.app #v-plan.active .table th{font-weight:500;color:var(--muted)}.app #v-plan.active .table td{font-variant-numeric:tabular-nums}
+.app #v-card.active .payment-confirm{background:var(--panel)!important;border:0!important;border-radius:15px!important}.app #v-card.active .payment-confirm-heading{display:flex;flex-direction:column;align-items:flex-start;gap:3px}.app #v-card.active .payment-confirm-heading .receipt-note{min-height:0;text-align:left;font-size:12px}
+.app #v-expense.active .ops-action-tile{position:relative;isolation:isolate;overflow:hidden;background:var(--panel)!important;border:0!important;text-align:left;align-items:flex-start;justify-content:flex-start;padding:10px!important;min-height:80px}.app #v-expense.active .ops-action-icon{position:absolute;bottom:-3px;right:-2px;width:44px;height:44px;background:var(--art) center/contain no-repeat!important;color:transparent!important;font-size:0!important;pointer-events:none}
+.app #v-analytics.active :is(.analytics-economy-card,.analytics-capital-unified){border:0!important;border-radius:18px!important;background:var(--card)!important}.app #v-analytics.active .analytics-capital-numbers strong,.app #v-analytics.active .analytics-economy-total strong{letter-spacing:-.045em;font-variant-numeric:tabular-nums}.app #v-analytics.active .analytics-capital-card{background:transparent!important;box-shadow:none!important}
+.app #v-settings.active>.design-group>details{background:transparent!important;border:0!important}.app #v-settings.active details>summary{font-weight:650;line-height:1.22}.app #v-settings.active .field select{border-radius:12px}
+@media(max-height:740px){.home-balances div{padding:4px 9px}.daily-summary summary{padding:5px}}
+.daily-headline{padding:8px;text-align:center}.daily-headline>span{display:block}.daily-headline #nextPaymentWhen{font-size:14px;font-weight:600;margin-top:4px}
+.app #v-home .home-balances{margin:6px 0 0;gap:0;border-radius:16px;background:var(--card);padding:10px 0}.app #v-home .home-balances>div{min-width:0;padding:0 10px;border-radius:0;background:transparent}.home-balances>div+div{border-inline-start:1px solid var(--line)}
+.app #v-home .home-balances :is(#heroTotal,#heroAll){font:700 clamp(17px,5vw,23px)/1.2 system-ui!important;letter-spacing:-.035em!important;color:var(--ink);margin:3px 0 0!important}
+.app #v-plan.active>.design-group{padding:10px!important}.app #v-plan.active>.design-group :is(.payroll-preview,.month-strip,.payment-inputs,.payout-destinations){background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+.app #v-plan.active .payroll-grid>div{padding:10px!important;background:color-mix(in srgb,var(--card) 88%,var(--teal))!important;border-radius:14px}.app #v-plan.active .payroll-grid b{font-size:clamp(18px,5.4vw,26px)!important}
+.app #v-plan.active .payment-inputs .payment-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;align-items:start}.app #v-plan.active>.design-group:has(.payment-inputs) .payment-receipt{display:flex!important;flex-direction:column;align-items:stretch;gap:5px;min-width:0;background:var(--panel)!important;border:0!important;border-radius:14px;padding:9px!important}.app #v-plan.active .payment-receipt .receipt-note{min-height:0!important;height:auto!important}.app #v-plan.active .payment-receipt button{white-space:normal}.app #v-plan.active .goal-allocation-card{border:0!important;border-inline-start:3px solid var(--teal)!important;background:var(--panel)!important}.app #v-plan.active .month-buttons{border:0!important;background:transparent!important}
+
+.app #v-home .home-balances{width:100%;margin:0 0 5px;flex:none}
+.app #v-plan.active .payment-inputs .payment-grid{align-items:stretch}
+.app #v-plan.active>.design-group:has(.payment-inputs) .payment-receipt{
+ display:grid!important;box-sizing:border-box;width:100%;aspect-ratio:1;height:auto!important;min-height:0!important;align-self:start;grid-template-rows:22px minmax(0,1fr) 36px 25px;align-content:stretch;align-items:center
+}
+.app #v-plan.active .payment-receipt>.receipt-button{grid-row:2;height:100%}
+.app #v-plan.active .payment-receipt>.receipt-note{grid-row:3;white-space:pre-line;line-height:1.2}
+.app #v-plan.active .payment-receipt>.receipt-undo{grid-row:4}
+</style><style>
+/* Use the dashboard's open sections and single card surface on secondary screens. */
+.app .main :is(#v-plan,#v-card,#v-expense,#v-analytics,#v-settings).active > .design-group {
+ background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0 0 12px!important
+}
+.app .main .view.active:not(#v-home) .section-heading {padding:3px 0 6px!important;background:transparent!important}
+.app .main .view.active:not(#v-home) .section-heading h2 {font:650 15px/1.25 system-ui!important;letter-spacing:-.02em}
+.app .main #v-plan.active .payroll-grid>div,
+.app .main #v-plan.active>.design-group:has(.payment-inputs) .payment-receipt,
+.app .main #v-card.active .payment-confirm,
+.app .main #v-expense.active :is(.ops-action-tile,.analytics-mini-card),
+.app .main #v-analytics.active :is(.analytics-economy-card,.analytics-capital-unified),
+.app .main #v-settings.active>.design-group>:is(details,.card),
+.app .main #v-card.active>.design-group>:is(.mortgage-monthly-settings,.credit-basic-card) {
+ background:var(--card)!important;color:var(--ink);border:0!important;border-radius:16px!important;box-shadow:none!important
+}
+.app .main #v-card.active .payment-obligations,.app .main #v-expense.active .operations-hub,.app .main #v-analytics.active .analytics-one-screen {
+ background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important
+}
+.app .main #v-card.active .payment-obligations .payment-grid {display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+.app .main #v-card.active .payment-confirm {min-width:0;display:flex;flex-direction:column;padding:11px!important;gap:8px}
+.app .main #v-card.active .payment-confirm>.btn {margin-top:auto;white-space:normal;min-height:38px}
+.app .main #v-plan.active .payment-receipt>.receipt-button {height:36px!important;align-self:start}
+.app .main #v-plan.active .goal-allocation-card,.app .main #v-plan.active .payout-destinations {background:var(--card)!important;border:0!important;border-radius:16px!important;padding:10px!important}
+.app .main #v-analytics.active .analytics-economy-total strong {font-size:clamp(24px,7vw,34px)!important;color:var(--ink)}
+.app .main #v-settings.active .field :is(input:not([type=checkbox]),select) {border-radius:10px;background:var(--panel);color:var(--ink)}
+</style><style>
+.app .main #v-plan.active .payment-receipt>.receipt-note{grid-row:2;align-self:start;margin:0!important}
+.app .main #v-plan.active .payment-receipt>.receipt-note strong{display:block;font:700 clamp(20px,5.7vw,28px)/1.15 system-ui;letter-spacing:-.04em;color:var(--ink)}
+.app .main #v-plan.active .payment-receipt>.receipt-note span{display:block;margin-top:3px;font:500 13px/1.18 system-ui;color:var(--muted)}
+.app .main #v-plan.active .payment-receipt>.receipt-button{grid-row:3;align-self:center}
+.app .main #v-plan.active .pay-more{background:var(--card);border-radius:14px;padding:0 12px;margin:6px 0}
+.app .main #v-plan.active .pay-more>summary{cursor:pointer;padding:12px 0;font:650 16px/1.25 system-ui}
+.app .main #v-plan.active .section-heading h2{font-size:18px!important}
+</style><style>
+.app .main #v-plan.active .design-group:has(.payout-destinations){flex:none!important;height:auto!important;min-height:0!important;justify-content:flex-start!important}
+.app .main #v-plan.active .payout-destinations{padding:0!important;min-height:0!important;flex:none!important;background:transparent!important}
+.app .main #v-plan.active .payout-destinations .pay-more{margin:0}
+.app .main #v-plan.active .pay-more>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.app .main #v-plan.active .pay-more>summary::-webkit-details-marker{display:none}
+.app .main #v-plan.active .pay-more>summary::after{content:"⌄";color:var(--muted)}
+.app .main #v-plan.active .pay-more[open]>summary::after{transform:rotate(180deg)}
+</style><style>
+.app>.nav .tab[data-go] .tab-icon{background:transparent!important;border:0!important}
+.app>.nav .tab[data-go] .tab-icon svg{width:24px;height:24px;filter:drop-shadow(0 1px 1px #0004)}
+.app>.nav .tab[data-go].active{background:color-mix(in srgb,var(--blue) 14%,var(--card))!important;box-shadow:inset 0 2px var(--blue)}
+.app .main #v-settings.active>.design-group{margin:0 0 10px!important}
+.app .main #v-settings.active .section-heading h2{font-size:18px!important}
+.app .main #v-settings.active>.design-group>:is(.card,details){padding:12px!important;background:var(--card)!important;border-radius:16px!important}
+.app .main #v-settings.active .field>span{font:600 13px/1.35 system-ui;color:var(--muted)}
+.app .main #v-settings.active .field :is(select,input:not([type=checkbox])){width:100%;min-height:42px;font-size:16px;border:1px solid var(--line);border-radius:11px;padding:7px 10px}
+.app .main #v-settings.active .foot{font-size:13px;line-height:1.4;color:var(--muted)}
+.app .main #v-settings.active .btn{min-height:40px;border-radius:12px;white-space:normal}
+.app .main #v-settings.active summary{font-size:15px;font-weight:650}
+</style><style>
+.family-split,.family-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.family-split{flex:none;padding:7px 9px;border-radius:14px;background:var(--card);text-align:center;align-items:center;grid-template-columns:repeat(2,minmax(0,1fr))}
+.family-split span,.family-split strong{display:block}
+.family-split span{font-size:11px;color:var(--muted)}
+.family-split strong{font-size:clamp(13px,3.8vw,20px);line-height:1.2;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#wifeCheckOpen{grid-column:auto}
+.family-actions{margin-top:8px;grid-template-columns:minmax(0,1fr);gap:8px}
+#wifeReportedBalance{grid-column:1/-1;color:var(--muted);font-size:11px}
+.family-actions .btn{width:100%;min-width:0;min-height:44px;display:flex;align-items:center;justify-content:center;text-align:center;white-space:normal;line-height:1.2;padding:10px 12px;font-size:13px}
+#supportForm label{display:grid;gap:4px;margin-bottom:8px}
+ .history-sort-control{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:8px 0;padding:0 4px;color:var(--muted);font-size:12px}.history-sort-control select{max-width:190px;min-height:34px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);padding:6px;font-size:12px}
+/* Home: center monetary values in each envelope, while preserving readable labels and history action. */
+#v-home #envelopes .pocket strong{align-self:center;width:100%;text-align:center;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+#v-home .family-split>div:not([hidden]){min-width:0;text-align:center}
+#v-home .family-split>div:not([hidden]) strong{display:block;width:100%;text-align:center}
+/* The two monetary overview tiles also center their values. */
+.app #v-home .home-balances>div strong{width:100%;text-align:center}
+/* Shared typography for the two overview balance groups. */
+.app #v-home .home-balances>div,
+.app #v-home .family-split>div:not([hidden]){min-width:0}
+.app #v-home .home-balances>div>span,
+.app #v-home .family-split>div:not([hidden])>span{
+ display:block;text-align:left;font-size:clamp(11px,2.8vw,14px);
+ font-weight:400;line-height:1.25;color:var(--muted)
+}
+.app #v-home .home-balances>div>strong,
+.app #v-home .family-split>div:not([hidden])>strong{
+ display:block;width:100%;text-align:center;
+ font:700 clamp(16px,4.5vw,22px)/1.2 system-ui!important;
+ letter-spacing:-.035em!important;font-variant-numeric:tabular-nums;
+ color:var(--ink);margin:6px 0 0!important;overflow-wrap:anywhere
+}
+/* Center only the payout amounts inside Advance and Salary cards. */
+#v-plan .payment-receipt .receipt-note>strong{display:block;width:100%;text-align:center;font-variant-numeric:tabular-nums}
+</style></body></html>

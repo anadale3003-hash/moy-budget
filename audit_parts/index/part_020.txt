@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 20
+SOURCE LINES: 2648-2797
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+<script>
+(function(){'use strict';
+const THEMES={"Orchid Gold":{"bg":"#100f15","card":"#211e28","panel":"#282431","ink":"#f5f0e8","muted":"#bcb2c4","line":"#423a48","blue":"#e2c494","accentText":"#261c18","hero":"#19151e","input":"#19171e","selected":"#433746","red":"#ffa3ab"},"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY='my-budget-v1';const fmt=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});const rub=n=>fmt.format(Number.isFinite(n)?n:0);const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
+let data;const defaults=()=>({months:{},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:10000,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
+try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();if(!data.expenseTypes||typeof data.expenseTypes!=='object')data.expenseTypes={};
+for(const c of cats){if(!Array.isArray(data.expenseTypes[c.id]))data.expenseTypes[c.id]=[];}
+for(const x of data.expenses){if(x.type&&cats.some(c=>c.id===x.category)){const a=data.expenseTypes[x.category];if(!a.some(y=>y.toLocaleLowerCase('ru')===String(x.type).toLocaleLowerCase('ru')))a.push(String(x.type));}}
+if(!data.startBalances||typeof data.startBalances!=='object')data.startBalances=null;
+if(!Array.isArray(data.receipts))data.receipts=[];
+normalizeIncomeRecords();
+if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];
+if(!Array.isArray(data.transfers))data.transfers=[];
+if(!Array.isArray(data.regularPayments))data.regularPayments=[];
+if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
+if(!data.salaryConfig||typeof data.salaryConfig!=='object')data.salaryConfig={base:0,mode:'gross',taxRate:13};
+if(data.salaryConfig.taxRate===undefined)data.salaryConfig.taxRate=13;
+if(typeof data.paidMortgageMonth!=='string')data.paidMortgageMonth='';
+if(!Number.isFinite(Number(data.utilitiesAdvanceTarget))||Number(data.utilitiesAdvanceTarget)<0)data.utilitiesAdvanceTarget=15000;
+if(typeof data.utilitiesFromSalary!=='boolean')data.utilitiesFromSalary=true;
+// Первоначальные настройки старых версий были 15/30; для этого бюджета даты 16/1.
+if(!data.payDays||typeof data.payDays!=='object')data.payDays={advance:16,salary:1};
+if(!data.payDays2026Migrated){if(Number(data.payDays.advance)===15&&Number(data.payDays.salary)===30)data.payDays={advance:16,salary:1};data.payDays2026Migrated=true;}
+let month=currentMonth;
+function setTheme(name,shouldSave=true){const key=Object.prototype.hasOwnProperty.call(THEMES,name)?name:'Outlook Dusk';const t=THEMES[key],root=document.documentElement;root.classList.toggle("orchid-gold",key==="Orchid Gold");for(const [k,v] of Object.entries(t)){root.style.setProperty('--'+k,v);}root.style.setProperty('--teal',t.blue);root.style.setProperty('--green',t.blue);root.style.setProperty('--orange',t.blue);root.style.setProperty('--accent-text',t.accentText);root.style.setProperty('--hero',t.hero);root.style.setProperty('--input',t.input);root.style.setProperty('--selected',t.selected);const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=t.hero;if(shouldSave){data.theme=key;save();}const select=$('themeSelect');if(select)select.value=key;}
+function initTheme(){const select=$('themeSelect');select.innerHTML=Object.keys(THEMES).map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join('');select.onchange=e=>setTheme(e.target.value);setTheme(data.theme||'Outlook Dusk',false)}
+
+function monthData(){
+ if(!data.months[month])data.months[month]={advance:0,salary:0,mortgage:Number.isFinite(Number(data.mortgageMonthly))&&data.mortgageMonthly!==undefined?num(data.mortgageMonthly):55000};
+ const m=data.months[month];
+ if(m.mortgage===undefined)m.mortgage=data.mortgageMonthly===undefined?55000:num(data.mortgageMonthly);
+ return m;
+}
+const RU_NONWORK=["2026-01-01", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-02-23", "2026-03-09", "2026-05-01", "2026-05-11", "2026-06-12", "2026-11-04", "2026-12-31", "2027-01-01", "2027-01-04", "2027-01-05", "2027-01-06", "2027-01-07", "2027-01-08", "2027-02-22", "2027-02-23", "2027-03-08", "2027-05-03", "2027-05-10", "2027-06-14", "2027-11-04", "2027-11-05", "2027-12-31"];
+const RU_WORK_SAT=["2027-02-20"];
+const RU_DAYS_OFF=new Set(RU_NONWORK),RU_SAT_WORK=new Set(RU_WORK_SAT);
+function countWorkdays(key){
+ const [y,mo]=key.split('-').map(Number);const last=new Date(y,mo,0).getDate();let total=0,first=0;
+ for(let d=1;d<=last;d++){
+  const x=new Date(y,mo-1,d),date=iso(x),day=x.getDay();
+  if((day!==0&&day!==6&&!RU_DAYS_OFF.has(date))||RU_SAT_WORK.has(date)){total++;if(d<=15)first++;}
+ }
+ return {total,first,official:y===2026||y===2027};
+}
+function payrollForecast(m,key=month){
+ const cfg=data.salaryConfig,base=num(cfg.base),work=countWorkdays(key);
+ const overrideTotal=Number(m.manualDaysTotal),overrideFirst=Number(m.manualDaysFirst);
+ const total=m.manualDaysTotal!==undefined&&m.manualDaysTotal!==''&&overrideTotal>0?Math.min(31,overrideTotal):work.total;
+ const first=m.manualDaysFirst!==undefined&&m.manualDaysFirst!==''&&overrideFirst>=0?Math.min(total,overrideFirst):work.first;
+ const rate=Math.min(50,num(cfg.taxRate));
+ const net=cfg.mode==='net'?base:base*(1-rate/100);
+ const advanceForecast=total>0?net*first/total:0;
+ // Legacy month.advance/month.salary may contain a stale or cancelled
+ // manually entered amount. Treat an amount as ACTUAL only if a matching receipt
+ // exists. When the salary is configured, the remaining amount is a forecast.
+ const advanceReceipt=(data.receipts||[]).find(r=>r.id===key+'-advance');
+ const advancePlan=advanceReceipt?num(advanceReceipt.amount):advanceForecast;
+ const salaryForecast=Math.max(0,Math.round(net*100)-Math.round(advancePlan*100))/100;
+ return {net,advanceForecast,advancePlan,salaryForecast,total,first,official:work.official,configured:base>0};
+}
+function plannedAdvance(m,key=month){
+ const receipt=(data.receipts||[]).find(r=>r.id===key+'-advance');
+ if(receipt)return num(receipt.amount);
+ const forecast=payrollForecast(m,key);
+ return forecast.configured?forecast.advanceForecast:num(m.advance);
+}
+function plannedSalary(m,key=month){
+ const receipt=(data.receipts||[]).find(r=>r.id===key+'-salary');
+ if(receipt)return num(receipt.amount);
+ const forecast=payrollForecast(m,key);
+ return forecast.configured?forecast.salaryForecast:num(m.salary);
+}
+function isForecast(m){return !data.receipts.some(r=>r.id===month+'-salary')&&payrollForecast(m).configured}
+
+/* Feedback is tied to a completed localStorage write, never to the initial tap.
+   A cancelled confirmation or an invalid form cannot emit a success check. */
+const SAVE_FORM_MESSAGES={
+ earlyForm:'Погашение записано',
+ expenseForm:'Расход сохранён',
+ transferForm:'Перевод сохранён',
+ incomeForm:'Доход зачислен',
+ receiptEntryForm:'Поступление сохранено',
+ paymentEntryForm:'Оплата подтверждена',
+ ladderTransferForm:'Перевод в накопления сохранён',
+};
+const SAVE_BUTTON_MESSAGES={
+ saveStart:'Остатки сохранены',
+ savingsPlanSave:'Цель и срок сохранены',
+ undoAdvance:'Зачисление отменено',
+ undoSalary:'Зачисление отменено'
+};
+const SAVE_CHANGE_MESSAGES={
+ themeSelect:'Тема применена',
+ salaryMode:'Способ расчёта сохранён',
+ mortgage:'Платёж по ипотеке сохранён',
+ deadline:'Срок погашения сохранён',
+ advanceDate:'Дата аванса сохранена',
+ salaryDate:'Дата зарплаты сохранена'
+};
+let saveFeedbackIntent=null,saveFeedbackHideTimer=null,saveFeedbackFinishTimer=null,saveFeedbackClearTimer=null;
+function stageSaveFeedback(message,button){
+ const intent={message,button};
+ saveFeedbackIntent=intent;
+ // Do not use a Promise microtask here: Safari can run a microtask checkpoint
+ // BETWEEN document capture listeners and the form/button's own handler.
+ // Clear an unused intent only after the entire user action has finished.
+ if(saveFeedbackClearTimer!==null)clearTimeout(saveFeedbackClearTimer);
+ saveFeedbackClearTimer=setTimeout(()=>{
+  if(saveFeedbackIntent===intent)saveFeedbackIntent=null;
+  saveFeedbackClearTimer=null;
+ },0);
+}
+document.addEventListener('click',e=>{
+ const button=e.target.closest?.('button');
+ if(!button||button.disabled)return;
+ let message=SAVE_BUTTON_MESSAGES[button.id]||null;
+ if(!message&&button.matches('[data-del],[data-del-early],[data-del-income]'))message='Запись удалена';
+ if(!message&&button.matches('[data-del-transfer]'))message='Перевод отменён';
+ if(!message&&button.matches('[data-undo-regular]'))message='Оплата отменена';
+ if(message)stageSaveFeedback(message,button);
+},true);
+document.addEventListener('submit',e=>{
+ const form=e.target;
+ const message=SAVE_FORM_MESSAGES[form.id];
+ if(message)stageSaveFeedback(message,e.submitter||form.querySelector('button[type="submit"]'));
+},true);
+document.addEventListener('change',e=>{
+ const message=SAVE_CHANGE_MESSAGES[e.target.id];
+ if(message)stageSaveFeedback(message,e.target);
+},true);
+function showSaveFeedback(message,button){
+ const toast=$('budgetSaveToast'),label=$('budgetSaveLabel');
+ if(!toast||!label)return;
+ if(saveFeedbackHideTimer!==null)clearTimeout(saveFeedbackHideTimer);
+ if(saveFeedbackFinishTimer!==null)clearTimeout(saveFeedbackFinishTimer);
+ label.textContent=message||'Сохранено';
+ toast.hidden=false;
+ toast.classList.remove('is-visible');
+ // Start immediately after a forced style flush; no reliance on a potentially
+ // throttled iOS requestAnimationFrame after a sheet or keyboard closes.
+ void toast.offsetWidth;
+ toast.classList.add('is-visible');
+ saveFeedbackHideTimer=setTimeout(()=>{
+   toast.classList.remove('is-visible');
+   saveFeedbackFinishTimer=setTimeout(()=>{
+     if(!toast.classList.contains('is-visible'))toast.hidden=true;
+   },220);
+ },(message?.startsWith('В накопления +')||message?.startsWith('Долг по кредитке'))?5000:1450);
+ if(button?.classList&&button.isConnected){
+   button.classList.remove('budget-action-saved');
+   void button.offsetWidth;

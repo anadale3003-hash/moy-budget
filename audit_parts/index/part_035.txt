@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 35
+SOURCE LINES: 4890-5039
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+    document.getElementById('wifeTransferForm').reset();
+    updateWifeTransferAvailable();
+    showSheet('wifeTransfer');
+   });
+  document.getElementById('wifeCheckOpen').addEventListener('click',()=>{
+   document.getElementById('wifeCheckForm').reset();
+   showSheet('wifeCheck');
+  });
+  document.getElementById('supportOpen').addEventListener('click',()=>showSheet('support'));
+  grid.addEventListener('click',event=>{
+   const button=event.target.closest('[data-ops-action]');if(button)showSheet(button.dataset.opsAction);
+  });
+  close.addEventListener('click',closeSheet);
+  overlay.addEventListener('click',event=>{if(event.target===overlay)closeSheet()});
+  document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!overlay.hidden)closeSheet()});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initOperations,{once:true});
+ else initOperations();
+})();
+</script>
+<script>
+/* v1.5.30: restore the portrait scroll position during reflow, without
+   repeated delayed scroll resets that can produce a visible jump on iOS. */
+(function(){
+ const orientation=window.matchMedia('(orientation: landscape)');
+ const app=document.querySelector('.app');
+ const main=document.querySelector('.app>.main');
+ const nav=document.querySelector('.app>.nav');
+ let lastLandscape=orientation.matches;
+ let settleUntil=0;
+ let settleTimer=null;
+ let framePending=false;
+
+ function resetPortraitScroll(){
+   if(orientation.matches)return;
+   if(app && (app.scrollTop || app.scrollLeft)){app.scrollTop=0;app.scrollLeft=0}
+   if(main && (main.scrollTop || main.scrollLeft)){main.scrollTop=0;main.scrollLeft=0}
+   const root=document.scrollingElement;
+   if(root && root.scrollTop)root.scrollTop=0;
+   if(document.body && document.body.scrollTop)document.body.scrollTop=0;
+   if(window.scrollY)window.scrollTo(0,0);
+ }
+ function settleOnNextFrame(){
+   if(framePending)return;
+   framePending=true;
+   requestAnimationFrame(function(){
+     framePending=false;
+     resetPortraitScroll();
+   });
+ }
+ function orientationChanged(){
+   const landscape=orientation.matches;
+   if(landscape!==lastLandscape){
+     lastLandscape=landscape;
+     if(settleTimer)clearTimeout(settleTimer);
+     if(landscape){settleUntil=0;return}
+     // Reset at the first possible opportunity, then only when Safari reports a resize.
+     settleUntil=performance.now()+380;
+     resetPortraitScroll();
+     settleOnNextFrame();
+     settleTimer=setTimeout(function(){settleUntil=0;},390);
+   }else if(!landscape && settleUntil && performance.now()<settleUntil){
+     settleOnNextFrame();
+   }
+ }
+ if(nav)nav.addEventListener('click',function(event){
+   if(orientation.matches && event.target.closest('[data-go]')){
+     requestAnimationFrame(function(){
+       if(app)app.scrollTop=0;
+       if(main)main.scrollTop=0;
+     });
+   }
+ });
+ if(orientation.addEventListener)orientation.addEventListener('change',orientationChanged);
+ else if(orientation.addListener)orientation.addListener(orientationChanged);
+ window.addEventListener('orientationchange',orientationChanged,{passive:true});
+ window.addEventListener('resize',orientationChanged,{passive:true});
+ if(window.visualViewport)
+   window.visualViewport.addEventListener('resize',orientationChanged,{passive:true});
+})();
+</script>
+<div id="budgetSaveToast" class="budget-save-toast" role="status" aria-live="polite" aria-atomic="true" hidden><span class="budget-save-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span id="budgetSaveLabel">Сохранено</span></div>
+<script>
+/* Remote Web Push integration for the installed PWA. */
+(function(){
+ const API='https://autumn-resonance-d140.anadale3003.workers.dev';
+ const ready=()=>{
+  const choice=document.getElementById('notifyReminderChoice');
+  const enable=document.getElementById('notifyEnableBtn');
+  const test=document.getElementById('notifyTestBtn');
+  const delayed=document.getElementById('notifyDelayedTestBtn');
+  const status=document.getElementById('notifyStatus');
+  if(!choice||!enable||!test||!delayed||!status)return;
+  const preferenceKey='budget-notification-preferences-v1';
+  choice.value=localStorage.getItem(preferenceKey)||'all';
+  const isInstalled=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  const supported=()=>('Notification' in window)&&('serviceWorker' in navigator)&&('PushManager' in window)&&window.isSecureContext;
+  const appSettings=()=>{
+   try{return JSON.parse(localStorage.getItem('my-budget-v1')||'{}')||{};}catch(_){return {};}
+  };
+  const b64ToBytes=value=>{
+   const normalized=String(value).replace(/-/g,'+').replace(/_/g,'/');
+   const padded=normalized+'='.repeat((4-normalized.length%4)%4);
+   return Uint8Array.from(atob(padded),c=>c.charCodeAt(0));
+  };
+  const post=async(path,payload)=>{
+   const response=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+   let result={};try{result=await response.json();}catch(_){}
+   if(!response.ok)throw new Error(result.detail||result.error||('HTTP '+response.status));
+   return result;
+  };
+  const preferences=()=>{
+   const d=appSettings();
+   return {reminders:choice.value,advanceDay:Number(d.payDays?.advance)||16,salaryDay:Number(d.payDays?.salary)||1};
+  };
+  const currentSubscription=async()=>{
+   const reg=await navigator.serviceWorker.ready;
+   return reg.pushManager.getSubscription();
+  };
+  const confirmedPeriods=()=>{
+   const d=appSettings();
+   return (Array.isArray(d.receipts)?d.receipts:[])
+    .map(r=>r&&typeof r.id==='string'?r.id:'')
+    .filter(id=>/^20\d{2}-(0[1-9]|1[0-2])-(advance|salary)$/.test(id));
+  };
+  // Serialize writes so an old confirmation state cannot overwrite a newer one.
+  let syncSequence=Promise.resolve();
+  const saveSubscription=async(sub)=>{
+   const payload={subscription:sub.toJSON(),preferences:preferences(),confirmedPeriods:confirmedPeriods()};
+   const operation=syncSequence.catch(()=>{}).then(()=>post('/subscribe',payload));
+   syncSequence=operation;
+   await operation;
+  };
+  const syncReceipts=async()=>{
+   if(!supported()||Notification.permission!=='granted')return;
+   try{
+    const sub=await currentSubscription();
+    if(sub)await saveSubscription(sub);
+   }catch(e){
+    status.textContent='Поступление сохранено в приложении, но сервер уведомлений не обновлён: '+e.message+'. Открой настройки при наличии интернета.';
+   }
+  };
+  const refresh=async()=>{
+   if(!supported()){status.textContent='Push недоступен. На iPhone установи приложение на экран «Домой» и открой его оттуда.';return;}
+   if(!isInstalled()){status.textContent='Сначала добавь приложение на экран «Домой»: Safari → Поделиться → На экран «Домой».';return;}
+   if(Notification.permission==='denied'){status.textContent='Уведомления запрещены в настройках iPhone. Разреши их для «Моего бюджета».';return;}
+   try{
+    const sub=await currentSubscription();
+    if(sub){
+     await saveSubscription(sub);

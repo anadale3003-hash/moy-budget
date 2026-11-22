@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 3
+SOURCE LINES: 218-367
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+#v-plan .payment-confirm-fields{display:grid;grid-template-columns:minmax(0, .85fr) minmax(0, 1.4fr);gap:9px;align-items:end}
+#v-plan .payment-confirm-fields .field{min-width:0;width:100%;margin:0!important}
+#v-plan .payment-confirm-fields .field>span{font-size:11px;line-height:1.25;margin-bottom:3px}
+#v-plan .payment-confirm-fields input{display:block;min-width:0;width:100%;height:39px;min-height:39px;padding:6px 9px;box-sizing:border-box}
+#v-plan .payment-confirm-fields input[type=date]{
+  font-size:14px!important;line-height:1.2!important;
+  white-space:nowrap!important;overflow:hidden;
+  -webkit-appearance:none;appearance:none;
+}
+#v-plan .payment-confirm-fields input[type=date]::-webkit-date-and-time-value{
+  min-height:1.2em;text-align:left;white-space:nowrap;
+}
+#v-plan .payment-confirm-fields input[type=date]::-webkit-datetime-edit{padding:0;white-space:nowrap}
+#v-plan .payment-confirm .btn{width:100%;min-height:37px;padding:7px 9px;font-size:13px;line-height:1.25;border-radius:9px}
+@media(max-width:370px){
+  #v-plan .payment-confirm-fields{grid-template-columns:minmax(0,1fr) minmax(0,1.65fr);gap:6px}
+  #v-plan .payment-confirm-fields input[type=date]{font-size:12px!important;padding-left:4px;padding-right:4px}
+  #v-plan .payment-confirm-heading{display:block}
+  #v-plan .payment-confirm-heading .receipt-note{text-align:left;margin-top:2px}
+}
+
+/* v1.5.15: permanent bottom tabs, top summary only on Home. */
+.app{position:relative;height:100dvh;max-height:100dvh;overflow:hidden}
+.app:not(.home-active)>.hero{display:none}
+.app:not(.home-active)>.main{padding-top:max(12px, env(safe-area-inset-top))}
+.app>.main{flex:1 1 auto;min-height:0;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding-bottom:calc(76px + env(safe-area-inset-bottom));scroll-padding-bottom:calc(85px + env(safe-area-inset-bottom))}
+.app>.nav{position:absolute;left:0;right:0;bottom:0;transform:none;width:100%;margin:0;z-index:30;flex:0 0 auto}
+
+/* v1.5.16: non-scrolling Home; other sections still scroll independently. */
+.app.home-active>.main{
+  overflow:hidden!important;
+  padding:7px 12px calc(66px + env(safe-area-inset-bottom));
+  overscroll-behavior:none;
+  touch-action:pan-x;
+}
+.app.home-active #v-home{
+  height:100%!important;min-height:0!important;
+  display:flex;flex-direction:column;gap:5px;
+  overflow:hidden!important;
+}
+#v-home>.section-heading{flex:0 0 auto;margin:0 0 2px!important}
+#v-home>#obligations{flex:0 0 auto;min-height:0}
+#v-home>#obligations .card{padding:7px 10px}
+#v-home>#obligations .lineitem{padding:3px 0;line-height:1.28;font-size:12px}
+#v-home>#obligations .sub{margin-top:5px!important;line-height:1.25}
+#homeEnvelopesPanel{display:flex;flex:1 1 auto;flex-direction:column;min-height:0;overflow:hidden}
+#homeEnvelopesPanel>.section-heading{flex:0 0 auto;margin:2px 0 5px!important}
+#homeEnvelopesPanel #envelopes{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  flex:1 1 auto;min-height:0;gap:7px;
+}
+#homeEnvelopesPanel #envelopes>.card{
+  display:flex;flex-direction:column;justify-content:center;
+  min-height:0;overflow:hidden;padding:7px 9px;
+}
+#homeEnvelopesPanel #envelopes>.card .row{flex:0 0 auto}
+#homeEnvelopesPanel #envelopes>.card .row-title{min-width:0}
+#homeEnvelopesPanel #envelopes>.card .name{overflow-wrap:anywhere}
+#homeEnvelopesPanel #envelopes>.card .number{font-size:clamp(14px,4.5vw,22px)}
+#homeEnvelopesPanel #envelopes>.card .track{flex:0 0 auto}
+#homeEnvelopesPanel #envelopes>.card .tinyline{flex:0 0 auto}
+@media(max-height:800px){
+ .app.home-active>.hero{padding-top:max(30px,calc(env(safe-area-inset-top) - 12px));padding-bottom:7px}
+ .app.home-active .hero-overview{gap:8px}
+ .app.home-active .hero-brand{padding-top:5px}
+ .app.home-active .payday-counter{margin-top:5px;padding:6px 9px}
+ .app.home-active .payday-per-day{font-size:16px;margin-top:2px}
+ .app.home-active .payday-explain{font-size:10px;line-height:1.25}
+ .app.home-active #v-home>.section-heading h2,
+ .app.home-active #homeEnvelopesPanel>.section-heading h2{font-size:14px}
+ #homeEnvelopesPanel #envelopes>.card .sub{font-size:9px}
+ #homeEnvelopesPanel #envelopes>.card .tinyline{font-size:9px}
+}
+@media(max-height:680px){
+ .app.home-active .hero-overview #heroLabel{display:none}
+ .app.home-active .payday-explain{display:none}
+ .app.home-active #v-home>#obligations .sub{display:none}
+ #homeEnvelopesPanel #envelopes>.card .track,
+ #homeEnvelopesPanel #envelopes>.card .tinyline{display:none}
+ #homeEnvelopesPanel #envelopes>.card .emoji{width:22px;height:22px;font-size:13px}
+}
+
+/* Interactive envelopes: isolated scrollable history overlay. */
+#homeEnvelopesPanel #envelopes>.envelope-button{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;text-align:left;width:100%;cursor:pointer;touch-action:manipulation;transition:filter .15s}
+#homeEnvelopesPanel #envelopes>.envelope-button:active{filter:brightness(1.07)}
+#homeEnvelopesPanel #envelopes>.envelope-button:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+.envelope-history-overlay[hidden]{display:none!important}
+.envelope-history-overlay{position:fixed;inset:0;z-index:100;background:rgba(4,12,25,.72);display:flex;align-items:flex-end;justify-content:center;padding:0}
+.envelope-history-sheet{box-sizing:border-box;width:min(100%,600px);max-height:min(84dvh,820px);display:flex;flex-direction:column;min-height:0;background:var(--bg);color:var(--ink);border-radius:20px 20px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom));box-shadow:0 -8px 35px #0004}
+.envelope-history-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex:0 0 auto}
+.envelope-history-top h2{font-size:18px;margin:0}
+.envelope-history-close{border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:7px 12px;font-size:20px;cursor:pointer}
+.envelope-history-summary{margin:9px 0 12px;font-size:13px;color:var(--muted);flex:0 0 auto}
+.envelope-history-list{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;min-height:0;flex:1}
+.envelope-history-entry{display:flex;justify-content:space-between;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding:12px 2px}
+.envelope-history-entry>div:first-child{min-width:0}
+.envelope-history-entry .history-title{font-weight:650;font-size:13px;overflow-wrap:anywhere}
+.envelope-history-entry .history-detail{font-size:11px;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}
+.envelope-history-entry .history-amount{white-space:nowrap;font-size:14px;font-weight:700}
+.envelope-history-entry .history-amount.positive{color:var(--green)}
+.envelope-history-entry .history-amount.negative{color:var(--red)}
+
+/* Preview: polished envelope reveal / dismissal, without moving the dashboard. */
+#homeEnvelopesPanel #envelopes>.envelope-button{
+ transform:translateZ(0);
+ transition:transform 180ms cubic-bezier(.2,.8,.2,1),box-shadow 220ms ease,filter 180ms ease;
+ -webkit-tap-highlight-color:transparent;
+}
+#homeEnvelopesPanel #envelopes>.envelope-button:active{
+ transform:scale(.965);filter:brightness(1.1);
+}
+.envelope-history-overlay{
+ opacity:0;visibility:hidden;pointer-events:none;
+ background:rgba(4,12,25,.64);
+ -webkit-backdrop-filter:blur(0);
+ backdrop-filter:blur(0);
+ transition:opacity 290ms ease,visibility 290ms ease,backdrop-filter 290ms ease,-webkit-backdrop-filter 290ms ease;
+}
+.envelope-history-overlay.is-open{
+ opacity:1;visibility:visible;pointer-events:auto;
+ -webkit-backdrop-filter:blur(6px);
+ backdrop-filter:blur(6px);
+}
+.envelope-history-sheet{
+ transform:translate3d(0,105%,0) scale(.97);
+ transform-origin:bottom center;
+ opacity:.95;
+ transition:transform 420ms cubic-bezier(.18,.85,.23,1.02),opacity 280ms ease;
+ will-change:transform;
+ border:1px solid var(--line);
+ border-bottom:0;
+}
+.envelope-history-overlay.is-open .envelope-history-sheet{transform:translate3d(0,0,0) scale(1);opacity:1}
+.envelope-history-sheet::before{
+ content:"";display:block;flex:0 0 auto;
+ width:42px;height:5px;border-radius:8px;
+ background:var(--muted);opacity:.42;
+ margin:-5px auto 14px;
+}
+.envelope-history-overlay.is-open .envelope-history-entry{
+ animation:envelope-entry-in 320ms both ease-out;
+}
+.envelope-history-overlay.is-open .envelope-history-entry:nth-child(2){animation-delay:35ms}
+.envelope-history-overlay.is-open .envelope-history-entry:nth-child(3){animation-delay:65ms}
+.envelope-history-overlay.is-open .envelope-history-entry:nth-child(4){animation-delay:95ms}
+.envelope-history-overlay.is-open .envelope-history-entry:nth-child(5){animation-delay:125ms}
+@keyframes envelope-entry-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+ #homeEnvelopesPanel #envelopes>.envelope-button,

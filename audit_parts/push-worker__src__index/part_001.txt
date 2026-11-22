@@ -1,0 +1,155 @@
+SOURCE: push-worker/src/index.js
+PART: 1
+SOURCE LINES: 1-150
+SOURCE BLOB SHA: 36a458ea72da5cc438efcaee7e51dc7d3a657b12
+
+import { DurableObject } from "cloudflare:workers";
+import { buildPushPayload } from "@block65/webcrypto-web-push";
+
+const APP_ORIGIN = "https://anadale3003-hash.github.io";
+const APP_URL = APP_ORIGIN + "/moy-budget/index.html";
+const VAPID_SUBJECT = "https://github.com/anadale3003-hash/moy-budget";
+
+const RU_NONWORK = new Set([
+  "2026-01-01","2026-01-02","2026-01-05","2026-01-06","2026-01-07","2026-01-08","2026-01-09",
+  "2026-02-23","2026-03-09","2026-05-01","2026-05-11","2026-06-12","2026-11-04","2026-12-31",
+  "2027-01-01","2027-01-04","2027-01-05","2027-01-06","2027-01-07","2027-01-08",
+  "2027-02-22","2027-02-23","2027-03-08","2027-05-03","2027-05-10","2027-06-14",
+  "2027-11-04","2027-11-05","2027-12-31"
+]);
+const RU_WORK_SAT = new Set(["2027-02-20"]);
+
+function json(data, status = 200, headers = {}) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store", ...headers }
+  });
+}
+function corsHeaders(origin) {
+  if (origin !== APP_ORIGIN) return {};
+  return {
+    "Access-Control-Allow-Origin": APP_ORIGIN,
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Max-Age": "86400",
+    "Vary": "Origin"
+  };
+}
+function b64url(bytes) {
+  let binary = "";
+  for (const byte of bytes) binary += String.fromCharCode(byte);
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+async function endpointId(endpoint) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(endpoint));
+  return b64url(new Uint8Array(digest));
+}
+// A push subscription's auth secret is known to the subscribing device, but not
+// to someone who only knows the push endpoint URL. Never embed a shared API key in PWA JS.
+function secureEqual(a, b) {
+  if (typeof a !== "string" || typeof b !== "string") return false;
+  const x = new TextEncoder().encode(a), y = new TextEncoder().encode(b);
+  let diff = x.length ^ y.length;
+  for (let i = 0; i < Math.max(x.length, y.length); i++) diff |= (x[i] || 0) ^ (y[i] || 0);
+  return diff === 0 && x.length > 0;
+}
+function ownsSubscription(record, secret) {
+  return !!record && secureEqual(record.subscription?.keys?.auth, secret);
+}
+function storeStub(env) {
+  const id = env.SUBSCRIPTIONS.idFromName("moy-budget-global");
+  return env.SUBSCRIPTIONS.get(id);
+}
+async function storeCall(env, path, body) {
+  const response = await storeStub(env).fetch("https://store" + path, {
+    method: body === undefined ? "GET" : "POST",
+    headers: { "Content-Type": "application/json" },
+    body: body === undefined ? undefined : JSON.stringify(body)
+  });
+  if (!response.ok) throw new Error("Subscription store error: " + response.status);
+  return response.json();
+}
+function moscowDate(now) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/Moscow", year: "numeric", month: "2-digit", day: "2-digit"
+  }).formatToParts(now);
+  const get = type => parts.find(p => p.type === type)?.value;
+  return get("year") + "-" + get("month") + "-" + get("day");
+}
+function dateFor(year, month, day) {
+  const last = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return new Date(Date.UTC(year, month - 1, Math.min(Math.max(1, day), last)));
+}
+function dateISO(date) {
+  return date.getUTCFullYear() + "-" + String(date.getUTCMonth() + 1).padStart(2, "0") + "-" + String(date.getUTCDate()).padStart(2, "0");
+}
+function shiftPayday(year, month, day) {
+  const date = dateFor(year, month, day);
+  for (let i = 0; i < 18; i++) {
+    const key = dateISO(date), weekday = date.getUTCDay();
+    if (RU_WORK_SAT.has(key) || (weekday !== 0 && weekday !== 6 && !RU_NONWORK.has(key))) return key;
+    date.setUTCDate(date.getUTCDate() - 1);
+  }
+  return dateISO(date);
+}
+function addMonths(year, month, offset) {
+  const date = new Date(Date.UTC(year, month - 1 + offset, 1));
+  return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1 };
+}
+// Only the latest active pay cycle per type can generate reminders.
+// A pending payment is reminded hourly during the configured Cron window for up to 14 days after its planned date.
+function duePaydays(today, prefs) {
+  const [year, month] = today.split("-").map(Number);
+  const advanceDay = Math.min(31, Math.max(1, Number(prefs.advanceDay) || 16));
+  const salaryDay = Math.min(31, Math.max(1, Number(prefs.salaryDay) || 1));
+  const candidates = [];
+  for (let offset = -2; offset <= 1; offset++) {
+    const cycle = addMonths(year, month, offset);
+    const period = String(cycle.year) + "-" + String(cycle.month).padStart(2, "0");
+    candidates.push({ type: "advance", period,
+      due: shiftPayday(cycle.year, cycle.month, advanceDay) });
+    const target = addMonths(cycle.year, cycle.month, salaryDay <= advanceDay ? 1 : 0);
+    candidates.push({ type: "salary", period,
+      due: shiftPayday(target.year, target.month, salaryDay) });
+  }
+  const nowDay = Date.parse(today + "T00:00:00Z");
+  return ["advance", "salary"].map(type => candidates.filter(item => {
+    const difference = (nowDay - Date.parse(item.due + "T00:00:00Z")) / 86400000;
+    return item.type === type && difference >= 0 && difference <= 14;
+  }).sort((a, b) => b.due.localeCompare(a.due))[0]).filter(Boolean);
+}
+function isMonthEnd(iso) {
+  const [year, month, day] = iso.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day + 1)).getUTCMonth() !== month - 1;
+}
+function notificationFor(type) {
+  if (type === "advance") return {
+    title: "Сегодня день аванса 💵",
+    body: "Когда деньги поступят, отметь зачисление в приложении «Мой бюджет».",
+    tag: "advance"
+  };
+  if (type === "salary") return {
+    title: "Сегодня день зарплаты 💰",
+    body: "Когда зарплата поступит, отметь зачисление в приложении «Мой бюджет».",
+    tag: "salary"
+  };
+  return {
+    title: "Итоги месяца 📊",
+    body: "Проверь расходы, поступления и остаток семейного бюджета.",
+    tag: "month-end"
+  };
+}
+async function sendToRecord(env, record, message) {
+  const vapid = await storeCall(env, "/vapid");
+  const payload = await buildPushPayload(
+    { data: { ...message, url: APP_URL }, options: { ttl: message.tag?.startsWith("advance-") || message.tag?.startsWith("salary-") ? 3600 : 86400, urgency: "high", topic: message.tag } },
+    record.subscription,
+    { subject: VAPID_SUBJECT, publicKey: vapid.publicKey, privateKey: vapid.privateKey }
+  );
+  return fetch(record.subscription.endpoint, payload);
+}
+
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+    const origin = request.headers.get("Origin") || "";

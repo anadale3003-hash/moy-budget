@@ -1,0 +1,154 @@
+SOURCE: index.html
+PART: 31
+SOURCE LINES: 4290-4439
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+  const label=category.name+' · '+(own===null?'остаток неизвестен':rub(own))+(category.id==='family'&&isExpense?' у тебя':'');
+  for(const id of selectIds){
+   const option=Array.from($(id).options).find(item=>item.value===category.id);
+   if(option)option.textContent=label;
+  }
+ }
+}
+function updateExpenseOptions(){
+ labelEnvelopeOptions(['expenseCategory'],$('expenseDate').value);
+ toggleNewType();
+}
+function updateTransferAvailable(){
+ const from=$('transferFrom').value, date=$('transferDate').value;
+ labelEnvelopeOptions(['transferFrom','transferTo'],date);
+ const balance=transferableKopeks(from,date);
+ $('transferAvailable').textContent='Доступно в категории на эту дату: '+(balance===null?'укажи стартовые остатки и корректную дату':rub(balance/100));
+}
+$('transferFrom').addEventListener('change',updateTransferAvailable);
+$('transferDate').addEventListener('change',updateTransferAvailable);
+$('transferForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ if(!data.startBalances){alert('Сначала задай стартовые остатки в настройках.');go('settings');return;}
+ const from=$('transferFrom').value,to=$('transferTo').value,date=$('transferDate').value,amount=num($('transferAmount').value),note=$('transferNote').value.trim();
+ if(!cats.some(c=>c.id===from)||!cats.some(c=>c.id===to)||!fromISO(date)||!Number.isFinite(amount)||amount<=0){alert('Проверь поля перевода.');return;}
+ if(from===to){alert('Выбери разные категории.');return;}
+ if(date>iso(new Date())){alert('Будущие переводы пока не учитываются.');return;}
+ if(date<data.startBalances.date){alert('Дата перевода раньше начала учёта.');return;}
+ const available=transferableKopeks(from,date);
+ if(available===null||Math.round(amount*100)>available){alert('Недостаточно средств в исходной категории. Доступно: '+rub((available||0)/100)+' · Введено: '+rub(amount));return;}
+ const fromName=cats.find(c=>c.id===from).name,toName=cats.find(c=>c.id===to).name;
+ if(!confirm('Перевести '+rub(amount)+' из «'+fromName+'» в «'+toName+'»?'))return;
+ recordEnvelopeTransfer({id:'tr-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),from,to,date,amount,note});
+ $('transferAmount').value='';$('transferNote').value='';month=date.slice(0,7);renderAll();
+});
+$('transferList').addEventListener('click',e=>{
+ const b=e.target.closest('[data-del-transfer]');if(!b)return;
+ if(!confirm('Отменить перевод? Сумма вернётся в исходную категорию.'))return;
+ data.transfers=data.transfers.filter(t=>t.id!==b.dataset.delTransfer);renderAll();
+});
+$('incomeDate').value=iso(new Date());
+
+$('incomeForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках, чтобы правильно учитывать доходы.');go('settings');return;}
+ const amount=num($('incomeAmount').value),date=$('incomeDate').value,source=$('incomeSource').value,destination=$('incomeDestination').value,note=$('incomeNote').value.trim();
+ if(amount<=0||!fromISO(date)||!['family','utilities','savings','other','mortgage','credit','reserve'].includes(destination))return;
+ if(date<data.startBalances.date){alert('Дата дохода раньше начала учёта. Измени дату или включи эти деньги в стартовые остатки.');return;}
+ const income={id:'inc-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),amount,date,source,destination:source==='Доход жены'?'family':destination,note,createdAt:new Date().toISOString(),wifeIncome:source==='Доход жены'};
+ if(income.destination==='savings')assignContribution(income,amount);
+ data.extraIncomes.push(income);
+ month=date.slice(0,7);$('incomeAmount').value='';$('incomeNote').value='';
+ renderAll();
+});
+$('incomeList').addEventListener('click',e=>{
+ const b=e.target.closest('[data-del-income]');if(!b||!confirm('Удалить это поступление?'))return;
+ data.extraIncomes=data.extraIncomes.filter(i=>i.id!==b.dataset.delIncome);renderAll();
+});
+$('expenseDate').value=iso(new Date());
+$('expenseDate').addEventListener('input',updateExpenseOptions);
+$('expenseDate').addEventListener('change',updateExpenseOptions);
+$('expenseCategory').addEventListener('change',()=>{refreshTypes();toggleNewType();});
+$('expenseType').addEventListener('change',toggleNewType);
+refreshTypes();
+$('expenseForm').onsubmit=e=>{e.preventDefault();const amount=num($('expenseAmount').value),date=$('expenseDate').value,category=$('expenseCategory').value,note=$('expenseNote').value.trim();if(!amount||!fromISO(date)||!cats.some(c=>c.id===category))return;
+let type=$('expenseType').value;if(type==='__new__'){type=$('newExpenseType').value.trim().replace(/\s+/g,' ');if(!type){alert('Введи название нового вида расхода');$('newExpenseType').focus();return;}if(type.length>50)return;}
+if(!type){alert('Выбери вид расхода');return;}
+if(isWifeTransferType(type))type='Отправил жене';
+const existing=data.expenseTypes[category].find(x=>x.toLocaleLowerCase('ru')===type.toLocaleLowerCase('ru'));if(existing)type=existing;
+if(type==='Отправил жене'){
+ const available=categoryBalanceAt(category,date);
+ const held=wifeFunds(date);
+ const mine=category==='family'?(available===null?null:Math.max(0,Math.round((available-held)*100)/100)):available;
+ if(mine===null||amount>mine+0.005){alert('Перевод не записан. У тебя в выбранном конверте доступно '+rub(Math.max(0,mine||0))+', а перевод составляет '+rub(amount)+'. Выбери другой источник или меньшую сумму.');return;}
+ if(date>iso(new Date())||date<data.startBalances.date){alert('Перевод можно записать только в период фактического учёта до сегодняшнего дня.');return;}
+ const id='wife-expense-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+ if(category!=='family')(data.transfers||=[]).push({id:'wife-transfer-'+id,date,from:category,to:'family',amount,note:'Отправил жене',wifeMoveId:id});
+ (data.wifeMoves||=[]).push({id,date,amount,source:category,createdAt:new Date().toISOString(),note,fromExpense:true});
+ }else{
+ if(!existing)data.expenseTypes[category].push(type);
+ data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});
+ }
+ month=date.slice(0,7);
+ $('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);
+ if(renderAll()){
+  const isMove=type==='Отправил жене';
+  if(isMove){$('expenseHistoryPanel').open=true;showSaveFeedback('Перевод жене '+rub(amount)+' записан',$('expenseForm').querySelector('button[type="submit"]'));}
+  else showSaveFeedback('Расход сохранён',$('expenseForm').querySelector('button[type="submit"]'));
+  if($('opsSheet')&&!$('opsSheet').hidden)$('opsSheet').querySelector('.ops-sheet-close')?.click();
+ }};
+$('expenseList').addEventListener('click',e=>{
+ const wifeDelete=e.target.closest('[data-del-wife]');
+ if(wifeDelete){
+  if(!confirm('Удалить запись перевода жене?'))return;
+  const id=wifeDelete.dataset.delWife;
+  data.wifeMoves=(data.wifeMoves||[]).filter(m=>String(m.id)!==id);
+  data.transfers=(data.transfers||[]).filter(t=>String(t.wifeMoveId)!==id);
+  renderAll();return;
+ }
+ const b=e.target.closest('[data-del]');if(!b||!confirm('Удалить этот расход?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
+$('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(new Date())+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
+$('importClick').onclick=()=>$('importData').click();$('importData').onchange=async e=>{const f=e.target.files?.[0];if(!f)return;try{const obj=JSON.parse(await f.text());const restored=obj.data;if(!restored||!restored.months||!restored.weights||!Array.isArray(restored.expenses))throw new Error('Некорректная копия');if(confirm('Заменить текущие данные данными из резервной копии?')){data=restored;normalizeIncomeRecords();if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];if(!Array.isArray(data.transfers))data.transfers=[];if(!Array.isArray(data.regularPayments))data.regularPayments=[];if(renderAll())showSaveFeedback('Данные восстановлены',$('importClick'))}}catch(_){alert('Не удалось прочитать резервную копию')}e.target.value=''};
+
+const APP_VERSION='1.5.101';
+let pendingWorker=null;
+$('appVersion').textContent=APP_VERSION;
+const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
+function updateMessage(message){$('updateStatus').textContent=message;}
+$('saveStart').addEventListener('click',()=>{
+ const date=$('startDate').value;
+ if(!fromISO(date)){alert('Укажи корректную дату начала учёта');return;}
+ const balances={};for(const c of cats)balances[c.id]=num($('start-'+c.id).value);
+ const mortgage=num($('startMortgageFund').value);
+ if(data.startBalances&&!confirm('Изменение стартовых остатков пересчитает текущие остатки. Продолжить?'))return;
+ data.startBalances={date,balances,mortgage};
+ data.paidMortgageMonth=$('paidMortgageMonth').value||'';
+ renderAll();$('startStatus').textContent='Стартовые остатки сохранены. Старые покупки до '+date+' не списываются.';
+});
+let receiptEntryType=null;
+let receiptEntryMonth=null;
+let receiptEntryFocus=null;
+function closeReceiptEntry(){
+ $('receiptEntryOverlay').hidden=true;
+ receiptEntryType=null;receiptEntryMonth=null;
+ if(receiptEntryFocus?.focus)receiptEntryFocus.focus();
+}
+function receive(type){
+ if(!data.startBalances){alert('Сначала сохрани начальные остатки в настройках.');return;}
+ if(data.receipts.some(r=>r.id===month+'-'+type)){alert('Это поступление уже учтено.');return;}
+ receiptEntryType=type;receiptEntryMonth=month;
+ receiptEntryFocus=$(type==='advance'?'receiveAdvance':'receiveSalary');
+ $('receiptEntryTitle').textContent=type==='advance'?'Аванс поступил':'Зарплата поступила';
+ const m=monthData(),forecast=payrollForecast(m);
+ // Show ONLY the same forecast as the payroll preview. In particular, do not
+ // use legacy m.advance or m.salary, which could contain 100000 even when
+ // November's calculated advance differs. The suggested amount is editable.
+ const proposed=forecast.configured?
+   (type==='advance'?forecast.advanceForecast:plannedSalary(m)):0;
+ const period=new Date(month+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'}).replace(/\.$/,'');
+ $('receiptEntryHint').textContent='За '+period+'. '+(proposed>0?'Прогноз: '+rub(proposed)+'. ':'')+
+   'Введи сумму, которая действительно поступила на счёт.';
+ const amountField=$('receiptEntryAmount');
+ amountField.value='';
+ amountField.defaultValue='';
+ amountField.placeholder='Фактически получено, ₽';
+ $('receiptEntryDate').max=iso(new Date());
+ $('receiptEntryDate').min=data.startBalances.date;
+ $('receiptEntryDate').value=iso(new Date());
+ $('receiptEntryError').hidden=true;
+ $('receiptEntryOverlay').hidden=false;

@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 37
+SOURCE LINES: 5190-5339
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+#v-card .payment-obligations{padding:9px 11px 10px!important}
+#v-card .payment-obligations .card{box-shadow:none!important}
+#v-card .mortgage-monthly-settings,
+#v-card .credit-settings{padding:9px 11px!important}
+#v-card .mortgage-monthly-settings .field,
+#v-card .credit-settings .field{margin-top:7px!important}
+#v-card .mortgage-monthly-settings input,
+#v-card .credit-settings input{min-height:41px!important}
+#v-plan.active .design-group>.month-strip{box-shadow:none!important}
+#v-plan #planTable th,#v-plan #planTable td{
+ border-bottom-color:color-mix(in srgb,var(--line) 65%,transparent)!important;
+ font-variant-numeric:tabular-nums;
+}
+#v-plan .receipt-button{box-shadow:none!important}
+#v-expense .ops-action-tile{box-shadow:none!important}
+#v-expense .ops-action-tile:active{transform:scale(.985)}
+#v-expense .operations-history details{box-shadow:none!important}
+#v-analytics .analytics-economy-card{border-width:1px!important}
+#v-analytics .analytics-economy-card:has(.analytics-economy-total) .foot{line-height:1.35}
+#v-analytics .analytics-goal-settings{box-shadow:none!important}
+#v-analytics #advisorOpen{box-shadow:none!important}
+#v-settings>.section-heading .pill{
+ font-size:10px!important;letter-spacing:.035em;
+ background:color-mix(in srgb,var(--card) 88%,var(--blue) 12%)!important;
+ border:1px solid var(--line);
+}
+#v-settings>.card,#v-settings>.design-group{margin-bottom:9px!important}
+#v-settings .design-group>.card{box-shadow:none!important}
+#v-settings .design-group>details>summary,
+#v-settings .card>details>summary{min-height:39px!important}
+.app>.nav .tab .tab-icon{box-shadow:none!important}
+.app>.nav .tab{font-weight:600}
+.app>.nav .tab.active{font-weight:750}
+@media (max-width:390px){
+ #v-card .payment-obligations{padding:7px 9px!important}
+ #v-card .mortgage-monthly-settings,
+ #v-card .credit-settings{padding:8px 9px!important}
+ #v-expense .operations-hub{padding:9px!important}
+ #v-settings .design-group{padding:8px!important}
+}
+@media (prefers-reduced-motion:reduce){
+ .app .tab,.app button,.app .card{transition:none!important;animation:none!important}
+}
+
+/* Focused analytics and accessibility adjustments, 1.5.80 test. */
+#v-analytics .analytics-capital-unified .analytics-goal-top{
+ display:none!important; /* Same goal/current figures are already above the progress bar */
+}
+#v-analytics .analytics-capital-unified .analytics-goal-overview{
+ gap:5px!important;
+}
+#v-analytics .analytics-capital-unified .analytics-goal-rest{
+ padding:7px 10px!important;
+ border:0!important;
+ box-shadow:none!important;
+ background:color-mix(in srgb,var(--card) 91%,#9877db 9%)!important;
+}
+#v-analytics .analytics-capital-unified .analytics-monthly-save{
+ padding:7px 9px!important;
+ border-width:1px!important;
+ box-shadow:none!important;
+}
+#v-analytics .analytics-economy-card:not(.has-comparison){
+ padding:11px 13px!important;
+ gap:6px!important;
+}
+#v-analytics .analytics-economy-card:not(.has-comparison) .analytics-economy-total{
+ min-height:0!important;
+}
+#v-analytics .analytics-economy-card:not(.has-comparison) .analytics-economy-total>strong{
+ font-size:clamp(23px,6vw,29px)!important;
+}
+#v-analytics .analytics-economy-card:not(.has-comparison) .analytics-economy-peek>.foot{
+ font-size:clamp(12px,3.1vw,14px)!important;
+ line-height:1.35;
+}
+#v-settings .card:focus-within,
+#v-expense .ops-action-tile:focus-visible,
+#v-plan .receipt-button:focus-visible,
+#v-card .btn:focus-visible,
+.app>.nav .tab:focus-visible{
+ outline:2px solid var(--blue)!important;
+ outline-offset:2px;
+}
+@media (orientation:landscape) and (max-height:430px){
+ .app:has(#v-analytics.active)>.main{
+  overflow-y:auto!important;touch-action:pan-y!important;
+ }
+ #v-analytics.active{height:auto!important;max-height:none!important}
+}
+
+/* Confirmation buttons are actions until the payment is actually recorded. */
+#v-plan .receipt-button.is-confirmed{
+ background:color-mix(in srgb,var(--card) 70%,#49b38d 30%)!important;
+ border:1px solid color-mix(in srgb,var(--line) 50%,#49b38d 50%)!important;
+ color:var(--ink)!important;
+}
+#v-plan .receipt-button:not(.is-confirmed){
+ border:1px solid color-mix(in srgb,var(--line) 65%,var(--blue) 35%)!important;
+}
+#v-plan .receipt-undo.visible{color:var(--muted)}
+
+
+
+/* Test 1.5.80b: restore the savings-goal save button on short iPhone screens.
+   Scroll the modal contents, not the underlying Analytics dashboard. */
+#analyticsModalPlan.analytics-sheet-page{
+ overflow-y:auto!important;
+ overflow-x:hidden!important;
+ -webkit-overflow-scrolling:touch;
+ min-height:0!important;
+ max-height:100%!important;
+ overscroll-behavior:contain;
+ padding-bottom:calc(16px + env(safe-area-inset-bottom))!important;
+}
+#analyticsModalPlan #savingsPlanSave{
+ display:flex!important;
+ flex:0 0 auto!important;
+ position:sticky!important;
+ bottom:0;
+ z-index:2;
+ min-height:44px!important;
+ margin:8px 0 0!important;
+ width:100%!important;
+ justify-content:center;
+ align-items:center;
+ box-sizing:border-box;
+}
+#analyticsModalPlan #savingsPlanStatus{flex:0 0 auto!important}
+@media(max-height:700px){
+ #analyticsModalPlan.analytics-sheet-page{gap:6px!important}
+ #analyticsModalPlan .analytics-plan-summary>div{padding:6px 8px!important}
+ #analyticsModalPlan #savingsPlanSave{min-height:42px!important}
+}
+
+/* Goal-linked allocations: compact affordance in the allocation-rule editor. */
+#autoSavingsModeRow{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+#autoSavingsModeRow[hidden]{display:none!important}
+#autoSavingsModeRow>span{display:flex;align-items:center;gap:9px;font-weight:700}
+#autoSavingsMode{width:18px;height:18px;flex:0 0 18px;accent-color:var(--blue)}
+
+/* 1.5.80 TEST · visible goal-linked savings status on Payouts. */
+#v-plan .goal-allocation-card{
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+ padding:9px 11px;margin:6px 0 8px;
+ background:color-mix(in srgb,var(--card) 86%,#8b78d7 14%);
+ border:1px solid color-mix(in srgb,var(--line) 60%,#8b78d7 40%);
+ border-radius:13px;min-width:0;
+}
+#v-plan .goal-allocation-main{flex:1 1 auto;min-width:0}

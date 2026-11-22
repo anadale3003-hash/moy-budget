@@ -1,0 +1,76 @@
+SOURCE: preview.html
+PART: 18
+SOURCE LINES: 2427-2497
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+<div class="foot">Для расчёта используется пятидневная рабочая неделя и календарь РФ на 2026–2027 годы. При другом графике, отпуске, премии или повышенной ставке НДФЛ скорректируй расчёт вручную. Прогноз не является гарантированной выплатой.</div>
+<div class="two"><label class="field"><span>Рабочих дней в месяце (необязательно)</span><input id="manualDaysTotal" type="number" min="1" max="31" step="1" placeholder="Автоматически"></label><label class="field"><span>Из них с 1 по 15 (необязательно)</span><input id="manualDaysFirst" type="number" min="0" max="15" step="1" placeholder="Автоматически"></label></div>
+<div id="salaryCalendarInfo" class="hint"></div></div>
+<div class="card"><b>Старт с текущих остатков</b><p class="foot">Установи реальные деньги на счетах. Старые покупки до даты старта не будут вычтены ещё раз. Плановые зарплаты не считаются полученными.</p><label class="field"><span>Дата начала учёта</span><input id="startDate" type="date"></label><div class="two"><label class="field"><span>Семейные нужды, ₽</span><input id="start-family" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Коммуналка, ₽</span><input id="start-utilities" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Накопления, ₽</span><input id="start-savings" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Остальное, ₽</span><input id="start-other" type="number" min="0" inputmode="decimal"></label></div><label class="field"><span>Уже отложено на следующую ипотеку, ₽</span><input id="startMortgageFund" type="number" min="0" inputmode="decimal"></label><label class="field"><span>За какой месяц ипотека уже оплачена</span><input id="paidMortgageMonth" type="month"></label><button class="btn full" id="saveStart" type="button">Сохранить стартовые остатки</button><div id="startStatus" class="foot"></div></div>
+<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion">1.5.101</strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
+<div class="card"><b>Резервная копия</b><p class="foot">Сохрани данные перед обновлением или переносом на другой телефон.</p><div class="actions"><button class="btn secondary" id="exportData" type="button">Сохранить копию</button><button class="btn light" id="importClick" type="button">Восстановить</button></div><input type="file" id="importData" accept="application/json,.json" style="display:none"></div>
+<div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
+<div class="hint">Финансовые данные остаются в хранилище браузера на этом устройстве. Не очищай данные сайта, если не сохранил резервную копию.</div>
+</section></main><nav class="nav" aria-label="Разделы"><button type="button" class="tab active" data-go="home" aria-label="Главная"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-0" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-0)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="M4 11 12 4l8 7v10h-6v-7h-4v7H4z"/><path d="m2 11 10-9 10 9-2 2-8-7-8 7z"/></g></svg></span><span class="tab-label">Главная</span></button><button type="button" class="tab" data-go="plan" aria-label="Выплаты"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-1" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-1)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="m2 8 17-5 3 12-17 5z"/><rect x="2" y="8" width="19" height="12" rx="2"/><ellipse cx="11.5" cy="14" rx="3" ry="4"/><path d="M5 11h2m9 6h2"/></g></svg></span><span class="tab-label">Выплаты</span></button><button type="button" class="tab" data-go="card" aria-label="Кредиты"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-2" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-2)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><rect x="2" y="5" width="20" height="15" rx="3"/><path d="M3 9h18v2H3z"/><rect x="5" y="14" width="4" height="3" rx=".6"/><path d="M13 16h5"/></g></svg></span><span class="tab-label">Кредиты</span></button><button type="button" class="tab" data-go="expense" aria-label="Операции"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-3" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-3)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="M5 2h14v20l-2-1.5-2.5 1.5-2.5-1.5L9.5 22 7 20.5 5 22z"/><path d="M8 7h8m-8 4h8m-8 5h3m2 0h3"/></g></svg></span><span class="tab-label">Операции</span></button><button type="button" class="tab" data-go="analytics" aria-label="Накопления"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-4" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-4)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="m2 13 3-1 3 1v8H2zM10 9l3-1 2 1v12h-5zM17 4l3-1 2 1v17h-5z"/></g></svg></span><span class="tab-label">Накопления</span></button><button type="button" class="tab" data-go="settings" aria-label="Настройки"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-5" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-5)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path fill-rule="evenodd" d="m9 2 1 2h4l1-2 4 2-1 3 2 3 2 1v3l-3 1-1 3 1 2-4 2-2-2h-3l-2 2-4-2 1-3-2-3-2-1v-3l3-1 1-3-1-2z M16 12a4 4 0 1 0-8 0 4 4 0 0 0 8 0z"/></g></svg></span><span class="tab-label">Настройки</span></button></nav></div>
+<div class="analytics-overlay" id="analyticsOverlay" hidden>
+  <section class="analytics-sheet" role="dialog" aria-modal="true" aria-labelledby="analyticsSheetTitle">
+   <div class="analytics-sheet-head"><h2 id="analyticsSheetTitle">Подробности</h2><button id="analyticsSheetClose" type="button" class="analytics-sheet-close" aria-label="Закрыть">×</button></div>
+   <div class="analytics-sheet-body">
+    <div class="analytics-sheet-page" id="analyticsModalEconomy" hidden>
+     <div class="analytics-modal-intro" id="analyticsEconomyExplanation">Где снизились траты</div>
+     <div id="analyticsEconomyFullList" class="analytics-full-list"></div>
+     <div class="analytics-pagination"><button type="button" id="analyticsEconomyPrev" aria-label="Предыдущие находки">‹</button><span id="analyticsEconomyPageLabel">—</span><button type="button" id="analyticsEconomyNext" aria-label="Следующие находки">›</button></div>
+     <div class="foot" id="ladderCompare">Это предварительная разница расходов, не свободные деньги на счёте.</div>
+     <button type="button" class="btn full" id="analyticsEconomyOpenTransfer" data-anal-open="transfer">Перевести доступную часть</button>
+    </div>
+    <div class="analytics-sheet-page" id="analyticsModalTransfer" hidden>
+     <p class="foot">Здесь записывается перевод между конвертами. Сначала выполни его в банке.</p>
+     <form id="ladderTransferForm">
+      <label class="field"><span>Откуда перевести</span><select id="ladderSource"></select></label>
+      <label class="field"><span>Сумма в накопления, ₽</span><input id="ladderTransferAmount" type="number" inputmode="decimal" step="0.01" min="0.01" required placeholder="Сумма"></label>
+      <div class="foot" id="ladderTransferLimit">Не превышай доступный остаток.</div>
+      <label class="analytics-utilities-check" id="analyticsUtilitiesWrap" hidden><input type="checkbox" id="analyticsUtilitiesPaid"><span>Подтверждаю, что обязательные счета по коммуналке оплачены</span></label>
+      <button class="btn full" type="submit" id="ladderTransferButton" disabled>Записать перевод в накопления</button>
+     </form>
+     <p class="foot">Это не доход и не банковский перевод. Ипотечные и кредитные резервы не затрагиваются.</p>
+    </div>
+    <div class="analytics-sheet-page" id="analyticsModalCapital" hidden>
+     <div class="analytics-capital-details"><div><span>🛡 Неприкосновенная подушка</span><b id="ladderReserve">500 000 ₽</b></div><div><span>🏦 Сверх подушки</span><b id="ladderExtra">—</b></div><div><span>Следующая ступень</span><b id="ladderGoal">1 000 000 ₽</b></div></div>
+     <p class="foot" id="ladderNote"></p>
+
+    </div>
+    
+    <div class="analytics-sheet-page" id="analyticsModalPlan" hidden>
+     <div class="analytics-plan-summary">
+      <div><span>Следующая цель</span><strong id="savingsPlanGoal">—</strong></div>
+      <div><span>Уже накоплено</span><strong id="savingsPlanCurrent">—</strong></div>
+      <div class="analytics-plan-left"><span>Осталось накопить</span><strong id="savingsPlanRemaining">—</strong></div>
+     </div>
+     <label class="field analytics-plan-input"><span>Размер подушки, ₽</span><input id="ladderReserveInput" type="number" inputmode="decimal" step="100" min="0" required value="500000"></label>
+     <label class="analytics-plan-included"><input id="ladderIncluded" type="checkbox"><span>Подушка уже входит в остаток категории «Накопления»</span></label>
+<div id="personalGoals"><strong>Цели накоплений</strong>
+ <div id="goalReserve"></div><div id="goalBalances"></div>
+ <label class="field" id="goalChoiceField">Цель для новых пополнений<select id="goalChoice"></select></label>
+ <button class="btn secondary" type="button" id="deletePurpose" hidden>Удалить цель</button>
+ <details id="newGoal"><summary>Новая цель</summary><form id="newGoalForm">
+ <label class="field">Название<input id="purposeName" required maxlength="60" placeholder="Например, поездка"></label>
+ <label class="field">Нужно накопить, ₽<input id="purposeTarget" required type="number" step=".01" min=".01" inputmode="decimal"></label>
+ <label class="field">Выделить из свободных накоплений, ₽<input id="purposeStart" type="number" min="0" step=".01" inputmode="decimal" placeholder="0"></label>
+ <button class="btn full" type="submit">Создать цель</button></form></details>
+ </div>
+     <div class="confirmed-savings-card" id="confirmedSavingsCard">
+      <div class="row"><b>🏦 Фактически на накопительном счёте</b><span class="quiet" id="confirmedSavingsState">Не подтверждено</span></div>
+      <div class="foot">Для цели используем остаток конверта «Накопления». Пока стартовые остатки не введены, используем указанную здесь сумму по банку.</div>
+      <label class="field"><span>Фактический остаток счёта, ₽</span><input id="confirmedSavingsBalanceInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="Укажи сумму по банку"></label>
+      <button type="button" class="btn full secondary" id="confirmedSavingsSet">Сохранить фактический остаток</button>
+      <label class="field"><span>Дополнительно перевёл в накопления, ₽</span><input id="confirmedSavingsDeposit" inputmode="decimal" type="number" min="0.01" step="0.01" placeholder="Например, 15 000"></label>
+      <button type="button" class="btn full secondary" id="confirmedSavingsAdd">Подтвердить пополнение</button>
+      <div class="foot" id="confirmedSavingsMessage" role="status" aria-live="polite"></div>
+      <div id="confirmedSavingsHistory"></div>
+     </div>
+     <label class="field analytics-plan-input"><span>Название цели</span><input id="savingsGoalName" maxlength="60" placeholder="Например, Запас для семьи"></label>
+     <label class="field analytics-plan-input"><span>Моя цель, ₽ (включая подушку)</span><input id="savingsPlanTargetAmount" type="number" inputmode="numeric" min="0" max="1000000000" step="1000" required value="1000000"></label>
+     <label class="field analytics-plan-input"><span>За сколько месяцев накопить?</span><input id="savingsPlanMonths" type="number" inputmode="numeric" min="1" max="120" step="1" value="12"></label>
+     <div class="analytics-plan-presets" aria-label="Выбрать срок">
+      <button type="button" data-savings-months="6">6 мес.</button>
+      <button type="button" data-savings-months="12">1 год</button>

@@ -1,0 +1,155 @@
+SOURCE: preview.html
+PART: 32
+SOURCE LINES: 4445-4594
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+ $('receiptEntryError').hidden=true;
+ $('receiptEntryOverlay').hidden=false;
+
+}
+$('receiptEntryForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ if(!receiptEntryType||!receiptEntryMonth)return;
+ const amount=Number($('receiptEntryAmount').value),date=$('receiptEntryDate').value;
+ const err=$('receiptEntryError');
+ if(!Number.isFinite(amount)||amount<=0||!fromISO(date)||date>iso(new Date())||date<data.startBalances.date){
+  err.textContent='Укажи положительную сумму и дату от начала учёта до сегодняшнего дня.';err.hidden=false;return;
+ }
+ if(month!==receiptEntryMonth||data.receipts.some(r=>r.id===receiptEntryMonth+'-'+receiptEntryType)){
+  err.textContent='Месяц или состояние поступления изменилось. Закрой окно и попробуй снова.';err.hidden=false;return;
+ }
+ const type=receiptEntryType,key=month+'-'+type,m=monthData();
+ const pf=payrollForecast(m);
+ const orphanAdvance=type==='advance'&&!data.receipts.some(r=>r.month===month&&r.type==='advance')&&
+   pf.configured&&num(m.advance)>=pf.net;
+ const previousMonthAmount=orphanAdvance?0:num(m[type]);
+ if(pf.configured&&type==='advance'&&amount>pf.net*1.25){
+  if(!confirm('Внимание: аванс '+rub(amount)+' заметно превышает ожидаемый доход на руки '+rub(pf.net)+'. Проверь, не добавился ли лишний ноль. Сохранить именно эту сумму?'))return;
+ }
+ // Register a temporary receipt BEFORE calculating distribution. Otherwise the
+ // orphan-advance protection treats a legitimate large receipt as cancelled and
+ // allocates only the much smaller salary forecast.
+ const receipt={id:key,type,month,date,amount,amounts:{},previousMonthAmount};
+ data.receipts.push(receipt);
+ m[type]=amount;
+ try{
+  const calc=allocation(date,null,receipt),col=type==='advance'?'a':'b',amounts={};
+  for(const row of calc.rows){
+   const dest=row.id||(row.name==='Ипотека'?'mortgage':'credit');
+   amounts[dest]=Math.round(num(row[col])*100)/100;
+  }
+  // Rounding per destination can leave a few kopecks. Put them in "Other".
+  const distributed=Object.values(amounts).reduce((sum,v)=>sum+v,0);
+  const difference=Math.round((amount-distributed)*100)/100;
+  amounts.other=Math.round((num(amounts.other)+difference)*100)/100;
+  const verified=Object.values(amounts).reduce((sum,v)=>sum+v,0);
+  if(Object.values(amounts).some(v=>!Number.isFinite(v)||v<0)||
+     Math.abs(verified-amount)>0.011)throw Error('Сумма поступления не совпадает с распределением. Ничего не сохранено; попробуй ещё раз.');
+  assignContribution(receipt,amounts.savings);
+  receipt.amounts=amounts;
+  if(amounts.credit)data.reserved=num(data.reserved)+amounts.credit;
+  closeReceiptEntry();renderAll();
+ }catch(ex){
+  data.receipts=data.receipts.filter(r=>r!==receipt);
+  m[type]=previousMonthAmount;
+  err.textContent=ex.message||'Не удалось распределить поступление.';
+  err.hidden=false;
+ }
+});
+$('receiptEntryClose').addEventListener('click',closeReceiptEntry);
+$('receiptEntryCancel').addEventListener('click',closeReceiptEntry);
+$('receiptEntryOverlay').addEventListener('click',e=>{if(e.target===$('receiptEntryOverlay'))closeReceiptEntry()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('receiptEntryOverlay').hidden)closeReceiptEntry()});
+// Mortgage and credit payments use the same two-step entry as incoming salary.
+let paymentEntryTarget=null;
+let paymentEntryMonth=null;
+let paymentEntryPart=null;
+let paymentEntryTrigger=null;
+function closePaymentEntry(){
+ $('paymentEntryOverlay').hidden=true;
+ paymentEntryTarget=null;paymentEntryMonth=null;paymentEntryPart=null;
+ if(paymentEntryTrigger?.focus)paymentEntryTrigger.focus();
+}
+function paymentFunding(target,amount,date){
+ const available=target==='mortgage'?regularMortgageAvailable(date):regularCreditAvailable(date);
+ const reserve=Math.max(0,Math.round(available*100)/100);
+ const reserveUsed=Math.min(amount,reserve);
+ const extraAmount=Math.max(0,Math.round((amount-reserveUsed)*100)/100);
+ return {reserveUsed,extraAmount};
+}
+function updateCreditPaymentFunding(){
+ const visible=paymentEntryTarget==='credit'||paymentEntryTarget==='mortgage';
+ $('creditPaymentFunding').hidden=!visible;
+ if(!visible)return;
+ const amount=Math.max(0,Number($('paymentEntryAmount').value)||0);
+ const date=$('paymentEntryDate').value;
+ const {reserveUsed,extraAmount}=paymentFunding(paymentEntryTarget,amount,date);
+ $('creditPaymentFundingSummary').textContent='Из отложенных: '+rub(reserveUsed)+(extraAmount>0?' · Дополнительно из конверта: '+rub(extraAmount):' · Доплата из конверта не требуется');
+ $('creditPaymentSourceWrap').hidden=extraAmount<=0;
+ const source=$('creditPaymentSource').value;
+ const available=fromISO(date)&&source?Math.max(0,categoryBalanceAt(source,date)||0):null;
+ $('creditPaymentSourceAvailable').textContent=extraAmount>0&&source?'Доступно в конверте на дату списания: '+rub(available):'';
+}
+function confirmRegularPayment(target,amount,date,extraSource='',part=''){
+ if(!data.startBalances)return 'Сначала укажи стартовые остатки в настройках.';
+ if(!Number.isFinite(amount)||amount<=0||!fromISO(date)||date>iso(new Date())||date<data.startBalances.date)return 'Проверь сумму и дату. Платёж должен быть после начала учёта и не позже сегодня.';
+ if(target==='credit'){
+  const outstanding=creditOutstanding();
+  if(amount>outstanding+0.001)return 'Платёж превышает оставшийся учтённый долг: '+rub(outstanding);
+ }
+ const {reserveUsed,extraAmount}=paymentFunding(target,amount,date);
+ if(extraAmount>0){
+  if(!cats.some(c=>c.id===extraSource))return 'Выбери конверт, из которого списать дополнительные '+rub(extraAmount)+'.';
+  const categoryBalance=categoryBalanceAt(extraSource,date);
+  if(categoryBalance===null||categoryBalance+0.001<extraAmount)return 'В выбранном конверте недостаточно денег на дату списания. Доступно: '+rub(Math.max(0,categoryBalance||0))+'.';
+ }
+ data.regularPayments.push({id:'payment-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
+  month,target,part:part==='advance'||part==='salary'?part:'',amount,date,reserveUsed,extraSource:extraAmount>0?extraSource:'',extraAmount});
+ if(target==='credit'){
+  data.reserved=Math.max(0,Math.round((num(data.reserved)-reserveUsed)*100)/100);
+  creditPaymentFeedback(amount);
+ }
+ closePaymentEntry();renderAll();
+ return null;
+}
+
+/* Regular bank payment confirmation now uses the shared reserve. Wage
+   splits remain in allocation() for planning, not as a payment choice. */
+function suggestedRegularPayment(target,date){
+ // The amount prefilled for bank-payment confirmation is the portion ACTUALLY
+ // reserved as of the selected date, not the whole planned mortgage or debt.
+ // Never suggest spending money from envelopes without a conscious choice.
+ const already=regularPaidForMonth(target,month);
+ const due=target==='mortgage'
+  ?Math.max(0,num(monthData().mortgage)-already)
+  :Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
+ if(target==='mortgage'&&data.paidMortgageMonth===month&&already===0)return 0;
+ const available=Math.max(0,target==='mortgage'?regularMortgageAvailable(date):regularCreditAvailable(date));
+ return Math.round(Math.max(0,Math.min(due,available))*100)/100;
+}
+function openPaymentEntry(target){
+ if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках.');return;}
+ const isMortgage=target==='mortgage';
+ paymentEntryTarget=target;paymentEntryMonth=month;
+ paymentEntryTrigger=$(isMortgage?'confirmMortgagePayment':'confirmCreditPayment');
+ $('paymentEntryTitle').textContent=isMortgage?'Оплата ипотеки':'Оплата кредитки';
+ const todayKey=iso(new Date());
+ $('paymentEntryDate').min=data.startBalances.date;
+ $('paymentEntryDate').max=todayKey;
+ $('paymentEntryDate').value=todayKey;
+ $('paymentEntryError').hidden=true;
+ $('creditPaymentSource').innerHTML='<option value="">Выбери конверт…</option>'+cats.map(c=>'<option value="'+c.id+'">'+c.icon+' '+c.name+'</option>').join('');
+ const available=Math.max(0,isMortgage?regularMortgageAvailable(todayKey):regularCreditAvailable(todayKey));
+ const suggested=suggestedRegularPayment(target,todayKey);
+ $('paymentEntryAmount').value=suggested>0?String(suggested):'';
+ const due= isMortgage
+  ?Math.max(0,num(monthData().mortgage)-regularPaidForMonth('mortgage',month))
+  :Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
+ $('paymentEntryHint').textContent='Платёж по плану: '+rub(due)+'. Отложено: '+rub(available)+'. '+
+  (suggested>0?'Подставлена только отложенная сумма. ':'Отложенных средств пока нет — сумма не подставлена. ')+
+  'Подтверждай только фактическое списание банка. Если платёж больше резерва, недостающее можно вручную взять из конверта.';
+ updateCreditPaymentFunding();
+ $('paymentEntryOverlay').hidden=false;
+ // Keep the suggested amount visible without automatically selecting it or opening the keyboard.
+ // The user can tap the field to edit the amount manually.
+}

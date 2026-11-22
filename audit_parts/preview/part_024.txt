@@ -1,0 +1,151 @@
+SOURCE: preview.html
+PART: 24
+SOURCE LINES: 3248-3394
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+ const todayKey=iso(now);
+ const early=(data.earlyRepayments||[]).filter(p=>p.target==='credit'&&p.date<=todayKey).reduce((v,p)=>v+num(p.amount),0);
+ return {data,mortgage:upcomingMortgage(now),debt:Math.max(0,num(data.debt)-regularPaymentSum('credit',null,todayKey)-early),
+ reserved:data.startBalances?Math.max(0,regularCreditAvailable(todayKey)):num(data.reserved)};
+};
+function renderEarlyAlerts(){
+ const host=$('budgetEarlyAlerts');if(!host)return;
+ const now=new Date(),todayKey=iso(now),start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+ const daysUntil=d=>Math.round((Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())-Date.UTC(start.getFullYear(),start.getMonth(),start.getDate()))/86400000);
+ const dateLabel=d=>d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+ const notes=[];
+ const push=(kind,title,body)=>notes.push({kind,title,body});
+ const mortgage=upcomingMortgage(now);
+ if(mortgage.plan>0){
+  const title=mortgage.remaining===0?'🏠 Платёж по ипотеке закрыт':mortgage.gap===0?'🏠 На ипотеку всё собрано':'🏠 Ипотека к '+dateLabel(mortgage.due);
+  const action=mortgage.remaining===0?'Платёж за этот период внесён полностью.':mortgage.gap===0?'Деньги на остаток платежа уже собраны. Подтверди оплату после списания.':mortgage.reserve===null?'Сверь остаток ипотечного счёта с суммой к оплате.':'Осталось отложить '+rub(mortgage.gap)+'.';
+  push(mortgage.gap>0?'warn':'info',title,'Уже оплачено '+rub(mortgage.paid)+' из '+rub(mortgage.plan)+'. '+(mortgage.reserve===null?'К оплате '+rub(mortgage.remaining)+'. ':'В резерве '+rub(mortgage.reserve)+'. ')+action);
+ }
+ // January advance: compare January's projected first-half workdays with December.
+ const yy=now.getFullYear()+(now.getMonth()>=10?1:0);
+ const jan=new Date(yy,0,1),janKey=iso(jan).slice(0,7);
+ const janPayday=plannedPayday(janKey,Number(data.payDays.advance)||16);
+ const janRangeDays=daysUntil(janPayday);
+ if(now.getMonth()>=10||now.getMonth()===0){
+  if(janRangeDays>=-17&&janRangeDays<=100){
+   const decKey=(yy-1)+'-12';
+   const janCfg=data.months[janKey]||{},decCfg=data.months[decKey]||{};
+   const janEstimate=payrollForecast(janCfg,janKey),decEstimate=payrollForecast(decCfg,decKey);
+   const januaryReceipt=(data.receipts||[]).some(r=>r.id===janKey+'-advance');
+   if(!januaryReceipt){
+    const smaller=janEstimate.configured&&decEstimate.configured&&janEstimate.advanceForecast<decEstimate.advanceForecast;
+    const febDue=new Date(yy,1,1);
+    const febKey=iso(febDue).slice(0,7);
+    const febPlan=data.months[febKey];
+    const febMortgage=num(febPlan?.mortgage===undefined?(data.mortgageMonthly===undefined?55000:data.mortgageMonthly):febPlan.mortgage);
+    const estimateText=smaller?'По расчёту аванс может быть около '+rub(janEstimate.advanceForecast)+' вместо декабрьских '+rub(decEstimate.advanceForecast)+'. ':'Из-за новогодних праздников аванс может быть меньше обычного. ';
+    push('season','🎄 Подготовь деньги к январю',
+      estimateText+'На ипотеку к '+dateLabel(febDue)+' потребуется '+rub(febMortgage)+'. По возможности отложи деньги из декабрьских поступлений. Прогноз не учитывает все особенности расчёта работодателя.');
+   }
+  }
+ }
+ const next=nearestPayday(now),money=actualMoneyToday();
+ const days=next?daysUntil(next.date):0;
+ if(money&&days>0){
+  const family=Math.max(0,Math.min(money.available,categoryBalanceAt('family',todayKey)));
+  push('daily','🛒 До '+dateLabel(next.date)+' на семью — '+rub(Math.floor(family/days))+' в день',
+   'В семейном конверте '+rub(family)+' на '+days+' дн. Перед закупкой сравни сумму корзины с остатком конверта.');
+ }
+ const snapshot=window.budgetAdvisorSnapshot(now);
+ if(snapshot.debt>0){
+  const due=fromISO(data.deadline),gap=Math.max(0,snapshot.debt-snapshot.reserved);
+  const paid=regularPaymentSum('credit',todayKey.slice(0,7)+'-01',todayKey);
+  const upcoming=nextPaydays(now);
+  const creditRow=next&&next.month===month?displayAllocationRows(allocation().rows).find(r=>r.name==='Кредитная карта'):null;
+  const action=gap===0?'Весь остаток уже обеспечен. После списания отметь оплату.':
+   due&&upcoming.length&&creditRow?'С '+(next.type==='advance'?'аванса ':'зарплаты ')+dateLabel(next.date)+' по плану отложи '+rub(creditRow[next.type==='advance'?'a':'b'])+'.':
+   due&&upcoming.length?'До '+dateLabel(due)+' нужно собрать '+rub(gap)+' за '+upcoming.length+' выплат.':
+   due?'До срока больше нет запланированных выплат. Сверь дату и сумму платежа с банком.':'Укажи дату окончания льготного периода в «Кредитах».';
+  push(due&&daysUntil(due)<=14&&gap>0?'critical':'credit',paid?'💳 В этом месяце ты погасил '+rub(paid):'💳 План по кредитке',
+   'Остаток долга '+rub(snapshot.debt)+'. '+action);
+ }
+ const capital=capitalSnapshot(),monthsLeft=savingsPlanMonthsLeft(capital.settings.targetMonth);
+ if(capital.settings.targetMonth&&monthsLeft>0){
+  const percent=Math.min(100,Math.floor(100*capital.total/Math.max(1,capital.goal)));
+  push('goal','🎯 '+percent+'% пути к цели', 'По данным приложения собрано '+rub(capital.total)+' из '+rub(capital.goal)+'. '+(capital.remaining===0?'Цель достигнута. В «Накоплениях» можно выбрать следующую.':snapshot.debt>0?'Пока гасишь кредитку, можно сохранить накопленное. Вернись к темпу накоплений после погашения.':'Чтобы уложиться в срок, ориентир — '+rub(Math.ceil(capital.remaining/monthsLeft))+' в месяц.'));
+ }
+ const economy=analyticsEconomy();
+ if(economy.isCurrent&&economy.available>=1){
+  push('saving','🌱 Расходы снизились','По записям за те же дни прошлого месяца можно рассмотреть до '+rub(economy.available)+'. Перед переводом проверь, что все покупки внесены и денег хватит до выплаты.');
+ }
+ if(!money)push('daily','🛒 Сколько можно тратить до выплаты','Укажи стартовые остатки в настройках. Тогда здесь появится дневной ориентир для семейных покупок.');
+ const priority=['critical','credit','daily','warn','saving','goal','info','season'];
+ notes.sort((a,b)=>priority.indexOf(a.kind)-priority.indexOf(b.kind));
+ if(!notes.length)push('info','Бюджет на сегодня','После записи поступлений и расходов здесь появятся персональные советы.');
+ const milestone=regularPaymentSum('credit',todayKey.slice(0,7)+'-01',todayKey);
+ const urgent=notes.find(n=>n.kind==='critical');
+ const wins=[];
+ if(mortgage.paid>0)wins.push('на ипотеку уже внесено '+rub(mortgage.paid));
+ if(milestone>0)wins.push('по кредитке за месяц погашено '+rub(milestone));
+ $('adviceOpening').textContent=wins.length?'Есть за что себя похвалить: '+wins.join(', ')+'.':'Давай посмотрим, что можно сделать с ближайшей выплаты.';
+ const options=[];
+ if(money&&days>0){
+  const family=Math.max(0,Math.min(money.available,categoryBalanceAt('family',todayKey)));
+  options.push({kind:'daily',title:'Оставить запас семье',body:family>0?'До '+dateLabel(next.date)+' в семейном конверте '+rub(family)+'. Можно оставить их на обычные покупки и вернуться к накоплениям после выплаты.':'В семейном конверте сейчас нет доступных денег. Сначала прикинь расходы на продукты до выплаты.'});
+ }
+ if(mortgage.gap>0)options.push({kind:'warn',title:'Подготовить ближайший платёж',body:'До '+dateLabel(mortgage.due)+' осталось собрать '+rub(mortgage.gap)+'. Сверь эту сумму с планом во «Выплатах», чтобы понимать, сколько оставить на ипотеку.'});
+ const creditNote=notes.find(n=>n.kind==='credit');
+ if(creditNote)options.push({...creditNote,title:'Продолжить погашать кредитку по плану'});
+ const goalNote=notes.find(n=>n.kind==='goal');
+ if(goalNote&&options.length<3)options.push(goalNote);
+ const card=n=>'<article class="budget-early-alert '+n.kind+'"><b>'+esc(n.title)+'</b><p>'+esc(n.body)+'</p></article>';
+ const visible=options.slice(0,3);
+ if(!visible.length&&!urgent)visible.push(notes[0]);
+ const rest=notes.filter(n=>n!==urgent&&!visible.includes(n)&&!visible.some(v=>v.kind===n.kind));
+ host.innerHTML=(urgent?card(urgent):'')+(visible.length?'<p class="budget-alerts-help">'+(visible.length>1?'Можно выбрать один из этих шагов.':'Ближайший шаг')+'</p>'+visible.map(card).join(''):'')+(rest.length?'<details class="more-budget-tips"><summary>Ещё по бюджету · '+rest.length+'</summary>'+rest.map(card).join('')+'</details>':'');
+ const count=$('budgetAlertsCount');count.textContent=String(visible.length+rest.length+(urgent?1:0));count.hidden=false;
+}
+
+const budgetAlertsDialog=$('budgetAlertsDialog');
+$('budgetAlertsOpen').addEventListener('click',()=>{
+ renderEarlyAlerts();
+ if(!budgetAlertsDialog.open)budgetAlertsDialog.showModal();
+});
+$('budgetAlertsClose').addEventListener('click',()=>budgetAlertsDialog.close());
+budgetAlertsDialog.addEventListener('click',e=>{if(e.target===budgetAlertsDialog)budgetAlertsDialog.close()});
+const historySortDirections={expenseList:'desc',incomeList:'desc',transferList:'desc',earlyHistory:'desc',envelopeHistoryList:'desc'};
+function sortHistoryRows(rows,key){
+ const direction=historySortDirections[key]==='asc'?1:-1;
+ return [...rows].sort((a,b)=>direction*String(a.date||'').localeCompare(String(b.date||'')));
+}
+document.querySelectorAll('[data-history-sort]').forEach(select=>{
+ select.addEventListener('change',()=>{
+  historySortDirections[select.dataset.historySort]=select.value==='asc'?'asc':'desc';
+  if(select.dataset.historySort==='envelopeHistoryList'){
+   if(lastEnvelopeHistoryId)showEnvelopeHistory(lastEnvelopeHistoryId);
+  }else render();
+ });
+});
+let lastEnvelopeHistoryId=null;
+
+function render(){renderEarlyAlerts();const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);renderFamilyBalances();
+$('envelopes').innerHTML=cats.map(cat=>{
+ const row=calc.rows.find(r=>r.id===cat.id);
+ const balance=realBalance(cat.id)??(num(row?.a)+num(row?.b)-sumExpenses(cat.id));
+ return `<button type="button" class="pocket" data-envelope="${cat.id}" aria-label="${cat.name}, ${rub(balance)}. Открыть историю"><span>${cat.name}</span><strong>${rub(balance)}</strong></button>`;
+}).join('');
+const cc=credit();
+const nextCreditPay=cc.pays[0];
+const planCreditRow=displayAllocationRows(calc.rows).find(row=>row.name==='Кредитная карта');
+const nextCreditText=nextCreditPay?.month===month
+ ?(nextCreditPay.type==='advance'?'С аванса ':'С зарплаты ')+nextCreditPay.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+' по плану — '+rub(planCreditRow[nextCreditPay.type==='advance'?'a':'b'])
+ :'В среднем по оставшимся выплатам — '+rub(cc.per);
+const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':nextCreditText;const homeMortgage=upcomingMortgage(new Date());
+$('obligations').innerHTML=`<div class="payment-summary"><span>Ипотека · ${homeMortgage.due.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}</span><strong>${homeMortgage.remaining?'Осталось внести '+rub(homeMortgage.remaining):'Платёж внесён'}</strong><small>Внесено ${rub(homeMortgage.paid)} из ${rub(homeMortgage.plan)}</small><details><summary>Кредитная карта</summary><p>Ещё собрать ${rub(cc.debt)}. ${esc(state)}</p></details></div>`;
+const visiblePlanRows=displayAllocationRows(calc.rows);
+const receivedLabel=type=>data.receipts.some(r=>r.id===month+'-'+type)?' ✓':'';
+$('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс'+receivedLabel('advance')+'</th><th>Зарплата'+receivedLabel('salary')+'</th></tr></thead><tbody>'+visiblePlanRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
+const popupPreview=$('proportionDistributionPreview');
+if(popupPreview?.closest('details')?.open)popupPreview.querySelector('.payout-popup-preview-content').innerHTML=$('planTable').innerHTML;
+$('planWarnings').innerHTML=(!plannedAdvance(m)||!plannedSalary(m))
+ ? '<div class="hint">Укажи оклад в настройках или фактические выплаты для полного расчёта.</div>'
+ : ''
+ + (calc.unfundedMortgage?`<div class="warning">Не хватает ${rub(calc.unfundedMortgage)} на ипотеку. Нужно покрыть разницу другим источником.</div>`:'')
+ + ((calc.offsets.advance||calc.offsets.salary)?`<div class="hint">Учтена дополнительная оплата ипотеки из конвертов: меньше отложить с аванса на ${rub(calc.offsets.advance)}, с зарплаты на ${rub(calc.offsets.salary)}. Уже подтверждённые поступления не меняются.</div>`:'')
+ + (calc.deficit?`<div class="warning">Ипотека и кредитка превышают доход месяца на ${rub(calc.deficit)}. Отложить требуемую сумму полностью не получится.</div>`:'')
+ + (!calc.weightTotal?'<div class="warning">Укажи хотя бы один положительный вес для распределения остатка.</div>':'');

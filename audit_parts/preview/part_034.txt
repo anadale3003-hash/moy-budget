@@ -1,0 +1,155 @@
+SOURCE: preview.html
+PART: 34
+SOURCE LINES: 4745-4894
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+ const targetInput=$('savingsPlanTargetAmount');
+ const reserveInput=$('ladderReserveInput');
+ const reserve=Number(reserveInput.value);
+ const incoming=reserveIncomeTotal();
+ const goal=Number(targetInput.value);
+ if(!Number.isInteger(months)||months<1||months>120){alert('Выбери срок от 1 до 120 месяцев.');return;}
+ if(reserveInput.value.trim()===''||!Number.isFinite(reserve)||reserve<incoming||reserve>1000000000){alert('Размер подушки не может быть меньше уже записанных в неё поступлений ('+rub(incoming)+'). Чтобы уменьшить эту сумму, удали ошибочные доходы.');return;}
+ if(targetInput.value.trim()===''||!Number.isInteger(goal)||goal<reserve||goal>1000000000){
+   alert('Цель должна быть не меньше защищённой подушки: '+rub(reserve)+'.');return;
+ }
+ const settings=ladderSettings();
+ settings.reserve=Math.round((reserve-incoming)*100)/100;
+ settings.included=$('ladderIncluded').checked;
+ settings.name=$('savingsGoalName').value.trim();
+ settings.targetAmount=goal;
+ settings.targetMonth=savingsPlanTarget(months);
+ if(settings.autoAllocateSavings===undefined)settings.autoAllocateSavings=true;
+ if(!renderAll())return;
+ $('savingsPlanStatus').textContent='Цель сохранена. Распределение по процентам не меняется; приложение показывает недостающий ежемесячный взнос.';
+ savingsPlanRender();
+});
+$('analyticsSheetClose').addEventListener('click',analyticsModalClose);
+$('analyticsOverlay').addEventListener('click',e=>{
+ if(e.target===$('analyticsOverlay'))analyticsModalClose();
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&!$('analyticsOverlay').hidden)analyticsModalClose();
+});
+$('analyticsEconomyPrev').addEventListener('click',()=>{analyticsEconomyPage--;analyticsBreakdownRender(analyticsEconomy())});
+$('analyticsEconomyNext').addEventListener('click',()=>{analyticsEconomyPage++;analyticsBreakdownRender(analyticsEconomy())});
+document.querySelectorAll('[data-anal-stats]').forEach(button=>button.addEventListener('click',()=>{
+ analyticsStatsTab=button.dataset.analStats;analyticsTypePage=0;analyticsReportRender();
+}));
+$('analyticsTypesPrev').addEventListener('click',()=>{analyticsTypePage--;analyticsReportRender()});
+$('analyticsTypesNext').addEventListener('click',()=>{analyticsTypePage++;analyticsReportRender()});
+window.addEventListener('resize',()=>{
+ if(!$('analyticsOverlay').hidden)analyticsBreakdownRender(analyticsEconomy());
+});
+$('ladderSource').addEventListener('change',()=>{
+ $('ladderTransferAmount').value='';
+ $('analyticsUtilitiesPaid').checked=false;
+ ladderRender();
+});
+$('ladderTransferForm').addEventListener('submit',event=>{
+ event.preventDefault();
+ if(month!==currentMonth){alert('Для перевода открой текущий месяц.');return;}
+ if(!data.startBalances||data.startBalances.date>iso(new Date())){alert('Сначала укажи стартовые остатки.');return;}
+ const source=$('ladderSource').value,amount=Number($('ladderTransferAmount').value);
+ if(!['family','utilities','other'].includes(source)||!Number.isFinite(amount)||amount<=0)return;
+ if(source==='utilities'&&!$('analyticsUtilitiesPaid').checked){
+   alert('Для коммуналки сначала подтверди, что обязательные счета оплачены.');return;
+ }
+ const estimate=ladderEconomy(source);
+ if(amount>estimate.max+0.001){alert('Экономия или доступный остаток уменьшились. Проверь сумму.');ladderRender();return;}
+ const name=cats.find(x=>x.id===source).name;
+ if(!confirm('Записать перевод '+rub(amount)+' из «'+name+'» в «Накопления»?\n\nЭто запись в бюджете, не перевод в банке. Сначала переведи деньги фактически.'))return;
+ const fresh=ladderEconomy(source),balance=categoryBalanceAt(source,iso(new Date()));
+ if(amount>fresh.max+0.001||balance===null||amount>balance+0.001){alert('Остаток изменился. Проверь сумму.');ladderRender();return;}
+ recordEnvelopeTransfer({
+   id:'tr-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
+   from:source,to:'savings',date:iso(new Date()),amount:Math.round(amount*100)/100,
+   note:'Экономия за '+month,kind:'economy',period:month
+ });
+ $('ladderTransferAmount').value='';
+ $('analyticsUtilitiesPaid').checked=false;
+ if(!renderAll())return;
+ analyticsModalClose();
+});
+
+setupCompactPanels();initTheme();renderAll();
+if('ResizeObserver' in window){new ResizeObserver(()=>fitTotalMoneyTile()).observe(document.querySelector('.hero-overview .hero-all'));}
+window.addEventListener('resize',fitTotalMoneyTile);
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+})();
+</script>
+<script>
+/* Operations screen renovation: purely DOM presentation, existing form IDs and handlers reused. */
+(function(){
+ function initOperations(){
+  const section=document.getElementById('v-expense');
+  if(!section || document.getElementById('opsActions'))return;
+  const parts={
+   expense:document.getElementById('expenseForm')?.closest('.card'),
+   income:document.getElementById('incomeForm')?.closest('.card'),
+   wifeCheck:document.getElementById('wifeCheckCard'),
+   wifeTransfer:document.getElementById('wifeTransferCard'),
+   support:document.getElementById('supportCard'),
+   transfer:document.getElementById('transferForm')?.closest('.card')
+  };
+  if(!parts.expense||!parts.income||!parts.transfer)return;
+  const histories=[
+   document.getElementById('expenseHistoryPanel'),
+   document.getElementById('incomeHistoryPanel'),
+   document.getElementById('transferHistoryPanel')
+  ].filter(Boolean);
+  // The existing grouping script has run; remove only wrappers, never the forms or history content.
+  const intro=document.createElement('div');intro.className='design-group ops-action-group';intro.id='opsActions';
+  const introTitle=document.createElement('div');introTitle.className='section-heading';
+  introTitle.innerHTML='<h2>Операции <small style="font-size:11px;color:var(--muted);font-weight:500">Тест · 21.11 · проверка переводов</small></h2>';intro.append(introTitle);
+  const grid=document.createElement('div');grid.className='ops-action-grid';
+  const actions=[
+   ['expense','Расход','↘'],['income','Доход','↗'],['transfer','Между конвертами','⇄']
+  ];
+  for(const [type,label,symbol] of actions){
+   const button=document.createElement('button');button.type='button';button.className='ops-action-tile';
+   button.dataset.opsAction=type;button.setAttribute('aria-label','Новая операция: '+label);
+   const pic=document.createElement('span');pic.className='ops-action-icon';pic.textContent=symbol;pic.setAttribute('aria-hidden','true');
+   const name=document.createElement('strong');name.textContent=label;
+   button.append(pic,name);grid.append(button);
+  }
+  intro.append(grid,document.getElementById('familyActions'));
+  const historyGroup=document.createElement('div');historyGroup.className='design-group ops-history-group';
+  const historyTitle=document.createElement('div');historyTitle.className='section-heading';historyTitle.innerHTML='<h2>История операций</h2>';historyGroup.append(historyTitle);
+  for(const panel of histories){panel.open=false;historyGroup.append(panel)}
+  // Keep all 3 forms in one accessible overlay, instead of 3 stacked forms on the page.
+  const overlay=document.createElement('div');overlay.className='ops-sheet-overlay';overlay.id='opsSheet';overlay.hidden=true;
+  const sheet=document.createElement('div');sheet.className='ops-sheet';sheet.setAttribute('role','dialog');
+  sheet.setAttribute('aria-modal','true');sheet.setAttribute('aria-labelledby','opsSheetTitle');
+  const head=document.createElement('div');head.className='ops-sheet-head';
+  const title=document.createElement('h2');title.id='opsSheetTitle';
+  const close=document.createElement('button');close.type='button';close.className='ops-sheet-close';
+  close.setAttribute('aria-label','Закрыть');close.textContent='×';
+  head.append(title,close);
+  const body=document.createElement('div');body.className='ops-sheet-body';
+  Object.values(parts).forEach(card=>{card.classList.add('ops-form-card');card.hidden=true;body.append(card)});
+  sheet.append(head,body);overlay.append(sheet);document.body.append(overlay);
+  // Keep the monthly Operations summary when rebuilding the legacy landing.
+  // The old section.replaceChildren(intro,historyGroup) silently detached
+  // analyticsTotal, analyticsIncomeTotal and the Details/month controls.
+  const overview=section.querySelector('.operations-hub');
+  if(overview){
+   // The existing three large tiles are the action entry points. Remove only
+   // duplicated quick buttons; keep the summary and its existing event listeners.
+   overview.querySelector('.operations-quick')?.remove();
+   const heading=overview.querySelector('.operations-head > strong');
+   if(heading)heading.textContent='Статистика';
+   overview.classList.add('design-group','ops-stats-group');
+   section.replaceChildren(intro,overview,historyGroup);
+  }else{
+   section.replaceChildren(intro,historyGroup);
+  }
+  let trigger=null;
+  const closeSheet=()=>{
+   overlay.hidden=true;document.documentElement.classList.remove('ops-sheet-shown');
+   if(trigger&&trigger.isConnected)trigger.focus({preventScroll:true});
+  };
+  const showSheet=type=>{
+   if(!parts[type])return;trigger=type==='wifeTransfer'?document.getElementById('wifeTransferOpen'):type==='wifeCheck'?document.getElementById('wifeCheckOpen'):type==='support'?document.getElementById('supportOpen'):grid.querySelector('[data-ops-action="'+type+'"]');
+   Object.entries(parts).forEach(([name,card])=>{card.hidden=name!==type});
+   title.textContent=type==='wifeTransfer'?'Перевод жене':type==='wifeCheck'?'Сверить остаток у жены':type==='support'?'Доход жены':type==='expense'?'Новый расход':type==='income'?'Новый доход':'Новый перевод';

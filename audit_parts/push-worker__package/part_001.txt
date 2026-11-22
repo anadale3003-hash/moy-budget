@@ -1,0 +1,22 @@
+SOURCE: push-worker/package.json
+PART: 1
+SOURCE LINES: 1-18
+SOURCE BLOB SHA: 6fc7d846669d65bb2f3edff78e23c4f0d3380ec1
+
+{
+  "name": "moy-budget-push",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "check": "node --check src/index.js"
+  },
+  "dependencies": {
+    "@block65/webcrypto-web-push": "^2.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.0.0"
+  }
+}

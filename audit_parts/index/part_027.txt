@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 27
+SOURCE LINES: 3690-3839
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+function savingsPlanRender(){
+ const input=$('savingsPlanMonths');
+ const parsed=Number(input.value);
+ const validMonths=input.value.trim()!==''&&Number.isInteger(parsed)&&parsed>=1&&parsed<=120;
+ const targetInput=$('savingsPlanTargetAmount');
+ const proposedGoal=Number(targetInput.value);
+ const reserveInput=$('ladderReserveInput');
+ const reserveValue=Number(reserveInput.value);
+ const incoming=reserveIncomeTotal();
+ const validReserve=reserveInput.value.trim()!==''&&Number.isFinite(reserveValue)&&reserveValue>=incoming&&reserveValue<=1000000000;
+ const reserve=validReserve?reserveValue:actualReserve();
+ const savings=goalSavingsBalance();
+ const booked=savings===null?0:Math.max(0,savings);
+ const baseReserve=Math.max(0,reserve-incoming);
+ const total=Math.round((reserve+($('ladderIncluded').checked?Math.max(0,booked-baseReserve):booked))*100)/100;
+ const validGoal=targetInput.value.trim()!==''&&Number.isInteger(proposedGoal)
+   &&proposedGoal>=reserve&&proposedGoal<=1000000000;
+ const info={goal:proposedGoal,total,remaining:Math.max(0,proposedGoal-total),reserve};
+ $('savingsPlanGoal').textContent=validGoal?rub(info.goal):'—';
+ $('savingsPlanCurrent').textContent=rub(info.total);
+ $('savingsPlanRemaining').textContent=validGoal?rub(info.remaining):'—';
+ $('savingsPlanSave').disabled=!(validMonths&&validGoal&&validReserve);
+ document.querySelectorAll('[data-savings-months]').forEach(btn=>{
+   btn.classList.toggle('active',validMonths&&Number(btn.dataset.savingsMonths)===parsed);
+ });
+ if(!validMonths||!validGoal||!validReserve){
+   $('savingsPlanPerMonth').textContent='—';
+   $('savingsPlanDeadline').textContent=!validReserve?'Укажи корректный размер подушки':
+    !validGoal?'Цель должна быть не ниже подушки: '+rub(info.reserve)
+     :'Выбери срок от 1 до 120 месяцев';
+   $('savingsPlanSplit').textContent='—';
+   return;
+ }
+ const perMonth=Math.ceil(info.remaining/parsed);
+ const fromAdvance=Math.floor(perMonth/2);
+ const fromSalary=perMonth-fromAdvance;
+ const deadline=savingsPlanTarget(parsed);
+ const [y,m]=deadline.split('-').map(Number);
+ const displayDate=new Date(y,m-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+ $('savingsPlanPerMonth').textContent=rub(perMonth);
+ $('savingsPlanDeadline').textContent='Плановая цель — '+displayDate+' · '+parsed+' мес. включая текущий';
+ $('savingsPlanSplit').textContent='Поровну: с аванса '+rub(fromAdvance)+' · с зарплаты '+rub(fromSalary);
+}
+function savingsPlanOpen(){
+ renderPurposes();
+ $('newGoal').open=false;
+ const settings=ladderSettings();
+ renderConfirmedSavings();
+ const remaining=savingsPlanMonthsLeft(settings.targetMonth);
+ $('savingsGoalName').value=settings.name||'';
+ $('savingsPlanTargetAmount').value=String(capitalSnapshot().goal);
+ $('ladderReserveInput').value=String(actualReserve());
+ $('ladderIncluded').checked=!!settings.included;
+ $('savingsPlanMonths').value=String(remaining===null?12:Math.max(1,Math.min(120,remaining)));
+ $('savingsPlanStatus').textContent=remaining===null?'Выбери срок и сохрани его, чтобы план запомнился.':
+  remaining<=0?'Прошлый срок уже завершился — выбери новый.':'Срок сохранён. При новых накоплениях сумма в месяц пересчитается.';
+ savingsPlanRender();
+}
+function ladderRender(){
+ const {settings,reserve,savings,extra,total,goal,automatic}=capitalSnapshot();
+ const base=automatic&&total>=1000000?goal-500000:0;
+ const progress=Math.max(0,Math.min(100,goal>base?Math.round((total-base)/(goal-base)*100):100));
+ const title=$('milestoneTitle');
+ const paid=creditPaidThisMonth(iso(new Date()));
+ const creditLine=$('milestoneCredit');
+ creditLine.hidden=paid<=0;
+ creditLine.textContent=paid>0?'За месяц погашено по кредитке '+rub(paid):'';
+ const focus=homeGoal();
+ const noGoalBalance=savings===null&&!data.activePurpose;
+ title.parentElement.hidden=noGoalBalance&&paid<=0;
+ title.hidden=noGoalBalance;
+ $('milestoneProgress').hidden=noGoalBalance;
+ title.textContent=milestoneText(focus.total,focus.goal);
+ $('milestoneProgress').textContent=(focus.name?focus.name+' · собрано ':'Уже собрано ')+rub(focus.total)+' из '+rub(focus.goal);
+ $('ladderTotal').textContent=rub(total);
+ $('analyticsGoalAmount').textContent=rub(goal);
+ $('analyticsGoalCurrent').textContent=rub(total);
+ $('analyticsGoalRemaining').textContent=rub(Math.max(0,goal-total));
+ const monthsLeft=savingsPlanMonthsLeft(settings.targetMonth);
+ if(monthsLeft!==null){
+  const count=Math.max(1,monthsLeft);
+  $('analyticsMonthlySaveAmount').textContent=rub(Math.ceil(Math.max(0,goal-total)/count));
+  const [targetYear,targetMonth]=settings.targetMonth.split('-').map(Number);
+  const targetDate=new Date(targetYear,targetMonth-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+  $('analyticsMonthlySaveDeadline').textContent='Плановая цель — '+targetDate+' · '+(monthsLeft>0?monthsLeft:0)+' мес. осталось';
+ }else{
+  $('analyticsMonthlySaveAmount').textContent='—';
+  $('analyticsMonthlySaveDeadline').textContent='Укажи срок в настройках цели';
+ }
+ $('ladderGoal').textContent=rub(goal);
+ $('ladderBadge').textContent='Цель: '+rub(goal);
+ $('ladderReserve').textContent=rub(reserve);
+ $('ladderExtra').textContent=savings===null?'—':rub(extra);
+ $('ladderRemaining').textContent=total>=goal?'Цель достигнута! · 100%':
+   'Достигнуто '+progress+'% цели';
+ $('ladderFill').style.width=progress+'%';
+ $('ladderTrack').setAttribute('aria-valuenow',progress);
+ $('ladderNote').textContent=savings===null
+   ?'Дополнительные накопления появятся после ввода стартовых остатков. Подушка указана отдельно.'
+   :settings.included?'Подушка уже внутри категории «Накопления». Повторно не учитываем.'
+   :'Подушка считается отдельно. Если она уже есть в остатке «Накоплений», включи переключатель.';
+ if(document.activeElement!==$('ladderReserveInput'))$('ladderReserveInput').value=reserve;
+
+ if(document.activeElement!==$('ladderIncluded'))$('ladderIncluded').checked=!!settings.included;
+ const auto=analyticsEconomy();
+ const economyCard=document.querySelector('#v-analytics .analytics-economy-card');
+ if(economyCard)economyCard.classList.toggle('has-comparison',!!auto.comparable);
+ $('ladderSaving').textContent=auto.comparable?rub(auto.total):'—';
+ $('ladderPeriod').textContent=auto.isCurrent?'За те же дни прошлого месяца':'Сравнение полных месяцев';
+ const preview=auto.lines.slice(0,2);
+ $('analyticsEconomyPreview').innerHTML=preview.length?preview.map(x=>
+   '<div class="analytics-economy-row"><span>'+esc(x.label)+'</span><b>−'+rub(x.amount)+'</b></div>'
+ ).join(''):'<div class="foot">'+(auto.comparable?'Снижение расходов пока не найдено.':'Добавь расходы за два месяца, чтобы увидеть экономию.')+'</div>';
+ $('analyticsEconomyNote').textContent=auto.comparable
+   ?'Сравниваем '+auto.comparable+' катег. · '+(auto.available?('доступно для перевода '+rub(auto.available)):'пока нет подтверждённо свободных денег')
+   :'Сравнение появится после внесения расходов за оба периода';
+ $('analyticsEconomyToSavings').disabled=!(auto.available>0);
+ $('analyticsEconomyOpenTransfer').disabled=!(auto.available>0);
+ $('analyticsEconomyExplanation').textContent='Поиск по всем видам. Сокращение затрат учитывается только после роста других трат.';
+ $('ladderCompare').textContent='Найдено '+(auto.comparable?rub(auto.total):'—')+
+   '. Уже переведено '+rub(auto.previousSaved)+
+   '. Сумма предварительная: неоплаченные покупки и счета могут изменить результат.';
+ analyticsBreakdownRender(auto);
+ const select=$('ladderSource'),prior=select.value;
+ const eligible=auto.groups.filter(g=>g.allocated>0.009);
+ select.innerHTML=eligible.length
+   ?eligible.map(g=>'<option value="'+g.id+'">'+esc(g.name)+' · '+rub(g.allocated)+'</option>').join('')
+   :'<option value="">Нет доступной экономии</option>';
+ if(eligible.some(g=>g.id===prior))select.value=prior;
+ else if(eligible.length)select.value=(eligible.find(g=>g.max>0)||eligible[0]).id;
+ const choice=auto.groups.find(g=>g.id===select.value),max=choice?.max||0;
+ $('ladderTransferLimit').textContent=!auto.isCurrent?'Перевести можно только из текущего месяца.':
+   !data.startBalances?'Сначала укажи стартовые остатки.':
+   !choice?'Пока нет сравнимой экономии.':
+   'Доступно в '+choice.name+': '+rub(Math.max(0,choice.balance||0))+
+   '. Безопасный предел записи: '+rub(max)+'.';
+ $('ladderTransferButton').disabled=!(max>0);
+ const amountInput=$('ladderTransferAmount');
+ amountInput.max=String(max);
+ if(!amountInput.value||Number(amountInput.value)>max||Number(amountInput.value)<=0)
+   amountInput.value=max>0?String(Math.round(max*100)/100):'';
+ $('analyticsUtilitiesWrap').hidden=select.value!=='utilities';
+ analyticsReportRender();
+}
+
+function analyticsRender(){
+const rows=data.expenses.filter(e=>e.date?.startsWith(month));const total=rows.reduce((s,e)=>s+num(e.amount),0);
+const y=Number(month.slice(0,4)),m=Number(month.slice(5,7));const prev=iso(new Date(y,m-2,1)).slice(0,7);
+const previous=data.expenses.filter(e=>e.date?.startsWith(prev)).reduce((s,e)=>s+num(e.amount),0);
+const extraIncome=incomeTotalMonth(month);

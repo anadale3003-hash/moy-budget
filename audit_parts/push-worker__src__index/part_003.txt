@@ -1,0 +1,146 @@
+SOURCE: push-worker/src/index.js
+PART: 3
+SOURCE LINES: 301-442
+SOURCE BLOB SHA: 36a458ea72da5cc438efcaee7e51dc7d3a657b12
+
+
+export class SubscriptionStore extends DurableObject {
+  async alarm() {
+    const entries = await this.ctx.storage.list({ prefix: "queued:" });
+    const now = Date.now();
+    let next = null;
+    for (const [key, job] of entries) {
+      if (!job || !Number.isFinite(job.when)) {
+        await this.ctx.storage.delete(key);
+        continue;
+      }
+      if (job.when > now) {
+        next = next === null ? job.when : Math.min(next, job.when);
+        continue;
+      }
+      // Delete before sending; jobs must not repeat if alarm is retried.
+      await this.ctx.storage.delete(key);
+      const record = await this.ctx.storage.get("sub:" + job.id);
+      if (!record) continue;
+      try {
+        const response = await sendToRecord(this.env, record, {
+          title: "Мой бюджет — тест блокировки 🔒",
+          body: "Пуш пришёл через 30 секунд. Уведомления работают, даже когда приложение закрыто.",
+          tag: "delayed-test"
+        });
+        if (response.status === 404 || response.status === 410) {
+          await this.ctx.storage.delete("sub:" + job.id);
+        }
+      } catch (error) {
+        console.error("Delayed push failed:", String(error));
+      }
+    }
+    if (next !== null) await this.ctx.storage.setAlarm(next);
+  }
+  async fetch(request) {
+    const url = new URL(request.url);
+    if (url.pathname === "/vapid") {
+      let keys = await this.ctx.storage.get("vapid");
+      if (!keys) {
+        const pair = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]);
+        const publicRaw = new Uint8Array(await crypto.subtle.exportKey("raw", pair.publicKey));
+        const privateJwk = await crypto.subtle.exportKey("jwk", pair.privateKey);
+        const privateB64 = privateJwk.d.replace(/-/g, "+").replace(/_/g, "/");
+        const privateRaw = Uint8Array.from(atob(privateB64 + "=".repeat((4 - privateB64.length % 4) % 4)), c => c.charCodeAt(0));
+        keys = { publicKey: b64url(publicRaw), privateKey: b64url(privateRaw) };
+        await this.ctx.storage.put("vapid", keys);
+      }
+      return json(keys);
+    }
+    if (url.pathname === "/allow-create" && request.method === "POST") {
+      const { subject } = await request.json();
+      if (!/^[A-Za-z0-9_-]{40,48}$/.test(subject || "")) return json({ ok: false }, 400);
+      const bucket = Math.floor(Date.now() / 3600000);
+      const key = "signup:" + bucket + ":" + subject;
+      const used = Number(await this.ctx.storage.get(key) || 0);
+      if (used >= 12) return json({ ok: false });
+      await this.ctx.storage.put(key, used + 1);
+      return json({ ok: true });
+    }
+    if (url.pathname === "/allow-test" && request.method === "POST") {
+      const { id } = await request.json();
+      if (!id || !(await this.ctx.storage.get("sub:" + id))) return json({ ok: false });
+      const bucket = Math.floor(Date.now() / 3600000);
+      const key = "test-rate:" + bucket + ":" + id;
+      const used = Number(await this.ctx.storage.get(key) || 0);
+      if (used >= 8) return json({ ok: false });
+      await this.ctx.storage.put(key, used + 1);
+      return json({ ok: true });
+    }
+    if (url.pathname === "/claim" && request.method === "POST") {
+      const { id, sentKey, confirmKey } = await request.json();
+      const result = await this.ctx.storage.transaction(async tx => {
+        const record = await tx.get("sub:" + id);
+        if (!record || record.sent?.[sentKey] || (confirmKey && record.confirmed?.[confirmKey])) return false;
+        record.claims = record.claims || {};
+        if (record.claims[sentKey] && Date.now() - record.claims[sentKey] < 10 * 60000) return false;
+        record.claims[sentKey] = Date.now();
+        await tx.put("sub:" + id, record);
+        return true;
+      });
+      return json({ ok: result });
+    }
+    if (url.pathname === "/mark-sent" && request.method === "POST") {
+      const { id, sentKey } = await request.json();
+      await this.ctx.storage.transaction(async tx => {
+        const record = await tx.get("sub:" + id);
+        if (!record) return;
+        record.sent = record.sent || {};
+        record.sent[sentKey] = Date.now();
+        if (record.claims) delete record.claims[sentKey];
+        for (const k of Object.keys(record.sent)) {
+          if (Date.now() - record.sent[k] > 60 * 86400000) delete record.sent[k];
+        }
+        await tx.put("sub:" + id, record);
+      });
+      return json({ ok: true });
+    }
+    if (url.pathname === "/release-claim" && request.method === "POST") {
+      const { id, sentKey } = await request.json();
+      await this.ctx.storage.transaction(async tx => {
+        const record = await tx.get("sub:" + id);
+        if (record?.claims) {
+          delete record.claims[sentKey];
+          await tx.put("sub:" + id, record);
+        }
+      });
+      return json({ ok: true });
+    }
+    if (url.pathname === "/save" && request.method === "POST") {
+      const { id, record } = await request.json();
+      if (!id || !record) return json({ error: "Invalid record" }, 400);
+      await this.ctx.storage.put("sub:" + id, record);
+      return json({ ok: true });
+    }
+    if (url.pathname === "/get" && request.method === "POST") {
+      const { id } = await request.json();
+      return json({ record: await this.ctx.storage.get("sub:" + id) || null });
+    }
+    if (url.pathname === "/delete" && request.method === "POST") {
+      const { id } = await request.json();
+      await this.ctx.storage.delete("sub:" + id);
+      return json({ ok: true });
+    }
+    if (url.pathname === "/queue-test" && request.method === "POST") {
+      const { id, delayMs } = await request.json();
+      if (!id || !(await this.ctx.storage.get("sub:" + id))) return json({ error: "Unknown subscription" }, 404);
+      const when = Date.now() + Math.min(60000, Math.max(30000, Number(delayMs) || 30000));
+      // One pending delayed test per device; don't crowd the alarm queue.
+      const key = "queued:" + id;
+      await this.ctx.storage.put(key, { id, when });
+      const currentAlarm = await this.ctx.storage.getAlarm();
+      if (currentAlarm === null || currentAlarm > when) await this.ctx.storage.setAlarm(when);
+      return json({ ok: true, queuedId: id, when });
+    }
+    if (url.pathname === "/list") {
+      const values = await this.ctx.storage.list({ prefix: "sub:" });
+      return json([...values.values()]);
+    }
+    return json({ error: "Not found" }, 404);
+  }
+}

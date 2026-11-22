@@ -1,0 +1,155 @@
+SOURCE: preview.html
+PART: 38
+SOURCE LINES: 5345-5494
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+ border-radius:13px;min-width:0;
+}
+#v-plan .goal-allocation-main{flex:1 1 auto;min-width:0}
+#v-plan .goal-allocation-title{font-size:12px;font-weight:750;color:var(--ink);margin-bottom:3px}
+#v-plan .goal-allocation-tag{font-size:9px;font-weight:800;color:var(--blue);padding:2px 5px;border:1px solid var(--line);border-radius:7px}
+#v-plan #goalAllocationAmount{display:block;font-size:clamp(16px,4.3vw,21px);font-weight:850;font-variant-numeric:tabular-nums;line-height:1.2}
+#v-plan .goal-allocation-note{font-size:10px;line-height:1.25;color:var(--muted);margin-top:3px}
+#v-plan .goal-allocation-action{flex:0 0 auto;max-width:102px;min-height:36px;border-radius:9px;padding:5px 8px;
+ border:1px solid var(--blue);color:var(--blue);font-size:11px;font-weight:750;background:var(--card)}
+@media (max-width:390px){
+ #v-plan .goal-allocation-card{padding:7px 8px;margin:4px 0 6px}
+ #v-plan .goal-allocation-note{font-size:9px}
+ #v-plan .goal-allocation-action{padding:4px 6px;max-width:90px}
+}
+
+/* TEST UX: explain both paydays and expose goal/manual modes without hidden menus */
+#v-plan .goal-allocation-card{
+ display:flex!important;flex-direction:column!important;
+ align-items:stretch!important;justify-content:flex-start!important;
+ gap:5px!important;padding:8px 10px!important;margin:5px 0 7px!important;
+}
+#v-plan .goal-allocation-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}
+#v-plan .goal-allocation-heading>b{font-size:13px;color:var(--ink)}
+#v-plan .goal-allocation-action{
+ min-height:29px!important;max-width:none!important;white-space:nowrap;
+ border:0!important;background:transparent!important;padding:2px 1px!important;
+}
+#v-plan .goal-allocation-main{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:8px;min-width:0}
+#v-plan .goal-allocation-total{display:flex;flex-direction:column;flex:0 0 auto}
+#v-plan .goal-allocation-total>span{font-size:10px;color:var(--muted)}
+#v-plan .goal-allocation-total>strong{font-size:clamp(15px,4.5vw,21px);white-space:nowrap}
+#v-plan .goal-allocation-split{display:flex;flex-direction:column;gap:1px;text-align:right;min-width:0}
+#v-plan .goal-allocation-split>span{font-size:11px;color:var(--muted);white-space:nowrap}
+#v-plan .goal-allocation-split b{font-variant-numeric:tabular-nums;color:var(--ink)}
+#v-plan .goal-allocation-note{font-size:10px!important;line-height:1.2!important;margin:1px 0!important}
+#v-plan .goal-allocation-mode{display:flex;align-items:center;justify-content:flex-start;gap:5px}
+#v-plan .goal-allocation-mode>span{font-size:10px;color:var(--muted);margin-right:3px}
+#v-plan .goal-mode-option{
+ border:1px solid var(--line);border-radius:8px;background:var(--card);
+ color:var(--muted);padding:4px 9px;min-height:27px;font-size:10px;font-weight:700;
+}
+#v-plan .goal-mode-option[aria-pressed="true"]{
+ background:color-mix(in srgb,var(--card) 65%,#a990f2 35%)!important;
+ color:var(--ink)!important;border-color:var(--blue)!important;
+}
+#v-plan .goal-mode-option:disabled{opacity:.48}
+#v-plan #planTable{font-variant-numeric:tabular-nums}
+@media(max-width:380px){
+ #v-plan .goal-allocation-card{gap:4px!important;padding:7px 8px!important}
+ #v-plan .goal-allocation-split>span{font-size:10px}
+}
+
+/* Fixed 1.5.80 goal layout: show required vs affordable without hiding the table. */
+#v-plan.active .goal-allocation-card{
+ padding:5px 8px!important;margin:2px 0 4px!important;gap:3px!important;
+ flex:0 0 auto!important;
+}
+#v-plan .goal-allocation-heading>b{font-size:12px!important}
+#v-plan .goal-allocation-main{
+ display:flex!important;gap:7px!important;align-items:center!important;
+ justify-content:space-between!important;flex-wrap:nowrap!important;
+}
+#v-plan #goalAllocationAmount{
+ font-size:clamp(12px,3.4vw,15px)!important;line-height:1.15!important;
+ white-space:normal!important;min-width:0;
+}
+#v-plan .goal-allocation-split{flex:0 0 auto}
+#v-plan .goal-allocation-split>span{font-size:10px!important}
+#v-plan .goal-allocation-bottom{
+ display:flex!important;justify-content:space-between!important;
+ align-items:center!important;gap:6px!important;min-width:0!important;
+}
+#v-plan .goal-allocation-note{flex:1 1 auto!important;min-width:0!important;font-size:10px!important;line-height:1.15!important}
+#v-plan .goal-allocation-mode{flex:0 0 auto!important;gap:3px!important}
+#v-plan .goal-mode-option{min-height:25px!important;padding:3px 6px!important;font-size:10px!important}
+#v-plan .goal-has-shortfall #goalAllocationAmount{color:var(--ink)}
+/* The Payouts tab must never clip its bottom total and rows. Scrolling is the
+   fallback on small phones rather than hiding financial information. */
+.app:has(#v-plan.active)>.main{
+ overflow-y:auto!important;overflow-x:hidden!important;
+ touch-action:pan-y!important;-webkit-overflow-scrolling:touch;
+}
+#v-plan.active{height:auto!important;min-height:100%!important;max-height:none!important;overflow:visible!important}
+#v-plan.active .design-group:has(#planTable){height:auto!important;max-height:none!important;min-height:0!important;overflow:visible!important}
+#v-plan.active .design-group>.payout-destinations{
+ display:block!important;flex:0 0 auto!important;
+ height:auto!important;min-height:0!important;max-height:none!important;
+ overflow:visible!important;padding:4px 7px!important;
+}
+#v-plan.active #planTable{display:block!important;flex:0 0 auto!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important}
+#v-plan.active #planTable table{height:auto!important;table-layout:fixed!important}
+#v-plan.active #planTable th,#v-plan.active #planTable td{padding:clamp(2px,.4dvh,4px) 2px!important;line-height:1.13!important}
+#v-plan.active #planWarnings{max-height:none!important;overflow:visible!important}
+@media(max-width:390px){
+ #v-plan.active .goal-allocation-card{padding:4px 7px!important}
+ #v-plan .goal-allocation-split>span{font-size:9px!important}
+}
+#v-plan .goal-needed{font-size:13px;font-weight:800;color:var(--blue);line-height:1.2}
+#v-plan .goal-allocation-card{padding:6px 9px!important;gap:4px!important}
+#v-plan .goal-allocation-note{font-size:10px!important;line-height:1.2!important}
+
+/* Test: discreet bell on Home opens separate advisory dialog */
+.home-alert-trigger{display:inline-flex;align-items:center;gap:4px;font-size:12px;flex-shrink:0}
+.home-alert-trigger .alert-bell-count{right:-6px;top:-7px}
+@media(max-width:370px){.home-alert-label{display:none}}
+/* Test 1.5.84: bell button + dialog without altering home layout */
+.alert-preview-controls{display:flex;align-items:center;gap:6px;min-width:0}
+.alert-preview-controls .analytics-icon-button{white-space:nowrap}
+.alert-bell{position:relative;min-width:36px;padding:6px 9px!important}
+.alert-bell-count{position:absolute;top:-4px;right:-4px;background:var(--red);color:white;padding:1px 4px;font-size:10px;border-radius:9px;min-width:15px}
+.alert-bell-count[hidden]{display:none!important}
+.budget-alerts-dialog{width:min(470px,calc(100% - 28px));max-height:80dvh;overflow:auto;border:1px solid var(--line);border-radius:18px;background:var(--card);color:var(--ink);padding:0;box-shadow:0 12px 55px #06172a45}
+.budget-alerts-dialog::backdrop{background:#09182b99}
+.budget-alerts-shell{padding:16px}
+.budget-alerts-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.budget-alerts-top h2{font-size:16px;margin:0}
+.budget-alerts-top .btn{padding:7px 12px}
+.budget-alerts-help{font-size:12px;color:var(--muted);margin:10px 0 14px}
+.budget-alerts-dialog .budget-early-alerts{margin:0}
+@media(max-width:390px){.alert-preview-controls{gap:4px}}
+/* v1.5.83: proactive financial warnings, shown on Home before obligations. */
+.budget-early-alerts:empty{display:none}
+.budget-early-alerts{display:grid;gap:8px;margin-bottom:11px}
+.budget-early-alert{border:1px solid var(--line);border-left:3px solid #d78b38;border-radius:13px;background:var(--card);padding:10px 12px}
+.budget-early-alert.daily{border-left-color:#56b3af}.budget-early-alert.credit{border-left-color:#be8bed}.budget-early-alert.goal,.budget-early-alert.saving{border-left-color:#75b98a}.budget-alerts-dialog .budget-early-alert{padding:13px 14px;background:var(--panel)}.budget-alerts-dialog .budget-early-alert p{line-height:1.5}.budget-early-alert.critical{border-left-color:#cf5555}
+.budget-early-alert.info{border-left-color:var(--blue)}
+.budget-early-alert b{display:block;font-size:13px;margin-bottom:4px}
+.budget-early-alert p{margin:0;font-size:12px;line-height:1.4;color:var(--ink)}
+/* v1.5.82: verified savings are entered separately from budget allocations. */
+#analyticsModalPlan .confirmed-savings-card{padding:9px 10px;margin:9px 0;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+#analyticsModalPlan .confirmed-savings-card .row{align-items:center;gap:8px}
+#analyticsModalPlan .confirmed-savings-card .row>b{font-size:12px}
+#analyticsModalPlan .confirmed-savings-card .field{margin:7px 0}
+#analyticsModalPlan .confirmed-savings-card .btn{min-height:37px;margin:4px 0}
+#analyticsModalPlan .confirmed-savings-card .foot{font-size:11px}
+#analyticsModalPlan #confirmedSavingsHistory .lineitem{font-size:11px}
+</style>
+<dialog id="adviceDialog" aria-labelledby="advisorTitle"><div class="advisor-shell">
+<div class="advisor-head"><h2 id="advisorTitle">🤖 Финансовый советник</h2><button class="btn light" id="advisorClose" type="button" aria-label="Закрыть">✕</button></div>
+<p class="advisor-desc">Подготовим обезличенную финансовую сводку для ChatGPT. Советник ищет способы увеличивать капитал: экономия, вклады, ипотека, кредитка. Никаких платных API и автоматической отправки данных.</p>
+<label class="field"><span>Формат ответа ChatGPT</span><select id="advisorResponseMode" aria-label="Формат финансового анализа"><option value="short" selected>⚡ Только важное</option><option value="full">📊 Развёрнутый анализ</option></select></label>
+<label class="utilities-fixed-switch"><input type="checkbox" id="advisorDetailed"> Включить разбивку расходов по видам</label>
+<textarea id="adviceText" readonly aria-label="Отчёт для финансового анализа"></textarea>
+<div class="advisor-actions"><button type="button" class="btn" id="advisorCopy">📋 Скопировать</button><button type="button" class="btn secondary" id="advisorShare">📤 Отправить</button></div>
+<div class="advisor-actions"><button type="button" class="btn light" id="advisorDownload">Сохранить .txt</button><button type="button" class="btn light" id="advisorRefresh">Обновить сводку</button></div>
+<div id="adviceStatus" role="status" aria-live="polite"></div>
+<p class="advisor-desc">Данные останутся в приложении, пока ты сам не выберешь «Скопировать» или «Отправить». Перед отправкой можно проверить текст. ChatGPT не получает данные автоматически.</p>
+</div></dialog>
+
+<script>

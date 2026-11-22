@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 16
+SOURCE LINES: 2168-2317
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+ min-height:0!important;margin:0!important;padding:4px 0!important;
+ border:0!important;border-radius:0!important;
+ background:transparent!important;box-shadow:none!important;
+}
+#v-analytics .analytics-capital-unified .analytics-goal-tile>strong{
+ font-size:clamp(17px,5.2vw,24px)!important;
+}
+#v-analytics .analytics-capital-unified .analytics-goal-rest{
+ display:flex!important;justify-content:space-between!important;align-items:center!important;
+}
+#v-analytics .analytics-capital-unified .analytics-monthly-save{
+ padding-top:9px!important;border-top:1px solid var(--line)!important;
+}
+#v-analytics .analytics-capital-unified .analytics-monthly-save>strong{
+ font-size:clamp(23px,6.5vw,30px)!important;
+}
+@media (max-height:750px){
+ #v-analytics .analytics-capital-unified{gap:5px;padding:9px 11px}
+ #v-analytics .analytics-capital-unified .analytics-goal-overview{gap:3px!important;padding-top:5px!important}
+ #v-analytics .analytics-capital-unified .analytics-monthly-save{padding-top:6px!important}
+}
+
+/* v1.5.69: reserve settings live alongside savings goal and deadline. */
+#analyticsModalPlan .analytics-plan-included{
+ display:flex;align-items:center;gap:7px;font-size:11px;
+ line-height:1.2;color:var(--muted);font-weight:650;min-height:25px;
+}
+#analyticsModalPlan .analytics-plan-included input{
+ flex:0 0 auto;width:17px;height:17px;accent-color:var(--blue);
+}
+#analyticsModalPlan #ladderReserveInput{font-size:16px!important;min-height:38px}
+
+/* v1.5.70: right-align saved capital and center the remaining amount. */
+#v-analytics .analytics-capital-unified .analytics-goal-top>.analytics-goal-tile:last-child{
+ text-align:right!important;
+}
+#v-analytics .analytics-capital-unified .analytics-goal-rest{
+ display:flex!important;
+ flex-direction:column!important;
+ align-items:center!important;
+ justify-content:center!important;
+ text-align:center!important;
+ gap:3px!important;
+ padding:10px 0 6px!important;
+}
+#v-analytics .analytics-capital-unified .analytics-goal-rest>span{
+ text-align:center!important;
+}
+#v-analytics .analytics-capital-unified .analytics-goal-rest>strong{
+ display:block!important;
+ margin:0!important;
+ text-align:center!important;
+ font-size:clamp(22px,6.8vw,32px)!important;
+ line-height:1.15!important;
+ max-width:100%;
+}
+.milestone-card{flex:0 0 auto;padding:8px 12px;border-radius:14px;background:var(--panel);border-left:3px solid var(--accent)}
+.milestone-card small{display:block;color:var(--muted);margin-top:2px}
+#budgetSaveLabel{white-space:normal}
+#milestoneProgress{overflow-wrap:anywhere}
+.milestone-card [hidden]{display:none!important}
+</style><style>@media(max-width:560px){#transferForm .transfer-envelopes{grid-template-columns:minmax(0,1fr)!important}}</style><style>#personalGoals{padding:8px 4px;flex-shrink:0}#personalGoals .field{display:grid;gap:4px;margin:8px 0}#personalGoals [hidden]{display:none!important}#personalGoals summary{padding:9px 0;color:var(--accent);cursor:pointer}#goalBalances>div{padding:5px 0;overflow-wrap:anywhere}</style></head><body>
+<div class="app home-active"><header class="hero"><div class="daily-summary"><div class="daily-headline"><span id="dailySpendingLimit">—</span><span id="nextPaymentDate">На семейные покупки</span><span id="nextPaymentWhen"></span></div><div hidden><p id="dailySpendingNote"></p><small id="heroLabel"></small></div></div></header>
+<main class="main">
+<section class="view active" id="v-home">
+<div class="home-balances"><div><span>Доступно на расходы</span><strong id="heroTotal">—</strong></div><div><span>Всего в бюджете</span><strong id="heroAll">—</strong></div></div>
+
+<section class="family-split" aria-label="Остаток на семейные покупки">
+<div hidden style="display:none!important"><span>На семейные покупки</span><strong id="familyTotalNow">—</strong></div>
+<div><span>У меня</span><strong id="familyMineNow">—</strong></div>
+<div><span>У жены</span><strong id="familyWifeNow">—</strong></div>
+<small id="wifeReportedBalance" hidden style="display:none!important"></small>
+</section>
+<div class="home-envelopes-visible dashboard-frame" id="homeEnvelopesPanel"><div class="section-heading"><h2>Мои конверты</h2></div><div id="envelopes"></div></div>
+<section class="milestone-card" aria-labelledby="milestoneTitle" hidden>
+ <strong id="milestoneTitle"></strong>
+ <small id="milestoneProgress"></small>
+ <small id="milestoneCredit" hidden></small>
+</section>
+<div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайший платёж</h2><button class="analytics-icon-button alert-bell home-alert-trigger" type="button" id="budgetAlertsOpen" aria-label="Открыть советы для бюджета" title="Советы">🔔 <span class="home-alert-label">Советы</span><span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button></div><div id="obligations"></div></div>
+</section>
+<section class="view" id="v-plan">
+<div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div>
+<div class="section-heading"><h2>Аванс и зарплата</h2></div><div class="card payment-inputs">
+<div class="payment-grid">
+<div class="payment-receipt"><input id="advance" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💵</span> Аванс</div><button class="btn full receipt-button" id="receiveAdvance" type="button">Подтвердить аванс</button><div class="receipt-note" id="advanceReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoAdvance" type="button">Отменить зачисление</button></div>
+<div class="payment-receipt"><input id="salary" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💰</span> Зарплата</div><button class="btn full receipt-button secondary" id="receiveSalary" type="button">Подтвердить зарплату</button><div class="receipt-note" id="salaryReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoSalary" type="button">↶ Отменить зачисление</button></div>
+</div>
+<div class="payment-dates-note">
+<input id="advanceDate" type="date" hidden aria-hidden="true" tabindex="-1">
+<input id="salaryDate" type="date" hidden aria-hidden="true" tabindex="-1">
+<div class="foot">Плановые даты выплат учитывают выходные и праздники РФ (календарь 2026–2027). Фактические дату и сумму укажи при подтверждении поступления.</div>
+</div>
+</div><!-- End: advance and salary card -->
+<div class="section-heading"><h2>Куда перевести деньги</h2><span class="quiet">с каждой выплаты</span></div>
+<div class="goal-allocation-card" id="goalAllocationCard" aria-live="polite">
+ <div class="goal-allocation-heading">
+  <b>🎯 Накопления</b>
+  <button id="goalAllocationAction" class="goal-allocation-action" type="button">Цель и срок ›</button>
+ </div>
+ <div class="goal-allocation-main">
+ <strong id="goalAllocationAmount">—</strong>
+ <div class="goal-allocation-split"><span>Аванс <b id="goalSplitAdvance">—</b></span><span>Зарплата <b id="goalSplitSalary">—</b></span></div>
+</div>
+<div id="goalNeeded" class="goal-needed">—</div>
+<div id="goalAllocationNote" class="goal-allocation-note">Проверяем цель...</div>
+</div>
+<div class="card payout-destinations"><h3 style="margin:8px 0;font-size:16px">Суммы по категориям</h3><div id="planTable"></div><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two" id="categoryRules"></div><div class="foot">Сначала выделяются суммы в ₽, затем проценты от оставшейся части выплаты. Нераспределённый остаток — в «Остальное». Настройки действуют для следующих поступлений.</div></div></section>
+<section class="view" id="v-card"><div class="section-heading"><h2>Кредиты</h2></div>
+<div class="card mortgage-monthly-settings"><b>🏠 Ипотека</b><label class="field"><span>Ежемесячный платёж по ипотеке, ₽</span><input id="mortgage" type="number" min="0" step="100" inputmode="decimal"></label><div id="mortgageMonthlyStatus" class="foot">Изменение платежа применяется к будущим неподтверждённым поступлениям.</div></div>
+<div class="section-heading"><h2>Ипотека и кредитка</h2></div>
+<div class="card payment-confirm-card payment-obligations">
+  <div class="row"><b>Фактическая оплата</b><span class="quiet">после перевода в банк</span></div>
+  <div class="payment-grid">
+    <div class="payment-confirm">
+      <div class="payment-confirm-heading"><b>🏠 Ипотека</b><div class="receipt-note" id="mortgagePaymentStatus"></div></div>
+      <input type="number" id="mortgagePayAmount" hidden aria-hidden="true" tabindex="-1"><input type="date" id="mortgagePayDate" hidden aria-hidden="true" tabindex="-1">
+      <button class="btn full" type="button" id="confirmMortgagePayment">Подтвердить оплату</button>
+    </div>
+    <div class="payment-confirm">
+      <div class="payment-confirm-heading"><b>💳 Кредитка</b><div class="receipt-note" id="creditPaymentStatus"></div></div>
+      <input type="number" id="creditPayAmount" hidden aria-hidden="true" tabindex="-1"><input type="date" id="creditPayDate" hidden aria-hidden="true" tabindex="-1">
+      <button class="btn full secondary" type="button" id="confirmCreditPayment">Подтвердить оплату</button>
+    </div>
+  </div>
+  <div id="regularPaymentHistory"></div>
+  <p class="foot">Ипотека и кредитка уже исключены из доступного бюджета. Отмечай оплату только после реального списания банком. Повторно из бюджета деньги не вычитаются.</p>
+</div>
+<div class="section-heading"><h2>Кредитная карта</h2><span class="pill">Без просрочки</span></div><div class="card"><label class="field"><span>Общий долг, ₽</span><input id="debt" type="number" min="0" step="100" inputmode="decimal"></label><label class="field"><span>Уже отложено на погашение, ₽</span><input id="reserved" type="number" min="0" step="100" inputmode="decimal"></label><label class="field"><span>Погасить не позднее</span><input id="deadline" type="date"></label><div class="divider"></div><div class="label">Ещё нужно накопить</div><div class="metric" id="debtRemaining"></div><div class="lineitem"><span>Оставшихся выплат до срока</span><span id="payCount"></span></div><div class="lineitem"><span>Откладывать с каждой выплаты</span><span id="perPay"></span></div><div id="debtAlert"></div></div><div class="card"><b>График погашения</b><div id="debtSchedule"></div><div class="foot">Расчёт без процентов, комиссий и новых покупок. Проверяй точную дату окончания льготного периода в банке. Досрочные погашения учитываются отдельно от накопленного резерва.</div></div>
+<details id="earlyPanel" class="compact-disclosure"><summary>↗ Досрочное погашение из накоплений</summary>
+<div class="card"><div class="foot">Учитывай только фактически выполненный платёж. Деньги будут вычтены из «Накоплений». Обычным расходом или новым доходом операция не считается.</div>
+<form id="earlyForm">
+<label class="field"><span>Куда погасить</span><select id="earlyTarget"><option value="credit">Кредитная карта</option><option value="mortgage">Ипотека</option></select></label>
+<div class="two"><label class="field"><span>Сумма, ₽</span><input id="earlyAmount" type="number" min="0.01" step="0.01" inputmode="decimal" required placeholder="Например, 5000"></label><label class="field"><span>Дата платежа</span><input id="earlyDate" type="date" required></label></div>
+<label class="field"><span>Комментарий</span><input id="earlyNote" maxlength="120" placeholder="Необязательно"></label>
+<div class="hint" id="earlyAvailable">Доступно из накоплений: —</div>
+<div class="foot">Для кредитки пересчитаем оставшуюся сумму, которую нужно накопить. Для ипотеки приложение фиксирует дополнительное погашение, но новый платёж и срок нужно подтвердить в банке.</div>
+<button class="btn full" type="submit">Записать погашение</button></form>
+</div></details>
+<details id="earlyHistoryPanel" class="compact-disclosure"><summary>История досрочных погашений <span id="earlyCount"></span></summary><div class="history-sort-control"><label for="earlyHistorySort">По дате</label><select id="earlyHistorySort" data-history-sort="earlyHistory"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="card" id="earlyHistory"></div></details>
+</section>
+<section class="view" id="v-expense">
+<div class="operations-hub">
+ <div class="operations-head">
+  <strong>Операции</strong>
+  <div class="operations-month" aria-label="Выбранный месяц"><button id="operationsMonthPrev" type="button" aria-label="Предыдущий месяц">‹</button><span id="operationsMonthName">—</span><button id="operationsMonthNext" type="button" aria-label="Следующий месяц">›</button></div>
+  <button class="operations-details-link" type="button" data-anal-open="stats">▤ Детали</button>
+ </div>
+  <div class="analytics-mini-stats">
+   <div class="analytics-mini-card"><span>Потрачено за месяц</span><strong id="analyticsTotal">0 ₽</strong><small id="analyticsChange">—</small></div>

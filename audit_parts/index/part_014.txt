@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 14
+SOURCE LINES: 1868-2017
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+  overflow-y:auto!important;overflow-x:hidden!important;touch-action:pan-y!important;
+  -webkit-overflow-scrolling:touch;
+ }
+ #v-analytics.active{height:auto!important;min-height:100%!important;max-height:none!important;overflow:visible!important}
+}
+@media (orientation:portrait) and (max-height:750px){
+ #v-analytics .analytics-goal-tile{padding:8px 9px 9px}
+ #v-analytics .analytics-goal-tile>span{font-size:11px}
+ #v-analytics .analytics-goal-tile>strong{margin-top:3px;font-size:clamp(16px,5vw,21px)}
+ #v-analytics .analytics-goal-rest{min-height:47px;padding:7px 9px}
+ #v-analytics .analytics-goal-rest>strong{font-size:clamp(19px,5.9vw,26px)}
+ #v-analytics .analytics-goal-settings{min-height:35px;font-size:12px}
+}
+@media (orientation:landscape){
+ #v-analytics .analytics-one-screen{
+  grid-template-rows:auto auto minmax(0,1fr) auto!important;
+ }
+ #v-analytics .analytics-goal-overview{
+  grid-column:1;grid-row:2;min-height:0;gap:4px;
+ }
+ #v-analytics .analytics-goal-top{gap:4px}
+ #v-analytics .analytics-goal-tile{padding:6px 7px}
+ #v-analytics .analytics-goal-tile>span,
+ #v-analytics .analytics-goal-rest>span{font-size:10px}
+ #v-analytics .analytics-goal-tile>strong{font-size:clamp(13px,2.6vw,17px);margin-top:2px}
+ #v-analytics .analytics-goal-rest{min-height:30px;padding:4px 7px}
+ #v-analytics .analytics-goal-rest>strong{font-size:clamp(15px,3vw,18px)}
+ #v-analytics .analytics-goal-settings{display:flex!important;grid-column:1;grid-row:4;min-height:30px;padding:5px 9px}
+}
+.rule-live-plan{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;margin:12px 0 14px}.rule-live-title{display:flex;justify-content:space-between;gap:8px;font-size:12px;font-weight:700;margin-bottom:8px}.rule-live-plan .table{width:100%;font-size:11px}.rule-live-plan .table th,.rule-live-plan .table td{padding:5px 3px}.rule-live-plan .table td:not(:first-child),.rule-live-plan .table th:not(:first-child){text-align:right;white-space:nowrap}.rule-live-plan .rule-highlight{background:var(--selected);font-weight:700}.rule-live-plan .rule-preview-total{font-weight:700;border-top:1px solid var(--line)}.rule-live-warning{font-size:11px;color:var(--red);margin-top:7px}.rule-live-warning[hidden]{display:none}</style><style>
+.category-value{position:relative}.category-value input{padding-right:44px!important}.category-gear{position:absolute;right:2px;top:0;bottom:0;width:42px;border:0;background:transparent;color:var(--blue);font-size:23px}.rule-caption{font-size:10px;color:var(--muted);margin-top:4px}.rule-dialog{width:min(420px,calc(100% - 28px));max-height:85dvh;overflow:auto;border:1px solid var(--line);border-radius:18px;background:var(--card);color:var(--ink);padding:18px}.rule-dialog::backdrop{background:#0009}.rule-dialog h3{margin:0 0 16px}.rule-dialog .field{margin:12px 0}.rule-dialog .field span{font-size:12px}
+
+/* Proportions editor: a single scrollable modal with allocation table
+   followed immediately by adjustable categories. No clipped lower half. */
+#v-plan>details.compact-disclosure[open]{
+ position:fixed!important;inset:0!important;z-index:1000!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;
+ justify-content:center!important;overflow:visible!important;
+ padding:max(14px,env(safe-area-inset-top)) 14px max(20px,env(safe-area-inset-bottom))!important;
+ background:rgba(4,12,25,.78)!important;box-sizing:border-box;
+}
+#v-plan>details.compact-disclosure[open]>summary{
+ flex:0 0 auto!important;width:min(100%,520px)!important;
+ border-radius:15px 15px 0 0!important;
+}
+#v-plan>details.compact-disclosure[open]>.card{
+ display:block!important;flex:0 1 auto!important;
+ width:min(100%,520px)!important;
+ max-height:calc(100dvh - 135px)!important;
+ overflow-y:auto!important;overscroll-behavior:contain!important;
+ -webkit-overflow-scrolling:touch;
+ background:var(--card)!important;
+ padding:8px 13px 18px!important;
+ margin:0!important;min-height:0!important;
+ border-radius:0 0 15px 15px!important;
+}
+#v-plan .payout-popup-preview{
+ display:none;
+ padding:4px 0 10px;
+ margin-bottom:12px;border-bottom:1px solid var(--line);
+}
+#v-plan>details.compact-disclosure[open]>.card>.payout-popup-preview{
+ display:block!important;
+}
+.payout-popup-preview-title{font-size:13px;font-weight:750;margin:2px 0 7px;color:var(--ink)}
+.payout-popup-preview-content table{
+ width:100%;table-layout:fixed;border-collapse:collapse;font-size:clamp(10px,2.7vw,12px)
+}
+.payout-popup-preview-content th,.payout-popup-preview-content td{
+ padding:5px 2px;text-align:right;line-height:1.25
+}
+.payout-popup-preview-content th:first-child,.payout-popup-preview-content td:first-child{
+ text-align:left;width:38%
+}
+
+/* Portal overlay: always above the advance card and outside clipped #v-plan. */
+body>details.proportions-modal[open]{
+ position:fixed!important;inset:0!important;z-index:10000!important;
+ display:flex!important;flex-direction:column!important;align-items:center!important;
+ justify-content:center!important;box-sizing:border-box!important;
+ padding:max(10px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom))!important;
+ border:0!important;border-radius:0!important;margin:0!important;
+ background:rgba(5,10,24,.80)!important;
+ backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);
+ overflow:visible!important;
+}
+body>details.proportions-modal[open]>summary{
+ width:min(100%,520px)!important;max-width:520px;box-sizing:border-box;
+ flex:0 0 46px!important;min-height:46px!important;
+ background:var(--card)!important;color:var(--ink)!important;
+ padding:11px 15px!important;
+ border-radius:16px 16px 0 0!important;font-size:15px!important;
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+}
+body>details.proportions-modal[open]>summary:after{content:'✕'!important}
+body>details.proportions-modal[open]>.card{
+ width:min(100%,520px)!important;height:min(79dvh,760px)!important;
+ max-height:calc(100dvh - 105px)!important;min-height:0!important;
+ display:flex!important;flex-direction:column!important;
+ flex:0 1 auto!important;overflow:hidden!important;
+ background:var(--card)!important;border:0!important;
+ border-radius:0 0 16px 16px!important;
+ margin:0!important;padding:0!important;
+}
+body>details.proportions-modal[open] .payout-popup-preview{
+ display:flex!important;flex-direction:column!important;
+ flex:0 0 48%!important;min-height:0!important;
+ overflow:hidden!important;padding:12px 12px 8px!important;margin:0!important;
+ border-bottom:1px solid var(--line)!important;
+}
+body>details.proportions-modal[open] .payout-popup-preview-content{
+ flex:1 1 auto!important;overflow-y:auto!important;min-height:0;
+ -webkit-overflow-scrolling:touch;
+}
+body>details.proportions-modal[open] .payout-popup-preview-content table{
+ font-size:clamp(10px,2.75vw,12px);table-layout:fixed;width:100%;border-collapse:collapse;
+}
+body>details.proportions-modal[open] .payout-popup-preview-content th,
+body>details.proportions-modal[open] .payout-popup-preview-content td{padding:5px 2px;line-height:1.2}
+body>details.proportions-modal[open] .proportions-settings-pane{
+ flex:1 1 52%!important;min-height:0!important;overflow-y:auto!important;
+ padding:12px 14px 18px!important;-webkit-overflow-scrolling:touch;
+}
+body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bottom:4px}
+
+/* v1.5.62 — prominent next-payday countdown, compact enough for iPhone. */
+.app.home-active .payday-counter{
+ background:linear-gradient(105deg,rgba(56,106,176,.27),rgba(38,95,145,.14))!important;
+ border:1px solid rgba(129,193,255,.55)!important;
+ box-shadow:inset 0 0 0 1px rgba(129,193,255,.09),0 3px 16px rgba(18,92,167,.16);
+ border-radius:14px;
+ padding:9px 12px!important;
+}
+.app.home-active .payday-counter .payday-row{
+ display:flex;align-items:center;justify-content:space-between;
+ flex-wrap:nowrap;gap:8px;
+}
+.app.home-active .payday-counter .payday-title{
+ font-size:clamp(11px,2.9vw,13px);font-weight:700;opacity:1;line-height:1.15;
+}
+.app.home-active .payday-counter .payday-when{
+ display:flex;flex-direction:column;align-items:flex-end;justify-content:center;
+ gap:2px;min-width:0;text-align:right;
+}
+.app.home-active .payday-counter .payday-next-label{
+ font-size:clamp(10px,2.65vw,12px);font-weight:650;color:#d5e9ff;white-space:nowrap;
+}
+.app.home-active .payday-counter .payday-days-badge{
+ display:inline-block;min-width:83px;padding:3px 11px;
+ border-radius:9px;background:#ffe08a;color:#352508;

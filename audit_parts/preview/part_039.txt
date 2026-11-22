@@ -1,0 +1,155 @@
+SOURCE: preview.html
+PART: 39
+SOURCE LINES: 5495-5644
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+(function(){
+'use strict';
+function setupAdvisor(){
+ const open=document.getElementById('advisorOpen');
+ const dialog=document.getElementById('adviceDialog');
+ if(!open||!dialog)return;
+ const $a=id=>document.getElementById(id);
+ const amount=v=>Number.isFinite(Number(v))?Math.max(0,Number(v)):0;
+ const reportCurrency=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});
+ const ru=v=>reportCurrency.format(v);
+ const now=()=>new Date().toISOString().slice(0,10);
+ const current=()=>new Date().toLocaleDateString('sv-SE').slice(0,7);
+ const validDate=d=>typeof d==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(d);
+ const sum=(items,fn)=>items.reduce((v,i)=>v+fn(i),0);
+ const group=(items,keyFunc)=>{
+  const m=new Map();
+  items.forEach(x=>{const k=keyFunc(x)||'Без категории';m.set(k,(m.get(k)||0)+amount(x.amount));});
+  return [...m].sort((a,b)=>b[1]-a[1]).map(([k,v])=>'  '+k+': '+ru(v)).join('\n')||'  Нет операций';
+ };
+ function report(){
+  // Read-only snapshot. No records, dates or app settings are changed.
+  const asOf=new Date();
+  const {data:d,mortgage,debt,reserved}=window.budgetAdvisorSnapshot(asOf);
+  const today=asOf.toLocaleDateString('sv-SE');
+  const month=today.slice(0,7);
+  const expenses=Array.isArray(d.expenses)?d.expenses.filter(x=>validDate(x.date)&&x.date<=today):[];
+  const incomes=Array.isArray(d.extraIncomes)?d.extraIncomes.filter(x=>validDate(x.date)&&x.date<=today):[];
+  const receipts=Array.isArray(d.receipts)?d.receipts.filter(x=>validDate(x.date)&&x.date<=today):[];
+  const periods=[...new Set([...expenses.map(x=>x.date.slice(0,7)),...receipts.map(x=>x.date.slice(0,7)),...incomes.map(x=>x.date.slice(0,7))])].filter(x=>x<=month).sort().slice(-6);
+  if(!periods.includes(month)) periods.push(month);
+  const reserve=amount(d.ladder?.reserve);
+  const catNames={family:'Семейные нужды',utilities:'Коммуналка',savings:'Накопления',other:'Остальное'};
+  const monthExpense=expenses.filter(x=>x.date.startsWith(month));
+  const monthIncome=incomes.filter(x=>x.date.startsWith(month));
+  const monthReceipt=receipts.filter(x=>x.date.startsWith(month));
+  const detail=$a('advisorDetailed').checked;
+  const responseMode=$a('advisorResponseMode').value;
+  const lines=[
+   'ФИНАНСОВЫЙ АНАЛИЗ — «МОЙ БЮДЖЕТ»',
+   'Дата: '+today+'. Валюта: рубли.',
+   'Это отчёт только из записей приложения; отсутствие операции не означает отсутствие расхода.',
+   'Записи в будущем исключены. Планы и фактически поступившие деньги не смешивать.',
+   '',
+   'ЗАДАЧА ДЛЯ CHATGPT:',
+   'Выступи финансовым советником семьи. Цель — безопасно увеличивать чистый капитал.',
+   'Не предлагай акции, криптовалюту, спекуляции и рискованный бизнес.',
+   'Неприкосновенная подушка — 500 000 ₽; её фактический остаток может быть неизвестен.',
+   'Не выдумывай данные. Различай факты, планы, гипотезы, проценты и доходы. Переводы между счетами — не доход.',
+   'Начни с одного подтверждённого достижения в рублях, если оно есть. Предложи один посильный шаг до следующей выплаты. Учитывай расходы семьи. Не обещай экономию без подтверждения.',
+   'Проверь долг и сроки кредитки, сохранность резерва и реалистичность платежей.',
+   'Отвечай простым разговорным языком, без финансового жаргона. Предупреждай заранее о будущей нехватке денег: январский аванс после праздников, ближайшая ипотека, кредитка. Называй дату, конкретную сумму и действие. Прогноз отделяй от фактов.',
+   'Не сравнивай ипотеку и вклад без ставки ипотеки, чистой ставки вклада, налогов и ограничений.',
+   ...(responseMode==='short'?[
+    'ФОРМАТ ОТВЕТА: ТОЛЬКО ВАЖНОЕ.',
+    'Пиши коротко, без длинного вступления, таблиц, графиков и повторов; максимум 120 слов.',
+    'Сначала 3–4 ключевые цифры с пометкой, если они не подтверждены фактическим остатком.',
+    'Затем не более 3 приоритетных действий с конкретными суммами там, где они обоснованы.',
+    'Заверши одним коротким шагом на ближайшие 30 дней и главным выводом.',
+    'Если экономия не подтверждена, прямо назови её гипотезой. Не называй погашение долга доходом или экономией.'
+   ]:[
+    'ФОРМАТ ОТВЕТА: РАЗВЁРНУТЫЙ АНАЛИЗ.',
+    'Найди до 5 конкретных действий: эффект в ₽/месяц и ₽/год, сложность, риски.',
+    'Разделяй подтверждённую экономию, гипотезы и процентные доходы.',
+    'Дай проверку резерва, график погашения кредитки и реалистичный план на 30 дней.',
+    'Неизвестные данные обозначь явно; не считай погашение долга экономией.'
+   ]),
+   '',
+   'СОСТОЯНИЕ:',
+   'Ипотека к '+mortgage.due.toLocaleDateString('ru-RU')+' — платёж '+ru(mortgage.plan)+', оплачено '+ru(mortgage.paid)+', к оплате '+ru(mortgage.remaining)+(mortgage.reserve===null?' (резерв неизвестен)':', в резерве '+ru(mortgage.reserve)+', ещё собрать '+ru(mortgage.gap)),
+   'Кредитная карта — учтённый долг: '+ru(debt)+'; отдельно отложено: '+ru(reserved)+'; срок: '+(d.deadline||'не указан'),
+   'Подушка безопасности — значение в настройках: '+ru(reserve)+' (может быть не равно остатку на счёте)',
+   'Накопления: точный свободный остаток не выводится, если он неотличим от бюджетных переводов.',
+   'Текущий месяц: '+month,
+   'Поступления зарплаты/аванса, записанные как полученные: '+ru(sum(monthReceipt,x=>amount(x.amount))),
+   'Дополнительные доходы: '+ru(sum(monthIncome,x=>amount(x.amount))),
+   'Записанные расходы: '+ru(sum(monthExpense,x=>amount(x.amount))),
+   'По категориям расходов:',
+   group(monthExpense,x=>catNames[x.category]||x.category),
+   'По источникам дополнительных доходов:',
+   group(monthIncome,x=>x.source||'Прочее'),
+   '',
+   'ПОСЛЕДНИЕ МЕСЯЦЫ (только фактические операции):'
+  ];
+  for(const p of periods){
+   const e=expenses.filter(x=>x.date.startsWith(p)), r=receipts.filter(x=>x.date.startsWith(p)), i=incomes.filter(x=>x.date.startsWith(p));
+   lines.push(p+': выплаты '+ru(sum(r,x=>amount(x.amount)))+', доп. доходы '+ru(sum(i,x=>amount(x.amount)))+', расходы '+ru(sum(e,x=>amount(x.amount))));
+  }
+  if(detail){lines.push('','ВИДЫ РАСХОДОВ ЗА ТЕКУЩИЙ МЕСЯЦ:',group(monthExpense,x=>x.type||catNames[x.category]||'Без вида'));}
+  lines.push('','Примечание: отчёт не содержит ФИО, заметок к операциям, номеров счетов и полных журналов транзакций.');
+  return lines.join('\n');
+ }
+ const feedback=(id,message)=>{
+ const button=$a(id);
+ if(button){
+  if(!button.dataset.originalLabel)button.dataset.originalLabel=button.textContent;
+  button.classList.add('done');button.textContent='✓ Готово';
+  clearTimeout(button._advisorFeedbackTimer);
+  button._advisorFeedbackTimer=setTimeout(()=>{button.textContent=button.dataset.originalLabel;button.classList.remove('done')},1800);
+ }
+ $a('adviceStatus').textContent='✓ '+message;
+};
+const refresh=()=>{$a('adviceText').value=report();$a('adviceStatus').textContent='✓ Сводка сформирована на этом устройстве.';};
+ open.addEventListener('click',()=>{try{refresh();dialog.showModal();}catch(e){alert('Не удалось сформировать сводку: '+e.message);}});
+ $a('advisorClose').addEventListener('click',()=>dialog.close());
+ $a('advisorDetailed').addEventListener('change',refresh);
+ $a('advisorResponseMode').addEventListener('change',refresh);
+ $a('advisorRefresh').addEventListener('click',()=>{refresh();feedback('advisorRefresh','Сводка обновлена.');});
+ $a('advisorCopy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($a('adviceText').value);feedback('advisorCopy','Скопировано. Вставь сводку в чат ChatGPT.');}catch(_){$a('adviceText').focus();$a('adviceText').select();$a('adviceStatus').textContent='Выделено. Нажми «Копировать» в меню iPhone.';}});
+ $a('advisorShare').addEventListener('click',async()=>{try{if(navigator.share){await navigator.share({title:'Финансовый анализ — Мой бюджет',text:$a('adviceText').value});feedback('advisorShare','Открыто меню отправки.');}else{$a('adviceStatus').textContent='Меню отправки недоступно. Используй «Скопировать».';}}catch(e){if(e.name!=='AbortError')$a('adviceStatus').textContent='Не удалось открыть отправку.';}});
+ $a('advisorDownload').addEventListener('click',()=>{const u=URL.createObjectURL(new Blob([$a('adviceText').value],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=u;a.download='finansovyy-sovetnik-'+new Date().toLocaleDateString('sv-SE')+'.txt';document.body.appendChild(a);a.click();a.remove();feedback('advisorDownload','Файл подготовлен.');setTimeout(()=>URL.revokeObjectURL(u),1500);});
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupAdvisor,{once:true});else setupAdvisor();
+})();
+</script>
+<style>
+.orchid-gold body{background:radial-gradient(ellipse at 90% 0%,#302132 0%,transparent 48%),#100f15;color-scheme:dark;font-variant-numeric:tabular-nums}
+.orchid-gold .app .hero{background:transparent!important;box-shadow:none}
+.orchid-gold .app .hero-overview.dashboard-frame{position:relative;isolation:isolate;overflow:hidden;background:linear-gradient(118deg,#29222e 5%,#352837 56%,#493947)!important;border:1px solid #796453!important;border-radius:22px!important;box-shadow:inset 0 1px #f4d6a826,0 6px 20px #08060b45}
+.orchid-gold .hero-overview:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:repeating-radial-gradient(ellipse at 112% -50%,transparent 0 15px,#f0cd9b19 16px,transparent 17px 23px);mask-image:linear-gradient(95deg,transparent 3%,black 100%)}
+.orchid-gold .hero .hero-primary-label{color:#edcca3;letter-spacing:.09em;font-size:11px}
+.orchid-gold .hero #heroTotal{font-family:Georgia,serif;font-weight:500;letter-spacing:-.045em;color:#fff6e8;font-size:clamp(29px,8vw,49px)}
+.orchid-gold .hero .hero-mini.hero-all{border:0!important;border-left:1px solid #d8bb943f!important;border-radius:0!important;background:transparent!important}
+.orchid-gold .app .payday-counter,.orchid-gold .app .dashboard-frame:not(.hero-overview),.orchid-gold .app .view.active>.design-group,.orchid-gold .app #v-analytics>.card{background:linear-gradient(125deg,#28232d,#201d26)!important;border:1px solid #514550!important;box-shadow:inset 0 1px #ffffff08!important;border-radius:18px!important}
+.orchid-gold .view .section-heading h2,.orchid-gold .view .design-group h2{letter-spacing:-.025em}
+.orchid-gold .app .view .design-group>.card,.orchid-gold .app #obligations>.card{border-color:transparent!important;background:transparent!important;box-shadow:none!important}
+.orchid-gold #homeEnvelopesPanel #envelopes>.envelope-button[data-envelope]{background:linear-gradient(125deg,color-mix(in srgb,var(--envelope-accent) 13%,#24202a),#211d25)!important;border:1px solid color-mix(in srgb,var(--envelope-accent) 32%,#38303a)!important;border-radius:15px!important}
+.orchid-gold #homeEnvelopesPanel .envelope-button .number{letter-spacing:-.045em;font-weight:650}
+.orchid-gold .app .nav{background:#19171ff5!important;border-top:1px solid #594b50!important;box-shadow:0 -4px 20px #08060a38}
+.orchid-gold .nav .tab.active{background:#332c34!important;color:#f6d9ac!important}
+.orchid-gold .nav .tab.active .tab-icon{color:#f2c990!important;background:#473a36!important}
+.orchid-gold .budget-alerts-dialog{background:#1a171f;border-color:#645244}
+.orchid-gold .budget-alerts-top h2{font-family:Georgia,serif;font-weight:500;color:#f5dcba}
+.orchid-gold .budget-alerts-dialog .budget-early-alert:first-child{background:linear-gradient(120deg,#3f303e,#2a242d);border-color:#8e7458}
+.orchid-gold :focus-visible{outline:2px solid #f4ce96;outline-offset:2px}
+</style><style>
+.app .payday-counter{position:relative}
+#dailySpendingLimit{color:var(--ink);letter-spacing:-.025em}
+#dailySpendingLimit .daily-low{color:var(--red)}
+#dailySpendingLimit .daily-medium{color:var(--orange)}
+#dailySpendingLimit .daily-good{color:var(--green)}
+.more-budget-tips summary{padding:14px 2px;font-weight:650;cursor:pointer}
+.more-budget-tips article+article{margin-top:8px}
+</style><style>@media (orientation:portrait){
+ .app.home-active>.main{overflow-y:auto!important;touch-action:pan-y;overscroll-behavior:contain}
+ .app.home-active #v-home{height:auto!important;min-height:100%!important;overflow:visible!important;justify-content:flex-start}
+ .app.home-active #homeEnvelopesPanel{flex:0 0 auto;overflow:visible}
+ #homeEnvelopesPanel #envelopes{flex:none;height:auto!important;grid-template-rows:repeat(2,auto)!important}
+ #homeEnvelopesPanel #envelopes>.envelope-button{display:grid!important;grid-template-rows:1fr auto auto;align-content:start;gap:3px!important;height:auto!important;min-height:max-content!important;padding:6px 8px!important}
+ #homeEnvelopesPanel #envelopes>.envelope-button>.row{display:grid!important;grid-template-rows:1fr auto;align-items:start;gap:2px!important;margin:0!important}
+ #homeEnvelopesPanel #envelopes>.envelope-button .row-title{align-items:center!important}

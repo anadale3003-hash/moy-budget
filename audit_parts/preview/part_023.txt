@@ -1,0 +1,155 @@
+SOURCE: preview.html
+PART: 23
+SOURCE LINES: 3098-3247
+SOURCE BLOB SHA: 70f3f2570efea1d3532fe86ade3e4d17e4bbbfac
+
+ const received=data.receipts.filter(r=>r.date>=start&&r.date<=date).reduce((a,r)=>a+num(r.amounts?.[id]),0);
+ const spent=data.expenses.filter(e=>e.date>=start&&e.date<=date&&e.category===id).reduce((a,e)=>a+num(e.amount),0);
+ const income=data.extraIncomes.filter(i=>i.destination===id&&i.date>=start&&i.date<=date).reduce((a,i)=>a+num(i.amount),0);
+ const wifeCorrection=id==='family'?(data.wifeAdjustments||[]).filter(a=>a.date>=start&&a.date<=date).reduce((sum,a)=>sum+num(a.amount),0):0;
+ const early=id==='savings'?(data.earlyRepayments||[]).filter(x=>x.date>=start&&x.date<=date).reduce((a,x)=>a+num(x.amount),0):0;
+ const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start&&p.date<=date).reduce((a,p)=>a+num(p.extraAmount),0);
+ return base+received+income+wifeCorrection-spent-early-creditExtra+transferDelta(id,start,date);
+}
+function realBalance(id){if(!data.startBalances)return null;const start=data.startBalances.date;const base=num(data.startBalances.balances[id]);const received=data.receipts.filter(r=>r.date>=start).reduce((a,r)=>a+num(r.amounts?.[id]),0);const spent=data.expenses.filter(e=>e.date>=start&&e.category===id).reduce((a,e)=>a+num(e.amount),0);const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start).reduce((a,p)=>a+num(p.extraAmount),0);return base+received+incomeAmountFor(id,start)+(id==='family'?(data.wifeAdjustments||[]).filter(a=>a.date>=start).reduce((sum,a)=>sum+num(a.amount),0):0)-spent-(id==='savings'?repaymentSavingsSpent(start):0)-creditExtra+transferDelta(id,start)}
+// Фактический остаток на сегодня, без планируемых и датированных будущим операций.
+// Бюджетные конверты, ипотечный резерв и резерв кредитки не пересекаются.
+function actualMoneyToday(){
+ if(!data.startBalances||data.startBalances.date>iso(new Date()))return null;
+ const asOf=iso(new Date());
+ const envelopes=cats.reduce((total,c)=>total+categoryBalanceAt(c.id,asOf),0);
+ const mortgage=num(data.startBalances.mortgage)
+   +data.receipts.filter(r=>r.date>=data.startBalances.date&&r.date<=asOf).reduce((a,r)=>a+num(r.amounts?.mortgage),0)
+   +data.extraIncomes.filter(i=>i.destination==='mortgage'&&i.date>=data.startBalances.date&&i.date<=asOf).reduce((a,i)=>a+num(i.amount),0)
+   -mortgageReserveSpent(data.startBalances.date,asOf);
+ // data.reserved includes manual credit-card reserves and reserves from received wages.
+ // Exclude future-dated receipt allocations if any exist.
+ const futureCredit=data.receipts.filter(r=>r.date>asOf).reduce((a,r)=>a+num(r.amounts?.credit),0);
+ const creditReserve=num(data.reserved)-futureCredit
+   +data.extraIncomes.filter(i=>i.destination==='credit'&&i.date>=data.startBalances.date&&i.date<=asOf).reduce((a,i)=>a+num(i.amount),0);
+ const savings=categoryBalanceAt('savings',asOf);
+ const available=envelopes-savings;
+ const reserve=mortgage+creditReserve;
+ return {envelopes,savings,available,reserve,mortgage,creditReserve,total:envelopes+reserve};
+}
+function mortgageFund(){if(!data.startBalances)return null;return num(data.startBalances.mortgage)+data.receipts.filter(r=>r.date>=data.startBalances.date).reduce((a,r)=>a+num(r.amounts?.mortgage),0)+incomeAmountFor('mortgage',data.startBalances.date)-mortgageReserveSpent(data.startBalances.date)}
+function updateStartFields(){const x=data.startBalances||{date:iso(new Date()),balances:{},mortgage:0};$('startDate').value=x.date;$('startMortgageFund').value=x.mortgage||0;for(const c of cats)$('start-'+c.id).value=x.balances?.[c.id]||0;$('paidMortgageMonth').value=data.paidMortgageMonth||'';}
+function regularPaidForMonth(target,key){return (data.regularPayments||[]).filter(p=>p.target===target&&p.month===key).reduce((a,p)=>a+num(p.amount),0)}
+function regularCreditAvailable(date){
+ if(!data.startBalances)return 0;
+ const futureCredit=(data.receipts||[]).filter(r=>r.date>date).reduce((a,r)=>a+num(r.amounts?.credit),0);
+ const extraFuture=(data.extraIncomes||[]).filter(x=>x.destination==='credit'&&x.date>date).reduce((a,x)=>a+num(x.amount),0);
+ // data.reserved already excludes confirmed credit-card payments.
+ return num(data.reserved)-futureCredit+incomeAmountFor('credit',data.startBalances.date)-extraFuture+(data.regularPayments||[]).filter(p=>p.target==='credit'&&p.date>date).reduce((a,p)=>a+num(p.amount),0);
+}
+function mortgageReserveSpent(fromDate=null,toDate=null){
+ return (data.regularPayments||[]).filter(p=>p.target==='mortgage'&&(!fromDate||p.date>=fromDate)&&(!toDate||p.date<=toDate))
+  .reduce((sum,p)=>sum+num(p.reserveUsed===undefined?p.amount:p.reserveUsed),0);
+}
+function regularMortgageAvailable(date){
+ if(!data.startBalances)return 0;
+ return num(data.startBalances.mortgage)+data.receipts.filter(r=>r.date>=data.startBalances.date&&r.date<=date).reduce((a,r)=>a+num(r.amounts?.mortgage),0)+data.extraIncomes.filter(x=>x.destination==='mortgage'&&x.date>=data.startBalances.date&&x.date<=date).reduce((a,x)=>a+num(x.amount),0)-mortgageReserveSpent(data.startBalances.date,date);
+}
+function paymentInfo(){
+ const todayKey=iso(new Date());
+ for(const target of ['mortgage','credit']){
+  const isMortgage=target==='mortgage';
+  const status=$(isMortgage?'mortgagePaymentStatus':'creditPaymentStatus');
+  const amount=$(isMortgage?'mortgagePayAmount':'creditPayAmount');
+  const date=$(isMortgage?'mortgagePayDate':'creditPayDate');
+  const paid=regularPaidForMonth(target,month);
+  const available=isMortgage?regularMortgageAvailable(todayKey):regularCreditAvailable(todayKey);
+  const due=isMortgage?num(monthData().mortgage):Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
+  const isLegacy=isMortgage&&data.paidMortgageMonth===month&&paid===0;
+  status.textContent=(isLegacy?'Ранее отмечена оплаченной · ':'')+'Оплачено за '+fromISO(month+'-01').toLocaleDateString('ru-RU',{month:'long',year:'numeric'})+': '+rub(paid)+' · Отложено: '+rub(Math.max(0,available));
+  if(!date.value)date.value=todayKey;
+  if(!amount.value&&available>0)amount.placeholder=rub(Math.min(due||available,available));
+ }
+ const rows=(data.regularPayments||[]).filter(p=>p.month===month).sort((a,b)=>b.date.localeCompare(a.date));
+ $('regularPaymentHistory').innerHTML=rows.length?'<div class="foot"><b>Подтверждённые платежи</b></div>'+rows.map(p=>`<div class="transaction"><div><b>${p.target==='mortgage'?'🏠 Ипотека':'💳 Кредитка'}</b><small>${esc(p.date)} · подтверждено${p.part==='advance'?' · с аванса':p.part==='salary'?' · с зарплаты':''}${num(p.extraAmount)>0?' · из конверта '+esc(cats.find(c=>c.id===p.extraSource)?.name||'—')+' '+rub(p.extraAmount):''}</small></div><div class="row"><b>${rub(p.amount)}</b><button class="delete" type="button" data-undo-regular="${esc(p.id)}" title="Отменить подтверждение">↶</button></div></div>`).join(''):'<div class="foot">Подтверждённых платежей за выбранный месяц пока нет.</div>';
+}
+function receiptInfo(){
+ for(const type of ['advance','salary']){
+  const receipt=data.receipts.find(r=>r.id===month+'-'+type);
+  const button=$(type==='advance'?'receiveAdvance':'receiveSalary');
+  const note=$(type+'ReceiptNote');
+  const undo=$(type==='advance'?'undoAdvance':'undoSalary');
+  undo.classList.toggle('visible',!!receipt);
+  button.disabled=!!receipt;
+  button.textContent=receipt?'✓ Получено':(type==='advance'?'Подтвердить аванс':'Подтвердить зарплату');
+  button.classList.toggle('is-confirmed',!!receipt);
+  button.setAttribute('aria-label',receipt?(type==='advance'?'Аванс получен':'Зарплата получена'):(type==='advance'?'Подтвердить поступление аванса':'Подтвердить поступление зарплаты'));
+  const plan = monthData();
+  const forecast = payrollForecast(plan);
+  const expected = type === 'advance' ? forecast.advanceForecast : plannedSalary(plan);
+  const amountLine = document.createElement('strong');
+  amountLine.textContent = receipt ? rub(receipt.amount) : forecast.configured ? rub(expected) : '—';
+  const detail = document.createElement('span');
+  const advanceReceived = type === 'salary' && data.receipts.some(r => r.id === month + '-advance');
+  detail.textContent = receipt ? (fromISO(receipt.date)?.toLocaleDateString('ru-RU',{day:'numeric',month:'long'}) || receipt.date) : !data.startBalances ? 'Укажи стартовые остатки' : forecast.configured ? (advanceReceived ? 'Остаток после аванса' : 'Ожидается по прогнозу') : 'Укажи оклад в настройках';
+  note.replaceChildren(amountLine, detail);
+  note.classList.toggle('received',!!receipt);
+ }
+}
+
+function isWifeTransferType(label){
+ const name=String(label).trim().replace(/\s+/g,' ').toLocaleLowerCase('ru').replace(/ё/g,'е');
+ return /^(?:отправил|отправить|перевод|перевел|перевести)(?: деньги)? жене$/.test(name);
+}
+function refreshTypes(preferred){const category=$('expenseCategory').value;const types=(data.expenseTypes?.[category]||[]).filter(type=>!isWifeTransferType(type));types.push('Отправил жене');const old=preferred??$('expenseType').value;const options=types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');$('expenseType').innerHTML='<option value="">Выбери вид расхода</option>'+options+'<option value="__new__">＋ Добавить новый…</option>';
+$('expenseType').value=types.includes(old)||old==='__new__'?old:'';toggleNewType();}
+function toggleNewType(){
+ $('newTypeWrap').style.display=$('expenseType').value==='__new__'?'block':'none';
+ if($('expenseType').value!=='__new__')$('newExpenseType').value='';
+ const note=$('expenseWifeTransferAvailable');
+ if(!note)return;
+ const isMove=isWifeTransferType($('expenseType').value);
+ note.hidden=!isMove;
+ const source=$('expenseCategory').value,date=$('expenseDate').value;
+ if(isMove){
+  const balance=fromISO(date)?categoryBalanceAt(source,date):null;
+  const mine=balance===null?null:source==='family'?Math.max(0,Math.round((balance-wifeFunds(date))*100)/100):Math.max(0,balance);
+  note.textContent='Это перевод, не расход семьи. У тебя доступно для перевода: '+(mine===null?'укажи начальные остатки':rub(mine));
+ }
+}
+function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=Math.round(creditOutstanding()*100)/100;$('reserved').value=data.reserved;$('deadline').value=data.deadline;renderCategoryRules();}
+// Fit the label and amount to the actual available tile width, including large balances.
+function fitTotalMoneyTile(){
+ const tile=document.querySelector('.hero-overview .hero-all');
+ if(!tile)return;
+ const amount=tile.querySelector('#heroAll');
+ const label=tile.querySelector('span');
+ if(!amount||!label)return;
+ const available=tile.clientWidth-14;
+ if(available<30)return;
+ const canvas=document.createElement('canvas'),ctx=canvas.getContext('2d');
+ for(const [el,max,min] of [[label,17,11],[amount,30,11]]){
+  el.style.fontSize=max+'px';
+  if(!ctx)continue;
+  const computed=getComputedStyle(el);
+  const family=computed.fontFamily||'sans-serif';
+  const weight=computed.fontWeight||'700';
+  let size=max;
+  while(size>min){
+   ctx.font=weight+' '+size+'px '+family;
+   const width=ctx.measureText(el.textContent||'').width;
+   if(width<=available)break;
+   size-=.5;
+  }
+  el.style.fontSize=Math.max(min,size)+'px';
+ }
+}
+
+/* Financial risk notices: use actual records for balances, label forecasts, never spend reserve. */
+function upcomingMortgage(now){
+ const todayKey=iso(now);
+ const due=new Date(now.getFullYear(),now.getMonth()+(now.getDate()===1?0:1),1);
+ const cycle=iso(new Date(due.getFullYear(),due.getMonth()-1,1)).slice(0,7);
+ const plan=num(data.months[cycle]?.mortgage??data.mortgageMonthly??55000);
+ const payments=(data.regularPayments||[]).filter(p=>p.target==='mortgage'&&p.month===cycle&&p.date<=todayKey);
+ const paid=payments.length?payments.reduce((sum,p)=>sum+num(p.amount),0):data.paidMortgageMonth===cycle?plan:0;
+ const reserve=data.startBalances?.date<=todayKey?Math.max(0,regularMortgageAvailable(todayKey)):null;
+ const remaining=Math.max(0,plan-paid);
+ return {due,plan,paid,reserve,remaining,gap:reserve===null?null:Math.max(0,remaining-reserve)};
+}
+window.budgetAdvisorSnapshot=function(now){

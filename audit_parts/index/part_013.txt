@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 13
+SOURCE LINES: 1718-1867
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+#v-expense .operations-month{display:flex;align-items:center;gap:3px;min-width:0;padding:2px 4px;border-radius:10px;background:var(--card);border:1px solid var(--line)}
+#v-expense .operations-month span{font-size:11px;font-weight:750;white-space:nowrap;min-width:64px;text-align:center;text-transform:capitalize}
+#v-expense .operations-month button{width:22px;height:26px;border:0;background:transparent;color:var(--ink);font-size:21px;line-height:1;font-weight:750;padding:0}
+#v-expense .operations-details-link{white-space:nowrap;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:10px;min-height:31px;padding:4px 9px;font-size:12px;font-weight:750}
+#v-expense .operations-hub .analytics-mini-stats{gap:8px}
+#v-expense .operations-hub .analytics-mini-card{padding:8px 9px}
+#v-expense .operations-hub .analytics-mini-card:first-child{border-color:color-mix(in srgb,var(--line) 72%,#ed7e6a)}
+#v-expense .operations-hub .analytics-mini-card:nth-child(2){border-color:color-mix(in srgb,var(--line) 72%,#2daf83)}
+#v-expense .operations-hub .analytics-mini-card strong{font-size:clamp(17px,5vw,23px)}
+#v-expense .operations-overview-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 2px;color:var(--muted);font-size:10px}
+#v-expense .operations-quick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#v-expense .operations-quick button{min-height:31px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-size:12px;font-weight:750;padding:5px 3px}
+#v-expense .operations-quick button:first-child{background:color-mix(in srgb,var(--card) 84%,#ed8575)}
+#v-expense .operations-quick button:nth-child(2){background:color-mix(in srgb,var(--card) 84%,#4db78c)}
+#v-expense .operations-quick button:nth-child(3){background:color-mix(in srgb,var(--card) 87%,#758db8)}
+
+
+
+
+
+#analyticsModalStats .operations-modal-totals{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#analyticsModalStats .operations-modal-totals>div{border-radius:10px;border:1px solid var(--line);background:var(--card);padding:7px 5px;min-width:0}
+#analyticsModalStats .operations-modal-totals span{display:block;font-size:10px;color:var(--muted);white-space:nowrap}
+#analyticsModalStats .operations-modal-totals b{display:block;font-size:clamp(12px,3.7vw,16px);font-weight:800;white-space:nowrap;margin-top:3px;font-variant-numeric:tabular-nums}
+#analyticsModalStats .analytics-stats-tabs{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+#analyticsModalStats .analytics-stats-tabs button{padding:8px 1px;font-size:11px;white-space:nowrap}
+#analyticsModalStats .operations-income-row{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 1px;border-bottom:1px solid var(--line)}
+#analyticsModalStats .operations-income-row>div{min-width:0;display:flex;flex-direction:column;gap:2px}
+#analyticsModalStats .operations-income-row b{font-size:12px}
+#analyticsModalStats .operations-income-row small{color:var(--muted);font-size:10px}
+#analyticsModalStats .operations-income-row strong{font-size:13px;white-space:nowrap;font-variant-numeric:tabular-nums}
+@media(max-height:700px){
+ #v-expense .operations-hub{gap:5px;padding-bottom:5px}
+ #v-expense .operations-hub .analytics-mini-card{padding:6px 8px}
+ #v-expense .operations-head{min-height:28px}
+ #v-expense .operations-quick button{min-height:28px}
+ 
+ #analyticsModalStats .operations-modal-totals>div{padding:5px 5px}
+}
+@media(max-width:360px){
+ #v-expense .operations-head>strong{font-size:15px}
+ #v-expense .operations-month span{min-width:56px;font-size:10px}
+ #v-expense .operations-details-link{padding:4px 6px;font-size:11px}
+}
+/* Preview 1.5.46: monthly totals survive the legacy Operations DOM rebuild. */
+#v-expense>.ops-stats-group{
+ box-sizing:border-box;padding:10px 12px!important;margin-bottom:11px!important;
+ border-color:color-mix(in srgb,var(--line) 58%,#4f88d4 42%);
+ background:color-mix(in srgb,var(--card) 18%,#4678c5 7%);
+}
+#v-expense>.ops-stats-group .operations-head>strong{font-size:16px}
+#v-expense>.ops-stats-group .operations-hub{gap:6px}
+#v-expense>.ops-stats-group .operations-mini-stats{margin:0}
+@media(max-width:375px){
+ #v-expense>.ops-stats-group{padding:9px 10px!important}
+ #v-expense>.ops-stats-group .operations-head{gap:5px}
+}
+
+/* Preview 1.5.47: compact Analytics after moving monthly totals to Operations.
+   Economy no longer stretches over all the empty dashboard height. */
+@media (orientation:portrait){
+ #v-analytics .analytics-one-screen{
+  flex:0 0 auto!important;height:auto!important;min-height:0!important;
+  overflow:visible!important;justify-content:flex-start!important;gap:12px!important;
+ }
+ #v-analytics .analytics-economy-card{
+  flex:0 0 auto!important;height:auto!important;min-height:0!important;
+  max-height:none!important;overflow:visible!important;
+  gap:9px!important;padding:14px 15px!important;
+ }
+ #v-analytics .analytics-economy-peek{
+  flex:0 0 auto!important;min-height:0!important;overflow:visible!important;
+  gap:5px!important;
+ }
+ #v-analytics .analytics-economy-peek>.foot{
+  padding:5px 0 2px;line-height:1.35;font-size:12px;color:var(--muted);
+ }
+ #v-analytics .analytics-economy-sub{
+  white-space:normal!important;overflow:visible!important;font-size:11px;line-height:1.3;
+ }
+ #v-analytics .analytics-economy-card:not(.has-comparison) .analytics-economy-sub{display:none!important}
+ #v-analytics .analytics-economy-cta:disabled{display:none!important}
+ #v-analytics .analytics-panel-top>b{font-size:15px}
+ #v-analytics .analytics-economy-total>strong{font-size:clamp(24px,6.2vw,30px)}
+ #v-analytics .analytics-capital-card{
+  flex:0 0 auto!important;height:auto!important;min-height:0!important;
+  padding:13px 15px!important;
+ }
+ #v-analytics .analytics-capital-card .analytics-panel-top{margin-bottom:5px}
+ #v-analytics .analytics-capital-card .ladder-track{margin:9px 0 7px}
+ #v-analytics .analytics-bottom-link{min-height:43px;padding:11px 13px}
+}
+@media (orientation:portrait) and (max-height:750px){
+ #v-analytics .analytics-one-screen{gap:8px!important}
+ #v-analytics .analytics-economy-card{padding:10px 12px!important;gap:6px!important}
+ #v-analytics .analytics-capital-card{padding:10px 12px!important}
+ #v-analytics .analytics-bottom-link{min-height:35px;padding:7px 10px}
+}
+@media (orientation:portrait) and (max-height:570px){
+ #v-analytics .analytics-one-screen{gap:6px!important}
+ #v-analytics .analytics-economy-card{padding:8px 10px!important;gap:4px!important}
+ #v-analytics .analytics-economy-total>strong{font-size:22px}
+ #v-analytics .analytics-economy-peek>.foot{font-size:11px}
+ #v-analytics .analytics-capital-card{padding:8px 10px!important}
+}
+
+/* Preview 1.5.48 — compact three-card savings goal, on Analytics dashboard. */
+#v-analytics .analytics-goal-overview{
+ flex:0 0 auto;display:flex;flex-direction:column;gap:8px;min-width:0;
+}
+#v-analytics .analytics-goal-top{
+ display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;min-width:0;
+}
+#v-analytics .analytics-goal-tile,
+#v-analytics .analytics-goal-rest{
+ min-width:0;box-sizing:border-box;border-radius:14px;
+ border:1px solid color-mix(in srgb,var(--line) 50%,#9877db 50%);
+ background:color-mix(in srgb,var(--card) 79%,#9877db 21%);
+ box-shadow:inset 0 2px 0 color-mix(in srgb,#9877db 57%,transparent);
+}
+#v-analytics .analytics-goal-tile{padding:11px 12px 12px}
+#v-analytics .analytics-goal-tile>span,
+#v-analytics .analytics-goal-rest>span{
+ color:var(--muted);font-size:12px;line-height:1.3;display:block;
+}
+#v-analytics .analytics-goal-tile>strong{
+ display:block;margin-top:5px;color:var(--ink);font-weight:820;
+ font-size:clamp(18px,5.4vw,24px);line-height:1.13;letter-spacing:-.55px;
+ font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+#v-analytics .analytics-goal-rest{
+ min-height:58px;padding:9px 12px;
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+}
+#v-analytics .analytics-goal-rest>span{min-width:0}
+#v-analytics .analytics-goal-rest>strong{
+ font-size:clamp(20px,6.3vw,29px);font-weight:820;color:var(--ink);
+ line-height:1.1;letter-spacing:-.5px;white-space:nowrap;font-variant-numeric:tabular-nums;
+}
+#v-analytics .analytics-goal-settings{
+ flex:0 0 auto;min-height:41px;
+ background:color-mix(in srgb,var(--card) 84%,#9877db 16%)!important;
+ border-color:color-mix(in srgb,var(--line) 58%,#9877db 42%)!important;
+ font-size:13px;
+}
+@media (orientation:portrait){
+ #v-analytics .analytics-goal-overview{gap:7px}
+ #v-analytics .analytics-one-screen{padding-bottom:10px}
+ /* Keep the goal/settings reachable on shorter iPhones instead of clipping. */
+ .app:has(#v-analytics.active)>.main{

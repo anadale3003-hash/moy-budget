@@ -1,0 +1,155 @@
+SOURCE: index.html
+PART: 29
+SOURCE LINES: 3990-4139
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+ $('supportDate').max=today;
+ $('supportDate').min=data.startBalances?.date||'';
+ if(!$('supportDate').value)$('supportDate').value=today;
+ const food=data.extraIncomes.filter(i=>i.supportTotal!=null&&i.date.startsWith(today.slice(0,7))&&i.date<=today).reduce((sum,i)=>sum+num(i.amount),0);
+ $('supportMonthInfo').textContent='Из дохода жены на продукты в этом месяце выделено '+rub(food)+'.';
+}
+function reconcileWifePurchases(date,held,amount){
+ if(!Number.isFinite(amount)||amount<0){alert('Введи корректный остаток у жены.');return false;}
+ const diff=Math.round((amount-held)*100)/100;
+ if(diff<0){
+  if(!confirm('По сверке жена потратила '+rub(-diff)+'. Записать в семейные расходы?'))return false;
+  data.expenses.push({id:'wife-'+Date.now()+'-'+Math.random().toString(36).slice(2,7),date,category:'family',type:'Покупки жены',note:'По сверке остатка',amount:-diff,wifeCheck:true});
+ }else if(diff>0){
+  if(!confirm('Остаток у жены выше расчётного на '+rub(diff)+'. Добавить эту разницу к семейным средствам как корректировку? Сначала убедись, что перевод не был учтён дважды.'))return false;
+  (data.wifeAdjustments||=[]).push({id:'wife-adjust-'+Date.now(),date,amount:diff,note:'Сверка остатка жены'});
+ }
+ data.wifeChecked=date;return true;
+}
+$('wifeCheckForm').addEventListener('submit',event=>{
+ event.preventDefault();const form=event.currentTarget;if(!form.reportValidity())return;
+ const date=iso(new Date()),amount=$('wifeActualTotal').valueAsNumber;
+ if(!Number.isFinite(amount)||amount<0){alert('Введи остаток у жены.');return;}
+ if(categoryBalanceAt('family',date)===null){alert('Укажи стартовые остатки в настройках.');return;}
+ if(!reconcileWifePurchases(date,wifeFunds(date),amount))return;
+ const reports=(data.wifeBalanceReports||=[]),existing=reports.find(r=>r.date===date);
+ const checkedAt=new Date().toISOString();
+ if(existing){existing.total=amount;existing.family=amount;existing.checkedAt=checkedAt;}else reports.push({date,total:amount,family:amount,checkedAt});
+ if(renderAll()){form.reset();$('opsSheet').querySelector('.ops-sheet-close').click();showSaveFeedback('Сверка сохранена',$('wifeCheckOpen'));}
+});
+
+function normalizeIncomeRecords(){
+ if(!Array.isArray(data.extraIncomes))data.extraIncomes=[];
+ for(const income of data.extraIncomes){
+  if(income?.supportTotal!=null&&income.source==='Алименты')income.source='Доход жены';
+ }
+}
+function updateWifeTransferAvailable(){
+ const source=$('wifeTransferSource').value,date=iso(new Date()),balance=categoryBalanceAt(source,date);
+ const available=source==='family'?(balance===null?null:Math.max(0,Math.round((balance-wifeFunds(date))*100)/100)):balance;
+ $('wifeTransferAvailable').textContent=available===null?'Сначала укажи стартовые остатки':'Доступно для перевода: '+rub(available);
+ $('wifeTransferAmount').max=available===null?'':String(Math.max(0,available));
+}
+$('wifeTransferSource').addEventListener('change',updateWifeTransferAvailable);
+$('wifeTransferForm').addEventListener('submit',event=>{
+ event.preventDefault();
+ const date=iso(new Date()),source=$('wifeTransferSource').value,amount=$('wifeTransferAmount').valueAsNumber;
+ if(!cats.some(c=>c.id===source)||!Number.isFinite(amount)||amount<=0||Math.round(amount*100)!==amount*100){alert('Проверь источник и сумму перевода.');return;}
+ const balance=categoryBalanceAt(source,date);
+ if(balance===null){alert('Сначала укажи стартовые остатки.');return;}
+ const available=source==='family'?Math.max(0,Math.round((balance-wifeFunds(date))*100)/100):balance;
+ if(amount>available+0.001){alert('В выбранном конверте недостаточно средств. Доступно: '+rub(available));return;}
+ const label=cats.find(c=>c.id===source).name;
+ if(!confirm('Перевод жене '+rub(amount)+' из «'+label+'». Подтвердить?'))return;
+ const createdAt=new Date().toISOString(),id='wife-move-'+Date.now()+'-'+Math.random().toString(36).slice(2,7);
+ // The transfer from another envelope is reallocated into the family envelope,
+ // then moved within that envelope to the wife's card. Neither creates income.
+ if(source!=='family')(data.transfers||=[]).push({id:'wife-envelope-'+id,date,from:source,to:'family',amount,note:'Для перевода жене',wifeMoveId:id});
+ (data.wifeMoves||=[]).push({id,date,amount,source,createdAt});
+ if(renderAll()){
+  $('wifeTransferForm').reset();
+  $('opsSheet').querySelector('.ops-sheet-close').click();
+  showSaveFeedback('Перевод жене записан',$('wifeTransferOpen'));
+ }
+});
+
+let envelopeHistoryTrigger=null;
+function showEnvelopeHistory(id){
+ const cat=cats.find(c=>c.id===id);if(!cat)return;
+ lastEnvelopeHistoryId=id;
+ const entries=[];const add=(date,title,detail,amount)=>{if(fromISO(date)&&Number.isFinite(amount)&&amount!==0)entries.push({date,title,detail,amount});};
+ if(data.startBalances&&fromISO(data.startBalances.date)){
+   add(data.startBalances.date,'Стартовый остаток','На начало учёта',num(data.startBalances.balances?.[id]));
+ }
+ for(const r of data.receipts||[]){
+  add(r.date,r.type==='advance'?'Распределение аванса':'Распределение зарплаты',r.month?'Выплата за '+r.month:'Поступление',num(r.amounts?.[id]));
+ }
+ for(const inc of data.extraIncomes||[]){
+  if(inc.destination===id&&inc.supportTotal!=null&&inc.amount===0)entries.push({date:inc.date,title:'Доход жены',detail:inc.note,amount:0});
+  if(inc.destination===id)add(inc.date,'Дополнительный доход',[inc.source,inc.note].filter(Boolean).join(' · '),num(inc.amount));
+ }
+ for(const tr of data.transfers||[]){
+  if(tr.to===id){const source=cats.find(c=>c.id===tr.from)?.name||'другого конверта';add(tr.date,'Перевод из «'+source+'»',tr.note||'Пополнение конверта',num(tr.amount));}
+  if(tr.from===id){const target=cats.find(c=>c.id===tr.to)?.name||'другого конверта';add(tr.date,'Перевод в «'+target+'»',tr.note||'Перевод из конверта',-num(tr.amount));}
+ }
+ for(const e of data.expenses||[]){
+  if(e.category===id)add(e.date,e.type||'Расход',e.note||'Расход из конверта',-num(e.amount));
+ }
+ if(id==='savings')for(const pay of data.earlyRepayments||[]){
+  add(pay.date,pay.target==='mortgage'?'Досрочное погашение ипотеки':'Досрочное погашение кредитки',pay.note||'Из накоплений',-num(pay.amount));
+ }
+ $('envelopeHistoryTitle').textContent=cat.icon+' '+cat.name;
+ if(id==='family'){
+  for(const move of data.wifeMoves||[])entries.push({date:move.date,title:'Перевод жене',detail:rub(move.amount)+' · из «'+(cats.find(c=>c.id===(move.source||'family'))?.name||'Семейные нужды')+'»',amount:0});
+ }
+ const balance=realBalance(id);
+ $('envelopeHistorySummary').textContent='Остаток: '+(balance===null?'учёт не начат':rub(balance))+' · Операций: '+entries.length;
+ const orderedEntries=sortHistoryRows(entries,'envelopeHistoryList');
+ $('envelopeHistoryList').innerHTML=orderedEntries.length?orderedEntries.map(e=>'<div class="envelope-history-entry"><div><div class="history-title">'+esc(e.title)+'</div><div class="history-detail">'+esc(new Date(e.date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'}))+(e.detail?' · '+esc(e.detail):'')+'</div></div><div class="history-amount '+(e.amount>=0?'positive':'negative')+'">'+(e.amount===0?'':(e.amount>0?'+':'−')+rub(Math.abs(e.amount)))+'</div></div>').join(''):'<div class="foot" style="padding:20px 4px">Пока нет операций по этому конверту.</div>';
+ $('envelopeHistoryList').scrollTop=0;
+ envelopeHistoryTrigger=document.activeElement;
+ const overlay=$('envelopeHistoryOverlay');
+ clearTimeout(envelopeHistoryCloseTimer);
+ overlay.hidden=false;
+ // Separate frames ensure WebKit applies the offscreen transform before transition.
+ requestAnimationFrame(()=>requestAnimationFrame(()=>overlay.classList.add('is-open')));
+ $('envelopeHistoryClose').focus();
+}
+let envelopeHistoryCloseTimer=null;
+function closeEnvelopeHistory(){
+ const overlay=$('envelopeHistoryOverlay');
+ if(overlay.hidden)return;
+ overlay.classList.remove('is-open');
+ if(envelopeHistoryTrigger?.focus)envelopeHistoryTrigger.focus();
+ clearTimeout(envelopeHistoryCloseTimer);
+ envelopeHistoryCloseTimer=setTimeout(()=>{if(!overlay.classList.contains('is-open'))overlay.hidden=true;},310);
+}
+$('envelopes').addEventListener('click',e=>{const b=e.target.closest('[data-envelope]');if(b)showEnvelopeHistory(b.dataset.envelope)});
+$('envelopeHistoryClose').addEventListener('click',closeEnvelopeHistory);
+$('envelopeHistoryOverlay').addEventListener('click',e=>{if(e.target===$('envelopeHistoryOverlay'))closeEnvelopeHistory()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('envelopeHistoryOverlay').hidden)closeEnvelopeHistory()});
+
+function renderAll(){syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();updateExpenseOptions();return save()}
+function go(page){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));document.querySelector('.app').classList.toggle('home-active',page==='home');const main=document.querySelector('.main');if(main)main.scrollTop=0;}
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
+
+function changeOperationsMonth(step){
+ const [y,m]=month.split('-').map(Number);
+ month=iso(new Date(y,m-1+step,1)).slice(0,7);
+ renderAll();
+}
+$('operationsMonthPrev').addEventListener('click',()=>changeOperationsMonth(-1));
+$('operationsMonthNext').addEventListener('click',()=>changeOperationsMonth(1));
+document.querySelectorAll('[data-ops-open]').forEach(button=>button.addEventListener('click',()=>{
+ const action=button.dataset.opsOpen;
+ const panel=action==='income'?$('incomePanel'):action==='history'?$('expenseHistoryPanel'):null;
+ if(panel)panel.open=true;
+ const target=action==='income'?$('incomeAmount'):action==='history'?$('expenseHistoryPanel'):$('expenseAmount');
+ if(target?.scrollIntoView)target.scrollIntoView({behavior:'smooth',block:'center'});
+ if(action!=='history')target?.focus?.({preventScroll:true});
+}));
+
+
+$('monthPrev').onclick=()=>{let [y,m]=month.split('-').map(Number);month=iso(new Date(y,m-2,1)).slice(0,7);renderAll()};$('monthNext').onclick=()=>{let [y,m]=month.split('-').map(Number);month=iso(new Date(y,m,1)).slice(0,7);renderAll()};
+for(const id of ['advance','salary'])$(id).addEventListener('input',e=>{monthData()[id]=num(e.target.value);render();save()});
+// Select existing amounts on focus so users can overwrite with one keystroke.
+for(const id of ['advance','salary']){
+  $(id).addEventListener('focus',e=>{
+    if(e.target.value==='0')e.target.value='';
+    else if(e.target.value)try{e.target.select()}catch(_){/* Safari may not allow selection for number inputs */}
+  });

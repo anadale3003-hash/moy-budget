@@ -1,0 +1,154 @@
+SOURCE: index.html
+PART: 26
+SOURCE LINES: 3540-3689
+SOURCE BLOB SHA: 983e5f4c41d4941427e301dee273c8770c3b83f4
+
+ const savings=goalSavingsBalance();
+ const booked=savings===null?0:Math.max(0,savings);
+ const extra=settings.included?Math.max(0,booked-baseReserve):booked;
+ const total=Math.round((reserve+extra)*100)/100;
+ const automaticGoal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
+ const userGoal=typeof settings.targetAmount==='number'&&Number.isFinite(settings.targetAmount)
+   &&settings.targetAmount>=reserve&&settings.targetAmount<=1000000000;
+ const override=typeof goalOverride==='number'&&Number.isInteger(goalOverride)
+   &&goalOverride>=reserve&&goalOverride<=1000000000;
+ const goal=override?goalOverride:(userGoal?settings.targetAmount:automaticGoal);
+ return {settings,reserve,savings,extra,total,goal,automatic:!override&&!userGoal,
+   remaining:Math.max(0,goal-total)};
+}
+function purposeBalances(snapshot=capitalSnapshot()){
+ const cents=value=>Math.round(num(value)*100);
+ let free=cents(snapshot.extra);
+ const booked=new Map();
+ const todayKey=iso(new Date());
+ for(const rows of [data.receipts,data.extraIncomes,data.transfers]){
+  for(const entry of rows||[]){
+   if(entry.purposeId&&entry.date<=todayKey)
+    booked.set(entry.purposeId,(booked.get(entry.purposeId)||0)+cents(entry.purposeAmount));
+  }
+ }
+ const goals=(data.purposes||[]).map(goal=>{
+  const assigned=Math.min(free,cents(goal.target),cents(goal.start)+(booked.get(goal.id)||0));
+  free-=assigned;
+  return {...goal,saved:assigned/100};
+ });
+ return {goals,free:free/100,active:goals.find(g=>g.id===data.activePurpose)};
+}
+function assignContribution(entry,amount){
+ if(!amount||!data.activePurpose)return;
+ const {active}=purposeBalances();
+ if(!active)return;
+ entry.purposeId=active.id;
+ entry.purposeAmount=Math.min(amount,Math.max(0,Math.round((active.target-active.saved)*100)/100));
+}
+function homeGoal(snapshot=capitalSnapshot()){
+ const active=data.activePurpose&&purposeBalances(snapshot).active;
+ return active?{total:active.saved,goal:active.target,name:active.name}:{
+  total:snapshot.total,goal:snapshot.goal,name:snapshot.settings.name};
+}
+function renderPurposes(){
+ const snapshot=capitalSnapshot(),{goals,free}=purposeBalances(snapshot);
+ $('goalReserve').textContent='Подушка · '+rub(snapshot.reserve)+' · Свободно для целей '+rub(free);
+ $('goalBalances').replaceChildren(...goals.map(goal=>{
+  const row=document.createElement('div');
+  row.textContent=goal.name+' · '+rub(goal.saved)+' из '+rub(goal.target)+(goal.saved>=goal.target?' ✓':'');
+  return row;
+ }));
+ const choice=$('goalChoice');
+ choice.replaceChildren(new Option('Общие накопления',''),...goals.map(g=>new Option(g.name,g.id)));
+ choice.value=data.activePurpose||'';
+ $('goalChoiceField').hidden=!goals.length;
+ $('deletePurpose').hidden=!choice.value;
+}
+$('goalChoice').onchange=e=>{
+ data.activePurpose=e.target.value;
+ renderAll();renderPurposes();
+};
+$('deletePurpose').onclick=()=>{
+ const id=$('goalChoice').value;
+ const goals=data.purposes||[];
+ const goal=goals.find(item=>item.id===id);
+ if(!goal||!confirm('Удалить цель «'+goal.name+'»? Деньги останутся в конверте «Накопления».'))return;
+ const previousActive=data.activePurpose;
+ data.purposes=goals.filter(item=>item.id!==id);
+ if(previousActive===id)data.activePurpose='';
+ if(!renderAll()){
+  data.purposes=goals;
+  data.activePurpose=previousActive;
+  ladderRender();
+ }
+ renderPurposes();
+};
+$('newGoalForm').onsubmit=e=>{
+ e.preventDefault();
+ const name=$('purposeName').value.trim(),target=Number($('purposeTarget').value),start=Number($('purposeStart').value);
+ const {free}=purposeBalances();
+ if(!name||!Number.isFinite(target)||target<=0||!Number.isFinite(start)||start<0||start>Math.min(free,target)){
+  alert('Проверь название и суммы. Свободно для цели '+rub(free)+'.');return;
+ }
+ const goal={id:crypto.randomUUID(),name,target,start};
+ (data.purposes||=[]).push(goal);
+ data.activePurpose=goal.id;
+ if(!renderAll())return;
+ e.target.reset();$('newGoal').open=false;renderPurposes();
+};
+function nextCapitalMilestone(total,goal){
+ return Math.min(goal,(Math.floor(total/10000)+1)*10000);
+}
+function milestoneText(total,goal){
+ if(total>=goal)return 'Цель достигнута · '+rub(goal);
+ const next=nextCapitalMilestone(total,goal);
+ return 'До '+rub(next)+' осталось '+rub((Math.round(next*100)-Math.round(total*100))/100);
+}
+function recordEnvelopeTransfer(transfer){
+ const before=transfer.to==='savings'?homeGoal():null;
+ if(before)assignContribution(transfer,transfer.amount);
+ data.transfers.push(transfer);
+ if(!before||!saveFeedbackIntent)return;
+ const after=homeGoal();
+ const reached=nextCapitalMilestone(before.total,before.goal);
+ const crossed=before.total<reached&&after.total>=reached&&after.total<before.goal;
+ const progress=crossed?'Рубеж '+rub(reached)+' достигнут. ':'';
+ saveFeedbackIntent.message='В накопления +'+rub(transfer.amount)+'. '+progress+milestoneText(after.total,before.goal);
+}
+function savingsPlanTarget(months){
+ const now=new Date(),d=new Date(now.getFullYear(),now.getMonth()+months-1,1);
+ return iso(d).slice(0,7);
+}
+function savingsPlanMonthsLeft(targetMonth){
+ if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(targetMonth||''))return null;
+ const [year,m]=targetMonth.split('-').map(Number);
+ const now=new Date();return (year-now.getFullYear())*12+m-(now.getMonth()+1)+1;
+}
+function renderConfirmedSavings(){
+ const confirmed=confirmedSavingsBalance();
+ $('confirmedSavingsState').textContent=confirmed===null?'Нужно указать факт':'Подтверждено';
+ $('confirmedSavingsBalanceInput').value=confirmed===null?'':String(Math.round(confirmed*100)/100);
+ $('confirmedSavingsHistory').innerHTML=(data.confirmedSavings?.entries||[]).slice(-5).reverse()
+  .map(e=>'<div class="lineitem"><span>'+esc(e.date)+' · пополнение</span><span>'+rub(e.amount)+' <button type="button" class="delete" data-undo-savings-deposit="'+esc(e.id)+'" title="Отменить пополнение">↶</button></span></div>').join('');
+}
+$('confirmedSavingsSet').addEventListener('click',()=>{
+ const value=$('confirmedSavingsBalanceInput').value.trim(),amount=Number(value);
+ if(value===''||!Number.isFinite(amount)||amount<0)return $('confirmedSavingsMessage').textContent='Укажи фактический остаток по банковскому счёту.';
+ if(!confirm('Установить фактический остаток накоплений '+rub(amount)+'? Это не доход и не перевод между конвертами.'))return;
+ data.confirmedSavings={base:Math.round(amount*100)/100,entries:[]};
+ renderAll();savingsPlanOpen();
+ $('confirmedSavingsMessage').textContent='Остаток по банку сохранён.';
+});
+$('confirmedSavingsAdd').addEventListener('click',()=>{
+ const v=$('confirmedSavingsDeposit').value.trim(),amount=Number(v);
+ if(v===''||!Number.isFinite(amount)||amount<=0)return $('confirmedSavingsMessage').textContent='Укажи положительную сумму пополнения.';
+ if(confirmedSavingsBalance()===null)return $('confirmedSavingsMessage').textContent='Сначала укажи текущий фактический остаток по банковскому счёту.';
+ if(!confirm('Подтвердить перевод '+rub(amount)+' на накопительный счёт? Не добавлять повторно, если уже учтён в фактическом остатке.'))return;
+ data.confirmedSavings.entries.push({id:'sav-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),date:iso(new Date()),amount:Math.round(amount*100)/100});
+ $('confirmedSavingsDeposit').value='';
+ renderAll();savingsPlanOpen();
+ $('confirmedSavingsMessage').textContent='Пополнение подтверждено. Перевод не считается доходом.';
+});
+$('confirmedSavingsHistory').addEventListener('click',e=>{
+ const btn=e.target.closest('[data-undo-savings-deposit]');if(!btn)return;
+ const entry=data.confirmedSavings?.entries?.find(x=>x.id===btn.dataset.undoSavingsDeposit);
+ if(!entry||!confirm('Отменить пополнение '+rub(entry.amount)+'?'))return;
+ data.confirmedSavings.entries=data.confirmedSavings.entries.filter(x=>x.id!==entry.id);
+ renderAll();savingsPlanOpen();
+});

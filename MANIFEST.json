@@ -1,0 +1,65 @@
+{
+  "source_repo": "anadale3003-hash/moy-budget",
+  "source_branch": "main",
+  "source_commit": "ff49ea98bf14288a848f016c52bd1cc32370d1f9",
+  "source_version": "1.5.104",
+  "generated": "2026-11-22",
+  "files": [
+    {
+      "path": "index.html",
+      "lines": 5776,
+      "chars": 561903,
+      "git_blob_sha": "983e5f4c41d4941427e301dee273c8770c3b83f4",
+      "parts": 42
+    },
+    {
+      "path": "preview.html",
+      "lines": 5784,
+      "chars": 562235,
+      "git_blob_sha": "70f3f2570efea1d3532fe86ade3e4d17e4bbbfac",
+      "parts": 42
+    },
+    {
+      "path": "push-worker/src/index.js",
+      "lines": 442,
+      "chars": 21431,
+      "git_blob_sha": "36a458ea72da5cc438efcaee7e51dc7d3a657b12",
+      "parts": 3
+    },
+    {
+      "path": "sw.js",
+      "lines": 58,
+      "chars": 3123,
+      "git_blob_sha": "81f94feca5da8431c53fbee8e4d7d1a03dda4681",
+      "parts": 1
+    },
+    {
+      "path": "version.json",
+      "lines": 5,
+      "chars": 148,
+      "git_blob_sha": "fb039da4fc0e603f8a9636b4f8f0786c4adc20d4",
+      "parts": 1
+    },
+    {
+      "path": "manifest.webmanifest",
+      "lines": 1,
+      "chars": 446,
+      "git_blob_sha": "348443c575ab8e564d1f57a114ae6a6569019d17",
+      "parts": 1
+    },
+    {
+      "path": "push-worker/wrangler.jsonc",
+      "lines": 29,
+      "chars": 509,
+      "git_blob_sha": "be3e710669fc1bd4565ba94a10e5b97349c5aaa3",
+      "parts": 1
+    },
+    {
+      "path": "push-worker/package.json",
+      "lines": 18,
+      "chars": 336,
+      "git_blob_sha": "6fc7d846669d65bb2f3edff78e23c4f0d3380ec1",
+      "parts": 1
+    }
+  ]
+}
