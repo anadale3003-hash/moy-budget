@@ -2244,6 +2244,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  <small id="milestoneProgress"></small>
  <small id="milestoneCredit" hidden></small>
 </section>
+<button type="button" id="purchaseCheckOpen" class="btn light">Могу ли я позволить себе покупку?</button>
 <div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайший платёж</h2><button class="analytics-icon-button alert-bell home-alert-trigger" type="button" id="budgetAlertsOpen" aria-label="Открыть советы для бюджета" title="Советы">🔔 <span class="home-alert-label">Советы</span><span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button></div><div id="obligations"></div></div>
 </section>
 <section class="view" id="v-plan">
@@ -2573,6 +2574,8 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 <div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="history-sort-control"><label for="envelopeHistorySort">По дате</label><select id="envelopeHistorySort" data-history-sort="envelopeHistoryList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 
+<dialog id="purchaseCheckDialog" class="budget-alerts-dialog" aria-labelledby="purchaseCheckTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="purchaseCheckTitle">Могу ли я позволить себе покупку?</h2><button type="button" class="btn light" id="purchaseCheckClose" aria-label="Закрыть">✕</button></div><p class="foot" id="purchaseCheckContext"></p><form id="purchaseCheckForm"><label class="field">Стоимость дополнительной покупки, ₽<input id="purchasePrice" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><label class="field">Необходимые расходы семьи в день, ₽<input id="purchaseDaily" type="number" inputmode="decimal" min="0" step="0.01" required placeholder="Введи свой обычный бюджет"></label><label class="field">Другие разовые расходы до выплаты, ₽<input id="purchaseExtra" type="number" inputmode="decimal" min="0" step="0.01" value="0"></label><p class="foot">Не включай покупку и уже учтённые обязательные платежи в дневной бюджет или разовые расходы. Корм, лекарства и прочие необходимые покупки укажи отдельно, если они ещё не включены.</p><button class="btn full" type="submit">Проверить покупку</button></form><div id="purchaseCheckResult" aria-live="polite"></div></div></dialog>
+<style>#purchaseCheckOpen{width:100%;min-height:38px;margin:4px 0;font-size:13px;flex-shrink:0}#purchaseCheckDialog .field{display:grid;gap:5px;margin:10px 0}#purchaseCheckResult{margin-top:12px;padding:12px;border-radius:12px;background:var(--panel);overflow-wrap:anywhere}#purchaseCheckResult p{margin:6px 0;font-size:13px}#purchaseCheckResult small{display:block;color:var(--muted);margin-top:8px}.purchase-ok{color:var(--green)}.purchase-bad{color:var(--red)}</style>
 <dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">Советы для твоего бюджета</h2><button type="button" class="btn light" id="budgetAlertsClose" aria-label="Закрыть">✕</button></div><p class="budget-alerts-help" id="adviceOpening"></p><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
 <script>
 /* Layout-only grouping. IDs/forms remain intact so accounting calculations and saved data are unchanged. */
@@ -3362,6 +3365,7 @@ function advisorCashSnapshot(now){
  return {actual,family,wife,mine:family===null?null:family-wife,wifeCheck,next:next?{date:iso(next.date),type:next.type,expected}:null,days,
   bills:before?billReserve(before):null,familyBills:before?billReserve(before,'family'):null,
   sameDayBills:before&&after?Math.max(0,billReserve(after)-billReserve(before)):null,
+  sameDayFamilyBills:before&&after?Math.max(0,billReserve(after,'family')-billReserve(before,'family')):null,
   familyAfterBills:budget?budget.family:null,allAfterBills:budget?budget.total:null,
   daily:budget&&days>0?Math.floor(budget.family/days):null,confirmedSavings};
 }
@@ -3371,6 +3375,73 @@ window.budgetAdvisorSnapshot=function(now){
  return {data,cash:advisorCashSnapshot(now),mortgage:upcomingMortgage(now),debt:Math.max(0,num(data.debt)-regularPaymentSum('credit',null,todayKey)-early),
  reserved:data.startBalances?Math.max(0,regularCreditAvailable(todayKey)):num(data.reserved)};
 };
+// Read-only purchase scenario. Amounts are integer kopecks; no operation is created.
+function purchaseCents(value){
+ if(value===null||value===undefined||typeof value==='string'&&!value.trim())return null;
+ const n=Number(value),c=Math.round(n*100);
+ return Number.isFinite(n)&&Number.isSafeInteger(c)&&Math.abs(n*100-c)<0.0001?c:null;
+}
+function evaluatePurchase(snapshot,price,daily,extra,today){
+ const money=v=>purchaseCents(v);
+ const p=money(price),d=money(daily),e=money(extra);
+ if(p===null||p<=0||d===null||d<0||e===null||e<0)return {status:'invalid'};
+ const c=snapshot.cash,m=snapshot.mortgage;
+ if(!c||!c.actual||!c.next||!Number.isSafeInteger(c.days)||c.days<=0)return {status:'unknown',reason:'Нужны текущие остатки и дата следующей неполученной выплаты. Если выплата сегодня, дождись зачисления.'};
+ const family=money(c.family),available=money(c.actual.available),bills=money(c.bills),familyBills=money(c.familyBills),same=money(c.sameDayBills),sameFamily=money(c.sameDayFamilyBills);
+ if([family,available,bills,familyBills,same,sameFamily].some(v=>v===null))return {status:'unknown',reason:'Не удалось определить остатки или регулярные платежи.'};
+ let mortgage=0,credit=0;
+ if(m&&m.due&&iso(m.due)<=c.next.date&&m.remaining>0){
+  mortgage=money(m.gap);
+  if(mortgage===null)return {status:'unknown',reason:'Сверь резерв ближайшего ипотечного платежа.'};
+ }
+ if(snapshot.debt>0){
+  const deadline=snapshot.data.deadline;
+  if(!deadline||!fromISO(deadline))return {status:'unknown',reason:'Укажи срок кредитки и проверь минимальный платёж в банке.'};
+  if(deadline<=c.next.date){
+   const debt=money(snapshot.debt),reserved=money(snapshot.reserved);
+   if(debt===null||reserved===null)return {status:'unknown',reason:'Сверь задолженность и резерв кредитки.'};
+   credit=Math.max(0,debt-reserved);
+  }
+ }
+ // Household funds are a subset of available funds. Reserve each bill only once.
+ // For a debt gap, conservatively keep the full amount aside even on payday.
+ const debtGap=mortgage+credit,free=Math.min(family-familyBills-sameFamily,available-bills-same)-debtGap;
+ const essentials=d*c.days+e;
+ const before=free-essentials,after=before-p;
+ if(![free,essentials,before,after].every(Number.isSafeInteger))return {status:'invalid'};
+ return {status:after>=0?'ok':'shortfall',days:c.days,date:c.next.date,free,essentials,before,after,price:p,daily:d,extra:e,mortgage,credit,bills:bills+same,maxPurchase:Math.max(0,before),dailyAfter:Math.floor(Math.max(0,free-p-e)/c.days)};
+}
+function setupPurchaseCheck(){
+ const open=$('purchaseCheckOpen'),dialog=$('purchaseCheckDialog'),form=$('purchaseCheckForm'),result=$('purchaseCheckResult');
+ if(!open||!dialog||!form||!result)return;
+ const format=cents=>rub(cents/100);
+ function renderPurchase(){
+  const now=new Date(),snapshot=window.budgetAdvisorSnapshot(now),cash=snapshot.cash;
+  $('purchaseCheckContext').textContent=cash.family===null?'Семейный остаток неизвестен.':('Семейные деньги: '+rub(cash.family)+(cash.next?' · до '+cash.next.date+' — '+cash.days+' дн.':' · дата выплаты неизвестна'));
+  if(!$('purchasePrice').value||!$('purchaseDaily').value){result.textContent='Введи стоимость покупки и нужную сумму на день.';return;}
+  const r=evaluatePurchase(snapshot,$('purchasePrice').value,$('purchaseDaily').value,$('purchaseExtra').value||'0',iso(now));
+  result.replaceChildren();
+  const add=(tag,value)=>{const el=document.createElement(tag);el.textContent=value;result.append(el);return el;};
+  if(r.status==='invalid'||r.status==='unknown'){add('p',r.reason||'Проверь суммы: покупка должна быть больше нуля, остальные суммы — неотрицательные, до копеек.');return;}
+  const heading=add('strong',r.status==='ok'?'По введённому плану денег хватает':'По введённому плану денег не хватает');
+  heading.className=r.status==='ok'?'purchase-ok':'purchase-bad';
+  add('p','Доступно после обязательных резервов: '+format(r.free));
+  add('p','На жизнь до выплаты, включая дополнительные расходы: '+format(r.essentials));
+  add('p','Обязательные резервы: регулярные платежи '+format(r.bills)+', ипотека '+format(r.mortgage)+', кредитка '+format(r.credit)+'.');
+  add('p','После покупки и необходимых расходов: '+format(r.after));
+  if(r.before<0)add('p','Даже без покупки не хватает '+format(-r.before)+'.');
+  add('p','Максимум на дополнительную покупку: '+format(r.maxPurchase));
+  add('p','После покупки и разовых расходов на день остаётся '+format(r.dailyAfter)+'.');
+  if(r.status==='shortfall')add('p','Отложи необязательную покупку или пересмотри план. Не используй подушку или кредитку автоматически.');
+  add('small','Расчёт по записям, без будущей зарплаты. Неучтённые платежи и минимальный платёж по кредитке проверь отдельно. Введённая покупка не записывается.');
+ }
+ open.addEventListener('click',()=>{form.reset();renderPurchase();if(!dialog.open)dialog.showModal();});
+ $('purchaseCheckClose').addEventListener('click',()=>dialog.close());
+ form.addEventListener('submit',event=>{event.preventDefault();renderPurchase();});
+ form.addEventListener('input',renderPurchase);
+}
+
+setupPurchaseCheck();
 function renderEarlyAlerts(){
  const host=$('budgetEarlyAlerts');if(!host)return;
  const now=new Date(),todayKey=iso(now),start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -4600,7 +4671,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.107';
+const APP_VERSION='1.5.108';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
