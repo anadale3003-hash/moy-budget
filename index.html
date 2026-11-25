@@ -2916,7 +2916,7 @@ function creditPaymentFeedback(amount){
 function creditOutstanding(){
  return Math.max(0,num(data.debt)-repaymentTotal('credit')-regularPaymentSum('credit'));
 }
-function credit(pendingReceipt=null){const debt=Math.max(0,creditOutstanding()-num(data.reserved)-incomeAmountFor('credit'));const due=fromISO(data.deadline);const pays=pendingReceipt?nextPaydays(fromISO(pendingReceipt.date),pendingReceipt):nextPaydays();const per=pays.length?Math.ceil(debt/pays.length*100)/100:0;return {debt,due,pays,per}}
+function credit(pendingReceipt=null){const debt=Math.max(0,creditOutstanding()-(data.startBalances?regularCreditAvailable(iso(new Date())):num(data.reserved)+incomeAmountFor('credit')));const due=fromISO(data.deadline);const pays=pendingReceipt?nextPaydays(fromISO(pendingReceipt.date),pendingReceipt):nextPaydays();const per=pays.length?Math.ceil(debt/pays.length*100)/100:0;return {debt,due,pays,per}}
 // Mortgage top-ups from envelopes are already paid. Offset only the EXTRA
 // funding from subsequent UNCONFIRMED wage distributions, in payment order.
 // Past receipts retain their original confirmed allocations.
@@ -3106,11 +3106,7 @@ function actualMoneyToday(){
    +data.receipts.filter(r=>r.date>=data.startBalances.date&&r.date<=asOf).reduce((a,r)=>a+num(r.amounts?.mortgage),0)
    +data.extraIncomes.filter(i=>i.destination==='mortgage'&&i.date>=data.startBalances.date&&i.date<=asOf).reduce((a,i)=>a+num(i.amount),0)
    -mortgageReserveSpent(data.startBalances.date,asOf);
- // data.reserved includes manual credit-card reserves and reserves from received wages.
- // Exclude future-dated receipt allocations if any exist.
- const futureCredit=data.receipts.filter(r=>r.date>asOf).reduce((a,r)=>a+num(r.amounts?.credit),0);
- const creditReserve=num(data.reserved)-futureCredit
-   +data.extraIncomes.filter(i=>i.destination==='credit'&&i.date>=data.startBalances.date&&i.date<=asOf).reduce((a,i)=>a+num(i.amount),0);
+ const creditReserve=regularCreditAvailable(asOf);
  const savings=categoryBalanceAt('savings',asOf);
  const available=envelopes-savings;
  const reserve=mortgage+creditReserve;
@@ -3122,9 +3118,19 @@ function regularPaidForMonth(target,key){return (data.regularPayments||[]).filte
 function regularCreditAvailable(date){
  if(!data.startBalances)return 0;
  const futureCredit=(data.receipts||[]).filter(r=>r.date>date).reduce((a,r)=>a+num(r.amounts?.credit),0);
- const extraFuture=(data.extraIncomes||[]).filter(x=>x.destination==='credit'&&x.date>date).reduce((a,x)=>a+num(x.amount),0);
- // data.reserved already excludes confirmed credit-card payments.
- return num(data.reserved)-futureCredit+incomeAmountFor('credit',data.startBalances.date)-extraFuture+(data.regularPayments||[]).filter(p=>p.target==='credit'&&p.date>date).reduce((a,p)=>a+num(p.amount),0);
+ const start=data.startBalances.date;
+ const income=(data.extraIncomes||[]).filter(i=>i.destination==='credit'&&i.date>=start&&i.date<=date)
+  .reduce((sum,i)=>sum+num(i.amount),0);
+ let balance=num(data.reserved)-futureCredit+income;
+ for(const p of data.regularPayments||[]){
+  if(p.target!=='credit')continue;
+  const used=num(p.reserveUsed??p.amount);
+  const fromIncome=num(p.creditIncomeUsed);
+  // Only the manual/payroll portion was deducted directly from data.reserved.
+  if(p.date>date)balance+=used-fromIncome;
+  else if(p.date>=start)balance-=fromIncome;
+ }
+ return Math.round(balance*100)/100;
 }
 function mortgageReserveSpent(fromDate=null,toDate=null){
  return (data.regularPayments||[]).filter(p=>p.target==='mortgage'&&(!fromDate||p.date>=fromDate)&&(!toDate||p.date<=toDate))
@@ -4502,7 +4508,12 @@ function closePaymentEntry(){
  if(paymentEntryTrigger?.focus)paymentEntryTrigger.focus();
 }
 function paymentFunding(target,amount,date){
- const available=target==='mortgage'?regularMortgageAvailable(date):regularCreditAvailable(date);
+ let available=target==='mortgage'?regularMortgageAvailable(date):regularCreditAvailable(date);
+ if(target==='credit'){
+  for(const p of data.regularPayments||[]){
+   if(p.target==='credit'&&p.date>date)available=Math.min(available,regularCreditAvailable(p.date));
+  }
+ }
  const reserve=Math.max(0,Math.round(available*100)/100);
  const reserveUsed=Math.min(amount,reserve);
  const extraAmount=Math.max(0,Math.round((amount-reserveUsed)*100)/100);
@@ -4534,8 +4545,9 @@ function confirmRegularPayment(target,amount,date,extraSource='',part=''){
   const categoryBalance=categoryBalanceAt(extraSource,date);
   if(categoryBalance===null||categoryBalance+0.001<extraAmount)return 'В выбранном конверте недостаточно денег на дату списания. Доступно: '+rub(Math.max(0,categoryBalance||0))+'.';
  }
+ const creditIncomeUsed=target==='credit'?Math.max(0,Math.round((reserveUsed-num(data.reserved))*100)/100):0;
  data.regularPayments.push({id:'payment-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
-  month,target,part:part==='advance'||part==='salary'?part:'',amount,date,reserveUsed,extraSource:extraAmount>0?extraSource:'',extraAmount});
+  month,target,part:part==='advance'||part==='salary'?part:'',amount,date,reserveUsed,...(creditIncomeUsed?{creditIncomeUsed}:{}),extraSource:extraAmount>0?extraSource:'',extraAmount});
  if(target==='credit'){
   data.reserved=Math.max(0,Math.round((num(data.reserved)-reserveUsed)*100)/100);
   creditPaymentFeedback(amount);
@@ -4605,7 +4617,7 @@ $('regularPaymentHistory').addEventListener('click',e=>{
  const extraDescription=num(record.extraAmount)>0?' и '+rub(record.extraAmount)+' в конверт «'+(cats.find(c=>c.id===record.extraSource)?.name||'источник')+'»':'';
  if(!confirm('Отменить подтверждение оплаты '+rub(record.amount)+'? Израсходованные средства вернутся в резерв'+extraDescription+', а учёт платежа восстановится.'))return;
  data.regularPayments=data.regularPayments.filter(x=>x.id!==record.id);
- if(record.target==='credit')data.reserved=num(data.reserved)+num(record.reserveUsed===undefined?record.amount:record.reserveUsed);
+ if(record.target==='credit')data.reserved=Math.round((num(data.reserved)+num(record.reserveUsed??record.amount)-num(record.creditIncomeUsed))*100)/100;
  renderAll();
 });
 $('receiveAdvance').addEventListener('click',()=>receive('advance'));
