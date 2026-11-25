@@ -2365,7 +2365,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <button class="btn" type="submit">Учесть поступление</button>
 </form></div>
 <div class="card"><form id="expenseForm">
- <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><p class="foot" id="expenseWifeTransferAvailable" hidden></p><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="history-sort-control"><label for="expenseListSort">По дате</label><select id="expenseListSort" data-history-sort="expenseList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
+ <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory" required><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><p class="foot" id="expenseWifeTransferAvailable" hidden></p><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="history-sort-control"><label for="expenseListSort">По дате</label><select id="expenseListSort" data-history-sort="expenseList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
 <div class="two transfer-envelopes"><label class="field"><span>Откуда</span><select id="transferFrom"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Куда</span><select id="transferTo"><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label></div>
 <div class="two"><label class="field"><span>Сумма, ₽</span><input id="transferAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 5000"></label><label class="field"><span>Дата перевода</span><input id="transferDate" type="date" required></label></div>
 <label class="field"><span>Примечание (необязательно)</span><input id="transferNote" maxlength="120" placeholder="Остаток коммуналки"></label>
@@ -2380,7 +2380,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <label class="field"><span>Дата поступления</span><input id="incomeDate" type="date" required></label>
 </div>
 <label class="field"><span>Источник дохода</span><select id="incomeSource"><option>Проценты по вкладу</option><option>Премия</option><option>Кэшбэк</option><option>Возврат покупки</option><option>Подработка</option><option>Подарок</option><option>Доход жены</option><option>Другое</option></select></label>
-<label class="field"><span>Куда зачислить</span><select id="incomeDestination">
+<label class="field"><span>Куда зачислить</span><select id="incomeDestination" required>
 <option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option>
 <option value="savings">Накопления</option><option value="reserve">🛡 Подушка безопасности</option><option value="other">Доступный бюджет (Остальное)</option>
 <option value="mortgage">На ипотеку</option><option value="credit">На кредитку</option>
@@ -2577,6 +2577,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 <div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="history-sort-control"><label for="envelopeHistorySort">По дате</label><select id="envelopeHistorySort" data-history-sort="envelopeHistoryList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 
+<dialog id="smartOperationDialog" class="budget-alerts-dialog" aria-labelledby="smartOperationTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="smartOperationTitle">Умный ввод</h2><button type="button" class="btn light" id="smartOperationClose" aria-label="Закрыть">✕</button></div><p class="foot">Напиши уже совершённую операцию обычными словами. Всё обрабатывается на устройстве, без интернета.</p><form id="smartOperationForm"><label class="field">Что произошло?<textarea id="smartOperationText" rows="3" maxlength="240" required placeholder="Вчера купил корм собаке за 1800"></textarea></label><button class="btn full" type="submit">Распознать</button></form><p id="smartOperationPreview" aria-live="polite"></p><button class="btn full secondary" id="smartOperationContinue" type="button" disabled>Проверить и подтвердить в форме</button><p class="foot">Поддерживаются одиночные расходы и дополнительные доходы в рублях. Переводы, кредиты и зарплата — через обычные формы.</p></div></dialog><style>#smartOperationOpen{width:100%;margin:7px 0;min-height:42px}#smartOperationText{width:100%;box-sizing:border-box;resize:vertical;background:var(--input);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:16px}#smartOperationPreview{padding:10px;background:var(--panel);border-radius:12px;overflow-wrap:anywhere}#smartOperationContinue:disabled{opacity:.5}</style>
 <dialog id="moneyCalendarDialog" class="budget-alerts-dialog" aria-labelledby="moneyCalendarTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="moneyCalendarTitle">Календарь денег</h2><button class="btn light" type="button" id="moneyCalendarClose" aria-label="Закрыть">✕</button></div><div id="calendarHorizon" role="group" aria-label="Горизонт прогноза"><button type="button" class="btn light" data-horizon="30" aria-pressed="true">30 дней</button><button type="button" class="btn light" data-horizon="60" aria-pressed="false">60 дней</button><button type="button" class="btn light" data-horizon="90" aria-pressed="false">90 дней</button></div><p id="moneyCalendarSummary" class="foot" aria-live="polite"></p><div id="calendarForecastSummary" aria-live="polite"></div><details id="calendarPurchaseEditor"><summary>＋ Запланировать покупку</summary><form id="calendarPurchaseForm"><label class="field">Название<input id="calendarPurchaseName" required maxlength="80"></label><label class="field">Дата<input id="calendarPurchaseDate" type="date" required></label><label class="field">Сумма, ₽<input id="calendarPurchaseAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><button class="btn full" type="submit">Сохранить план</button><p class="foot">Указывай только дополнительные покупки, не включённые в дневной бюджет. План не списывает деньги.</p></form><div id="calendarPurchaseList"></div></details><div id="moneyCalendarDays"></div><details id="calendarActualDetails"><summary>Фактические операции · последние 30 дней</summary><div id="calendarActualList"></div></details><p class="foot">Прогноз общего свободного бюджета, не каждого конверта. Учитывает остаток на момент просмотра, полную дневную норму даже сегодня, известные платежи и плановые зарплаты. Сначала расходы, затем поступления. Новые накопления, неподтверждённые доходы кроме зарплат и неизвестные платежи не включены. Минимальный платёж кредитки и сроки сверяй с банком. Подушка не используется.</p></div></dialog>
 <style>#moneyCalendarDialog{max-height:90dvh;overflow:auto}#calendarHorizon{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:8px 0}#calendarHorizon button{padding:8px 3px;font-size:13px;white-space:nowrap}#calendarHorizon button[aria-pressed="true"]{background:var(--blue);color:var(--accent-text,var(--ink));border-color:var(--blue);font-weight:700}#calendarForecastSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 12px}#calendarForecastSummary>div{background:var(--panel);border-radius:12px;padding:9px;min-width:0;overflow-wrap:anywhere}#calendarForecastSummary small,#calendarForecastSummary strong{display:block}#calendarForecastSummary small{color:var(--muted);font-size:12px}#calendarForecastSummary strong{margin-top:5px;font-size:15px}#moneyCalendarDialog summary{cursor:pointer;font-weight:650;padding:10px 0}#moneyCalendarDialog .field{display:grid;gap:4px;margin:8px 0}.calendar-day{padding:9px 4px;border-bottom:1px solid var(--line)}.calendar-day-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.calendar-day small{display:block;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}.calendar-risk{color:var(--red);font-weight:700}.calendar-plan-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);align-items:center;overflow-wrap:anywhere}.calendar-plan-row>div{min-width:0}.calendar-plan-row button{flex-shrink:0}</style>
 <dialog id="purchaseCheckDialog" class="budget-alerts-dialog" aria-labelledby="purchaseCheckTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="purchaseCheckTitle">Могу ли я позволить себе покупку?</h2><button type="button" class="btn light" id="purchaseCheckClose" aria-label="Закрыть">✕</button></div><p class="foot" id="purchaseCheckContext"></p><form id="purchaseCheckForm"><label class="field">Стоимость дополнительной покупки, ₽<input id="purchasePrice" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><label class="field">Необходимые расходы семьи в день, ₽<input id="purchaseDaily" type="number" inputmode="decimal" min="0" step="0.01" required placeholder="Из настроек или введи вручную"></label><label class="field">Другие разовые расходы до выплаты, ₽<input id="purchaseExtra" type="number" inputmode="decimal" min="0" step="0.01" value="0"></label><p class="foot">Не включай покупку и уже учтённые обязательные платежи в дневной бюджет или разовые расходы. Корм, лекарства и прочие необходимые покупки укажи отдельно, если они ещё не включены.</p><button class="btn full" type="submit">Проверить покупку</button></form><div id="purchaseCheckResult" aria-live="polite"></div></div></dialog>
@@ -3631,6 +3632,90 @@ function setupMoneyCalendar(){
  });
 }
 
+// Smart text input is local, single-operation only, and never writes transactions.
+function parseSmartOperation(raw,now,types){
+ const text=String(raw||'').trim();
+ const fail=reason=>({ok:false,reason});
+ if(!text||text.length>240)return fail('Введи одну операцию (до 240 символов).');
+ let t=text.toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[\u00a0\u202f]/g,' ');
+ if(/(?:^|[^\p{L}])(?:не|нет|планирую|хочу|буду|надо|нужно|завтра|послезавтра|если|может|примерно|около|от\s+\d+|до\s+\d+)(?=$|[^\p{L}])/u.test(t)||/[?;+\n]/.test(t))return fail('Укажи одну уже совершённую операцию, без планов, отрицаний или приблизительных сумм.');
+ if(/перев[ео]|отправил|перекинул|снял|пополнил|погасил|ипотек|кредит|подушк|зарплат|аванс|накоплен/.test(t))return fail('Для переводов, зарплаты, кредитов и накоплений используй соответствующую форму.');
+ if(/[$€£]|(?:usd|eur|доллар|евро|злот|тенге)/i.test(t))return fail('Сейчас умный ввод поддерживает только рубли.');
+ if(/(?:^|[^\p{L}])(?:жена|жене|жены|дочь|дочка|сын)(?=$|[^\p{L}])/u.test(t)&&!/доход жены|алименты/.test(t))return fail('Уточни, кто совершил операцию, через обычную форму.');
+ let date=iso(now),dates=[];
+ t=t.replace(/\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}[./]\d{1,2}[./]\d{4}\b/g,x=>{let d=x;if(!x.includes('-')){const [a,b,c]=x.split(/[./]/);d=c+'-'+b.padStart(2,'0')+'-'+a.padStart(2,'0');}dates.push(d);return ' ';});
+ t=t.replace(/(?:^|[^\p{L}])(позавчера|вчера|сегодня)(?=$|[^\p{L}])/gu,(m,x)=>{dates.push(iso(new Date(now.getFullYear(),now.getMonth(),now.getDate()-(x==='позавчера'?2:x==='вчера'?1:0))));return ' ';});
+ if(dates.length>1)return fail('Укажи одну дату.');
+ if(dates.length)date=dates[0];
+ const parsed=fromISO(date);
+ if(!parsed||iso(parsed)!==date||date>iso(now))return fail('Дата должна быть корректной и не позже сегодняшней.');
+ if(/\d{1,2}[./]\d{1,2}(?![\d.,])/u.test(t)&&!/^\d+[.,]\d{1,2}$/.test(t.trim())&&/\d{1,2}\.\d{1,2}\s+(?:на|за|купил|потратил)/u.test(t))return fail('Для даты укажи полный год.');
+ const values=[...t.matchAll(/(?:\d{1,3}(?: \d{3})+|\d+)(?:[.,]\d+)?/g)];
+ if(values.length!==1||/-\s*\d/.test(t)||/\d\s*(?:тыс|к\b|k\b|млн)/iu.test(t))return fail('Укажи одну точную сумму цифрами, например 1800 или 1 800,50.');
+ const v=values[0][0],amount=Number(v.replace(/ /g,'').replace(',','.'));
+ if(!Number.isFinite(amount)||amount<=0||!Number.isSafeInteger(Math.round(amount*100))||Math.abs(amount*100-Math.round(amount*100))>0.0001)return fail('Сумма должна быть положительной, до копеек.');
+ const income=/получил[аи]?|поступил[оа]?|пришл[оаи]|начислил[и]?|доход|кэшбэк|кешбэк|процент[ыа] по вкладу|преми[яю]|подработк|алименты/.test(t);
+ const expense=/потратил[аи]?|купил[аи]?|оплатил[аи]?|заплатил[аи]?|расход/.test(t);
+ if(income&&expense)return fail('Раздели доход и расход на две записи.');
+ const rules=[
+  ['family','Питомцы',/корм|кошк|кот[ауеы]?|собак|ветеринар|питомц/],
+  ['family','Продукты',/продукт|продуктов|пятерочк|магазин|хлеб|молок|мясо|овощ|фрукт|еда/],
+  ['family','Здоровье',/аптек|лекарств|врач|таблетк/],
+  ['family','Бытовая химия',/бытов[а-я]* хим|порошок|моющ/],
+  ['family','Гигиена',/гигиен|шампун|мыло/],
+  ['family','Одежда и дети',/одежд|обув|детсад|садик|школ/],
+  ['utilities','Интернет',/интернет/],
+  ['utilities','Электричество',/электрич|свет/],
+  ['utilities','Вода',/водоснаб|за воду/],
+  ['utilities','ЖКХ',/жкх|коммунал/],
+  ['other','Автомобиль',/бензин|заправк|топлив|авто/],
+  ['other','Кафе',/кафе|ресторан/],
+  ['other','Подарки',/подарок|подарки/]
+ ];
+ const matches=rules.filter(r=>r[2].test(t));
+ if(income){
+  const source=/алименты|доход жены/.test(t)?'Доход жены':/процент[ыа] по вкладу/.test(t)?'Проценты по вкладу':/к[эе]шб[эе]к/.test(t)?'Кэшбэк':/преми/.test(t)?'Премия':/подработк/.test(t)?'Подработка':/возврат/.test(t)?'Возврат покупки':/подар/.test(t)?'Подарок':'Другое';
+  return {ok:true,kind:'income',amount,date,source,destination:source==='Доход жены'?'family':'',note:text.slice(0,120)};
+ }
+ if(!expense&&!matches.length)return fail('Укажи, это расход или дополнительный доход.');
+ const match=matches.length===1?matches[0]:null;
+ const category=match?match[0]:'',type=match?((types?.[category]||[]).find(x=>String(x).toLocaleLowerCase('ru')===match[1].toLocaleLowerCase('ru'))||''):'';
+ return {ok:true,kind:'expense',amount,date,category,type,note:text.slice(0,120),hint:matches.length>1?'Найдено несколько категорий — выбери нужную.':!category||!type?'Проверь и выбери категорию и вид расхода.':''};
+}
+function setupSmartOperation(){
+ const dialog=$('smartOperationDialog'),form=$('smartOperationForm'),input=$('smartOperationText'),preview=$('smartOperationPreview'),next=$('smartOperationContinue');
+ if(!dialog||!form)return;
+ let draft=null;
+ const reset=()=>{draft=null;next.disabled=true;preview.textContent='Введи одну операцию и нажми «Распознать».';};
+ document.addEventListener('click',event=>{if(!event.target.closest('#smartOperationOpen'))return;form.reset();reset();if(!dialog.open)dialog.showModal();});
+ $('smartOperationClose').addEventListener('click',()=>dialog.close());
+ input.addEventListener('input',reset);
+ form.addEventListener('submit',event=>{
+  event.preventDefault();reset();
+  const now=new Date(),r=parseSmartOperation(input.value,now,data.expenseTypes);
+  if(!r.ok){preview.textContent=r.reason;return;}
+  if(!data.startBalances||r.date<data.startBalances.date){preview.textContent='Сначала укажи стартовые остатки и проверь дату начала учёта.';return;}
+  draft=r;const category=cats.find(c=>c.id===r.category)?.name;
+  preview.textContent=(r.kind==='expense'?'Расход':'Дополнительный доход')+' · '+rub(r.amount)+' · '+r.date+' · '+(r.kind==='expense'?((category||'Категория не выбрана')+' / '+(r.type||'выбери вид расхода')):(r.source+' / '+(r.destination==='family'?'Семейные нужды':'выбери конверт')))+(r.hint?' · '+r.hint:'')+'. Запись ещё не сохранена.';
+  next.disabled=false;
+ });
+ next.addEventListener('click',()=>{
+  if(!draft)return;
+  const r=draft;draft=null;next.disabled=true;
+  const tile=document.querySelector('[data-ops-action="'+r.kind+'"]');
+  if(!tile){preview.textContent='Не удалось открыть форму операции.';return;}
+  dialog.close();tile.click();
+  if(r.kind==='expense'){
+   $('expenseAmount').value=r.amount;$('expenseDate').value=r.date;$('expenseCategory').value=r.category;
+   refreshTypes(r.type||'');updateExpenseOptions();$('expenseNote').value=r.note;
+  }else{
+   $('incomeAmount').value=r.amount;$('incomeDate').value=r.date;$('incomeSource').value=r.source;
+   $('incomeDestination').value=r.destination;$('incomeNote').value=r.note;
+  }
+ });
+}
+
+setupSmartOperation();
 setupMoneyCalendar();
 setupDailyBudgetSetting();
 setupPurchaseCheck();
@@ -4864,7 +4949,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.111';
+const APP_VERSION='1.5.112';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -5325,7 +5410,8 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))installTes
    const name=document.createElement('strong');name.textContent=label;
    button.append(pic,name);grid.append(button);
   }
-  intro.append(grid,document.getElementById('familyActions'),document.getElementById('monthlyBillsPanel'));
+  const smart=document.createElement('button');smart.type='button';smart.id='smartOperationOpen';smart.className='btn secondary';smart.textContent='✦ Умный ввод операции';
+  intro.append(grid,smart,document.getElementById('familyActions'),document.getElementById('monthlyBillsPanel'));
   const historyGroup=document.createElement('div');historyGroup.className='design-group ops-history-group';
   const historyTitle=document.createElement('div');historyTitle.className='section-heading';historyTitle.innerHTML='<h2>История операций</h2>';historyGroup.append(historyTitle);
   for(const panel of histories){panel.open=false;historyGroup.append(panel)}
