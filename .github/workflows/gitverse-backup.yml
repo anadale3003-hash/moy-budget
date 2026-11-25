@@ -1,0 +1,58 @@
+name: Backup to GitVerse
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '**'
+  schedule:
+    - cron: '23 */4 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gitverse-backup
+  cancel-in-progress: false
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Copy branches and tags without destructive updates
+        shell: bash
+        env:
+          GITVERSE_TOKEN: ${{ secrets.GITVERSE_TOKEN }}
+          GIT_TERMINAL_PROMPT: '0'
+        run: |
+          set -euo pipefail
+          if [[ -z "$GITVERSE_TOKEN" ]]; then
+            echo "::error::GITVERSE_TOKEN is not configured"
+            exit 1
+          fi
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          git clone --mirror https://github.com/anadale3003-hash/moy-budget.git "$tmp/source.git"
+          cd "$tmp/source.git"
+          cat > "$tmp/askpass" <<'EOF'
+          #!/bin/sh
+          case "$1" in
+            *Username*) printf '%s\n' 'Semanticmaze' ;;
+            *Password*) printf '%s\n' "$GITVERSE_TOKEN" ;;
+            *) exit 1 ;;
+          esac
+          EOF
+          chmod 700 "$tmp/askpass"
+          export GIT_ASKPASS="$tmp/askpass"
+          dest='https://gitverse.ru/Semanticmaze/moy-budget.git'
+          git -c credential.helper= push "$dest" 'refs/heads/*:refs/heads/*' 'refs/tags/*:refs/tags/*'
+          git for-each-ref --format='%(objectname)%09%(refname)' refs/heads refs/tags | LC_ALL=C sort > "$tmp/source-refs"
+          git -c credential.helper= ls-remote --refs --heads --tags "$dest" | LC_ALL=C sort > "$tmp/dest-refs"
+          if [[ -n "$(LC_ALL=C comm -23 "$tmp/source-refs" "$tmp/dest-refs")" ]]; then
+            echo "::error::Some source refs are missing or differ on GitVerse"
+            exit 1
+          fi
+          echo "Verified all source branches and tags on GitVerse."
