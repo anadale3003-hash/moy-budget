@@ -3688,7 +3688,82 @@ function normalizeSpokenAmount(text){
  return text.slice(0,g[0].index)+String(amount)+text.slice(g.at(-1).index+g.at(-1)[0].length).replace(/^\.(?=\s|$)/,'');
 }
 // The browser owns speech recognition. No audio is collected or sent by Saldoza.
+// iOS workaround for WebKit bug 321436: synthesize a fixed prompt, then
+// start a fresh non-continuous session and let it end naturally.
+function setupIOSSmartVoice(dialog,input,form){
+ const button=$('smartVoiceButton'),status=$('smartVoiceStatus'),keyboard=$('smartVoiceKeyboard');
+ const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+ const synth=window.speechSynthesis,Utterance=window.SpeechSynthesisUtterance;
+ let active=null,cooldown=null;
+ const supported=!!(Recognition&&synth&&Utterance);
+ const fallback='Используй микрофон клавиатуры или введи текст.';
+ const idle=()=>{button.disabled=!supported||!!active||cooldown!==null;button.textContent='🎙 Продиктовать';button.setAttribute('aria-pressed','false');};
+ function release(s,abort=false){
+  if(active!==s)return false;
+  active=null;clearTimeout(s.timer);
+  if(abort){if(s.phase==='prompt'){try{synth.cancel();}catch(_){}}else if(s.r){try{s.r.abort();}catch(_){}}}
+  if(cooldown!==null)clearTimeout(cooldown);
+  cooldown=setTimeout(()=>{cooldown=null;idle();},1000);idle();return true;
+ }
+ const cancel=()=>{if(active)release(active,true);};
+ const reset=()=>{cancel();idle();status.textContent=supported?'После голосовой подсказки «Говори» продиктуй фразу и сделай паузу.':'Голосовой ввод браузера недоступен. '+fallback;};
+ const watch=(s,ms)=>{clearTimeout(s.timer);s.timer=setTimeout(()=>{if(active!==s)return;const partial=s.partial;release(s,true);if(dialog.open&&partial){input.value=partial.slice(0,240);input.dispatchEvent(new Event('input',{bubbles:true}));status.textContent='Получен неполный текст. Проверь его и нажми «Распознать».';}else status.textContent='Распознавание не ответило. '+fallback;},ms);};
+ function receive(s){
+  if(!release(s)||!dialog.open)return;
+  const value=s.final||s.partial;
+  if(!value){status.textContent='Речь не распознана. '+fallback;return;}
+  if(value.length>240){status.textContent='Фраза слишком длинная. Продиктуй одну операцию.';return;}
+  input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));
+  status.textContent=s.final?'Текст получен. Проверь результат.':'Получен неполный текст. Проверь его и нажми «Распознать».';
+  if(s.final&&typeof form.requestSubmit==='function')form.requestSubmit();
+ }
+ function startRecognition(s){
+  if(active!==s||!dialog.open)return;
+  s.phase='recognition';
+  try{
+   const r=s.r=new Recognition();r.lang='ru-RU';r.continuous=false;r.interimResults=true;r.maxAlternatives=1;
+   const stage=message=>{if(active!==s)return;status.textContent=message;watch(s,20000);};
+   r.onstart=()=>stage('Говори, затем сделай паузу…');
+   r.onaudiostart=()=>stage('Микрофон включён. Говори…');
+   r.onspeechstart=()=>stage('Речь обнаружена…');
+   r.onresult=event=>{
+    if(active!==s||!dialog.open)return;
+    const all=[];let final=true;
+    for(let i=0;i<event.results.length;i++){const item=event.results[i];all.push(item[0].transcript);if(!item.isFinal)final=false;}
+    s.partial=all.join(' ').trim();s.final=final?s.partial:'';
+    status.textContent=s.final?'Текст получен. Ожидаю завершения записи…':'Распознано: '+s.partial;
+    // Do not call stop/abort on a normal successful session.
+    watch(s,final?8000:20000);
+   };
+   r.onerror=e=>{if(active!==s)return;const code=String(e.error||'unknown');release(s);status.textContent='Ошибка распознавания ['+code+']. '+fallback;};
+   r.onend=()=>receive(s);
+   watch(s,20000);r.start();
+  }catch(error){if(release(s,true))status.textContent='Не удалось начать диктовку ['+String(error?.name||'unknown')+']. '+fallback;}
+ }
+ button.addEventListener('click',()=>{
+  if(active||cooldown!==null||!supported||!dialog.open)return;
+  if(input.value.trim()&&!confirm('Заменить введённый текст результатом диктовки?'))return;
+  input.blur?.();
+  const s={phase:'prompt',r:null,timer:null,partial:'',final:''};active=s;
+  button.disabled=true;button.textContent='Подготовка микрофона…';button.setAttribute('aria-pressed','true');
+  status.textContent='Дождись голосовой подсказки…';
+  try{
+   const u=new Utterance('Говори');u.lang='ru-RU';s.utterance=u;
+   u.onend=()=>startRecognition(s);
+   u.onerror=()=>{if(release(s,true))status.textContent='Голосовая подсказка недоступна. '+fallback;};
+   watch(s,10000);synth.speak(u);
+  }catch(_){if(release(s,true))status.textContent='Не удалось запустить голосовую подсказку. '+fallback;}
+ });
+ keyboard.addEventListener('click',()=>{cancel();status.textContent='Нажми микрофон клавиатуры, продиктуй фразу и нажми «Распознать».';input.focus();});
+ dialog.addEventListener('close',()=>{if(!dialog.open)cancel();});
+ dialog.addEventListener('cancel',cancel);
+ input.addEventListener('input',cancel);
+ form.addEventListener('submit',cancel);
+ reset();return reset;
+}
 function setupSmartVoice(dialog,input,form){
+ const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ if(ios)return setupIOSSmartVoice(dialog,input,form);
  const button=$('smartVoiceButton'),status=$('smartVoiceStatus'),keyboard=$('smartVoiceKeyboard');
  const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
  const fallback='Можно использовать микрофон клавиатуры или ввести текст.';
@@ -5181,7 +5256,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.120';
+const APP_VERSION='1.5.121';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
