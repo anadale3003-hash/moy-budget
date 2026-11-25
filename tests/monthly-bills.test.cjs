@@ -103,3 +103,22 @@ for(const page of ['index.html','preview.html']){
   assert.equal(h.run("monthlyBillRows('2024-03-01')[0].nextDue"),'2024-02-29');
  });
 }
+
+for(const page of ['index.html','preview.html']){
+ test(page+' — рассрочка с коротким последним платежом',()=>{
+  const h=harness(page);
+  h.element('monthlyBillTotal').value='2500';
+  h.element('monthlyBillTotal').valueAsNumber=2500;
+  h.add('Телефон',1000,'2026-10-31');
+  const reserve=()=>h.run("billReserve(monthlyBillRows('2027-01-01'))");
+  assert.equal(reserve(),2500);
+  for(const [due,left] of [['2026-10-31',1500],['2026-11-30',500],['2026-12-31',0]]){
+   h.click({payBill:'1',billDue:due});
+   assert.equal(reserve(),left);
+  }
+  assert.equal(h.run('data.expenses[2].amount'),500);
+  assert.match(h.element('monthlyBillList').innerHTML,/погашена/);
+  h.run('data.expenses.pop()');
+  assert.equal(reserve(),500);
+ });
+}
