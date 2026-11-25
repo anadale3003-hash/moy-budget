@@ -6,6 +6,10 @@ for(const [width,height,file] of [[320,690,'preview.html'],[390,844,'index.html'
  await p.clock.setFixedTime(new Date('2026-11-25T10:00:00+03:00'));
  await p.goto(url+'/'+file);const $=s=>p.locator(s),click=s=>$(s).click(),fill=(s,v)=>$(s).fill(v);
  const data=()=>p.evaluate(()=>JSON.parse(localStorage.getItem('saldoza-test-budget-v1')));
+ assert.ok(await $('.family-split').isHidden());assert.ok(await $('button.tab[data-go="card"]').isHidden());
+ await click('button.tab[data-go="settings"]');await click('#layoutChoices summary');
+ await $('#showCreditTab').check();await $('#showFamilySplit').check();
+ await p.reload();assert.ok(await $('button.tab[data-go="card"]').isVisible());assert.ok(await $('.family-split').isVisible());
  await click('#firstBudget');await fill('#start-family','15000');await click('#saveStart');assert.equal(await $('#v-home').evaluate(e=>e.classList.contains('active')),true);
  await click('#purchaseCheckOpen');await fill('#purchaseName','Ботинки');await fill('#purchasePrice','4000');await fill('#purchaseDaily','1500');
  await click('#planAfterPayday');assert.equal(await $('#calendarPurchaseName').inputValue(),'Ботинки');assert.equal(await $('#calendarPurchaseAmount').inputValue(),'4000');assert.equal(await $('#calendarPurchaseDate').inputValue(),'2026-12-02');
