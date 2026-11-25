@@ -3639,10 +3639,10 @@ function normalizeSpokenAmount(text){
  const teens={десять:10,одиннадцать:11,двенадцать:12,тринадцать:13,четырнадцать:14,пятнадцать:15,шестнадцать:16,семнадцать:17,восемнадцать:18,девятнадцать:19};
  const tens={двадцать:20,тридцать:30,сорок:40,пятьдесят:50,шестьдесят:60,семьдесят:70,восемьдесят:80,девяносто:90};
  const hundreds={сто:100,двести:200,триста:300,четыреста:400,пятьсот:500,шестьсот:600,семьсот:700,восемьсот:800,девятьсот:900};
- const scale=/^тысяч(?:а|и|у)?$/;
+ const scale=/^(?:тысяч(?:а|и|у)?|тыщ(?:а|и|у)?|тыс)$/;
  const has=(obj,k)=>Object.prototype.hasOwnProperty.call(obj,k);
  const known=w=>[units,teens,tens,hundreds].some(obj=>has(obj,w))||scale.test(w);
- if(/(?:^|[^\p{L}])(?:миллион[а-я]*|миллиард[а-я]*|полтора|полторы|половина|половиной|копе[йекч][а-я]*|минус|плюс|тыс)(?=$|[^\p{L}])/u.test(text))return null;
+ if(/(?:^|[^\p{L}])(?:миллион[а-я]*|миллиард[а-я]*|полтора|полторы|половина|половиной|копе[йекч][а-я]*|минус|плюс)(?=$|[^\p{L}])/u.test(text))return null;
  const words=[...text.matchAll(/[\p{L}]+/gu)],groups=[];
  let group=[];
  for(const word of words){
@@ -3653,7 +3653,17 @@ function normalizeSpokenAmount(text){
  }
  if(group.length)groups.push(group);
  if(!groups.length)return text;
- if(groups.length!==1||/\d/.test(text))return null;
+ if(groups.length!==1)return null;
+ if(/\d/.test(text)){
+  const g=groups[0];
+  if(g.length!==1||!scale.test(g[0][0]))return null;
+  const prefix=text.slice(0,g[0].index),m=prefix.match(/(?:^|[^\d.,-])(\d{1,3})\s+$/);
+  if(!m||[...text.matchAll(/\d+/g)].length!==1||Number(m[1])<=0)return null;
+  const at=prefix.length-m[0].length+m[0].indexOf(m[1]);
+  const end=g[0].index+g[0][0].length;
+  const after=text.slice(end).replace(/^\.(?=\s|$)/,'');
+  return text.slice(0,at)+String(Number(m[1])*1000)+after;
+ }
  const chunk=arr=>{
   if(!arr.length)return 0;
   let i=0,n=0;
@@ -3674,14 +3684,14 @@ function normalizeSpokenAmount(text){
   amount=a*1000+b;
  }else amount=chunk(tokens);
  if(amount===null||amount<=0)return null;
- return text.slice(0,g[0].index)+String(amount)+text.slice(g.at(-1).index+g.at(-1)[0].length);
+ return text.slice(0,g[0].index)+String(amount)+text.slice(g.at(-1).index+g.at(-1)[0].length).replace(/^\.(?=\s|$)/,'');
 }
 // The browser owns speech recognition. No audio is collected or sent by Saldoza.
 function setupSmartVoice(dialog,input,form){
  const button=$('smartVoiceButton'),status=$('smartVoiceStatus'),keyboard=$('smartVoiceKeyboard');
  const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
  const fallback='Можно использовать микрофон клавиатуры или ввести текст.';
- let session=null,cooldown=null;
+ let session=null,cooldown=null,recognizer=null;
  const idle=()=>{button.textContent='🎙 Продиктовать';button.setAttribute('aria-pressed','false');button.disabled=!Recognition||!!session||cooldown!==null;};
  const clearTimer=s=>{if(s.timer!==null){clearTimeout(s.timer);s.timer=null;}};
  const release=s=>{
@@ -3689,7 +3699,7 @@ function setupSmartVoice(dialog,input,form){
   clearTimer(s);session=null;
   // Do not start a new recognizer until the previous one has ended and released audio.
   if(cooldown!==null)clearTimeout(cooldown);
-  cooldown=setTimeout(()=>{cooldown=null;idle();},650);
+  cooldown=setTimeout(()=>{cooldown=null;idle();},1200);
   idle();
  };
  const showText=(text,final)=>{
@@ -3714,6 +3724,7 @@ function setupSmartVoice(dialog,input,form){
    if(session!==s)return;
    // Missing end event: abort the old instance and allow a fresh attempt after cooldown.
    const cancelled=s.cancelled,text=s.finalText||s.partial,final=!!s.finalText&&!s.hasInterim;
+   recognizer=null;
    release(s);
    try{s.r.abort();}catch(_){}
    if(cancelled||!dialog.open)return;
@@ -3752,7 +3763,7 @@ function setupSmartVoice(dialog,input,form){
   try{
    // Dismiss the keyboard before starting WebKit speech recognition.
    if(typeof input.blur==='function')input.blur();
-   const r=new Recognition();r.lang='ru-RU';r.continuous=false;r.interimResults=true;r.maxAlternatives=1;
+   const r=recognizer||(recognizer=new Recognition());r.lang='ru-RU';r.continuous=false;r.interimResults=true;r.maxAlternatives=1;
    s={r,timer:null,phase:'запуск',partial:'',finalText:'',hasInterim:false,stopping:false,cancelled:false};
    session=s;button.disabled=false;button.textContent='■ Завершить';button.setAttribute('aria-pressed','true');
    status.textContent='Запрашивается доступ к микрофону…';
@@ -3766,13 +3777,14 @@ function setupSmartVoice(dialog,input,form){
     const all=[],finals=[];let hasInterim=false;
     for(let i=0;i<event.results.length;i++){const item=event.results[i];all.push(item[0].transcript);if(item.isFinal)finals.push(item[0].transcript);else hasInterim=true;}
     s.partial=all.join(' ').trim();s.finalText=hasInterim?'':finals.join(' ').trim();s.hasInterim=hasInterim;s.phase='получен текст';
-    if(s.finalText){status.textContent='Текст получен, завершается запись…';if(!s.stopping){s.stopping=true;awaitEnd(s);}}
+    if(s.finalText){if(!s.stopping)finish(s);}
     else if(s.partial&&!s.stopping){status.textContent='Распознано: '+s.partial;watch(s,10000);}
    };
    r.onerror=event=>{
     if(session!==s)return;
     if(!s.cancelled){
      const code=String(event.error||'unknown');
+     recognizer=null;
      const messages={'not-allowed':'Доступ к микрофону или распознаванию запрещён.','service-not-allowed':'Сервис распознавания запрещён в этом режиме браузера.','no-speech':'Речь не обнаружена.','audio-capture':'Микрофон недоступен.','network':'Ошибка сети сервиса распознавания.','language-not-supported':'Русский язык недоступен.','aborted':'Распознавание прервано.'};
      status.textContent=(messages[code]||'Ошибка распознавания.')+' ['+code+'] '+fallback;
      s.cancelled=true;
@@ -3782,6 +3794,7 @@ function setupSmartVoice(dialog,input,form){
    r.onend=()=>complete(s);
    watch(s,15000);r.start();
   }catch(error){
+   recognizer=null;
    if(s&&session===s){s.cancelled=true;release(s);try{s.r.abort();}catch(_){}}
    status.textContent='Не удалось запустить распознавание ['+String(error?.name||'unknown')+']. '+fallback;
   }
@@ -5167,7 +5180,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.119';
+const APP_VERSION='1.5.120';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
