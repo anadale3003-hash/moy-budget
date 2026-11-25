@@ -3681,53 +3681,116 @@ function normalizeSpokenAmount(text){
 function setupSmartVoice(dialog,input,form){
  const button=$('smartVoiceButton'),status=$('smartVoiceStatus'),keyboard=$('smartVoiceKeyboard');
  const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
- let active=null,timer=null,phase='',partial='';
- const clear=()=>{if(timer!==null){clearTimeout(timer);timer=null;}};
- const setIdle=()=>{button.textContent='🎙 Продиктовать';button.setAttribute('aria-pressed','false');};
- const stop=()=>{clear();const r=active;active=null;if(r){try{r.abort();}catch(_){}}setIdle();};
  const fallback='Можно использовать микрофон клавиатуры или ввести текст.';
- const resetVoice=()=>{stop();status.textContent=Recognition?'Речь распознаёт браузер или система; может потребоваться интернет.':('Распознавание браузером недоступно. '+fallback);button.disabled=!Recognition;};
- const finish=(r,text)=>{
-  if(active!==r||!dialog.open)return;
-  clear();active=null;setIdle();
-  if(!text){status.textContent='Распознавание завершилось без текста ('+phase+'). '+fallback;return;}
+ let session=null,cooldown=null;
+ const idle=()=>{button.textContent='🎙 Продиктовать';button.setAttribute('aria-pressed','false');button.disabled=!Recognition||!!session||cooldown!==null;};
+ const clearTimer=s=>{if(s.timer!==null){clearTimeout(s.timer);s.timer=null;}};
+ const release=s=>{
+  if(session!==s)return;
+  clearTimer(s);session=null;
+  // Do not start a new recognizer until the previous one has ended and released audio.
+  if(cooldown!==null)clearTimeout(cooldown);
+  cooldown=setTimeout(()=>{cooldown=null;idle();},650);
+  idle();
+ };
+ const showText=(text,final)=>{
+  if(!dialog.open||!text)return;
   if(text.length>240){status.textContent='Фраза слишком длинная. Продиктуй одну операцию.';return;}
   input.value=text;input.dispatchEvent(new Event('input',{bubbles:true}));
-  status.textContent='Текст получен. Проверь его и результат распознавания.';
-  if(typeof form.requestSubmit==='function')form.requestSubmit();
+  status.textContent=final?'Текст получен. Проверь его и результат распознавания.':'Получен неполный текст. Проверь и дополни фразу, затем нажми «Распознать».';
+  if(final&&typeof form.requestSubmit==='function')form.requestSubmit();
  };
- const watch=(r,ms)=>{clear();timer=setTimeout(()=>{if(active!==r)return;if(partial&&dialog.open){const text=partial;try{r.abort();}catch(_){}finish(r,text);return;}stop();status.textContent='Распознавание не ответило ('+phase+'). '+fallback;},ms);};
+ const complete=s=>{
+  if(session!==s)return;
+  const text=s.finalText||s.partial,final=!!s.finalText&&!s.hasInterim;
+  release(s);
+  if(s.cancelled||!dialog.open)return;
+  if(text)showText(text,final);
+  else status.textContent='Распознавание завершилось без текста ('+s.phase+'). '+fallback;
+ };
+ const closing=s=>{button.textContent='Завершение…';button.disabled=true;button.setAttribute('aria-pressed','false');};
+ const awaitEnd=s=>{
+  clearTimer(s);closing(s);
+  s.timer=setTimeout(()=>{
+   if(session!==s)return;
+   // Missing end event: abort the old instance and allow a fresh attempt after cooldown.
+   const cancelled=s.cancelled,text=s.finalText||s.partial,final=!!s.finalText&&!s.hasInterim;
+   release(s);
+   try{s.r.abort();}catch(_){}
+   if(cancelled||!dialog.open)return;
+   if(text)showText(text,final);
+   else status.textContent='Сервис не завершил распознавание. Попробуй ещё раз. '+fallback;
+  },4500);
+ };
+ const cancel=()=>{
+  const s=session;if(!s)return;
+  s.cancelled=true;s.stopping=true;awaitEnd(s);
+  try{s.r.abort();}catch(_){release(s);}
+ };
+ const finish=s=>{
+  if(session!==s||s.stopping)return;
+  s.stopping=true;status.textContent='Обрабатывается речь…';awaitEnd(s);
+  try{s.r.stop();}catch(_){try{s.r.abort();}catch(__){release(s);}}
+ };
+ const watch=(s,ms)=>{
+  clearTimer(s);
+  s.timer=setTimeout(()=>{
+   if(session!==s||s.stopping)return;
+   finish(s);
+  },ms);
+ };
+ const resetVoice=()=>{
+  cancel();idle();
+  status.textContent=Recognition?'Речь распознаёт браузер или система; может потребоваться интернет.':('Распознавание браузером недоступно. '+fallback);
+ };
  resetVoice();
- keyboard.addEventListener('click',()=>{stop();status.textContent='Нажми микрофон на клавиатуре iPhone, продиктуй фразу и нажми «Распознать».';input.focus();});
+ keyboard.addEventListener('click',()=>{cancel();status.textContent='Нажми микрофон на клавиатуре iPhone, продиктуй фразу и нажми «Распознать».';input.focus();});
  button.addEventListener('click',()=>{
-  if(active){const r=active;try{r.stop();phase='ожидание результата';status.textContent='Обрабатывается речь…';watch(r,5000);}catch(_){stop();status.textContent=fallback;}return;}
-  if(!Recognition){status.textContent=fallback;return;}
+  if(session){finish(session);return;}
+  if(cooldown!==null||!Recognition||!dialog.open)return;
   if(input.value.trim()&&!confirm('Заменить введённый текст результатом диктовки?'))return;
-  let r;
+  let s;
   try{
-   r=new Recognition();r.lang='ru-RU';r.continuous=false;r.interimResults=true;r.maxAlternatives=1;
-   active=r;partial='';phase='запуск';button.textContent='■ Завершить';button.setAttribute('aria-pressed','true');
+   // Dismiss the keyboard before starting WebKit speech recognition.
+   if(typeof input.blur==='function')input.blur();
+   const r=new Recognition();r.lang='ru-RU';r.continuous=false;r.interimResults=true;r.maxAlternatives=1;
+   s={r,timer:null,phase:'запуск',partial:'',finalText:'',hasInterim:false,stopping:false,cancelled:false};
+   session=s;button.disabled=false;button.textContent='■ Завершить';button.setAttribute('aria-pressed','true');
    status.textContent='Запрашивается доступ к микрофону…';
-   r.onstart=()=>{if(active!==r)return;phase='распознавание запущено';status.textContent='Говори одну операцию…';watch(r,20000);};
-   r.onaudiostart=()=>{if(active!==r)return;phase='микрофон включён';status.textContent='Микрофон включён. Говори…';watch(r,20000);};
-   r.onspeechstart=()=>{if(active!==r)return;phase='речь обнаружена';status.textContent='Речь обнаружена…';watch(r,20000);};
+   const live=()=>session===s&&!s.cancelled&&!s.stopping;
+   const stage=(phase,message)=>{if(!live())return;s.phase=phase;status.textContent=message;watch(s,15000);};
+   r.onstart=()=>stage('распознавание запущено','Говори одну операцию…');
+   r.onaudiostart=()=>stage('микрофон включён','Микрофон включён. Говори…');
+   r.onspeechstart=()=>stage('речь обнаружена','Речь обнаружена…');
    r.onresult=event=>{
-    if(active!==r||!dialog.open)return;
-    let all=[],finals=[],complete=true;
-    for(let i=0;i<event.results.length;i++){const item=event.results[i];all.push(item[0].transcript);if(item.isFinal)finals.push(item[0].transcript);else complete=false;}
-    partial=all.join(' ').trim();phase='получен текст';
-    if(complete&&finals.length){finish(r,finals.join(' ').trim());try{r.stop();}catch(_){}}
-    else if(partial){status.textContent='Распознано: '+partial;watch(r,12000);}
+    if(session!==s||s.cancelled||!dialog.open)return;
+    const all=[],finals=[];let hasInterim=false;
+    for(let i=0;i<event.results.length;i++){const item=event.results[i];all.push(item[0].transcript);if(item.isFinal)finals.push(item[0].transcript);else hasInterim=true;}
+    s.partial=all.join(' ').trim();s.finalText=hasInterim?'':finals.join(' ').trim();s.hasInterim=hasInterim;s.phase='получен текст';
+    if(s.finalText){status.textContent='Текст получен, завершается запись…';if(!s.stopping){s.stopping=true;awaitEnd(s);}}
+    else if(s.partial&&!s.stopping){status.textContent='Распознано: '+s.partial;watch(s,10000);}
    };
-   r.onerror=event=>{if(active!==r)return;const code=String(event.error||'unknown');stop();const messages={'not-allowed':'Доступ к микрофону или распознаванию запрещён.','service-not-allowed':'Сервис распознавания запрещён в этом режиме браузера.','no-speech':'Речь не обнаружена.','audio-capture':'Микрофон недоступен.','network':'Ошибка сети сервиса распознавания.','language-not-supported':'Русский язык недоступен в сервисе распознавания.','aborted':'Распознавание прервано.'};status.textContent=(messages[code]||'Ошибка распознавания.')+' ['+code+'] '+fallback;};
-   r.onend=()=>{if(active!==r)return;finish(r,partial);};
-   watch(r,20000);r.start();
-  }catch(error){stop();status.textContent='Не удалось запустить распознавание ['+String(error?.name||'unknown')+']. '+fallback;}
+   r.onerror=event=>{
+    if(session!==s)return;
+    if(!s.cancelled){
+     const code=String(event.error||'unknown');
+     const messages={'not-allowed':'Доступ к микрофону или распознаванию запрещён.','service-not-allowed':'Сервис распознавания запрещён в этом режиме браузера.','no-speech':'Речь не обнаружена.','audio-capture':'Микрофон недоступен.','network':'Ошибка сети сервиса распознавания.','language-not-supported':'Русский язык недоступен.','aborted':'Распознавание прервано.'};
+     status.textContent=(messages[code]||'Ошибка распознавания.')+' ['+code+'] '+fallback;
+     s.cancelled=true;
+    }
+    s.stopping=true;awaitEnd(s);
+   };
+   r.onend=()=>complete(s);
+   watch(s,15000);r.start();
+  }catch(error){
+   if(s&&session===s){s.cancelled=true;release(s);try{s.r.abort();}catch(_){}}
+   status.textContent='Не удалось запустить распознавание ['+String(error?.name||'unknown')+']. '+fallback;
+  }
  });
- dialog.addEventListener('close',stop);
- dialog.addEventListener('cancel',stop);
- form.addEventListener('submit',stop);
- input.addEventListener('input',()=>{if(active)stop();});
+ dialog.addEventListener('close',()=>{if(!dialog.open)cancel();});
+ dialog.addEventListener('cancel',cancel);
+ form.addEventListener('submit',cancel);
+ input.addEventListener('input',()=>{if(session)cancel();});
  return resetVoice;
 }
 function parseSmartOperation(raw,now,types,mode=null){
@@ -5105,7 +5168,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.118';
+const APP_VERSION='1.5.119';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
