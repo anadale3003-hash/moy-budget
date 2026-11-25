@@ -36,12 +36,14 @@ for(const page of ['index.html','preview.html']){
    return run;
   };
   let run=runPage();
+  assert.equal(run('data.debt'),0);
   assert.equal(run('data.expenses.length'),0);
-  assert.equal(run("data.expenses.push({id:'test'});save()"),true);
+  assert.equal(run("data.debt=10000;data.expenses.push({id:'test'});save()"),true);
   assert.equal(run('appSettings().expenses[0].id'),'test');
   assert.equal(run('localStorage.getItem(preferenceKey)'),null);
   run("localStorage.setItem(preferenceKey,'all')");
   run=runPage();
+  assert.equal(run('data.debt'),10000);
   assert.equal(run('data.expenses[0].id'),'test');
   assert.equal(run('localStorage.getItem(preferenceKey)'),'all');
   for(const [key,value] of existing){
