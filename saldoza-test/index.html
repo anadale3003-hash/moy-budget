@@ -3639,9 +3639,7 @@ function parseSmartOperation(raw,now,types,mode=null){
  if(!text||text.length>240)return fail('Введи одну операцию (до 240 символов).');
  let t=text.toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[\u00a0\u202f]/g,' ');
  if(/(?:^|[^\p{L}])(?:не|нет|планирую|хочу|буду|надо|нужно|завтра|послезавтра|если|может|примерно|около|от\s+\d+|до\s+\d+)(?=$|[^\p{L}])/u.test(t)||/[?;+\n]/.test(t))return fail('Укажи одну уже совершённую операцию, без планов, отрицаний или приблизительных сумм.');
- if(/перев[ео]|отправил|перекинул|снял|пополнил|погасил|ипотек|кредит|подушк|зарплат|аванс|накоплен/.test(t))return fail('Для переводов, зарплаты, кредитов и накоплений используй соответствующую форму.');
  if(/[$€£]|(?:usd|eur|доллар|евро|злот|тенге)/i.test(t))return fail('Сейчас умный ввод поддерживает только рубли.');
- if(/(?:^|[^\p{L}])(?:жена|жене|жены|дочь|дочка|сын)(?=$|[^\p{L}])/u.test(t)&&!/доход жены|алименты/.test(t))return fail('Уточни, кто совершил операцию, через обычную форму.');
  let date=iso(now),dates=[];
  t=t.replace(/\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}[./]\d{1,2}[./]\d{4}\b/g,x=>{let d=x;if(!x.includes('-')){const [a,b,c]=x.split(/[./]/);d=c+'-'+b.padStart(2,'0')+'-'+a.padStart(2,'0');}dates.push(d);return ' ';});
  t=t.replace(/(?:^|[^\p{L}])(позавчера|вчера|сегодня)(?=$|[^\p{L}])/gu,(m,x)=>{dates.push(iso(new Date(now.getFullYear(),now.getMonth(),now.getDate()-(x==='позавчера'?2:x==='вчера'?1:0))));return ' ';});
@@ -3654,6 +3652,16 @@ function parseSmartOperation(raw,now,types,mode=null){
  if(values.length!==1||/-\s*\d/.test(t)||/\d\s*(?:тыс|к\b|k\b|млн)/iu.test(t))return fail('Укажи одну точную сумму цифрами, например 1800 или 1 800,50.');
  const v=values[0][0],amount=Number(v.replace(/ /g,'').replace(',','.'));
  if(!Number.isFinite(amount)||amount<=0||!Number.isSafeInteger(Math.round(amount*100))||Math.abs(amount*100-Math.round(amount*100))>0.0001)return fail('Сумма должна быть положительной, до копеек.');
+ // Recognize only explicit spouse-transfer wording, or the short "жене 3000" in Expense.
+ const rest=(t.slice(0,values[0].index)+' '+t.slice(values[0].index+v.length))
+   .replace(/₽|(?:^|\s)(?:рублей|рубля|рубль|руб\.?|р\.?)(?=\s|$)/gu,' ').trim().replace(/[.!]+$/,'').replace(/\s+/g,' ').trim();
+ const explicitWife=/^(?:(?:перевод|перевел[аи]?|отправил[аи]?|перекинул[аи]?|скинул[аи]?|дал[аи]?) (?:деньги |денег )?жене|жене (?:перевод|перевел[аи]?|отправил[аи]?|перекинул[аи]?|скинул[аи]?|дал[аи]?))(?: на продукты)?$/u.test(rest);
+ if(explicitWife||mode==='expense'&&rest==='жене'){
+  if(mode==='income')return fail('Перевод жене записывается через «Расход».');
+  return {ok:true,kind:'expense',amount,date,category:'family',type:'Отправил жене',wifeTransfer:true,note:text.slice(0,120),hint:'Проверь исходный конверт. Это внутренний перевод, а не расход семьи.'};
+ }
+ if(/перев[ео]|отправил|перекинул|скинул|снял|пополнил|погасил|ипотек|кредит|подушк|зарплат|аванс|накоплен/.test(t))return fail('Для переводов, зарплаты, кредитов и накоплений используй соответствующую форму.');
+ if(/(?:^|[^\p{L}])(?:жена|жене|жены|дочь|дочка|сын)(?=$|[^\p{L}])/u.test(t)&&!/доход жены|алименты/.test(t))return fail('Уточни, кто совершил операцию, через обычную форму.');
  const income=/получил[аи]?|поступил[оа]?|пришл[оаи]|начислил[и]?|доход|кэшбэк|кешбэк|процент[ыа] по вкладу|преми[яю]|подработк|алименты/.test(t);
  const expense=/потратил[аи]?|купил[аи]?|оплатил[аи]?|заплатил[аи]?|расход/.test(t);
  if(income&&expense)return fail('Раздели доход и расход на две записи.');
@@ -3714,7 +3722,7 @@ function setupSmartOperation(){
   if(!r.ok){preview.textContent=r.reason;return;}
   if(!data.startBalances||r.date<data.startBalances.date){preview.textContent='Сначала укажи стартовые остатки и проверь дату начала учёта.';return;}
   draft=r;const category=cats.find(c=>c.id===r.category)?.name;
-  preview.textContent=(r.kind==='expense'?'Расход':'Дополнительный доход')+' · '+rub(r.amount)+' · '+r.date+' · '+(r.kind==='expense'?((category||'Категория не выбрана')+' / '+(r.type||'выбери вид расхода')):(r.source+' / '+(r.destination==='family'?'Семейные нужды':'выбери конверт')))+(r.hint?' · '+r.hint:'')+'. Запись ещё не сохранена.';
+  preview.textContent=(r.wifeTransfer?'Перевод жене':r.kind==='expense'?'Расход':'Дополнительный доход')+' · '+rub(r.amount)+' · '+r.date+' · '+(r.kind==='expense'?((category||'Категория не выбрана')+' / '+(r.type||'выбери вид расхода')):(r.source+' / '+(r.destination==='family'?'Семейные нужды':'выбери конверт')))+(r.hint?' · '+r.hint:'')+'. Запись ещё не сохранена.';
   next.disabled=false;
  });
  next.addEventListener('click',()=>{
@@ -4967,7 +4975,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.113';
+const APP_VERSION='1.5.114';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
