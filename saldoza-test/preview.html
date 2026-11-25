@@ -2438,7 +2438,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  <div class="foot" id="notifyStatus" role="status" aria-live="polite">Push ещё не подключён на этом устройстве.</div>
 </div>
 <div class="card theme-card"><div class="row"><b>Тема оформления</b><span class="quiet">Как в SQL Work Assistant</span></div><label class="field"><span>Выбери оформление</span><select id="themeSelect"></select></label></div>
-<div class="card" id="dailyBudgetSettingsCard"><b>Обычный дневной бюджет семьи</b><p class="foot">Сколько обычно нужно на ежедневные семейные покупки. Это твой ориентир расходов, а не рассчитанный доступный лимит. Не включай сюда ипотеку и другие уже учтённые обязательные платежи.</p><form id="dailyBudgetSettingsForm"><label class="field"><span>Расходы в день, ₽</span><input id="dailyBudgetSetting" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="Не задано"></label><button class="btn full" type="submit">Сохранить дневной бюджет</button><p class="foot" id="dailyBudgetStatus" role="status" aria-live="polite"></p></form><small class="foot">Чтобы сбросить настройку, очисти поле и сохрани.</small></div>
+<div class="card" id="smartLearningSettingsCard"><b>Обучение умного ввода</b><p class="foot">Приложение запоминает выбранный вид расхода для повторяющихся фраз. Суммы и даты не запоминаются. Всё хранится локально в истории.</p><p id="smartLearningStatus" class="foot" aria-live="polite"></p><button class="btn full light" id="smartLearningClear" type="button">Очистить запомненные категории</button></div><div class="card" id="dailyBudgetSettingsCard"><b>Обычный дневной бюджет семьи</b><p class="foot">Сколько обычно нужно на ежедневные семейные покупки. Это твой ориентир расходов, а не рассчитанный доступный лимит. Не включай сюда ипотеку и другие уже учтённые обязательные платежи.</p><form id="dailyBudgetSettingsForm"><label class="field"><span>Расходы в день, ₽</span><input id="dailyBudgetSetting" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="Не задано"></label><button class="btn full" type="submit">Сохранить дневной бюджет</button><p class="foot" id="dailyBudgetStatus" role="status" aria-live="polite"></p></form><small class="foot">Чтобы сбросить настройку, очисти поле и сохрани.</small></div>
 <div class="card" id="salarySettingsCard"><div class="row"><b>Оклад и рабочий календарь</b><span class="quiet">Расчёт выплат</span></div>
 <label class="field"><span>Месячный оклад, ₽</span><input id="baseSalary" type="number" min="0" step="100" inputmode="decimal" placeholder="Введи оклад"></label>
 <label class="field"><span>Как указан оклад</span><select id="salaryMode"><option value="gross">До вычета НДФЛ</option><option value="net">На руки (после НДФЛ)</option></select></label>
@@ -2697,6 +2697,7 @@ let data;const defaults=()=>({months:{},weights:{family:50,utilities:7.5,savings
 try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();
 normalizeBudget(data);
 function normalizeBudget(data){
+ for(const e of data.expenses||[])if(e.smartCategoryKey!==undefined&&(typeof e.smartCategoryKey!=='string'||smartCategoryKey(e.smartCategoryKey)!==e.smartCategoryKey||!e.smartCategoryKey||isWifeTransferType(e.type)))delete e.smartCategoryKey;
  if(!Array.isArray(data.calendarPurchases))data.calendarPurchases=[];
  data.usualDailyBudget=dailyBudgetValue(data.usualDailyBudget);
  if(!data.expenseTypes||typeof data.expenseTypes!=='object')data.expenseTypes={};
@@ -3692,73 +3693,10 @@ function normalizeSpokenAmount(text){
 // start a fresh non-continuous session and let it end naturally.
 function setupIOSSmartVoice(dialog,input,form){
  const button=$('smartVoiceButton'),status=$('smartVoiceStatus'),keyboard=$('smartVoiceKeyboard');
- const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
- const synth=window.speechSynthesis,Utterance=window.SpeechSynthesisUtterance;
- let active=null,cooldown=null;
- const supported=!!(Recognition&&synth&&Utterance);
- const fallback='Используй микрофон клавиатуры или введи текст.';
- const idle=()=>{button.disabled=!supported||!!active||cooldown!==null;button.textContent='🎙 Продиктовать';button.setAttribute('aria-pressed','false');};
- function release(s,abort=false){
-  if(active!==s)return false;
-  active=null;clearTimeout(s.timer);
-  if(abort){if(s.phase==='prompt'){try{synth.cancel();}catch(_){}}else if(s.r){try{s.r.abort();}catch(_){}}}
-  if(cooldown!==null)clearTimeout(cooldown);
-  cooldown=setTimeout(()=>{cooldown=null;idle();},1000);idle();return true;
- }
- const cancel=()=>{if(active)release(active,true);};
- const reset=()=>{cancel();idle();status.textContent=supported?'После голосовой подсказки «Говори» продиктуй фразу и сделай паузу.':'Голосовой ввод браузера недоступен. '+fallback;};
- const watch=(s,ms)=>{clearTimeout(s.timer);s.timer=setTimeout(()=>{if(active!==s)return;const partial=s.partial;release(s,true);if(dialog.open&&partial){input.value=partial.slice(0,240);input.dispatchEvent(new Event('input',{bubbles:true}));status.textContent='Получен неполный текст. Проверь его и нажми «Распознать».';}else status.textContent='Распознавание не ответило. '+fallback;},ms);};
- function receive(s){
-  if(!release(s)||!dialog.open)return;
-  const value=s.final||s.partial;
-  if(!value){status.textContent='Речь не распознана. '+fallback;return;}
-  if(value.length>240){status.textContent='Фраза слишком длинная. Продиктуй одну операцию.';return;}
-  input.value=value;input.dispatchEvent(new Event('input',{bubbles:true}));
-  status.textContent=s.final?'Текст получен. Проверь результат.':'Получен неполный текст. Проверь его и нажми «Распознать».';
-  if(s.final&&typeof form.requestSubmit==='function')form.requestSubmit();
- }
- function startRecognition(s){
-  if(active!==s||!dialog.open)return;
-  s.phase='recognition';
-  try{
-   const r=s.r=new Recognition();r.lang='ru-RU';r.continuous=false;r.interimResults=true;r.maxAlternatives=1;
-   const stage=message=>{if(active!==s)return;status.textContent=message;watch(s,20000);};
-   r.onstart=()=>stage('Говори, затем сделай паузу…');
-   r.onaudiostart=()=>stage('Микрофон включён. Говори…');
-   r.onspeechstart=()=>stage('Речь обнаружена…');
-   r.onresult=event=>{
-    if(active!==s||!dialog.open)return;
-    const all=[];let final=true;
-    for(let i=0;i<event.results.length;i++){const item=event.results[i];all.push(item[0].transcript);if(!item.isFinal)final=false;}
-    s.partial=all.join(' ').trim();s.final=final?s.partial:'';
-    status.textContent=s.final?'Текст получен. Ожидаю завершения записи…':'Распознано: '+s.partial;
-    // Do not call stop/abort on a normal successful session.
-    watch(s,final?8000:20000);
-   };
-   r.onerror=e=>{if(active!==s)return;const code=String(e.error||'unknown');release(s);status.textContent='Ошибка распознавания ['+code+']. '+fallback;};
-   r.onend=()=>receive(s);
-   watch(s,20000);r.start();
-  }catch(error){if(release(s,true))status.textContent='Не удалось начать диктовку ['+String(error?.name||'unknown')+']. '+fallback;}
- }
- button.addEventListener('click',()=>{
-  if(active||cooldown!==null||!supported||!dialog.open)return;
-  if(input.value.trim()&&!confirm('Заменить введённый текст результатом диктовки?'))return;
-  input.blur?.();
-  const s={phase:'prompt',r:null,timer:null,partial:'',final:''};active=s;
-  button.disabled=true;button.textContent='Подготовка микрофона…';button.setAttribute('aria-pressed','true');
-  status.textContent='Дождись голосовой подсказки…';
-  try{
-   const u=new Utterance('Говори');u.lang='ru-RU';s.utterance=u;
-   u.onend=()=>startRecognition(s);
-   u.onerror=()=>{if(release(s,true))status.textContent='Голосовая подсказка недоступна. '+fallback;};
-   watch(s,10000);synth.speak(u);
-  }catch(_){if(release(s,true))status.textContent='Не удалось запустить голосовую подсказку. '+fallback;}
- });
- keyboard.addEventListener('click',()=>{cancel();status.textContent='Нажми микрофон клавиатуры, продиктуй фразу и нажми «Распознать».';input.focus();});
- dialog.addEventListener('close',()=>{if(!dialog.open)cancel();});
- dialog.addEventListener('cancel',cancel);
- input.addEventListener('input',cancel);
- form.addEventListener('submit',cancel);
+ button.hidden=true;button.style.display='none';button.disabled=true;
+ keyboard.textContent='🎙 Диктовка клавиатурой';
+ const reset=()=>{status.textContent='На iPhone используй микрофон клавиатуры. Встроенная диктовка браузера пока нестабильна.';};
+ keyboard.addEventListener('click',()=>{input.focus();status.textContent='Нажми микрофон на клавиатуре, продиктуй фразу и нажми «Распознать».';});
  reset();return reset;
 }
 function setupSmartVoice(dialog,input,form){
@@ -3881,6 +3819,41 @@ function setupSmartVoice(dialog,input,form){
  input.addEventListener('input',()=>{if(session)cancel();});
  return resetVoice;
 }
+// Learn only from an explicitly saved, ordinary smart expense. No extra financial records.
+let pendingSmartExpense=null;
+function smartCategoryKey(rest){
+ const key=String(rest||'').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[^\p{L}\s]/gu,' ')
+  .split(/\s+/).filter(w=>w&&!/^(?:потратил[аи]?|купил[аи]?|оплатил[аи]?|заплатил[аи]?|расход|на|за|рублей|рубля|рубль|руб|р)$/.test(w)).join(' ');
+ return key.length>=2&&key.length<=120?key:'';
+}
+function learnedSmartCategory(key,expenses,types){
+ if(!key)return null;
+ // Latest saved choice wins; removed or renamed categories never become new categories automatically.
+ for(let i=(expenses||[]).length-1;i>=0;i--){
+  const e=expenses[i];
+  if(e.smartCategoryKey!==key||isWifeTransferType(e.type)||!['family','utilities','savings','other'].includes(e.category)||!(types?.[e.category]||[]).includes(e.type))continue;
+  return {category:e.category,type:e.type};
+ }
+ return null;
+}
+function smartLearningKeyForSave(pending,amount,date,type){
+ return pending&&pending.amount===amount&&pending.date===date&&!isWifeTransferType(type)?pending.key:'';
+}
+function setupSmartLearning(){
+ const clear=$('smartLearningClear'),status=$('smartLearningStatus');
+ if(!clear||!status)return;
+ const render=()=>{const count=new Set((data.expenses||[]).map(e=>e.smartCategoryKey).filter(Boolean)).size;status.textContent='Запомнено фраз: '+count+'.';clear.disabled=count===0;};
+ clear.addEventListener('click',()=>{
+  if(!confirm('Очистить запомненные категории? История расходов и деньги не изменятся.'))return;
+  const previous=data.expenses;
+  data.expenses=previous.map(e=>{if(!e.smartCategoryKey)return e;const copy={...e};delete copy.smartCategoryKey;return copy;});
+  if(!save())data.expenses=previous;
+  render();
+ });
+ // Update on opening settings and after any normal refresh/import.
+ window.refreshSmartLearning=render;
+ render();
+}
 function parseSmartOperation(raw,now,types,mode=null){
  const text=String(raw||'').trim();
  const fail=reason=>({ok:false,reason});
@@ -3960,7 +3933,7 @@ function parseSmartOperation(raw,now,types,mode=null){
  if(!expense&&!matches.length&&mode!=='expense')return fail('Укажи, это расход или дополнительный доход.');
  const match=matches.length===1?matches[0]:null;
  const category=match?match[0]:'',type=match?((types?.[category]||[]).find(x=>String(x).toLocaleLowerCase('ru')===match[1].toLocaleLowerCase('ru'))||''):'';
- return {ok:true,kind:'expense',amount,date,category,type,note:text.slice(0,120),hint:matches.length>1?'Найдено несколько категорий — выбери нужную.':!category||!type?'Проверь и выбери категорию и вид расхода.':''};
+ return {ok:true,kind:'expense',amount,date,category,type,learningKey:smartCategoryKey(rest),note:text.slice(0,120),hint:matches.length>1?'Найдено несколько категорий — выбери нужную.':!category||!type?'Проверь и выбери категорию и вид расхода.':''};
 }
 function setupSmartOperation(){
  const dialog=$('smartOperationDialog'),form=$('smartOperationForm'),input=$('smartOperationText'),preview=$('smartOperationPreview'),next=$('smartOperationContinue');
@@ -3970,7 +3943,7 @@ function setupSmartOperation(){
  const reset=()=>{draft=null;next.disabled=true;preview.textContent='Введи одну операцию и нажми «Распознать».';};
  const openSmart=kind=>{
   if(!['expense','income','transfer'].includes(kind))return;
-  mode=kind;form.reset();reset();resetVoice();
+  pendingSmartExpense=null;mode=kind;form.reset();reset();resetVoice();
   $('smartOperationTitle').textContent=kind==='expense'?'Новый расход':kind==='income'?'Новый доход':'Новый перевод';
   $('smartOperationLabel').textContent=kind==='expense'?'Что потратили?':kind==='income'?'Что пришло?':'Что переводим?';
   input.placeholder=kind==='expense'?'Например: корм собаке 1800':kind==='income'?'Например: кэшбэк 300':'Например: 3000 из остальных в накопления';
@@ -3985,7 +3958,8 @@ function setupSmartOperation(){
   document.dispatchEvent(new CustomEvent('budget:manual-operation-open',{detail:kind}));
  };
  document.addEventListener('budget:smart-operation-open',event=>openSmart(event.detail));
- $('smartOperationManual').addEventListener('click',()=>{draft=null;next.disabled=true;openManual(mode);});
+ document.addEventListener('budget:operation-sheet-closed',()=>{pendingSmartExpense=null;});
+ $('smartOperationManual').addEventListener('click',()=>{pendingSmartExpense=null;draft=null;next.disabled=true;openManual(mode);});
  $('smartOperationClose').addEventListener('click',()=>dialog.close());
  input.addEventListener('input',reset);
  form.addEventListener('submit',event=>{
@@ -3993,6 +3967,7 @@ function setupSmartOperation(){
   const now=new Date(),r=parseSmartOperation(input.value,now,data.expenseTypes,mode);
   if(!r.ok){preview.textContent=r.reason;return;}
   if(!data.startBalances||r.date<data.startBalances.date){preview.textContent='Сначала укажи стартовые остатки и проверь дату начала учёта.';return;}
+  if(r.kind==='expense'&&!r.wifeTransfer&&r.learningKey){const learned=learnedSmartCategory(r.learningKey,data.expenses,data.expenseTypes);if(learned){Object.assign(r,learned);r.hint='Категория из твоих предыдущих записей.';}}
   draft=r;const category=cats.find(c=>c.id===r.category)?.name;
   if(r.kind==='transfer'){
    const name=id=>cats.find(c=>c.id===id)?.name||'не выбран';
@@ -4011,6 +3986,7 @@ function setupSmartOperation(){
   if(r.kind==='expense'){
    $('expenseAmount').value=r.amount;$('expenseDate').value=r.date;$('expenseCategory').value=r.category;
    refreshTypes(r.type||'');updateExpenseOptions();$('expenseNote').value=r.note;
+   pendingSmartExpense=!r.wifeTransfer&&r.learningKey?{key:r.learningKey,amount:r.amount,date:r.date}:null;
   }else if(r.kind==='transfer'){
    $('transferAmount').value=r.amount;$('transferDate').value=r.date;
    $('transferFrom').value=r.from;$('transferTo').value=r.to;$('transferNote').value=r.note;
@@ -4023,6 +3999,7 @@ function setupSmartOperation(){
 }
 
 setupSmartOperation();
+setupSmartLearning();
 setupMoneyCalendar();
 setupDailyBudgetSetting();
 setupPurchaseCheck();
@@ -4929,7 +4906,7 @@ $('monthlyBillList').addEventListener('click',event=>{
 $('monthlyBillCategory').replaceChildren(...cats.map(c=>new Option(c.name,c.id)));
 $('monthlyBillDate').value=iso(new Date());
 
-function refreshBudgetView(){syncDailyBudgetSetting();renderMonthlyBills();syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();updateExpenseOptions()}
+function refreshBudgetView(){window.refreshSmartLearning?.();syncDailyBudgetSetting();renderMonthlyBills();syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();updateExpenseOptions()}
 function renderAll(){refreshBudgetView();return save()}
 function go(page){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));document.querySelector('.app').classList.toggle('home-active',page==='home');const main=document.querySelector('.main');if(main)main.scrollTop=0;}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
@@ -5188,8 +5165,12 @@ if(type==='Отправил жене'){
  (data.wifeMoves||=[]).push({id,date,amount,source:category,createdAt:new Date().toISOString(),note,fromExpense:true});
  }else{
  if(!existing)data.expenseTypes[category].push(type);
- data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});
+ const entry={id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note};
+ const key=smartLearningKeyForSave(pendingSmartExpense,amount,date,type);if(key)entry.smartCategoryKey=key;
+ data.expenses.push(entry);
  }
+ const learningEntry=type==='Отправил жене'?null:data.expenses.at(-1);
+ pendingSmartExpense=null;
  month=date.slice(0,7);
  $('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);
  if(renderAll()){
@@ -5197,7 +5178,8 @@ if(type==='Отправил жене'){
   if(isMove){$('expenseHistoryPanel').open=true;showSaveFeedback('Перевод жене '+rub(amount)+' записан',$('expenseForm').querySelector('button[type="submit"]'));}
   else showSaveFeedback('Расход сохранён',$('expenseForm').querySelector('button[type="submit"]'));
   if($('opsSheet')&&!$('opsSheet').hidden)$('opsSheet').querySelector('.ops-sheet-close')?.click();
- }};
+ }else if(learningEntry?.smartCategoryKey){delete learningEntry.smartCategoryKey;window.refreshSmartLearning?.();}
+ };
 $('expenseList').addEventListener('click',e=>{
  const wifeDelete=e.target.closest('[data-del-wife]');
  if(wifeDelete){
@@ -5256,7 +5238,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.121';
+const APP_VERSION='1.5.122';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -5750,7 +5732,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))installTes
   }
   let trigger=null;
   const closeSheet=()=>{
-   overlay.hidden=true;document.documentElement.classList.remove('ops-sheet-shown');
+   overlay.hidden=true;document.documentElement.classList.remove('ops-sheet-shown');document.dispatchEvent(new Event('budget:operation-sheet-closed'));
    if(trigger&&trigger.isConnected)trigger.focus({preventScroll:true});
   };
   const showSheet=type=>{
