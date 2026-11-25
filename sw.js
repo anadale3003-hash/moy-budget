@@ -1,8 +1,8 @@
 const PREFIX='saldoza-test:'+self.registration.scope+':';
-const CACHE=PREFIX+'1-5-104';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./version.json','./icon.svg','./icon.png','./icon-512.png'];
+const CACHE=PREFIX+'1-5-105';
+const ASSETS=['./','./index.html','./preview.html','./manifest.webmanifest','./version.json','./icon.svg','./icon.png','./icon-512.png'];
 function matchTestCache(request){return caches.open(CACHE).then(cache=>cache.match(request));}
-self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith(PREFIX)&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});
 self.addEventListener('fetch',event=>{

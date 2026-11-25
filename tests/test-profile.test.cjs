@@ -63,7 +63,8 @@ for(const page of ['index.html','preview.html']){
 test('activation removes only obsolete caches for this test scope',async()=>{
  const scope='https://example.test/test/';
  const prefix='saldoza-test:'+scope+':';
- const keys=['family-budget-v1-5-104','saldoza-test:https://example.test/other/:old',prefix+'old',prefix+'1-5-104'];
+ const current=prefix+require('../version.json').version.replaceAll('.','-');
+ const keys=['family-budget-v1-5-104','saldoza-test:https://example.test/other/:old',prefix+'old',current];
  const removed=[],handlers={};
  const script=fs.readFileSync(path.join(__dirname,'..','sw.js'),'utf8');
  vm.runInNewContext(script,{

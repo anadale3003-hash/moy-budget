@@ -2409,7 +2409,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  
 </section>
 <section class="view" id="v-settings">
-<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge">v1.5.101</span></div>
+<div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge"></span></div>
 <div class="card" id="notifySettingsCard">
  <div class="row"><b>🔔 Push-уведомления</b><span class="quiet">Автоматически</span></div>
  <div class="foot">Напоминания приходят на iPhone, даже когда приложение закрыто. С 08:30 по Москве, затем повторная проверка днём. Если подтверждённое зачисление сохранено, напоминания по нему прекращаются. Неподтверждённые выплаты напоминаются каждый час с 08:30 до 20:30 по Москве в дни напоминаний, пока поступление не подтверждено.</div>
@@ -2428,7 +2428,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="two"><label class="field"><span>Рабочих дней в месяце (необязательно)</span><input id="manualDaysTotal" type="number" min="1" max="31" step="1" placeholder="Автоматически"></label><label class="field"><span>Из них с 1 по 15 (необязательно)</span><input id="manualDaysFirst" type="number" min="0" max="15" step="1" placeholder="Автоматически"></label></div>
 <div id="salaryCalendarInfo" class="hint"></div></div>
 <div class="card"><b>Старт с текущих остатков</b><p class="foot">Установи реальные деньги на счетах. Старые покупки до даты старта не будут вычтены ещё раз. Плановые зарплаты не считаются полученными.</p><label class="field"><span>Дата начала учёта</span><input id="startDate" type="date"></label><div class="two"><label class="field"><span>Семейные нужды, ₽</span><input id="start-family" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Коммуналка, ₽</span><input id="start-utilities" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Накопления, ₽</span><input id="start-savings" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Остальное, ₽</span><input id="start-other" type="number" min="0" inputmode="decimal"></label></div><label class="field"><span>Уже отложено на следующую ипотеку, ₽</span><input id="startMortgageFund" type="number" min="0" inputmode="decimal"></label><label class="field"><span>За какой месяц ипотека уже оплачена</span><input id="paidMortgageMonth" type="month"></label><button class="btn full" id="saveStart" type="button">Сохранить стартовые остатки</button><div id="startStatus" class="foot"></div></div>
-<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion">1.5.101</strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
+<div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion"></strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
 <div class="card"><b>Резервная копия</b><p class="foot">Сохрани данные перед обновлением или переносом на другой телефон.</p><div class="actions"><button class="btn secondary" id="exportData" type="button">Сохранить копию</button><button class="btn light" id="importClick" type="button">Восстановить</button></div><input type="file" id="importData" accept="application/json,.json" style="display:none"></div>
 <div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
 <div class="hint">Финансовые данные остаются в хранилище браузера на этом устройстве. Не очищай данные сайта, если не сохранил резервную копию.</div>
@@ -4462,7 +4462,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.101';
+const APP_VERSION='1.5.105';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
