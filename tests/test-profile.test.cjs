@@ -29,7 +29,7 @@ for(const page of ['index.html','preview.html']){
    const context=vm.createContext({localStorage,location:{href:scope+page},URL,navigator:{serviceWorker}});
    const run=source=>vm.runInContext(source,context);
    run(html.slice(html.indexOf('const SALDOZA_BUDGET_KEY'),html.indexOf("(function(){'use strict';\nconst THEMES")));
-   run(html.slice(html.indexOf('const THEMES='),html.indexOf('for(const c of cats){if(!Array.isArray(data.expenseTypes')));
+   run(html.slice(html.indexOf('const THEMES='),html.indexOf('let month=currentMonth;')));
    run("let lastSavedReceiptSignature='[]',saveFeedbackIntent=null,saveFeedbackClearTimer=null;");
    run(html.match(/function save\(\)\{[\s\S]*?\n\}/)[0]);
    run(html.match(/const preferenceKey=[^;]+;/)[0]+html.match(/const appSettings=\(\)=>\{[\s\S]*?\n  \};/)[0]);
