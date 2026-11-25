@@ -3202,9 +3202,9 @@ function categoryBalanceAt(id,date){
 function realBalance(id){if(!data.startBalances)return null;const start=data.startBalances.date;const base=num(data.startBalances.balances[id]);const received=data.receipts.filter(r=>r.date>=start).reduce((a,r)=>a+num(r.amounts?.[id]),0);const spent=data.expenses.filter(e=>e.date>=start&&e.category===id).reduce((a,e)=>a+num(e.amount),0);const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start).reduce((a,p)=>a+num(p.extraAmount),0);return base+received+incomeAmountFor(id,start)+(id==='family'?(data.wifeAdjustments||[]).filter(a=>a.date>=start).reduce((sum,a)=>sum+num(a.amount),0):0)-spent-(id==='savings'?repaymentSavingsSpent(start):0)-creditExtra+transferDelta(id,start)}
 // Фактический остаток на сегодня, без планируемых и датированных будущим операций.
 // Бюджетные конверты, ипотечный резерв и резерв кредитки не пересекаются.
-function actualMoneyToday(){
- if(!data.startBalances||data.startBalances.date>iso(new Date()))return null;
- const asOf=iso(new Date());
+function actualMoneyToday(now=new Date()){
+ if(!data.startBalances||data.startBalances.date>iso(now))return null;
+ const asOf=iso(now);
  const envelopes=cats.reduce((total,c)=>total+categoryBalanceAt(c.id,asOf),0);
  const mortgage=num(data.startBalances.mortgage)
    +data.receipts.filter(r=>r.date>=data.startBalances.date&&r.date<=asOf).reduce((a,r)=>a+num(r.amounts?.mortgage),0)
@@ -3346,10 +3346,30 @@ function upcomingMortgage(now){
  const remaining=Math.max(0,plan-paid);
  return {due,plan,paid,reserve,remaining,gap:reserve===null?null:Math.max(0,remaining-reserve)};
 }
+function advisorCashSnapshot(now){
+ const today=iso(now),actual=actualMoneyToday(now),next=nearestPayday(now);
+ const family=actual?categoryBalanceAt('family',today):null;
+ const wife=family===null?null:wifeFunds(today);
+ const wifeCheck=(data.wifeBalanceReports||[]).filter(r=>r.date<=today&&(!data.startBalances||r.date>=data.startBalances.date)).map(r=>r.date).sort().pop()||null;
+ const days=next?Math.max(0,Math.round((Date.UTC(next.date.getFullYear(),next.date.getMonth(),next.date.getDate())-Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()))/86400000)):null;
+ const before=next?monthlyBillRows(iso(next.date)):null;
+ const after=next?monthlyBillRows(iso(new Date(next.date.getFullYear(),next.date.getMonth(),next.date.getDate()+1))):null;
+ const budget=actual&&next?spendingAfterBills(actual.available,family,iso(next.date)):null;
+ const plan=next?data.months[next.month]||{}:null;
+ const forecast=next?payrollForecast(plan,next.month):null;
+ const expected=next&&(forecast.configured||(plan[next.type]!=null&&plan[next.type]!==''&&Number.isFinite(Number(plan[next.type]))))?(next.type==='advance'?plannedAdvance(plan,next.month):plannedSalary(plan,next.month)):null;
+ const savingsRecord=data.confirmedSavings;
+ const confirmedSavings=savingsRecord&&!(savingsRecord.entries||[]).some(e=>e.date&&e.date>today)?confirmedSavingsBalance():null;
+ return {actual,family,wife,mine:family===null?null:family-wife,wifeCheck,next:next?{date:iso(next.date),type:next.type,expected}:null,days,
+  bills:before?billReserve(before):null,familyBills:before?billReserve(before,'family'):null,
+  sameDayBills:before&&after?Math.max(0,billReserve(after)-billReserve(before)):null,
+  familyAfterBills:budget?budget.family:null,allAfterBills:budget?budget.total:null,
+  daily:budget&&days>0?Math.floor(budget.family/days):null,confirmedSavings};
+}
 window.budgetAdvisorSnapshot=function(now){
  const todayKey=iso(now);
  const early=(data.earlyRepayments||[]).filter(p=>p.target==='credit'&&p.date<=todayKey).reduce((v,p)=>v+num(p.amount),0);
- return {data,mortgage:upcomingMortgage(now),debt:Math.max(0,num(data.debt)-regularPaymentSum('credit',null,todayKey)-early),
+ return {data,cash:advisorCashSnapshot(now),mortgage:upcomingMortgage(now),debt:Math.max(0,num(data.debt)-regularPaymentSum('credit',null,todayKey)-early),
  reserved:data.startBalances?Math.max(0,regularCreditAvailable(todayKey)):num(data.reserved)};
 };
 function renderEarlyAlerts(){
@@ -4581,7 +4601,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.106';
+const APP_VERSION='1.5.107';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -5704,7 +5724,8 @@ function setupAdvisor(){
  function report(){
   // Read-only snapshot. No records, dates or app settings are changed.
   const asOf=new Date();
-  const {data:d,mortgage,debt,reserved}=window.budgetAdvisorSnapshot(asOf);
+  const {data:d,mortgage,debt,reserved,cash}=window.budgetAdvisorSnapshot(asOf);
+  const known=v=>typeof v==='number'&&Number.isFinite(v)?ru(v):'неизвестно';
   const today=asOf.toLocaleDateString('sv-SE');
   const month=today.slice(0,7);
   const expenses=Array.isArray(d.expenses)?d.expenses.filter(x=>validDate(x.date)&&x.date<=today):[];
@@ -5731,6 +5752,7 @@ function setupAdvisor(){
    'Неприкосновенная подушка — 500 000 ₽; её фактический остаток может быть неизвестен.',
    'Не выдумывай данные. Различай факты, планы, гипотезы, проценты и доходы. Переводы между счетами — не доход.',
    'Начни с одного подтверждённого достижения в рублях, если оно есть. Предложи один посильный шаг до следующей выплаты. Учитывай расходы семьи. Не обещай экономию без подтверждения.',
+   'Сначала составь конкретный план до ближайшей выплаты: питание семьи, лекарства и корм домашних животных, затем обязательные платежи с учётом их сроков. Если остаток неизвестен, запроси сверку; не выдумывай суммы и не считай прогноз дохода доступными деньгами. Не рекомендуй досрочные платежи или пополнение накоплений, если это оставит семью без необходимого. Защищённую подушку не расходуй без явного решения пользователя.',
    'Проверь долг и сроки кредитки, сохранность резерва и реалистичность платежей.',
    'Отвечай простым разговорным языком, без финансового жаргона. Предупреждай заранее о будущей нехватке денег: январский аванс после праздников, ближайшая ипотека, кредитка. Называй дату, конкретную сумму и действие. Прогноз отделяй от фактов.',
    'Не сравнивай ипотеку и вклад без ставки ипотеки, чистой ставки вклада, налогов и ограничений.',
@@ -5748,6 +5770,23 @@ function setupAdvisor(){
     'Дай проверку резерва, график погашения кредитки и реалистичный план на 30 дней.',
     'Неизвестные данные обозначь явно; не считай погашение долга экономией.'
    ]),
+   '',
+   'ТЕКУЩАЯ ФИНАНСОВАЯ СИТУАЦИЯ (расчёт по локальным записям на '+today+', не банковская выписка):',
+   'Семейные деньги всего до дополнительных резервов на регулярные платежи: '+known(cash.family),
+   'У меня (семейный конверт): '+known(cash.mine),
+   'У жены (расчётный остаток семейных денег): '+known(cash.wife)+(cash.wifeCheck?' (последняя сверка '+cash.wifeCheck+')':' (сверка не указана)'),
+   'Свободные бюджетные конверты всего, без накоплений и резервов ипотеки/кредитки: '+known(cash.actual?.available),
+   'Ближайшая выплата (план, не получена): '+(cash.next?(cash.next.type==='advance'?'аванс':'зарплата')+' '+cash.next.date+'; ожидаемая сумма '+known(cash.next.expected):'неизвестна'),
+   'Дней до выплаты: '+(cash.days===null?'неизвестно':cash.days),
+   'Неоплаченные регулярные платежи до дня выплаты (включая просроченные): '+known(cash.bills)+'; из семейного конверта '+known(cash.familyBills),
+   'Регулярные платежи в день выплаты (порядок поступления и списания неизвестен): '+known(cash.sameDayBills),
+   'Семейные деньги после резерва на регулярные платежи: '+known(cash.familyAfterBills),
+   'Доступно на семейные покупки в день по главному экрану: '+known(cash.daily)+(cash.days===0?' (выплата сегодня, дождись зачисления)':''),
+   'Общий остаток свободных конвертов после резерва на регулярные платежи: '+known(cash.allAfterBills),
+   'Накопления в бюджетном конверте (не подтверждение банковского остатка): '+known(cash.actual?.savings),
+   'Накопления, указанные вручную отдельно (могут пересекаться с другими остатками, не суммировать): '+known(cash.confirmedSavings),
+   'Семейные деньги уже входят в общий остаток; деньги у жены уже входят в семейный остаток. Ипотека и кредитка показаны ниже отдельно. Дневной лимит — ориентир после регулярных платежей, не гарантия покрытия ипотеки или кредитки.',
+   ...(cash.family!==null&&cash.family<0||cash.actual&&cash.actual.available<0?['Внимание: отрицательный остаток означает дефицит.']:[]),
    '',
    'СОСТОЯНИЕ:',
    'Ипотека к '+mortgage.due.toLocaleDateString('ru-RU')+' — платёж '+ru(mortgage.plan)+', оплачено '+ru(mortgage.paid)+', к оплате '+ru(mortgage.remaining)+(mortgage.reserve===null?' (резерв неизвестен)':', в резерве '+ru(mortgage.reserve)+', ещё собрать '+ru(mortgage.gap)),
