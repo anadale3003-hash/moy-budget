@@ -2244,6 +2244,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  <small id="milestoneProgress"></small>
  <small id="milestoneCredit" hidden></small>
 </section>
+<button type="button" id="purchaseCheckOpen" class="btn light">Могу ли я позволить себе покупку?</button>
 <div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайший платёж</h2><button class="analytics-icon-button alert-bell home-alert-trigger" type="button" id="budgetAlertsOpen" aria-label="Открыть советы для бюджета" title="Советы">🔔 <span class="home-alert-label">Советы</span><span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button></div><div id="obligations"></div></div>
 </section>
 <section class="view" id="v-plan">
@@ -2259,6 +2260,8 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="foot">Плановые даты выплат учитывают выходные и праздники РФ (календарь 2026–2027). Фактические дату и сумму укажи при подтверждении поступления.</div>
 </div>
 </div><!-- End: advance and salary card -->
+<div class="section-heading"><h2>Финансовый календарь</h2></div><div class="card" id="moneyCalendarCard"><button class="btn full secondary" id="moneyCalendarOpen" type="button">Открыть календарь денег · 30 / 60 / 90 дней</button><p class="foot">Поступления, платежи, запланированные покупки и возможная нехватка денег.</p></div>
+
 <div class="section-heading"><h2>Куда перевести деньги</h2><span class="quiet">с каждой выплаты</span></div>
 <div class="goal-allocation-card" id="goalAllocationCard" aria-live="polite">
  <div class="goal-allocation-heading">
@@ -2362,8 +2365,8 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <button class="btn" type="submit">Учесть поступление</button>
 </form></div>
 <div class="card"><form id="expenseForm">
- <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><p class="foot" id="expenseWifeTransferAvailable" hidden></p><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="history-sort-control"><label for="expenseListSort">По дате</label><select id="expenseListSort" data-history-sort="expenseList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
-<div class="two transfer-envelopes"><label class="field"><span>Откуда</span><select id="transferFrom"><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Куда</span><select id="transferTo"><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label></div>
+ <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory" required><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><p class="foot" id="expenseWifeTransferAvailable" hidden></p><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="history-sort-control"><label for="expenseListSort">По дате</label><select id="expenseListSort" data-history-sort="expenseList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
+<div class="two transfer-envelopes"><label class="field"><span>Откуда</span><select id="transferFrom" required><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Куда</span><select id="transferTo" required><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label></div>
 <div class="two"><label class="field"><span>Сумма, ₽</span><input id="transferAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 5000"></label><label class="field"><span>Дата перевода</span><input id="transferDate" type="date" required></label></div>
 <label class="field"><span>Примечание (необязательно)</span><input id="transferNote" maxlength="120" placeholder="Остаток коммуналки"></label>
 <div class="foot" id="transferAvailable"></div><div class="foot">Перевод меняет только остатки категорий. Не учитывается как доход или расход. Делай запись после фактического перевода денег.</div><button type="submit" class="btn full">Перевести деньги</button>
@@ -2377,7 +2380,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <label class="field"><span>Дата поступления</span><input id="incomeDate" type="date" required></label>
 </div>
 <label class="field"><span>Источник дохода</span><select id="incomeSource"><option>Проценты по вкладу</option><option>Премия</option><option>Кэшбэк</option><option>Возврат покупки</option><option>Подработка</option><option>Подарок</option><option>Доход жены</option><option>Другое</option></select></label>
-<label class="field"><span>Куда зачислить</span><select id="incomeDestination">
+<label class="field"><span>Куда зачислить</span><select id="incomeDestination" required>
 <option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option>
 <option value="savings">Накопления</option><option value="reserve">🛡 Подушка безопасности</option><option value="other">Доступный бюджет (Остальное)</option>
 <option value="mortgage">На ипотеку</option><option value="credit">На кредитку</option>
@@ -2435,6 +2438,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  <div class="foot" id="notifyStatus" role="status" aria-live="polite">Push ещё не подключён на этом устройстве.</div>
 </div>
 <div class="card theme-card"><div class="row"><b>Тема оформления</b><span class="quiet">Как в SQL Work Assistant</span></div><label class="field"><span>Выбери оформление</span><select id="themeSelect"></select></label></div>
+<div class="card" id="smartLearningSettingsCard"><b>Обучение умного ввода</b><p class="foot">Приложение запоминает выбранный вид расхода для повторяющихся фраз. Суммы и даты не запоминаются. Всё хранится локально в истории.</p><p id="smartLearningStatus" class="foot" aria-live="polite"></p><button class="btn full light" id="smartLearningClear" type="button">Очистить запомненные категории</button></div><div class="card" id="dailyBudgetSettingsCard"><b>Обычный дневной бюджет семьи</b><p class="foot">Сколько обычно нужно на ежедневные семейные покупки. Это твой ориентир расходов, а не рассчитанный доступный лимит. Не включай сюда ипотеку и другие уже учтённые обязательные платежи.</p><form id="dailyBudgetSettingsForm"><label class="field"><span>Расходы в день, ₽</span><input id="dailyBudgetSetting" type="number" inputmode="decimal" min="0.01" step="0.01" placeholder="Не задано"></label><button class="btn full" type="submit">Сохранить дневной бюджет</button><p class="foot" id="dailyBudgetStatus" role="status" aria-live="polite"></p></form><small class="foot">Чтобы сбросить настройку, очисти поле и сохрани.</small></div>
 <div class="card" id="salarySettingsCard"><div class="row"><b>Оклад и рабочий календарь</b><span class="quiet">Расчёт выплат</span></div>
 <label class="field"><span>Месячный оклад, ₽</span><input id="baseSalary" type="number" min="0" step="100" inputmode="decimal" placeholder="Введи оклад"></label>
 <label class="field"><span>Как указан оклад</span><select id="salaryMode"><option value="gross">До вычета НДФЛ</option><option value="net">На руки (после НДФЛ)</option></select></label>
@@ -2573,6 +2577,11 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 <div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="history-sort-control"><label for="envelopeHistorySort">По дате</label><select id="envelopeHistorySort" data-history-sort="envelopeHistoryList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 
+<dialog id="smartOperationDialog" class="budget-alerts-dialog" aria-labelledby="smartOperationTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="smartOperationTitle">Умный ввод</h2><button type="button" class="btn light" id="smartOperationClose" aria-label="Закрыть">✕</button></div><p class="foot">Напиши уже совершённую операцию обычными словами. Разбор текста выполняется на устройстве. Голос распознаёт браузер или система — может потребоваться интернет.</p><form id="smartOperationForm"><label class="field"><span id="smartOperationLabel">Что потратили?</span><textarea id="smartOperationText" rows="3" maxlength="240" required placeholder="Вчера купил корм собаке за 1800"></textarea></label><button class="btn full light" id="smartVoiceButton" type="button" aria-pressed="false">🎙 Продиктовать</button><button class="btn full light" id="smartVoiceKeyboard" type="button" style="margin-top:5px">Диктовка клавиатурой</button><p class="foot" id="smartVoiceStatus" role="status" aria-live="polite"></p><button class="btn full" type="submit">Распознать</button></form><p id="smartOperationPreview" aria-live="polite"></p><button class="btn full secondary" id="smartOperationContinue" type="button" disabled>Проверить и подтвердить в форме</button><button class="btn full light" id="smartOperationManual" type="button" style="margin-top:8px">Ввести вручную</button><p class="foot">Поддерживаются одиночные расходы, дополнительные доходы и переводы между конвертами в рублях. Кредиты и зарплата — через обычные формы.</p></div></dialog><style>#smartOperationText{width:100%;box-sizing:border-box;resize:vertical;background:var(--input);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:16px}#smartOperationPreview{padding:10px;background:var(--panel);border-radius:12px;overflow-wrap:anywhere}#smartOperationContinue:disabled,#smartVoiceButton:disabled{opacity:.5}#smartVoiceButton{margin-top:6px;min-height:42px}#smartVoiceStatus{margin:5px 0 9px}</style>
+<dialog id="moneyCalendarDialog" class="budget-alerts-dialog" aria-labelledby="moneyCalendarTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="moneyCalendarTitle">Календарь денег</h2><button class="btn light" type="button" id="moneyCalendarClose" aria-label="Закрыть">✕</button></div><div id="calendarHorizon" role="group" aria-label="Горизонт прогноза"><button type="button" class="btn light" data-horizon="30" aria-pressed="true">30 дней</button><button type="button" class="btn light" data-horizon="60" aria-pressed="false">60 дней</button><button type="button" class="btn light" data-horizon="90" aria-pressed="false">90 дней</button></div><p id="moneyCalendarSummary" class="foot" aria-live="polite"></p><div id="calendarForecastSummary" aria-live="polite"></div><details id="calendarPurchaseEditor"><summary>＋ Запланировать покупку</summary><form id="calendarPurchaseForm"><label class="field">Название<input id="calendarPurchaseName" required maxlength="80"></label><label class="field">Дата<input id="calendarPurchaseDate" type="date" required></label><label class="field">Сумма, ₽<input id="calendarPurchaseAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><button class="btn full" type="submit">Сохранить план</button><p class="foot">Указывай только дополнительные покупки, не включённые в дневной бюджет. План не списывает деньги.</p></form><div id="calendarPurchaseList"></div></details><div id="moneyCalendarDays"></div><details id="calendarActualDetails"><summary>Фактические операции · последние 30 дней</summary><div id="calendarActualList"></div></details><p class="foot">Прогноз общего свободного бюджета, не каждого конверта. Учитывает остаток на момент просмотра, полную дневную норму даже сегодня, известные платежи и плановые зарплаты. Сначала расходы, затем поступления. Новые накопления, неподтверждённые доходы кроме зарплат и неизвестные платежи не включены. Минимальный платёж кредитки и сроки сверяй с банком. Подушка не используется.</p></div></dialog>
+<style>#moneyCalendarDialog{max-height:90dvh;overflow:auto}#calendarHorizon{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:8px 0}#calendarHorizon button{padding:8px 3px;font-size:13px;white-space:nowrap}#calendarHorizon button[aria-pressed="true"]{background:var(--blue);color:var(--accent-text,var(--ink));border-color:var(--blue);font-weight:700}#calendarForecastSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 12px}#calendarForecastSummary>div{background:var(--panel);border-radius:12px;padding:9px;min-width:0;overflow-wrap:anywhere}#calendarForecastSummary small,#calendarForecastSummary strong{display:block}#calendarForecastSummary small{color:var(--muted);font-size:12px}#calendarForecastSummary strong{margin-top:5px;font-size:15px}#moneyCalendarDialog summary{cursor:pointer;font-weight:650;padding:10px 0}#moneyCalendarDialog .field{display:grid;gap:4px;margin:8px 0}.calendar-day{padding:9px 4px;border-bottom:1px solid var(--line)}.calendar-day-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.calendar-day small{display:block;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}.calendar-risk{color:var(--red);font-weight:700}.calendar-plan-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);align-items:center;overflow-wrap:anywhere}.calendar-plan-row>div{min-width:0}.calendar-plan-row button{flex-shrink:0}</style>
+<dialog id="purchaseCheckDialog" class="budget-alerts-dialog" aria-labelledby="purchaseCheckTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="purchaseCheckTitle">Могу ли я позволить себе покупку?</h2><button type="button" class="btn light" id="purchaseCheckClose" aria-label="Закрыть">✕</button></div><p class="foot" id="purchaseCheckContext"></p><form id="purchaseCheckForm"><label class="field">Стоимость дополнительной покупки, ₽<input id="purchasePrice" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><label class="field">Необходимые расходы семьи в день, ₽<input id="purchaseDaily" type="number" inputmode="decimal" min="0" step="0.01" required placeholder="Из настроек или введи вручную"></label><label class="field">Другие разовые расходы до выплаты, ₽<input id="purchaseExtra" type="number" inputmode="decimal" min="0" step="0.01" value="0"></label><p class="foot">Не включай покупку и уже учтённые обязательные платежи в дневной бюджет или разовые расходы. Корм, лекарства и прочие необходимые покупки укажи отдельно, если они ещё не включены.</p><button class="btn full" type="submit">Проверить покупку</button></form><div id="purchaseCheckResult" aria-live="polite"></div></div></dialog>
+<style>#purchaseCheckOpen{width:100%;min-height:38px;margin:4px 0;font-size:13px;flex-shrink:0}#purchaseCheckDialog .field{display:grid;gap:5px;margin:10px 0}#purchaseCheckResult{margin-top:12px;padding:12px;border-radius:12px;background:var(--panel);overflow-wrap:anywhere}#purchaseCheckResult p{margin:6px 0;font-size:13px}#purchaseCheckResult small{display:block;color:var(--muted);margin-top:8px}.purchase-ok{color:var(--green)}.purchase-bad{color:var(--red)}</style>
 <dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">Советы для твоего бюджета</h2><button type="button" class="btn light" id="budgetAlertsClose" aria-label="Закрыть">✕</button></div><p class="budget-alerts-help" id="adviceOpening"></p><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
 <script>
 /* Layout-only grouping. IDs/forms remain intact so accounting calculations and saved data are unchanged. */
@@ -2687,6 +2696,9 @@ let data;const defaults=()=>({months:{},weights:{family:50,utilities:7.5,savings
 try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();
 normalizeBudget(data);
 function normalizeBudget(data){
+ for(const e of data.expenses||[])if(e.smartCategoryKey!==undefined&&(typeof e.smartCategoryKey!=='string'||smartCategoryKey(e.smartCategoryKey)!==e.smartCategoryKey||!e.smartCategoryKey||isWifeTransferType(e.type)))delete e.smartCategoryKey;
+ if(!Array.isArray(data.calendarPurchases))data.calendarPurchases=[];
+ data.usualDailyBudget=dailyBudgetValue(data.usualDailyBudget);
  if(!data.expenseTypes||typeof data.expenseTypes!=='object')data.expenseTypes={};
  for(const c of cats){if(!Array.isArray(data.expenseTypes[c.id]))data.expenseTypes[c.id]=[];}
  for(const x of data.expenses){if(x.type&&cats.some(c=>c.id===x.category)){const a=data.expenseTypes[x.category];if(!a.some(y=>y.toLocaleLowerCase('ru')===String(x.type).toLocaleLowerCase('ru')))a.push(String(x.type));}}
@@ -2730,7 +2742,7 @@ function countWorkdays(key){
  }
  return {total,first,official:y===2026||y===2027};
 }
-function payrollForecast(m,key=month){
+function payrollForecast(m,key=month,asOf=null){
  const cfg=data.salaryConfig,base=num(cfg.base),work=countWorkdays(key);
  const overrideTotal=Number(m.manualDaysTotal),overrideFirst=Number(m.manualDaysFirst);
  const total=m.manualDaysTotal!==undefined&&m.manualDaysTotal!==''&&overrideTotal>0?Math.min(31,overrideTotal):work.total;
@@ -2741,7 +2753,7 @@ function payrollForecast(m,key=month){
  // Legacy month.advance/month.salary may contain a stale or cancelled
  // manually entered amount. Treat an amount as ACTUAL only if a matching receipt
  // exists. When the salary is configured, the remaining amount is a forecast.
- const advanceReceipt=(data.receipts||[]).find(r=>r.id===key+'-advance');
+ const advanceReceipt=(data.receipts||[]).find(r=>r.id===key+'-advance'&&(!asOf||r.date<=asOf));
  const advancePlan=advanceReceipt?num(advanceReceipt.amount):advanceForecast;
  const salaryForecast=Math.max(0,Math.round(net*100)-Math.round(advancePlan*100))/100;
  return {net,advanceForecast,advancePlan,salaryForecast,total,first,official:work.official,configured:base>0};
@@ -3201,9 +3213,9 @@ function categoryBalanceAt(id,date){
 function realBalance(id){if(!data.startBalances)return null;const start=data.startBalances.date;const base=num(data.startBalances.balances[id]);const received=data.receipts.filter(r=>r.date>=start).reduce((a,r)=>a+num(r.amounts?.[id]),0);const spent=data.expenses.filter(e=>e.date>=start&&e.category===id).reduce((a,e)=>a+num(e.amount),0);const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start).reduce((a,p)=>a+num(p.extraAmount),0);return base+received+incomeAmountFor(id,start)+(id==='family'?(data.wifeAdjustments||[]).filter(a=>a.date>=start).reduce((sum,a)=>sum+num(a.amount),0):0)-spent-(id==='savings'?repaymentSavingsSpent(start):0)-creditExtra+transferDelta(id,start)}
 // Фактический остаток на сегодня, без планируемых и датированных будущим операций.
 // Бюджетные конверты, ипотечный резерв и резерв кредитки не пересекаются.
-function actualMoneyToday(){
- if(!data.startBalances||data.startBalances.date>iso(new Date()))return null;
- const asOf=iso(new Date());
+function actualMoneyToday(now=new Date()){
+ if(!data.startBalances||data.startBalances.date>iso(now))return null;
+ const asOf=iso(now);
  const envelopes=cats.reduce((total,c)=>total+categoryBalanceAt(c.id,asOf),0);
  const mortgage=num(data.startBalances.mortgage)
    +data.receipts.filter(r=>r.date>=data.startBalances.date&&r.date<=asOf).reduce((a,r)=>a+num(r.amounts?.mortgage),0)
@@ -3345,12 +3357,651 @@ function upcomingMortgage(now){
  const remaining=Math.max(0,plan-paid);
  return {due,plan,paid,reserve,remaining,gap:reserve===null?null:Math.max(0,remaining-reserve)};
 }
+function advisorCashSnapshot(now){
+ const today=iso(now),actual=actualMoneyToday(now),next=nearestPayday(now);
+ const family=actual?categoryBalanceAt('family',today):null;
+ const wife=family===null?null:wifeFunds(today);
+ const wifeCheck=(data.wifeBalanceReports||[]).filter(r=>r.date<=today&&(!data.startBalances||r.date>=data.startBalances.date)).map(r=>r.date).sort().pop()||null;
+ const days=next?Math.max(0,Math.round((Date.UTC(next.date.getFullYear(),next.date.getMonth(),next.date.getDate())-Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()))/86400000)):null;
+ const before=next?monthlyBillRows(iso(next.date)):null;
+ const after=next?monthlyBillRows(iso(new Date(next.date.getFullYear(),next.date.getMonth(),next.date.getDate()+1))):null;
+ const budget=actual&&next?spendingAfterBills(actual.available,family,iso(next.date)):null;
+ const plan=next?data.months[next.month]||{}:null;
+ const forecast=next?payrollForecast(plan,next.month):null;
+ const expected=next&&(forecast.configured||(plan[next.type]!=null&&plan[next.type]!==''&&Number.isFinite(Number(plan[next.type]))))?(next.type==='advance'?plannedAdvance(plan,next.month):plannedSalary(plan,next.month)):null;
+ const savingsRecord=data.confirmedSavings;
+ const confirmedSavings=savingsRecord&&!(savingsRecord.entries||[]).some(e=>e.date&&e.date>today)?confirmedSavingsBalance():null;
+ return {actual,family,wife,mine:family===null?null:family-wife,wifeCheck,next:next?{date:iso(next.date),type:next.type,expected}:null,days,usualDailyBudget:dailyBudgetValue(data.usualDailyBudget),
+  bills:before?billReserve(before):null,familyBills:before?billReserve(before,'family'):null,
+  sameDayBills:before&&after?Math.max(0,billReserve(after)-billReserve(before)):null,
+  sameDayFamilyBills:before&&after?Math.max(0,billReserve(after,'family')-billReserve(before,'family')):null,
+  familyAfterBills:budget?budget.family:null,allAfterBills:budget?budget.total:null,
+  daily:budget&&days>0?Math.floor(budget.family/days):null,confirmedSavings};
+}
 window.budgetAdvisorSnapshot=function(now){
  const todayKey=iso(now);
  const early=(data.earlyRepayments||[]).filter(p=>p.target==='credit'&&p.date<=todayKey).reduce((v,p)=>v+num(p.amount),0);
- return {data,mortgage:upcomingMortgage(now),debt:Math.max(0,num(data.debt)-regularPaymentSum('credit',null,todayKey)-early),
+ return {data,cash:advisorCashSnapshot(now),mortgage:upcomingMortgage(now),debt:Math.max(0,num(data.debt)-regularPaymentSum('credit',null,todayKey)-early),
  reserved:data.startBalances?Math.max(0,regularCreditAvailable(todayKey)):num(data.reserved)};
 };
+// Read-only purchase scenario. Amounts are integer kopecks; no operation is created.
+function purchaseCents(value){
+ if(value===null||value===undefined||typeof value==='string'&&!value.trim())return null;
+ const n=Number(value),c=Math.round(n*100);
+ return Number.isFinite(n)&&Number.isSafeInteger(c)&&Math.abs(n*100-c)<0.0001?c:null;
+}
+function evaluatePurchase(snapshot,price,daily,extra,today){
+ const money=v=>purchaseCents(v);
+ const p=money(price),d=money(daily),e=money(extra);
+ if(p===null||p<=0||d===null||d<0||e===null||e<0)return {status:'invalid'};
+ const c=snapshot.cash,m=snapshot.mortgage;
+ if(!c||!c.actual||!c.next||!Number.isSafeInteger(c.days)||c.days<=0)return {status:'unknown',reason:'Нужны текущие остатки и дата следующей неполученной выплаты. Если выплата сегодня, дождись зачисления.'};
+ const family=money(c.family),available=money(c.actual.available),bills=money(c.bills),familyBills=money(c.familyBills),same=money(c.sameDayBills),sameFamily=money(c.sameDayFamilyBills);
+ if([family,available,bills,familyBills,same,sameFamily].some(v=>v===null))return {status:'unknown',reason:'Не удалось определить остатки или регулярные платежи.'};
+ let mortgage=0,credit=0;
+ if(m&&m.due&&iso(m.due)<=c.next.date&&m.remaining>0){
+  mortgage=money(m.gap);
+  if(mortgage===null)return {status:'unknown',reason:'Сверь резерв ближайшего ипотечного платежа.'};
+ }
+ if(snapshot.debt>0){
+  const deadline=snapshot.data.deadline;
+  if(!deadline||!fromISO(deadline))return {status:'unknown',reason:'Укажи срок кредитки и проверь минимальный платёж в банке.'};
+  if(deadline<=c.next.date){
+   const debt=money(snapshot.debt),reserved=money(snapshot.reserved);
+   if(debt===null||reserved===null)return {status:'unknown',reason:'Сверь задолженность и резерв кредитки.'};
+   credit=Math.max(0,debt-reserved);
+  }
+ }
+ // Household funds are a subset of available funds. Reserve each bill only once.
+ // For a debt gap, conservatively keep the full amount aside even on payday.
+ const debtGap=mortgage+credit,free=Math.min(family-familyBills-sameFamily,available-bills-same)-debtGap;
+ const essentials=d*c.days+e;
+ const before=free-essentials,after=before-p;
+ if(![free,essentials,before,after].every(Number.isSafeInteger))return {status:'invalid'};
+ return {status:after>=0?'ok':'shortfall',days:c.days,date:c.next.date,free,essentials,before,after,price:p,daily:d,extra:e,mortgage,credit,bills:bills+same,maxPurchase:Math.max(0,before),dailyAfter:Math.floor(Math.max(0,free-p-e)/c.days)};
+}
+// Optional user-entered daily needs, kept in the same local backup as other settings.
+function dailyBudgetValue(value){
+ if(typeof value!=='number'&&typeof value!=='string')return null;
+ if(typeof value==='string'&&!value.trim())return null;
+ const n=Number(value),c=Math.round(n*100);
+ return Number.isFinite(n)&&n>0&&Number.isSafeInteger(c)&&c>0&&Math.abs(n*100-c)<0.0001?c/100:null;
+}
+function syncDailyBudgetSetting(){
+ const input=$('dailyBudgetSetting');
+ if(input)input.value=dailyBudgetValue(data.usualDailyBudget)??'';
+}
+function setupDailyBudgetSetting(){
+ const form=$('dailyBudgetSettingsForm');
+ if(!form)return;
+ syncDailyBudgetSetting();
+ form.addEventListener('submit',event=>{
+  event.preventDefault();
+  const input=$('dailyBudgetSetting'),status=$('dailyBudgetStatus');
+  if(input.validity.badInput){status.textContent='Введи корректную сумму.';return;}
+  const raw=input.value.trim(),value=dailyBudgetValue(raw);
+  if(raw&&value===null){status.textContent='Введи положительную сумму с точностью до копеек.';return;}
+  const previous=data.usualDailyBudget;
+  data.usualDailyBudget=value;
+  if(!save()){data.usualDailyBudget=previous;syncDailyBudgetSetting();status.textContent='Не удалось сохранить настройку.';return;}
+  syncDailyBudgetSetting();
+  status.textContent=value===null?'Дневной бюджет не задан.':'Сохранено: '+rub(value)+' в день.';
+ });
+}
+function setupPurchaseCheck(){
+ const open=$('purchaseCheckOpen'),dialog=$('purchaseCheckDialog'),form=$('purchaseCheckForm'),result=$('purchaseCheckResult');
+ if(!open||!dialog||!form||!result)return;
+ const format=cents=>rub(cents/100);
+ function renderPurchase(){
+  const now=new Date(),snapshot=window.budgetAdvisorSnapshot(now),cash=snapshot.cash;
+  $('purchaseCheckContext').textContent=cash.family===null?'Семейный остаток неизвестен.':('Семейные деньги: '+rub(cash.family)+(cash.next?' · до '+cash.next.date+' — '+cash.days+' дн.':' · дата выплаты неизвестна'));
+  if(!$('purchasePrice').value||!$('purchaseDaily').value){result.textContent='Введи стоимость покупки и нужную сумму на день.';return;}
+  const r=evaluatePurchase(snapshot,$('purchasePrice').value,$('purchaseDaily').value,$('purchaseExtra').value||'0',iso(now));
+  result.replaceChildren();
+  const add=(tag,value)=>{const el=document.createElement(tag);el.textContent=value;result.append(el);return el;};
+  if(r.status==='invalid'||r.status==='unknown'){add('p',r.reason||'Проверь суммы: покупка должна быть больше нуля, остальные суммы — неотрицательные, до копеек.');return;}
+  const heading=add('strong',r.status==='ok'?'По введённому плану денег хватает':'По введённому плану денег не хватает');
+  heading.className=r.status==='ok'?'purchase-ok':'purchase-bad';
+  add('p','Доступно после обязательных резервов: '+format(r.free));
+  add('p','На жизнь до выплаты, включая дополнительные расходы: '+format(r.essentials));
+  add('p','Обязательные резервы: регулярные платежи '+format(r.bills)+', ипотека '+format(r.mortgage)+', кредитка '+format(r.credit)+'.');
+  add('p','После покупки и необходимых расходов: '+format(r.after));
+  if(r.before<0)add('p','Даже без покупки не хватает '+format(-r.before)+'.');
+  add('p','Максимум на дополнительную покупку: '+format(r.maxPurchase));
+  add('p','После покупки и разовых расходов на день остаётся '+format(r.dailyAfter)+'.');
+  if(r.status==='shortfall')add('p','Отложи необязательную покупку или пересмотри план. Не используй подушку или кредитку автоматически.');
+  add('small','Расчёт по записям, без будущей зарплаты. Неучтённые платежи и минимальный платёж по кредитке проверь отдельно. Введённая покупка не записывается.');
+ }
+ open.addEventListener('click',()=>{form.reset();$('purchaseDaily').value=dailyBudgetValue(data.usualDailyBudget)??'';renderPurchase();if(!dialog.open)dialog.showModal();});
+ $('purchaseCheckClose').addEventListener('click',()=>dialog.close());
+ form.addEventListener('submit',event=>{event.preventDefault();renderPurchase();});
+ form.addEventListener('input',renderPurchase);
+}
+
+// Calendar simulation never updates balances or turns planned events into actual transactions.
+function calendarValidPlan(p){
+ const date=p&&typeof p.date==='string'?fromISO(p.date):null;
+ return !!date&&iso(date)===p.date&&date.getFullYear()>=1900&&date.getFullYear()<=9999&&typeof p.id==='string'&&p.id.length>0&&typeof p.name==='string'&&p.name.trim().length>0&&p.name.length<=80&&Number.isSafeInteger(p.cents)&&p.cents>0;
+}
+function calendarAddDays(date,n){return new Date(date.getFullYear(),date.getMonth(),date.getDate()+n);}
+function calendarForecast(keys,opening,daily,events){
+ let balance=opening===null||daily===null?null:opening;
+ let mortgageReserve=events.mortgageReserve,creditReserve=events.creditReserve;
+ const byDate=new Map();
+ for(const e of events.rows){if(!byDate.has(e.date))byDate.set(e.date,[]);byDate.get(e.date).push(e);}
+ return keys.map(date=>{
+  const rows=[...(byDate.get(date)||[])].sort((a,b)=>(a.kind==='income'?1:0)-(b.kind==='income'?1:0));
+  let low=balance;
+  const debit=c=>{if(balance!==null){balance-=c;if(!Number.isSafeInteger(balance)){balance=null;return;}low=Math.min(low,balance);}};
+  for(const e of rows.filter(x=>x.kind!=='income')){
+   if(e.cents===null){balance=null;continue;}
+   let cost=e.cents;
+   if(e.kind==='mortgage'){const used=Math.min(Math.max(0,mortgageReserve),cost);mortgageReserve-=used;cost-=used;}
+   if(e.kind==='credit'){const used=Math.min(Math.max(0,creditReserve),cost);creditReserve-=used;cost-=used;}
+   debit(cost);
+  }
+  if(daily!==null)debit(daily);
+  for(const e of rows.filter(x=>x.kind==='income')){
+   if(e.cents===null){balance=null;continue;}
+   if(balance!==null){balance+=e.cents;if(!Number.isSafeInteger(balance))balance=null;}
+  }
+  if(balance!==null&&!Number.isSafeInteger(balance))balance=null;
+  return {date,rows,balance,low,shortfall:low===null?null:Math.max(0,-low)};
+ });
+}
+function calendarOverview(days){
+ const first=days.find(d=>d.shortfall>0)||null;
+ const peak=days.reduce((best,d)=>d.shortfall>0&&(!best||d.shortfall>best.shortfall)?d:best,null);
+ const unknown=days.some(d=>d.balance===null||d.shortfall===null||d.rows.some(e=>e.cents===null));
+ const ending=days.length?days[days.length-1].balance:null;
+ return {first,peak,unknown,ending,riskDays:days.filter(d=>d.shortfall>0).length};
+}
+function calendarSnapshot(now,horizon=30){
+ const length=[30,60,90].includes(horizon)?horizon:30;
+ const today=iso(now),end=iso(calendarAddDays(now,length-1)),keys=Array.from({length},(_,i)=>iso(calendarAddDays(now,i)));
+ const actual=actualMoneyToday(now),snapshot=window.budgetAdvisorSnapshot(now),rows=[];
+ const cents=v=>typeof v==='number'&&Number.isFinite(v)&&Number.isSafeInteger(Math.round(v*100))?Math.round(v*100):null;
+ const push=(date,kind,name,value)=>{if(date>=today&&date<=end)rows.push({date,kind,name,cents:value});};
+ // Only actual receipts dated on or before today suppress a scheduled slot.
+ const received=new Set((data.receipts||[]).filter(r=>r.date<=today).map(r=>r.id));
+ for(let i=-2;i<=Math.ceil(length/28)+1;i++){
+  const cycle=new Date(now.getFullYear(),now.getMonth()+i,1),key=iso(cycle).slice(0,7),plan=data.months[key]||{};
+  const forecast=payrollForecast(plan,key,today);
+  for(const type of ['advance','salary']){
+   if(received.has(key+'-'+type))continue;
+   const shift=type==='salary'&&Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0;
+   const target=new Date(cycle.getFullYear(),cycle.getMonth()+shift,1);
+   const date=iso(plannedPayday(iso(target).slice(0,7),Number(data.payDays[type])||1));
+   const manual=Number(plan[type]),estimate=forecast.configured?(type==='advance'?forecast.advanceForecast:forecast.salaryForecast):(Number.isFinite(manual)&&manual>0?manual:null);
+   push(date,'income',type==='advance'?'Аванс · прогноз':'Зарплата · прогноз',cents(estimate));
+  }
+ }
+ for(const bill of (data.monthlyBills||[]).filter(validMonthlyBill)){
+  const paid=new Set((data.expenses||[]).filter(e=>e.date<=today&&e.billId===bill.id).map(e=>e.billDue));
+  const first=fromISO(bill.firstDue);
+  let overdue=0;
+  for(let i=0;i<120000;i++){
+   const dueDate=new Date(first.getFullYear(),first.getMonth()+i+1,0);
+   dueDate.setDate(Math.min(first.getDate(),dueDate.getDate()));
+   const due=iso(dueDate);
+   if(due>end)break;
+   if(paid.has(due))continue;
+   if(due<today){overdue++;continue;}
+   push(due,'bill',bill.name,bill.cents);
+  }
+  if(overdue)push(today,'bill',bill.name+' · просрочено '+overdue,Number.isSafeInteger(overdue*bill.cents)?overdue*bill.cents:null);
+ }
+ const mortgage=snapshot.mortgage;
+ if(mortgage.remaining>0)push(iso(mortgage.due),'mortgage','Ипотека · остаток платежа',cents(mortgage.remaining));
+ for(let offset=1;offset<=Math.ceil(length/28)+1;offset++){
+  const following=new Date(mortgage.due.getFullYear(),mortgage.due.getMonth()+offset,1);
+  if(iso(following)>end)break;
+  const cycle=iso(new Date(following.getFullYear(),following.getMonth()-1,1)).slice(0,7),plan=num(data.months[cycle]?.mortgage??data.mortgageMonthly??55000);
+  const paid=(data.regularPayments||[]).filter(p=>p.target==='mortgage'&&p.month===cycle&&p.date<=today).reduce((n,p)=>n+num(p.amount),0);
+  const remaining=Math.max(0,plan-(paid|| (data.paidMortgageMonth===cycle?plan:0)));
+  if(remaining>0)push(iso(following),'mortgage','Ипотека',cents(remaining));
+ }
+ if(snapshot.debt>0&&data.deadline&&fromISO(data.deadline))push(data.deadline<today?today:data.deadline,'credit','Кредитка · погасить долг',cents(snapshot.debt));
+ for(const p of data.calendarPurchases||[])if(calendarValidPlan(p))push(p.date<today?today:p.date,'purchase',p.name+(p.date<today?' · просроченный план':''),p.cents);
+ const daily=dailyBudgetValue(data.usualDailyBudget);
+ const days=calendarForecast(keys,actual?cents(actual.available):null,cents(daily),{rows,mortgageReserve:actual?cents(actual.mortgage)??0:0,creditReserve:actual?cents(actual.creditReserve)??0:0});
+ const history=[],start=iso(calendarAddDays(now,-29));
+ const addHistory=(items,kind,label)=>{for(const x of items||[])if(x.date>=start&&x.date<=today)history.push({date:x.date,kind,name:label(x),cents:cents(num(x.amount))});};
+ addHistory(data.receipts,'income',x=>x.type==='advance'?'Аванс':'Зарплата');
+ addHistory(data.extraIncomes,'income',x=>x.source||'Дополнительный доход');
+ addHistory(data.expenses,'expense',x=>x.type||cats.find(c=>c.id===x.category)?.name||'Расход');
+ addHistory(data.regularPayments,'expense',x=>x.target==='mortgage'?'Ипотека':'Кредитка');
+ addHistory(data.earlyRepayments,'expense',x=>x.target==='mortgage'?'Досрочная ипотека':'Досрочное погашение кредитки');
+ addHistory(data.transfers,'transfer',()=> 'Перевод между конвертами');
+ history.sort((a,b)=>b.date.localeCompare(a.date));
+ return {today,days,history,opening:actual?cents(actual.available):null,daily:cents(daily),unknownCredit:snapshot.debt>0&&(!data.deadline||!fromISO(data.deadline))};
+}
+function setupMoneyCalendar(){
+ const dialog=$('moneyCalendarDialog'),form=$('calendarPurchaseForm');
+ if(!dialog||!form)return;
+ let horizon=30;
+ const money=c=>c===null?'неизвестно':rub(c/100);
+ const node=(tag,text,cls)=>{const el=document.createElement(tag);el.textContent=text;if(cls)el.className=cls;return el;};
+ function render(){
+  const s=calendarSnapshot(new Date(),horizon),summary=$('moneyCalendarSummary'),host=$('moneyCalendarDays'),history=$('calendarActualList'),list=$('calendarPurchaseList');
+  const overview=calendarOverview(s.days),risk=overview.first,peak=overview.peak;
+  summary.textContent='Свободный остаток сейчас: '+money(s.opening)+' · обычные расходы в день: '+money(s.daily)+'. '+(overview.unknown||s.unknownCredit?'Прогноз неполный; проверь исходные данные. ':risk?'Возможна нехватка денег. ':'По введённым данным нехватки не видно. ')+(s.unknownCredit?'Срок кредитки неизвестен. ':'')+'Будущие поступления не гарантированы.';
+  const cards=$('calendarForecastSummary');cards.replaceChildren();
+  const metric=(label,value,warning=false)=>{const card=node('div','');card.append(node('small',label),node('strong',value,warning?'calendar-risk':''));cards.append(card);};
+  metric('Первая возможная нехватка',risk?risk.date+' · '+money(risk.shortfall):overview.unknown||s.unknownCredit?'Неизвестно':'Не выявлена',!!risk);
+  metric('Наибольшая выявленная нехватка',peak?money(peak.shortfall)+' · '+peak.date:overview.unknown||s.unknownCredit?'Неизвестно':money(0),!!peak);
+  metric('Дней с выявленным дефицитом',String(overview.riskDays)+(overview.unknown||s.unknownCredit?' (неполный прогноз)':''),overview.riskDays>0);
+  metric('Остаток на '+s.days[s.days.length-1].date,money(overview.ending),overview.ending!==null&&overview.ending<0);
+  for(const b of $('calendarHorizon').querySelectorAll('[data-horizon]'))b.setAttribute('aria-pressed',String(Number(b.dataset.horizon)===horizon));
+  host.replaceChildren();history.replaceChildren();list.replaceChildren();
+  for(const d of s.days){
+   const row=node('div','','calendar-day'),head=node('div','','calendar-day-head');
+   head.append(node('b',fromISO(d.date).toLocaleDateString('ru-RU',{day:'numeric',month:'short',weekday:'short'})),node('b','Прогноз: '+money(d.balance),d.shortfall>0?'calendar-risk':''));
+   row.append(head);
+   if(d.shortfall>0)row.append(node('div','Возможная нехватка: '+money(d.shortfall),'calendar-risk'));
+   for(const e of d.rows)row.append(node('small',e.name+' · '+(e.cents===null?'сумма неизвестна':(e.kind==='income'?'+':'−')+money(e.cents))));
+   if(s.daily!==null)row.append(node('small','Обычные расходы · −'+money(s.daily)));
+   host.append(row);
+  }
+  for(const e of s.history)history.append(node('div',e.date+' · '+e.name+' · '+(e.kind==='income'?'+':e.kind==='expense'?'−':'')+money(e.cents),'calendar-day'));
+  if(!s.history.length)history.append(node('p','Нет записанных операций.'));
+  for(const p of [...(data.calendarPurchases||[])].sort((a,b)=>a.date.localeCompare(b.date))){
+   const row=node('div','','calendar-plan-row'),description=node('div',p.date+' · '+p.name+' · '+money(p.cents));
+   const remove=node('button','Убрать','btn light');remove.type='button';
+   remove.addEventListener('click',()=>{
+    if(!confirm('Убрать план? Если покупка уже совершена, запиши её обычным расходом.'))return;
+    const previous=data.calendarPurchases;
+    data.calendarPurchases=previous.filter(x=>x.id!==p.id);
+    if(!save())data.calendarPurchases=previous;
+    render();
+   });row.append(description,remove);list.append(row);
+  }
+ }
+ $('moneyCalendarOpen').addEventListener('click',()=>{
+  const today=iso(new Date());$('calendarPurchaseDate').min=today;$('calendarPurchaseDate').value=today;render();if(!dialog.open)dialog.showModal();
+ });
+ $('moneyCalendarClose').addEventListener('click',()=>dialog.close());
+ $('calendarHorizon').addEventListener('click',event=>{const b=event.target.closest('[data-horizon]');if(!b)return;const n=Number(b.dataset.horizon);if([30,60,90].includes(n)){horizon=n;render();}});
+ form.addEventListener('submit',event=>{
+  event.preventDefault();
+  const name=$('calendarPurchaseName').value.trim(),date=$('calendarPurchaseDate').value,cents=purchaseCents($('calendarPurchaseAmount').value);
+  const p={id:'plan-'+Date.now()+'-'+Math.random().toString(36).slice(2),name,date,cents};
+  if(!calendarValidPlan(p)||date<iso(new Date())){alert('Проверь название, дату и сумму.');return;}
+  const previous=data.calendarPurchases;data.calendarPurchases=[...(previous||[]),p];
+  if(!save()){data.calendarPurchases=previous;return;}
+  form.reset();$('calendarPurchaseDate').value=iso(new Date());render();
+ });
+}
+
+// Smart text input is local, single-operation only, and never writes transactions.
+// Strict Russian whole-number phrases (up to 999999); never infer fractional words.
+function normalizeSpokenAmount(text){
+ const units={ноль:0,один:1,одна:1,одно:1,два:2,две:2,три:3,четыре:4,пять:5,шесть:6,семь:7,восемь:8,девять:9};
+ const teens={десять:10,одиннадцать:11,двенадцать:12,тринадцать:13,четырнадцать:14,пятнадцать:15,шестнадцать:16,семнадцать:17,восемнадцать:18,девятнадцать:19};
+ const tens={двадцать:20,тридцать:30,сорок:40,пятьдесят:50,шестьдесят:60,семьдесят:70,восемьдесят:80,девяносто:90};
+ const hundreds={сто:100,двести:200,триста:300,четыреста:400,пятьсот:500,шестьсот:600,семьсот:700,восемьсот:800,девятьсот:900};
+ const scale=/^(?:тысяч(?:а|и|у)?|тыщ(?:а|и|у)?|тыс)$/;
+ const has=(obj,k)=>Object.prototype.hasOwnProperty.call(obj,k);
+ const known=w=>[units,teens,tens,hundreds].some(obj=>has(obj,w))||scale.test(w);
+ if(/(?:^|[^\p{L}])(?:миллион[а-я]*|миллиард[а-я]*|полтора|полторы|половина|половиной|копе[йекч][а-я]*|минус|плюс)(?=$|[^\p{L}])/u.test(text))return null;
+ const words=[...text.matchAll(/[\p{L}]+/gu)],groups=[];
+ let group=[];
+ for(const word of words){
+  if(known(word[0])){
+   if(group.length&& !/^\s+$/.test(text.slice(group.at(-1).index+group.at(-1)[0].length,word.index))){groups.push(group);group=[];}
+   group.push(word);
+  }else if(group.length){groups.push(group);group=[];}
+ }
+ if(group.length)groups.push(group);
+ if(!groups.length)return text;
+ if(groups.length!==1)return null;
+ if(/\d/.test(text)){
+  const g=groups[0];
+  if(g.length!==1||!scale.test(g[0][0]))return null;
+  const prefix=text.slice(0,g[0].index),m=prefix.match(/(?:^|[^\d.,-])(\d{1,3})\s+$/);
+  if(!m||[...text.matchAll(/\d+/g)].length!==1||Number(m[1])<=0)return null;
+  const at=prefix.length-m[0].length+m[0].indexOf(m[1]);
+  const end=g[0].index+g[0][0].length;
+  const after=text.slice(end).replace(/^\.(?=\s|$)/,'');
+  return text.slice(0,at)+String(Number(m[1])*1000)+after;
+ }
+ const chunk=arr=>{
+  if(!arr.length)return 0;
+  let i=0,n=0;
+  if(has(hundreds,arr[i]))n+=hundreds[arr[i++]];
+  if(has(teens,arr[i]))n+=teens[arr[i++]];
+  else{
+   if(has(tens,arr[i]))n+=tens[arr[i++]];
+   if(has(units,arr[i])){if(units[arr[i]]===0&&arr.length!==1)return null;n+=units[arr[i++]];}
+  }
+  return i===arr.length?n:null;
+ };
+ const g=groups[0],tokens=g.map(w=>w[0]),scales=tokens.map((w,i)=>scale.test(w)?i:-1).filter(i=>i>=0);
+ let amount;
+ if(scales.length>1)return null;
+ if(scales.length===1){
+  const at=scales[0],a=at?chunk(tokens.slice(0,at)):1,b=chunk(tokens.slice(at+1));
+  if(a===null||a<=0||b===null)return null;
+  amount=a*1000+b;
+ }else amount=chunk(tokens);
+ if(amount===null||amount<=0)return null;
+ return text.slice(0,g[0].index)+String(amount)+text.slice(g.at(-1).index+g.at(-1)[0].length).replace(/^\.(?=\s|$)/,'');
+}
+// The browser owns speech recognition. No audio is collected or sent by Saldoza.
+// iOS workaround for WebKit bug 321436: synthesize a fixed prompt, then
+// start a fresh non-continuous session and let it end naturally.
+function setupIOSSmartVoice(dialog,input,form){
+ const button=$('smartVoiceButton'),status=$('smartVoiceStatus'),keyboard=$('smartVoiceKeyboard');
+ button.hidden=true;button.style.display='none';button.disabled=true;
+ keyboard.textContent='🎙 Диктовка клавиатурой';
+ const reset=()=>{status.textContent='На iPhone используй микрофон клавиатуры. Встроенная диктовка браузера пока нестабильна.';};
+ keyboard.addEventListener('click',()=>{input.focus();status.textContent='Нажми микрофон на клавиатуре, продиктуй фразу и нажми «Распознать».';});
+ reset();return reset;
+}
+function setupSmartVoice(dialog,input,form){
+ const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ if(ios)return setupIOSSmartVoice(dialog,input,form);
+ const button=$('smartVoiceButton'),status=$('smartVoiceStatus'),keyboard=$('smartVoiceKeyboard');
+ const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
+ const fallback='Можно использовать микрофон клавиатуры или ввести текст.';
+ let session=null,cooldown=null,recognizer=null;
+ const idle=()=>{button.textContent='🎙 Продиктовать';button.setAttribute('aria-pressed','false');button.disabled=!Recognition||!!session||cooldown!==null;};
+ const clearTimer=s=>{if(s.timer!==null){clearTimeout(s.timer);s.timer=null;}};
+ const release=s=>{
+  if(session!==s)return;
+  clearTimer(s);session=null;
+  // Do not start a new recognizer until the previous one has ended and released audio.
+  if(cooldown!==null)clearTimeout(cooldown);
+  cooldown=setTimeout(()=>{cooldown=null;idle();},1200);
+  idle();
+ };
+ const showText=(text,final)=>{
+  if(!dialog.open||!text)return;
+  if(text.length>240){status.textContent='Фраза слишком длинная. Продиктуй одну операцию.';return;}
+  input.value=text;input.dispatchEvent(new Event('input',{bubbles:true}));
+  status.textContent=final?'Текст получен. Проверь его и результат распознавания.':'Получен неполный текст. Проверь и дополни фразу, затем нажми «Распознать».';
+  if(final&&typeof form.requestSubmit==='function')form.requestSubmit();
+ };
+ const complete=s=>{
+  if(session!==s)return;
+  const text=s.finalText||s.partial,final=!!s.finalText&&!s.hasInterim;
+  release(s);
+  if(s.cancelled||!dialog.open)return;
+  if(text)showText(text,final);
+  else status.textContent='Распознавание завершилось без текста ('+s.phase+'). '+fallback;
+ };
+ const closing=s=>{button.textContent='Завершение…';button.disabled=true;button.setAttribute('aria-pressed','false');};
+ const awaitEnd=s=>{
+  clearTimer(s);closing(s);
+  s.timer=setTimeout(()=>{
+   if(session!==s)return;
+   // Missing end event: abort the old instance and allow a fresh attempt after cooldown.
+   const cancelled=s.cancelled,text=s.finalText||s.partial,final=!!s.finalText&&!s.hasInterim;
+   recognizer=null;
+   release(s);
+   try{s.r.abort();}catch(_){}
+   if(cancelled||!dialog.open)return;
+   if(text)showText(text,final);
+   else status.textContent='Сервис не завершил распознавание. Попробуй ещё раз. '+fallback;
+  },4500);
+ };
+ const cancel=()=>{
+  const s=session;if(!s)return;
+  s.cancelled=true;s.stopping=true;awaitEnd(s);
+  try{s.r.abort();}catch(_){release(s);}
+ };
+ const finish=s=>{
+  if(session!==s||s.stopping)return;
+  s.stopping=true;status.textContent='Обрабатывается речь…';awaitEnd(s);
+  try{s.r.stop();}catch(_){try{s.r.abort();}catch(__){release(s);}}
+ };
+ const watch=(s,ms)=>{
+  clearTimer(s);
+  s.timer=setTimeout(()=>{
+   if(session!==s||s.stopping)return;
+   finish(s);
+  },ms);
+ };
+ const resetVoice=()=>{
+  cancel();idle();
+  status.textContent=Recognition?'Речь распознаёт браузер или система; может потребоваться интернет.':('Распознавание браузером недоступно. '+fallback);
+ };
+ resetVoice();
+ keyboard.addEventListener('click',()=>{cancel();status.textContent='Нажми микрофон на клавиатуре iPhone, продиктуй фразу и нажми «Распознать».';input.focus();});
+ button.addEventListener('click',()=>{
+  if(session){finish(session);return;}
+  if(cooldown!==null||!Recognition||!dialog.open)return;
+  if(input.value.trim()&&!confirm('Заменить введённый текст результатом диктовки?'))return;
+  let s;
+  try{
+   // Dismiss the keyboard before starting WebKit speech recognition.
+   if(typeof input.blur==='function')input.blur();
+   const r=recognizer||(recognizer=new Recognition());r.lang='ru-RU';r.continuous=false;r.interimResults=true;r.maxAlternatives=1;
+   s={r,timer:null,phase:'запуск',partial:'',finalText:'',hasInterim:false,stopping:false,cancelled:false};
+   session=s;button.disabled=false;button.textContent='■ Завершить';button.setAttribute('aria-pressed','true');
+   status.textContent='Запрашивается доступ к микрофону…';
+   const live=()=>session===s&&!s.cancelled&&!s.stopping;
+   const stage=(phase,message)=>{if(!live())return;s.phase=phase;status.textContent=message;watch(s,15000);};
+   r.onstart=()=>stage('распознавание запущено','Говори одну операцию…');
+   r.onaudiostart=()=>stage('микрофон включён','Микрофон включён. Говори…');
+   r.onspeechstart=()=>stage('речь обнаружена','Речь обнаружена…');
+   r.onresult=event=>{
+    if(session!==s||s.cancelled||!dialog.open)return;
+    const all=[],finals=[];let hasInterim=false;
+    for(let i=0;i<event.results.length;i++){const item=event.results[i];all.push(item[0].transcript);if(item.isFinal)finals.push(item[0].transcript);else hasInterim=true;}
+    s.partial=all.join(' ').trim();s.finalText=hasInterim?'':finals.join(' ').trim();s.hasInterim=hasInterim;s.phase='получен текст';
+    if(s.finalText){if(!s.stopping)finish(s);}
+    else if(s.partial&&!s.stopping){status.textContent='Распознано: '+s.partial;watch(s,10000);}
+   };
+   r.onerror=event=>{
+    if(session!==s)return;
+    if(!s.cancelled){
+     const code=String(event.error||'unknown');
+     recognizer=null;
+     const messages={'not-allowed':'Доступ к микрофону или распознаванию запрещён.','service-not-allowed':'Сервис распознавания запрещён в этом режиме браузера.','no-speech':'Речь не обнаружена.','audio-capture':'Микрофон недоступен.','network':'Ошибка сети сервиса распознавания.','language-not-supported':'Русский язык недоступен.','aborted':'Распознавание прервано.'};
+     status.textContent=(messages[code]||'Ошибка распознавания.')+' ['+code+'] '+fallback;
+     s.cancelled=true;
+    }
+    s.stopping=true;awaitEnd(s);
+   };
+   r.onend=()=>complete(s);
+   watch(s,15000);r.start();
+  }catch(error){
+   recognizer=null;
+   if(s&&session===s){s.cancelled=true;release(s);try{s.r.abort();}catch(_){}}
+   status.textContent='Не удалось запустить распознавание ['+String(error?.name||'unknown')+']. '+fallback;
+  }
+ });
+ dialog.addEventListener('close',()=>{if(!dialog.open)cancel();});
+ dialog.addEventListener('cancel',cancel);
+ form.addEventListener('submit',cancel);
+ input.addEventListener('input',()=>{if(session)cancel();});
+ return resetVoice;
+}
+// Learn only from an explicitly saved, ordinary smart expense. No extra financial records.
+let pendingSmartExpense=null;
+function smartCategoryKey(rest){
+ const key=String(rest||'').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[^\p{L}\s]/gu,' ')
+  .split(/\s+/).filter(w=>w&&!/^(?:потратил[аи]?|купил[аи]?|оплатил[аи]?|заплатил[аи]?|расход|на|за|рублей|рубля|рубль|руб|р)$/.test(w)).join(' ');
+ return key.length>=2&&key.length<=120?key:'';
+}
+function learnedSmartCategory(key,expenses,types){
+ if(!key)return null;
+ // Latest saved choice wins; removed or renamed categories never become new categories automatically.
+ for(let i=(expenses||[]).length-1;i>=0;i--){
+  const e=expenses[i];
+  if(e.smartCategoryKey!==key||isWifeTransferType(e.type)||!['family','utilities','savings','other'].includes(e.category)||!(types?.[e.category]||[]).includes(e.type))continue;
+  return {category:e.category,type:e.type};
+ }
+ return null;
+}
+function smartLearningKeyForSave(pending,amount,date,type){
+ return pending&&pending.amount===amount&&pending.date===date&&!isWifeTransferType(type)?pending.key:'';
+}
+function setupSmartLearning(){
+ const clear=$('smartLearningClear'),status=$('smartLearningStatus');
+ if(!clear||!status)return;
+ const render=()=>{const count=new Set((data.expenses||[]).map(e=>e.smartCategoryKey).filter(Boolean)).size;status.textContent='Запомнено фраз: '+count+'.';clear.disabled=count===0;};
+ clear.addEventListener('click',()=>{
+  if(!confirm('Очистить запомненные категории? История расходов и деньги не изменятся.'))return;
+  const previous=data.expenses;
+  data.expenses=previous.map(e=>{if(!e.smartCategoryKey)return e;const copy={...e};delete copy.smartCategoryKey;return copy;});
+  if(!save())data.expenses=previous;
+  render();
+ });
+ // Update on opening settings and after any normal refresh/import.
+ window.refreshSmartLearning=render;
+ render();
+}
+function parseSmartOperation(raw,now,types,mode=null){
+ const text=String(raw||'').trim();
+ const fail=reason=>({ok:false,reason});
+ if(!text||text.length>240)return fail('Введи одну операцию (до 240 символов).');
+ let t=text.toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[\u00a0\u202f]/g,' ');
+ if(/(?:^|[^\p{L}])(?:не|нет|планирую|хочу|буду|надо|нужно|завтра|послезавтра|если|может|примерно|около|от\s+\d+|до\s+\d+)(?=$|[^\p{L}])/u.test(t)||/[?;+\n]/.test(t))return fail('Укажи одну уже совершённую операцию, без планов, отрицаний или приблизительных сумм.');
+ if(/[$€£]|(?:usd|eur|доллар|евро|злот|тенге)/i.test(t))return fail('Сейчас умный ввод поддерживает только рубли.');
+ let date=iso(now),dates=[];
+ t=t.replace(/\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}[./]\d{1,2}[./]\d{4}\b/g,x=>{let d=x;if(!x.includes('-')){const [a,b,c]=x.split(/[./]/);d=c+'-'+b.padStart(2,'0')+'-'+a.padStart(2,'0');}dates.push(d);return ' ';});
+ t=t.replace(/(?:^|[^\p{L}])(позавчера|вчера|сегодня)(?=$|[^\p{L}])/gu,(m,x)=>{dates.push(iso(new Date(now.getFullYear(),now.getMonth(),now.getDate()-(x==='позавчера'?2:x==='вчера'?1:0))));return ' ';});
+ if(dates.length>1)return fail('Укажи одну дату.');
+ if(dates.length)date=dates[0];
+ const parsed=fromISO(date);
+ if(!parsed||iso(parsed)!==date||date>iso(now))return fail('Дата должна быть корректной и не позже сегодняшней.');
+ const normalized=normalizeSpokenAmount(t);
+ if(normalized===null)return fail('Не удалось однозначно разобрать сумму словами. Укажи одну сумму цифрами.');
+ t=normalized;
+ if(/\d{1,2}[./]\d{1,2}(?![\d.,])/u.test(t)&&!/^\d+[.,]\d{1,2}$/.test(t.trim())&&/\d{1,2}\.\d{1,2}\s+(?:на|за|купил|потратил)/u.test(t))return fail('Для даты укажи полный год.');
+ const values=[...t.matchAll(/(?:\d{1,3}(?: \d{3})+|\d+)(?:[.,]\d+)?/g)];
+ if(values.length!==1||/-\s*\d/.test(t)||/\d\s*(?:тыс|к\b|k\b|млн)/iu.test(t))return fail('Укажи одну точную сумму цифрами, например 1800 или 1 800,50.');
+ const v=values[0][0],amount=Number(v.replace(/ /g,'').replace(',','.'));
+ if(!Number.isFinite(amount)||amount<=0||!Number.isSafeInteger(Math.round(amount*100))||Math.abs(amount*100-Math.round(amount*100))>0.0001)return fail('Сумма должна быть положительной, до копеек.');
+ // Recognize only explicit spouse-transfer wording, or the short "жене 3000" in Expense.
+ const rest=(t.slice(0,values[0].index)+' '+t.slice(values[0].index+v.length))
+   .replace(/₽|(?:^|\s)(?:рублей|рубля|рубль|руб\.?|р\.?)(?=\s|$)/gu,' ').trim().replace(/[.!]+$/,'').replace(/\s+/g,' ').trim();
+ const explicitWife=/^(?:(?:перевод|перевел[аи]?|отправил[аи]?|перекинул[аи]?|скинул[аи]?|дал[аи]?) (?:деньги |денег )?жене|жене (?:перевод|перевел[аи]?|отправил[аи]?|перекинул[аи]?|скинул[аи]?|дал[аи]?))(?: на продукты)?$/u.test(rest);
+ if(mode==='transfer'){
+  if(/жене|жен[аы]|ипотек|кредит|подушк|зарплат|аванс|долг|погасил|получил|потратил|купил|оплатил/.test(rest))return fail('Это не перевод между конвертами. Используй соответствующую форму.');
+  const envelope=name=>{
+   const n=String(name||'').trim().replace(/^(?:конверта|конверт|категории|категорию)\s+/,'').replace(/[«»"']/g,'').trim();
+   if(/^(?:семейные нужды|семейных нужд|семейный бюджет|семейного бюджета|семейный|семейного|семья|семьи|семью|продукты|продуктов)$/.test(n))return 'family';
+   if(/^(?:коммуналка|коммуналки|коммуналку|коммунальные платежи|коммунальных платежей|жкх)$/.test(n))return 'utilities';
+   if(/^(?:накопления|накоплений|накопление|сбережения|сбережений)$/.test(n))return 'savings';
+   if(/^(?:остальное|остального|остальных|остаток|остатка|прочее|прочего|доступный бюджет|доступного бюджета)$/.test(n))return 'other';
+   return '';
+  };
+  const phrase=rest.replace(/^(?:перевод|перевел[аи]?|перевести|перенес[ла]?|перекинул[аи]?|перебросил[аи]?|переместил[аи]?)\s*/,'').trim();
+  const direct=phrase.match(/^(?:из|со|с)\s+(.+?)\s+(?:в|на)\s+(.+)$/);
+  const reverse=phrase.match(/^(?:в|на)\s+(.+?)\s+(?:из|со|с)\s+(.+)$/);
+  const fromOnly=phrase.match(/^(?:из|со|с)\s+(.+)$/),toOnly=phrase.match(/^(?:в|на)\s+(.+)$/);
+  const from=envelope(direct?direct[1]:reverse?reverse[2]:fromOnly?fromOnly[1]:'');
+  const to=envelope(direct?direct[2]:reverse?reverse[1]:toOnly?toOnly[1]:'');
+  if(from&&from===to)return fail('Выбери разные конверты.');
+  return {ok:true,kind:'transfer',amount,date,from,to,note:text.slice(0,120),hint:!from||!to?'Уточни исходный и целевой конверты в форме.':'Внутренний перевод: не доход и не расход.'};
+ }
+ if(explicitWife||mode==='expense'&&rest==='жене'){
+  if(mode==='income')return fail('Перевод жене записывается через «Расход».');
+  return {ok:true,kind:'expense',amount,date,category:'family',type:'Отправил жене',wifeTransfer:true,note:text.slice(0,120),hint:'Проверь исходный конверт. Это внутренний перевод, а не расход семьи.'};
+ }
+ if(/перев[ео]|отправил|перекинул|скинул|снял|пополнил|погасил|ипотек|кредит|подушк|зарплат|аванс|накоплен/.test(t))return fail('Для переводов, зарплаты, кредитов и накоплений используй соответствующую форму.');
+ if(/(?:^|[^\p{L}])(?:жена|жене|жены|дочь|дочка|сын)(?=$|[^\p{L}])/u.test(t)&&!/доход жены|алименты/.test(t))return fail('Уточни, кто совершил операцию, через обычную форму.');
+ const income=/получил[аи]?|поступил[оа]?|пришл[оаи]|начислил[и]?|доход|кэшбэк|кешбэк|процент[ыа] по вкладу|преми[яю]|подработк|алименты/.test(t);
+ const expense=/потратил[аи]?|купил[аи]?|оплатил[аи]?|заплатил[аи]?|расход/.test(t);
+ if(income&&expense)return fail('Раздели доход и расход на две записи.');
+ if(mode==='expense'&&income)return fail('Похоже на доход. Открой «Доход» или уточни запись.');
+ if(mode==='income'&&expense)return fail('Похоже на расход. Открой «Расход» или уточни запись.');
+ const rules=[
+  ['family','Питомцы',/корм|кошк|кот[ауеы]?|собак|ветеринар|питомц/],
+  ['family','Продукты',/продукт|продуктов|пятерочк|магазин|хлеб|молок|мясо|овощ|фрукт|еда/],
+  ['family','Здоровье',/аптек|лекарств|врач|таблетк/],
+  ['family','Бытовая химия',/бытов[а-я]* хим|порошок|моющ/],
+  ['family','Гигиена',/гигиен|шампун|мыло/],
+  ['family','Одежда и дети',/одежд|обув|детсад|садик|школ/],
+  ['utilities','Интернет',/интернет/],
+  ['utilities','Электричество',/электрич|свет/],
+  ['utilities','Вода',/водоснаб|за воду/],
+  ['utilities','ЖКХ',/жкх|коммунал/],
+  ['other','Автомобиль',/бензин|заправк|топлив|авто/],
+  ['other','Кафе',/кафе|ресторан/],
+  ['other','Подарки',/подарок|подарки/]
+ ];
+ const matches=rules.filter(r=>r[2].test(t));
+ if(income||mode==='income'){
+  const source=/алименты|доход жены/.test(t)?'Доход жены':/процент[ыа] по вкладу/.test(t)?'Проценты по вкладу':/к[эе]шб[эе]к/.test(t)?'Кэшбэк':/преми/.test(t)?'Премия':/подработк/.test(t)?'Подработка':/возврат/.test(t)?'Возврат покупки':/подар/.test(t)?'Подарок':'Другое';
+  return {ok:true,kind:'income',amount,date,source,destination:source==='Доход жены'?'family':'',note:text.slice(0,120)};
+ }
+ if(!expense&&!matches.length&&mode!=='expense')return fail('Укажи, это расход или дополнительный доход.');
+ const match=matches.length===1?matches[0]:null;
+ const category=match?match[0]:'',type=match?((types?.[category]||[]).find(x=>String(x).toLocaleLowerCase('ru')===match[1].toLocaleLowerCase('ru'))||''):'';
+ return {ok:true,kind:'expense',amount,date,category,type,learningKey:smartCategoryKey(rest),note:text.slice(0,120),hint:matches.length>1?'Найдено несколько категорий — выбери нужную.':!category||!type?'Проверь и выбери категорию и вид расхода.':''};
+}
+function setupSmartOperation(){
+ const dialog=$('smartOperationDialog'),form=$('smartOperationForm'),input=$('smartOperationText'),preview=$('smartOperationPreview'),next=$('smartOperationContinue');
+ if(!dialog||!form)return;
+ const resetVoice=setupSmartVoice(dialog,input,form);
+ let draft=null,mode=null;
+ const reset=()=>{draft=null;next.disabled=true;preview.textContent='Введи одну операцию и нажми «Распознать».';};
+ const openSmart=kind=>{
+  if(!['expense','income','transfer'].includes(kind))return;
+  pendingSmartExpense=null;mode=kind;form.reset();reset();resetVoice();
+  $('smartOperationTitle').textContent=kind==='expense'?'Новый расход':kind==='income'?'Новый доход':'Новый перевод';
+  $('smartOperationLabel').textContent=kind==='expense'?'Что потратили?':kind==='income'?'Что пришло?':'Что переводим?';
+  input.placeholder=kind==='expense'?'Например: корм собаке 1800':kind==='income'?'Например: кэшбэк 300':'Например: 3000 из остальных в накопления';
+  if(!dialog.open)dialog.showModal();
+  input.focus({preventScroll:true});
+ };
+ const openManual=kind=>{
+  if(!['expense','income','transfer'].includes(kind))return;
+  const tile=document.querySelector('[data-ops-action="'+kind+'"]');
+  if(!tile){preview.textContent='Не удалось открыть форму операции.';return;}
+  dialog.close();
+  document.dispatchEvent(new CustomEvent('budget:manual-operation-open',{detail:kind}));
+ };
+ document.addEventListener('budget:smart-operation-open',event=>openSmart(event.detail));
+ document.addEventListener('budget:operation-sheet-closed',()=>{pendingSmartExpense=null;});
+ $('smartOperationManual').addEventListener('click',()=>{pendingSmartExpense=null;draft=null;next.disabled=true;openManual(mode);});
+ $('smartOperationClose').addEventListener('click',()=>dialog.close());
+ input.addEventListener('input',reset);
+ form.addEventListener('submit',event=>{
+  event.preventDefault();reset();
+  const now=new Date(),r=parseSmartOperation(input.value,now,data.expenseTypes,mode);
+  if(!r.ok){preview.textContent=r.reason;return;}
+  if(!data.startBalances||r.date<data.startBalances.date){preview.textContent='Сначала укажи стартовые остатки и проверь дату начала учёта.';return;}
+  if(r.kind==='expense'&&!r.wifeTransfer&&r.learningKey){const learned=learnedSmartCategory(r.learningKey,data.expenses,data.expenseTypes);if(learned){Object.assign(r,learned);r.hint='Категория из твоих предыдущих записей.';}}
+  draft=r;const category=cats.find(c=>c.id===r.category)?.name;
+  if(r.kind==='transfer'){
+   const name=id=>cats.find(c=>c.id===id)?.name||'не выбран';
+   preview.textContent='Перевод · '+rub(r.amount)+' · '+r.date+' · '+name(r.from)+' → '+name(r.to)+' · '+r.hint+'. Запись ещё не сохранена.';
+  }else{
+  preview.textContent=(r.wifeTransfer?'Перевод жене':r.kind==='expense'?'Расход':'Дополнительный доход')+' · '+rub(r.amount)+' · '+r.date+' · '+(r.kind==='expense'?((category||'Категория не выбрана')+' / '+(r.type||'выбери вид расхода')):(r.source+' / '+(r.destination==='family'?'Семейные нужды':'выбери конверт')))+(r.hint?' · '+r.hint:'')+'. Запись ещё не сохранена.';
+  }
+  next.disabled=false;
+ });
+ next.addEventListener('click',()=>{
+  if(!draft)return;
+  const r=draft;draft=null;next.disabled=true;
+  const tile=document.querySelector('[data-ops-action="'+r.kind+'"]');
+  if(!tile){preview.textContent='Не удалось открыть форму операции.';return;}
+  openManual(r.kind);
+  if(r.kind==='expense'){
+   $('expenseAmount').value=r.amount;$('expenseDate').value=r.date;$('expenseCategory').value=r.category;
+   refreshTypes(r.type||'');updateExpenseOptions();$('expenseNote').value=r.note;
+   pendingSmartExpense=!r.wifeTransfer&&r.learningKey?{key:r.learningKey,amount:r.amount,date:r.date}:null;
+  }else if(r.kind==='transfer'){
+   $('transferAmount').value=r.amount;$('transferDate').value=r.date;
+   $('transferFrom').value=r.from;$('transferTo').value=r.to;$('transferNote').value=r.note;
+   updateTransferAvailable();
+  }else{
+   $('incomeAmount').value=r.amount;$('incomeDate').value=r.date;$('incomeSource').value=r.source;
+   $('incomeDestination').value=r.destination;$('incomeNote').value=r.note;
+  }
+ });
+}
+
+setupSmartOperation();
+setupSmartLearning();
+setupMoneyCalendar();
+setupDailyBudgetSetting();
+setupPurchaseCheck();
 function renderEarlyAlerts(){
  const host=$('budgetEarlyAlerts');if(!host)return;
  const now=new Date(),todayKey=iso(now),start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
@@ -4254,7 +4905,7 @@ $('monthlyBillList').addEventListener('click',event=>{
 $('monthlyBillCategory').replaceChildren(...cats.map(c=>new Option(c.name,c.id)));
 $('monthlyBillDate').value=iso(new Date());
 
-function refreshBudgetView(){renderMonthlyBills();syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();updateExpenseOptions()}
+function refreshBudgetView(){window.refreshSmartLearning?.();syncDailyBudgetSetting();renderMonthlyBills();syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();updateExpenseOptions()}
 function renderAll(){refreshBudgetView();return save()}
 function go(page){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));document.querySelector('.app').classList.toggle('home-active',page==='home');const main=document.querySelector('.main');if(main)main.scrollTop=0;}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
@@ -4513,8 +5164,12 @@ if(type==='Отправил жене'){
  (data.wifeMoves||=[]).push({id,date,amount,source:category,createdAt:new Date().toISOString(),note,fromExpense:true});
  }else{
  if(!existing)data.expenseTypes[category].push(type);
- data.expenses.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note});
+ const entry={id:String(Date.now())+Math.random().toString(36).slice(2,7),amount,date,category,type,note};
+ const key=smartLearningKeyForSave(pendingSmartExpense,amount,date,type);if(key)entry.smartCategoryKey=key;
+ data.expenses.push(entry);
  }
+ const learningEntry=type==='Отправил жене'?null:data.expenses.at(-1);
+ pendingSmartExpense=null;
  month=date.slice(0,7);
  $('expenseAmount').value='';$('expenseNote').value='';refreshTypes(type);
  if(renderAll()){
@@ -4522,7 +5177,8 @@ if(type==='Отправил жене'){
   if(isMove){$('expenseHistoryPanel').open=true;showSaveFeedback('Перевод жене '+rub(amount)+' записан',$('expenseForm').querySelector('button[type="submit"]'));}
   else showSaveFeedback('Расход сохранён',$('expenseForm').querySelector('button[type="submit"]'));
   if($('opsSheet')&&!$('opsSheet').hidden)$('opsSheet').querySelector('.ops-sheet-close')?.click();
- }};
+ }else if(learningEntry?.smartCategoryKey){delete learningEntry.smartCategoryKey;window.refreshSmartLearning?.();}
+ };
 $('expenseList').addEventListener('click',e=>{
  const wifeDelete=e.target.closest('[data-del-wife]');
  if(wifeDelete){
@@ -4556,6 +5212,7 @@ function readBackup(text){
  }
  if(budget.monthlyBills!==undefined&&(!Array.isArray(budget.monthlyBills)||!budget.monthlyBills.every(validMonthlyBill)||
     new Set(budget.monthlyBills.map(b=>b.id)).size!==budget.monthlyBills.length))invalid();
+ if(budget.calendarPurchases!==undefined&&(!Array.isArray(budget.calendarPurchases)||!budget.calendarPurchases.every(calendarValidPlan)||new Set(budget.calendarPurchases.map(p=>p.id)).size!==budget.calendarPurchases.length))invalid();
  normalizeBudget(budget);
  return budget;
 }
@@ -4580,7 +5237,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.106';
+const APP_VERSION='1.5.122';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -5074,7 +5731,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))installTes
   }
   let trigger=null;
   const closeSheet=()=>{
-   overlay.hidden=true;document.documentElement.classList.remove('ops-sheet-shown');
+   overlay.hidden=true;document.documentElement.classList.remove('ops-sheet-shown');document.dispatchEvent(new Event('budget:operation-sheet-closed'));
    if(trigger&&trigger.isConnected)trigger.focus({preventScroll:true});
   };
   const showSheet=type=>{
@@ -5094,8 +5751,12 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))installTes
   });
   document.getElementById('supportOpen').addEventListener('click',()=>showSheet('support'));
   grid.addEventListener('click',event=>{
-   const button=event.target.closest('[data-ops-action]');if(button)showSheet(button.dataset.opsAction);
+   const button=event.target.closest('[data-ops-action]');if(!button)return;
+   const kind=button.dataset.opsAction;
+   if(['expense','income','transfer'].includes(kind))document.dispatchEvent(new CustomEvent('budget:smart-operation-open',{detail:kind}));
+   else showSheet(kind);
   });
+  document.addEventListener('budget:manual-operation-open',event=>{if(['expense','income','transfer'].includes(event.detail))showSheet(event.detail);});
   close.addEventListener('click',closeSheet);
   overlay.addEventListener('click',event=>{if(event.target===overlay)closeSheet()});
   document.addEventListener('keydown',event=>{if(event.key==='Escape'&&!overlay.hidden)closeSheet()});
@@ -5703,7 +6364,8 @@ function setupAdvisor(){
  function report(){
   // Read-only snapshot. No records, dates or app settings are changed.
   const asOf=new Date();
-  const {data:d,mortgage,debt,reserved}=window.budgetAdvisorSnapshot(asOf);
+  const {data:d,mortgage,debt,reserved,cash}=window.budgetAdvisorSnapshot(asOf);
+  const known=v=>typeof v==='number'&&Number.isFinite(v)?ru(v):'неизвестно';
   const today=asOf.toLocaleDateString('sv-SE');
   const month=today.slice(0,7);
   const expenses=Array.isArray(d.expenses)?d.expenses.filter(x=>validDate(x.date)&&x.date<=today):[];
@@ -5730,6 +6392,7 @@ function setupAdvisor(){
    'Неприкосновенная подушка — 500 000 ₽; её фактический остаток может быть неизвестен.',
    'Не выдумывай данные. Различай факты, планы, гипотезы, проценты и доходы. Переводы между счетами — не доход.',
    'Начни с одного подтверждённого достижения в рублях, если оно есть. Предложи один посильный шаг до следующей выплаты. Учитывай расходы семьи. Не обещай экономию без подтверждения.',
+   'Сначала составь конкретный план до ближайшей выплаты: питание семьи, лекарства и корм домашних животных, затем обязательные платежи с учётом их сроков. Если остаток неизвестен, запроси сверку; не выдумывай суммы и не считай прогноз дохода доступными деньгами. Не рекомендуй досрочные платежи или пополнение накоплений, если это оставит семью без необходимого. Защищённую подушку не расходуй без явного решения пользователя.',
    'Проверь долг и сроки кредитки, сохранность резерва и реалистичность платежей.',
    'Отвечай простым разговорным языком, без финансового жаргона. Предупреждай заранее о будущей нехватке денег: январский аванс после праздников, ближайшая ипотека, кредитка. Называй дату, конкретную сумму и действие. Прогноз отделяй от фактов.',
    'Не сравнивай ипотеку и вклад без ставки ипотеки, чистой ставки вклада, налогов и ограничений.',
@@ -5747,6 +6410,25 @@ function setupAdvisor(){
     'Дай проверку резерва, график погашения кредитки и реалистичный план на 30 дней.',
     'Неизвестные данные обозначь явно; не считай погашение долга экономией.'
    ]),
+   '',
+   'ТЕКУЩАЯ ФИНАНСОВАЯ СИТУАЦИЯ (расчёт по локальным записям на '+today+', не банковская выписка):',
+   'Семейные деньги всего до дополнительных резервов на регулярные платежи: '+known(cash.family),
+   'У меня (семейный конверт): '+known(cash.mine),
+   'У жены (расчётный остаток семейных денег): '+known(cash.wife)+(cash.wifeCheck?' (последняя сверка '+cash.wifeCheck+')':' (сверка не указана)'),
+   'Свободные бюджетные конверты всего, без накоплений и резервов ипотеки/кредитки: '+known(cash.actual?.available),
+   'Ближайшая выплата (план, не получена): '+(cash.next?(cash.next.type==='advance'?'аванс':'зарплата')+' '+cash.next.date+'; ожидаемая сумма '+known(cash.next.expected):'неизвестна'),
+   'Дней до выплаты: '+(cash.days===null?'неизвестно':cash.days),
+   'Неоплаченные регулярные платежи до дня выплаты (включая просроченные): '+known(cash.bills)+'; из семейного конверта '+known(cash.familyBills),
+   'Регулярные платежи в день выплаты (порядок поступления и списания неизвестен): '+known(cash.sameDayBills),
+   'Семейные деньги после резерва на регулярные платежи: '+known(cash.familyAfterBills),
+   'Доступно на семейные покупки в день по главному экрану: '+known(cash.daily)+(cash.days===0?' (выплата сегодня, дождись зачисления)':''),
+   'Обычный дневной бюджет семьи (задан пользователем, не доступный лимит): '+known(cash.usualDailyBudget),
+   ...(cash.usualDailyBudget!==null&&cash.days>0&&cash.familyAfterBills!==null?['Обычные ежедневные расходы до выплаты: '+known(cash.usualDailyBudget*cash.days)+'; нехватка на них после регулярных платежей: '+known(Math.max(0,cash.usualDailyBudget*cash.days-cash.familyAfterBills))+' (без новых разовых расходов и отдельных долговых платежей).']:[]),
+   'Общий остаток свободных конвертов после резерва на регулярные платежи: '+known(cash.allAfterBills),
+   'Накопления в бюджетном конверте (не подтверждение банковского остатка): '+known(cash.actual?.savings),
+   'Накопления, указанные вручную отдельно (могут пересекаться с другими остатками, не суммировать): '+known(cash.confirmedSavings),
+   'Семейные деньги уже входят в общий остаток; деньги у жены уже входят в семейный остаток. Ипотека и кредитка показаны ниже отдельно. Дневной лимит — ориентир после регулярных платежей, не гарантия покрытия ипотеки или кредитки.',
+   ...(cash.family!==null&&cash.family<0||cash.actual&&cash.actual.available<0?['Внимание: отрицательный остаток означает дефицит.']:[]),
    '',
    'СОСТОЯНИЕ:',
    'Ипотека к '+mortgage.due.toLocaleDateString('ru-RU')+' — платёж '+ru(mortgage.plan)+', оплачено '+ru(mortgage.paid)+', к оплате '+ru(mortgage.remaining)+(mortgage.reserve===null?' (резерв неизвестен)':', в резерве '+ru(mortgage.reserve)+', ещё собрать '+ru(mortgage.gap)),

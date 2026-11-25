@@ -32,6 +32,8 @@ function harness(page){
  });
  const run=script=>vm.runInContext(script,context);
  run('const SALDOZA_BUDGET_KEY="test";');
+ run(between('function dailyBudgetValue(', 'function syncDailyBudgetSetting('));
+ run(between('function calendarValidPlan(', 'function calendarAddDays('));
  run(between('const THEMES=','let month=currentMonth;'));
  run(between('function num(n)','function dateFor('));
  run(between('function esc(s)','function sumExpenses('));

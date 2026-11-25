@@ -29,6 +29,8 @@ for (const page of ['index.html','preview.html']) {
       }
     });
     const run = script => vm.runInContext(script,context);
+    run(chunk('function dailyBudgetValue(', 'function syncDailyBudgetSetting('));
+    run(chunk('function calendarValidPlan(', 'function calendarAddDays('));
     run(chunk('const THEMES=','let month=currentMonth;'));
     run("let lastSavedReceiptSignature='[]',saveFeedbackIntent=null,saveFeedbackClearTimer=null;");
     run(chunk('function save(){','function num('));
