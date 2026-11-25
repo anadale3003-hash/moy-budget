@@ -1,12 +1,15 @@
-const CACHE='family-budget-v1-5-104';
+const PREFIX='saldoza-test:'+self.registration.scope+':';
+const CACHE=PREFIX+'1-5-104';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./version.json','./icon.svg','./icon.png','./icon-512.png'];
+function matchTestCache(request){return caches.open(CACHE).then(cache=>cache.match(request));}
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
-self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('family-budget-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
+self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith(PREFIX)&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});
 self.addEventListener('fetch',event=>{
  const request=event.request;
- if(request.method!=='GET'||new URL(request.url).origin!==self.location.origin)return;
+ if(request.method!=='GET'||!request.url.startsWith(self.registration.scope))return;
  const url=new URL(request.url);
+ if(!url.href.startsWith(self.registration.scope))return;
  if(url.pathname.endsWith('/version.json')){event.respondWith(fetch(request,{cache:'no-store'}));return;}
  // Keep the preview isolated from the production entrypoint cache.
  // Network-first without HTTP cache allows an installed Home Screen shortcut to see updates.
@@ -14,13 +17,13 @@ self.addEventListener('fetch',event=>{
   event.respondWith(fetch(request,{cache:'no-store'}).then(response=>{
    if(response.ok){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put('./preview.html',copy)));}
    return response;
-  }).catch(()=>caches.match('./preview.html')));
+  }).catch(()=>matchTestCache('./preview.html')));
   return;
  }
  if(request.mode==='navigate'||url.pathname.endsWith('/index.html')){
-  event.respondWith(fetch(request,{cache:'no-store'}).then(response=>{if(response.ok){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put('./index.html',copy)));}return response}).catch(()=>caches.match('./index.html')));return;
+  event.respondWith(fetch(request,{cache:'no-store'}).then(response=>{if(response.ok){const copy=response.clone();event.waitUntil(caches.open(CACHE).then(cache=>cache.put('./index.html',copy)));}return response}).catch(()=>matchTestCache('./index.html')));return;
  }
- event.respondWith(caches.match(request).then(hit=>hit||fetch(request)));
+ event.respondWith(matchTestCache(request).then(hit=>hit||fetch(request)));
 });
 
 self.addEventListener('push', event => {
@@ -35,7 +38,7 @@ self.addEventListener('push', event => {
     badge: new URL('./icon.png', self.registration.scope).href,
     tag: message.tag || 'moy-budget',
     renotify: false,
-    data: { url: message.url || new URL('./index.html', self.registration.scope).href }
+    data: { url: new URL('./index.html', self.registration.scope).href }
   };
   event.waitUntil(self.registration.showNotification(title, options));
 });
@@ -46,7 +49,7 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil((async () => {
     const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
     for (const client of windows) {
-      if ('focus' in client) {
+      if (client.url.startsWith(self.registration.scope) && 'focus' in client) {
         await client.focus();
         if ('navigate' in client) await client.navigate(target);
         return;

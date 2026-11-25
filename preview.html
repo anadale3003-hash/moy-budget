@@ -2646,15 +2646,28 @@ else setup();
 })();
 </script>
 <script>
+const SALDOZA_BUDGET_KEY='saldoza-test-budget-v1';
+const SALDOZA_REMINDERS_KEY='saldoza-test-reminders-v1';
+const testWorkerUrl=new URL('./sw.js?profile=saldoza-test',location.href).href;
+const testScope=new URL('./',location.href).href;
+async function testRegistration(){
+ const registration=await navigator.serviceWorker.getRegistration(testScope);
+ if(!registration||registration.scope!==testScope)return null;
+ const workers=[registration.active,registration.waiting,registration.installing].filter(Boolean);
+ return workers.length&&workers.every(worker=>worker.scriptURL===testWorkerUrl)?registration:null;
+}
+async function installTestWorker(){
+ const existing=await navigator.serviceWorker.getRegistration(testScope);
+ if(existing?.scope===testScope&&!(await testRegistration()))return;
+ await navigator.serviceWorker.register(testWorkerUrl,{scope:testScope});
+}
+async function testPushRegistration(){
+ const registration=await testRegistration();
+ if(!registration?.active)throw new Error('Для тестовых уведомлений открой отдельную установленную версию Saldoza');
+ return registration;
+}
 (function(){'use strict';
-const THEMES={"Orchid Gold":{"bg":"#100f15","card":"#211e28","panel":"#282431","ink":"#f5f0e8","muted":"#bcb2c4","line":"#423a48","blue":"#e2c494","accentText":"#261c18","hero":"#19151e","input":"#19171e","selected":"#433746","red":"#ffa3ab"},"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY='my-budget-orchid-preview';
-try{
- if(!localStorage.getItem(KEY)){
-  const snapshot=JSON.parse(localStorage.getItem('my-budget-v1')||'{}');
-  snapshot.theme='Orchid Gold';
-  localStorage.setItem(KEY,JSON.stringify(snapshot));
- }
-}catch(_){}
+const THEMES={"Orchid Gold":{"bg":"#100f15","card":"#211e28","panel":"#282431","ink":"#f5f0e8","muted":"#bcb2c4","line":"#423a48","blue":"#e2c494","accentText":"#261c18","hero":"#19151e","input":"#19171e","selected":"#433746","red":"#ffa3ab"},"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY=SALDOZA_BUDGET_KEY;
 const fmt=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});const rub=n=>fmt.format(Number.isFinite(n)?n:0);const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
 let data;const defaults=()=>({months:{},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:10000,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
 try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();if(!data.expenseTypes||typeof data.expenseTypes!=='object')data.expenseTypes={};
@@ -4697,13 +4710,13 @@ $('checkUpdate').addEventListener('click',async()=>{
     if(!newer(meta.version,APP_VERSION)){updateMessage('У тебя актуальная версия '+APP_VERSION);$('applyUpdate').style.display='none';return;}
     updateMessage('Доступна версия '+meta.version+'. Перед обновлением сохрани резервную копию.');
     $('applyUpdate').style.display='block';
-    if('serviceWorker' in navigator){const reg=await navigator.serviceWorker.getRegistration();if(reg){await reg.update();pendingWorker=reg.waiting||reg.installing;}}
+    if('serviceWorker' in navigator){const reg=await testRegistration();if(reg){await reg.update();pendingWorker=reg.waiting||reg.installing;}}
   }catch(err){updateMessage('Проверка не выполнена: '+(err?.message||'ошибка сети')+'. Проверь адрес /version.json на своём сайте.');}
 });
 $('applyUpdate').addEventListener('click',async()=>{
   updateMessage('Обновляем приложение…');
   if('serviceWorker' in navigator){
-    const reg=await navigator.serviceWorker.getRegistration();
+    const reg=await testRegistration();
     if(reg){await reg.update();pendingWorker=reg.waiting||reg.installing;if(pendingWorker?.state==='installed')pendingWorker.postMessage({type:'SKIP_WAITING'});}
   }
   location.replace('./index.html?refresh='+Date.now());
@@ -4826,7 +4839,7 @@ $('ladderTransferForm').addEventListener('submit',event=>{
 setupCompactPanels();initTheme();renderAll();
 if('ResizeObserver' in window){new ResizeObserver(()=>fitTotalMoneyTile()).observe(document.querySelector('.hero-overview .hero-all'));}
 window.addEventListener('resize',fitTotalMoneyTile);
-if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))installTestWorker().catch(()=>{});
 })();
 </script>
 <script>
@@ -5000,12 +5013,12 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
   const delayed=document.getElementById('notifyDelayedTestBtn');
   const status=document.getElementById('notifyStatus');
   if(!choice||!enable||!test||!delayed||!status)return;
-  const preferenceKey='budget-notification-preferences-v1';
+  const preferenceKey=SALDOZA_REMINDERS_KEY;
   choice.value=localStorage.getItem(preferenceKey)||'all';
   const isInstalled=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
   const supported=()=>('Notification' in window)&&('serviceWorker' in navigator)&&('PushManager' in window)&&window.isSecureContext;
   const appSettings=()=>{
-   try{return JSON.parse(localStorage.getItem('my-budget-v1')||'{}')||{};}catch(_){return {};}
+   try{return JSON.parse(localStorage.getItem(SALDOZA_BUDGET_KEY)||'{}')||{};}catch(_){return {};}
   };
   const b64ToBytes=value=>{
    const normalized=String(value).replace(/-/g,'+').replace(/_/g,'/');
@@ -5023,7 +5036,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
    return {reminders:choice.value,advanceDay:Number(d.payDays?.advance)||16,salaryDay:Number(d.payDays?.salary)||1};
   };
   const currentSubscription=async()=>{
-   const reg=await navigator.serviceWorker.ready;
+   const reg=await testPushRegistration();
    return reg.pushManager.getSubscription();
   };
   const confirmedPeriods=()=>{
@@ -5080,7 +5093,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
      const permission=await Notification.requestPermission();
      if(permission!=='granted')throw new Error('Разрешение на уведомления не получено.');
     }
-    const reg=await navigator.serviceWorker.ready;
+    const reg=await testPushRegistration();
     if(!reg.pushManager)throw new Error('PushManager недоступен в этом браузере.');
     let sub=await reg.pushManager.getSubscription();
     if(!sub){
@@ -5127,7 +5140,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.
      await post('/test',{endpoint:sub.endpoint,auth:sub.toJSON().keys.auth});
      status.textContent='Тестовый push отправлен сервером. Проверь уведомления iPhone.';
     }else{
-     const reg=await navigator.serviceWorker.ready;
+     const reg=await testPushRegistration();
      await reg.showNotification('Мой бюджет — локальный тест 🔔',{body:'Локальные уведомления работают. Для серверного push сначала подключи подписку.',icon:'./icon.png',badge:'./icon.png',tag:'budget-local-test'});
      status.textContent='Показан локальный тест. Сначала подключи серверный push.';
     }
