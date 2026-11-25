@@ -2307,6 +2307,21 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <details id="earlyHistoryPanel" class="compact-disclosure"><summary>История досрочных погашений <span id="earlyCount"></span></summary><div class="history-sort-control"><label for="earlyHistorySort">По дате</label><select id="earlyHistorySort" data-history-sort="earlyHistory"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="card" id="earlyHistory"></div></details>
 </section>
 <section class="view" id="v-expense">
+<details class="monthly-bills" id="monthlyBillsPanel">
+ <summary>Регулярные платежи<span id="monthlyBillCount"></span></summary>
+ <p class="foot">Суммы к оплате до ближайшей выплаты учитываются в дневном лимите. Расход появится только после подтверждения.</p>
+ <div id="monthlyBillList"></div>
+ <details id="monthlyBillEditor"><summary>Добавить ежемесячный платёж</summary>
+  <form id="monthlyBillForm">
+   <label class="field"><span>Название</span><input id="monthlyBillName" maxlength="80" placeholder="Например, садик" required></label>
+   <div class="two"><label class="field"><span>Сумма, ₽</span><input id="monthlyBillAmount" type="number" step="0.01" min="0.01" max="999999999" inputmode="decimal" required></label>
+   <label class="field"><span>Первая дата оплаты</span><input id="monthlyBillDate" type="date" min="1900-01-01" max="9999-12-31" required></label></div>
+   <label class="field"><span>Из какого конверта</span><select id="monthlyBillCategory"></select></label>
+   <button class="btn full" type="submit">Сохранить платёж</button>
+  </form>
+ </details>
+</details>
+
 <div class="operations-hub">
  <div class="operations-head">
   <strong>Операции</strong>
@@ -2881,6 +2896,63 @@ function nearestPayday(now=new Date()){
  }
  return options.sort((a,b)=>a.date-b.date)[0]||null;
 }
+function validMonthlyBill(bill){
+ const date=bill&&fromISO(bill.firstDue);
+ return !!date&&iso(date)===bill.firstDue&&date.getFullYear()>=1900&&date.getFullYear()<=9999&&
+  typeof bill.id==='string'&&bill.id.length>0&&typeof bill.name==='string'&&bill.name.trim().length>0&&
+  bill.name.length<=80&&cats.some(c=>c.id===bill.category)&&Number.isSafeInteger(bill.cents)&&bill.cents>0;
+}
+// Payment history identifies the scheduled occurrence, even if it was paid early or late.
+function monthlyBillSchedule(bill,until,paid){
+ const first=fromISO(bill.firstDue);
+ let nextDue=null,count=0;
+ for(let offset=0;;offset++){
+  const last=new Date(first.getFullYear(),first.getMonth()+offset+1,0);
+  last.setDate(Math.min(first.getDate(),last.getDate()));
+  const due=iso(last);
+  if(!paid.has(due)){
+   if(nextDue===null)nextDue=due;
+   if(due>=until)break;
+   count++;
+  }
+ }
+ return {nextDue,count};
+}
+function monthlyBillRows(until){
+ const paid=new Map();
+ for(const expense of data.expenses){
+  if(!expense.billId)continue;
+  if(!paid.has(expense.billId))paid.set(expense.billId,new Set());
+  paid.get(expense.billId).add(expense.billDue);
+ }
+ return (data.monthlyBills||[]).map(bill=>({bill,...monthlyBillSchedule(bill,until,paid.get(bill.id)||new Set())}))
+  .sort((a,b)=>a.nextDue.localeCompare(b.nextDue)||a.bill.name.localeCompare(b.bill.name,'ru'));
+}
+function billReserve(rows,category){
+ return rows.reduce((sum,row)=>sum+(category===undefined||row.bill.category===category?row.count*row.bill.cents:0),0)/100;
+}
+function payMonthlyBill(bill,due,today){
+ if(!data.startBalances||today<data.startBalances.date)return 'Сначала укажи стартовые остатки.';
+ const occurrence=monthlyBillRows(today).find(row=>row.bill.id===bill.id);
+ if(!occurrence||occurrence.nextDue!==due)return 'Этот платёж уже обработан.';
+ const amount=bill.cents/100;
+ const balance=categoryBalanceAt(bill.category,today);
+ const available=balance-(bill.category==='family'?wifeFunds(today):0);
+ if(balance===null||Math.round(available*100)<bill.cents)return 'Недостаточно денег в выбранном конверте для оплаты.';
+ const expense={id:'bill-'+bill.id+'-'+due,date:today,category:bill.category,amount,type:bill.name,note:bill.name,billId:bill.id,billDue:due};
+ data.expenses.push(expense);
+ if(!save()){data.expenses.pop();return 'Платёж не записан.';}
+ return '';
+}
+function spendingAfterBills(available,familyBalance,until){
+ const rows=monthlyBillRows(until);
+ const reserved=billReserve(rows,'family');
+ const total=Math.max(0,available-billReserve(rows));
+ const family=Math.max(0,Math.min(available,familyBalance)-reserved);
+ const names=rows.filter(row=>row.count&&row.bill.category==='family').map(row=>row.bill.name);
+ return {total,family,names,reserved};
+}
+
 function showPaydayCountdown(actual){
  const next=nearestPayday(),where=$('nextPaymentWhen'),dateEl=$('nextPaymentDate'),limit=$('dailySpendingLimit'),note=$('dailySpendingNote');
  limit.classList.remove('daily-good','daily-medium','daily-low');
@@ -2894,9 +2966,10 @@ function showPaydayCountdown(actual){
  where.textContent=(next.type==='advance'?'Аванс':'Зарплата')+(dayCount===0?' сегодня':' через '+dayCount+' '+daysWord);
  if(!actual){limit.textContent='—';note.textContent='Для дневного лимита укажи стартовые остатки в настройках';return;}
  if(dayCount===0){limit.textContent='Выплата сегодня';note.textContent='Если деньги ещё не поступили, дождись фактического зачисления';return;}
- const spendable=Math.max(0,actual.available);
+ const budget=spendingAfterBills(actual.available,num(categoryBalanceAt('family',iso(now))),iso(next.date));
+ const spendable=budget.total;
  const dailyAmount=Math.floor(spendable/dayCount);
- const family=Math.max(0,Math.min(spendable,num(categoryBalanceAt('family',iso(now)))));
+ const family=budget.family;
  const familyDaily=Math.floor(family/dayCount);
  limit.textContent='';
  const amount=document.createElement('strong');
@@ -2904,6 +2977,7 @@ function showPaydayCountdown(actual){
  amount.textContent=rub(familyDaily);
  limit.append(amount,' в день');
  dateEl.textContent='На семейные покупки с обеих карт до '+next.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+ if(budget.reserved)dateEl.textContent+=' · На платежи: '+rub(budget.reserved)+' ('+budget.names.join(', ')+')';
  note.textContent=rub(family)+' ÷ '+dayCount+' дн. = '+rub(familyDaily)+' в день · общий ориентир '+rub(dailyAmount)+'/день';
 
 }
@@ -3316,7 +3390,7 @@ function renderEarlyAlerts(){
  const next=nearestPayday(now),money=actualMoneyToday();
  const days=next?daysUntil(next.date):0;
  if(money&&days>0){
-  const family=Math.max(0,Math.min(money.available,categoryBalanceAt('family',todayKey)));
+  const family=spendingAfterBills(money.available,categoryBalanceAt('family',todayKey),iso(next.date)).family;
   push('daily','🛒 До '+dateLabel(next.date)+' на семью — '+rub(Math.floor(family/days))+' в день',
    'В семейном конверте '+rub(family)+' на '+days+' дн. Перед закупкой сравни сумму корзины с остатком конверта.');
  }
@@ -3354,7 +3428,7 @@ function renderEarlyAlerts(){
  $('adviceOpening').textContent=wins.length?'Есть за что себя похвалить: '+wins.join(', ')+'.':'Давай посмотрим, что можно сделать с ближайшей выплаты.';
  const options=[];
  if(money&&days>0){
-  const family=Math.max(0,Math.min(money.available,categoryBalanceAt('family',todayKey)));
+  const family=spendingAfterBills(money.available,categoryBalanceAt('family',todayKey),iso(next.date)).family;
   options.push({kind:'daily',title:'Оставить запас семье',body:family>0?'До '+dateLabel(next.date)+' в семейном конверте '+rub(family)+'. Можно оставить их на обычные покупки и вернуться к накоплениям после выплаты.':'В семейном конверте сейчас нет доступных денег. Сначала прикинь расходы на продукты до выплаты.'});
  }
  if(mortgage.gap>0)options.push({kind:'warn',title:'Подготовить ближайший платёж',body:'До '+dateLabel(mortgage.due)+' осталось собрать '+rub(mortgage.gap)+'. Сверь эту сумму с планом во «Выплатах», чтобы понимать, сколько оставить на ипотеку.'});
@@ -4138,7 +4212,49 @@ $('envelopeHistoryClose').addEventListener('click',closeEnvelopeHistory);
 $('envelopeHistoryOverlay').addEventListener('click',e=>{if(e.target===$('envelopeHistoryOverlay'))closeEnvelopeHistory()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('envelopeHistoryOverlay').hidden)closeEnvelopeHistory()});
 
-function refreshBudgetView(){syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();updateExpenseOptions()}
+function renderMonthlyBills(){
+ const today=iso(new Date()),rows=monthlyBillRows(today);
+ $('monthlyBillCount').textContent=rows.length?' · '+rows.length:'';
+ $('monthlyBillList').innerHTML=rows.map(({bill,nextDue})=>{
+  const cat=cats.find(c=>c.id===bill.category);
+  const due=fromISO(nextDue).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
+  return '<div class="monthly-bill-row"><div><b>'+esc(bill.name)+'</b><small>'+esc(cat.name)+' · '+(nextDue<today?'Просрочен: ':'Срок: ')+esc(due)+'</small></div><b>'+rub(bill.cents/100)+'</b>'+
+   '<div class="monthly-bill-actions"><button type="button" class="btn" data-pay-bill="'+esc(bill.id)+'" data-bill-due="'+esc(nextDue)+'">Отметить оплату</button>'+
+   '<button type="button" class="btn secondary" data-stop-bill="'+esc(bill.id)+'">Прекратить</button></div></div>';
+ }).join('');
+}
+$('monthlyBillForm').addEventListener('submit',event=>{
+ event.preventDefault();
+ const form=event.currentTarget;
+ const bill={id:crypto.randomUUID(),name:$('monthlyBillName').value.trim(),category:$('monthlyBillCategory').value,
+  cents:Math.round($('monthlyBillAmount').valueAsNumber*100),firstDue:$('monthlyBillDate').value};
+ if(!form.reportValidity()||!validMonthlyBill(bill)){alert('Проверь название, сумму и дату платежа.');return;}
+ (data.monthlyBills||=[]).push(bill);
+ if(!save()){data.monthlyBills.pop();return;}
+ form.reset();$('monthlyBillDate').value=iso(new Date());$('monthlyBillEditor').open=false;
+ refreshBudgetView();
+});
+$('monthlyBillList').addEventListener('click',event=>{
+ const button=event.target.closest('button');
+ if(!button)return;
+ const bill=(data.monthlyBills||[]).find(item=>item.id===(button.dataset.payBill||button.dataset.stopBill));
+ if(!bill)return;
+ if(button.dataset.payBill){
+  if(!confirm('Подтвердить оплату «'+bill.name+'» на '+rub(bill.cents/100)+' за '+button.dataset.billDue+'? Расход запишется сегодняшней датой.'))return;
+  const error=payMonthlyBill(bill,button.dataset.billDue,iso(new Date()));
+  if(error){alert(error);return;}
+ }else{
+  if(!confirm('Прекратить платежи «'+bill.name+'»? Резерв будет снят, история оплат сохранится.'))return;
+  const previous=data.monthlyBills;
+  data.monthlyBills=previous.filter(item=>item.id!==bill.id);
+  if(!save()){data.monthlyBills=previous;return;}
+ }
+ refreshBudgetView();
+});
+$('monthlyBillCategory').replaceChildren(...cats.map(c=>new Option(c.name,c.id)));
+$('monthlyBillDate').value=iso(new Date());
+
+function refreshBudgetView(){renderMonthlyBills();syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();updateExpenseOptions()}
 function renderAll(){refreshBudgetView();return save()}
 function go(page){document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));document.querySelector('.app').classList.toggle('home-active',page==='home');const main=document.querySelector('.main');if(main)main.scrollTop=0;}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
@@ -4438,6 +4554,8 @@ function readBackup(text){
   if(!Array.isArray(rows)||rows.some(row=>!record(row)||!fromISO(row.date)||
      !money(field==='wifeBalanceReports'?row.family??row.total:row.amount)))invalid();
  }
+ if(budget.monthlyBills!==undefined&&(!Array.isArray(budget.monthlyBills)||!budget.monthlyBills.every(validMonthlyBill)||
+    new Set(budget.monthlyBills.map(b=>b.id)).size!==budget.monthlyBills.length))invalid();
  normalizeBudget(budget);
  return budget;
 }
@@ -4462,7 +4580,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.105';
+const APP_VERSION='1.5.106';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -4923,7 +5041,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))installTes
    const name=document.createElement('strong');name.textContent=label;
    button.append(pic,name);grid.append(button);
   }
-  intro.append(grid,document.getElementById('familyActions'));
+  intro.append(grid,document.getElementById('familyActions'),document.getElementById('monthlyBillsPanel'));
   const historyGroup=document.createElement('div');historyGroup.className='design-group ops-history-group';
   const historyTitle=document.createElement('div');historyTitle.className='section-heading';historyTitle.innerHTML='<h2>История операций</h2>';historyGroup.append(historyTitle);
   for(const panel of histories){panel.open=false;historyGroup.append(panel)}
@@ -5851,4 +5969,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 }
 /* Center only the payout amounts inside Advance and Salary cards. */
 #v-plan .payment-receipt .receipt-note>strong{display:block;width:100%;text-align:center;font-variant-numeric:tabular-nums}
+#monthlyBillsPanel{margin-top:12px}
+#monthlyBillsPanel summary{padding:10px 0;cursor:pointer;font-weight:650}
+#monthlyBillList .monthly-bill-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:start;padding:12px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}
+.monthly-bill-row small{display:block;color:var(--muted)}
+.monthly-bill-actions{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px}
+#monthlyBillForm .field{margin-bottom:8px}
 </style></body></html>
