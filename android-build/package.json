@@ -1,0 +1,15 @@
+{
+  "name": "saldoza-android",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "prepare:web": "node prepare-web.mjs"
+  },
+  "dependencies": {
+    "@capacitor/core": "7.4.4",
+    "@capacitor/android": "7.4.4"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "7.4.4"
+  }
+}
