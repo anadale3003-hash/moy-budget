@@ -1,0 +1,9 @@
+{
+  "appId": "app.saldoza.budget",
+  "appName": "Saldoza",
+  "webDir": "www",
+  "server": {
+    "hostname": "localhost",
+    "androidScheme": "https"
+  }
+}
