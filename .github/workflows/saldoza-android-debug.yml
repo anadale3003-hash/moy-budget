@@ -49,17 +49,21 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.SALDOZA_TEST_KEYSTORE_PASSWORD }}
         run: |
           set -euo pipefail
-          if [[ -z "$KEYSTORE_B64" && -z "$KEYSTORE_PASSWORD" ]]; then
-            echo "artifact=saldoza-debug-apk-ephemeral" >> "$GITHUB_OUTPUT"
-            echo "::warning::Persistent test signing secrets are missing. This APK cannot update a different debug certificate."
-            exit 0
-          fi
-          [[ -n "$KEYSTORE_B64" && -n "$KEYSTORE_PASSWORD" ]]
           umask 077
           keystore="$RUNNER_TEMP/saldoza-test.p12"
-          printf '%s' "$KEYSTORE_B64" | base64 --decode > "$keystore"
+          if [[ -z "$KEYSTORE_B64" && -z "$KEYSTORE_PASSWORD" ]]; then
+            artifact=saldoza-debug-apk-ephemeral
+            export KEYSTORE_PASSWORD="$(openssl rand -hex 24)"
+            echo "::add-mask::$KEYSTORE_PASSWORD"
+            keytool -genkeypair -keystore "$keystore" -storetype PKCS12 -storepass:env KEYSTORE_PASSWORD -alias saldoza-test -keyalg RSA -keysize 2048 -validity 30 -dname 'CN=Saldoza temporary QA'
+            echo "::warning::Persistent test signing secrets are missing. This APK cannot update a different test certificate."
+          else
+            [[ -n "$KEYSTORE_B64" && -n "$KEYSTORE_PASSWORD" ]]
+            artifact=saldoza-debug-apk
+            printf '%s' "$KEYSTORE_B64" | base64 --decode > "$keystore"
+          fi
           printf 'SALDOZA_TEST_KEYSTORE=%s\nSALDOZA_TEST_KEYSTORE_PASSWORD=%s\n' "$keystore" "$KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
-          echo "artifact=saldoza-debug-apk" >> "$GITHUB_OUTPUT"
+          echo "artifact=$artifact" >> "$GITHUB_OUTPUT"
       - name: Generate Android project
         run: |
           if [ ! -d android ]; then npx --no-install cap add android; fi
@@ -100,13 +104,7 @@ jobs:
             cp "$work/checkout/android-build/android/app/build/outputs/apk/debug/app-debug.apk" "$work/app-debug.apk"
           fi
           signer="$ANDROID_HOME/build-tools/35.0.0/apksigner"
-          alias=saldoza-test
-          if [[ -z "${SALDOZA_TEST_KEYSTORE:-}" ]]; then
-            export SALDOZA_TEST_KEYSTORE="$HOME/.android/debug.keystore"
-            export SALDOZA_TEST_KEYSTORE_PASSWORD=android
-            alias=androiddebugkey
-          fi
-          "$signer" sign --ks "$SALDOZA_TEST_KEYSTORE" --ks-key-alias "$alias" --ks-pass env:SALDOZA_TEST_KEYSTORE_PASSWORD --key-pass env:SALDOZA_TEST_KEYSTORE_PASSWORD --out "$work/previous.apk" "$work/app-debug.apk"
+          "$signer" sign --ks "$SALDOZA_TEST_KEYSTORE" --ks-key-alias saldoza-test --ks-pass env:SALDOZA_TEST_KEYSTORE_PASSWORD --key-pass env:SALDOZA_TEST_KEYSTORE_PASSWORD --out "$work/previous.apk" "$work/app-debug.apk"
           "$signer" verify "$work/previous.apk"
       - name: Remove temporary signing material
         if: always()
