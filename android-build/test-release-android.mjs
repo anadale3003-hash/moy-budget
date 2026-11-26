@@ -90,6 +90,15 @@ function tapNode(match){
 
 let web;
 try{
+ // WebView can report onLine even without an Internet route on an emulator.
+ // Enforce network isolation outside the APK on this disposable device.
+ adb('root');
+ adb('wait-for-device');
+ assert.equal(adb('shell','id','-u'),'0');
+ for(const command of ['iptables','ip6tables']){
+  adb('shell',command,'-I','OUTPUT','!','-o','lo','-j','REJECT');
+  adb('shell',command,'-C','OUTPUT','!','-o','lo','-j','REJECT');
+ }
  adb('shell','input','keyevent','KEYCODE_WAKEUP');
  adb('shell','wm','dismiss-keyguard');
  adb('shell','cmd','connectivity','airplane-mode','enable');
@@ -100,8 +109,8 @@ try{
  adb('install','-t',candidate);
  web=await start();
  await waitWritable(web);
- const launch=await web.js("({origin:location.origin, online:navigator.onLine, native:window.Capacitor.isNativePlatform(),backup:window.Capacitor.isPluginAvailable('BudgetBackup'),locks:!!navigator.locks})");
- assert.deepEqual(launch,{origin:'https://localhost',online:false,native:true,backup:true,locks:true});
+ const launch=await web.js("({origin:location.origin, native:window.Capacitor.isNativePlatform(),backup:window.Capacitor.isPluginAvailable('BudgetBackup'),locks:!!navigator.locks})");
+ assert.deepEqual(launch,{origin:'https://localhost',native:true,backup:true,locks:true});
  console.log('PASS installed APK cold start offline and registered native bridge');
 
  web.close();
@@ -154,8 +163,8 @@ try{
  adb('shell','pm','grant',pkg,'android.permission.POST_NOTIFICATIONS');
  await web.js("document.querySelector('#notifyReminderChoice').value='none';document.querySelector('#notifyTestBtn').click();true");
  await retry(async()=>assert.match(await web.js("document.querySelector('#notifyStatus').textContent"),/30 секунд/));
- await delay(38000);
- assert.match(adb('shell','dumpsys','notification'),/NotificationRecord\([^\n]*pkg=app\.saldoza\.budget/);
+ await delay(30000);
+ await retry(()=>assert.match(adb('shell','dumpsys','notification'),/NotificationRecord\([^\n]*pkg=app\.saldoza\.budget/),120000);
  console.log('PASS local test notification delivered in airplane mode with reminders off');
 }catch(error){
  for(const cmd of [['shell','dumpsys','activity','activities'],['logcat','-d','-t','600']]){

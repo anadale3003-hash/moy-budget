@@ -31,4 +31,4 @@ android {`).replace(buildTypes,`    signingConfigs {
         }`);
  await writeFile(gradleFile,gradle);
 }
-console.log(keystore?'Persistent test signing configured':'Temporary debug key enabled');
+console.log(keystore?'Dedicated test keystore configured':'Temporary debug key enabled');
