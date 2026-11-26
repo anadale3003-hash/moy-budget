@@ -76,6 +76,32 @@ function getBudget(web){
 async function waitWritable(web){
  await retry(async()=>assert.equal(await web.js("document.querySelector('#budgetLockDialog')?.open"),false));
 }
+async function stopAfterBackgrounding(web){
+ web.close();
+ adb('shell','input','keyevent','KEYCODE_HOME');
+ // Exercise an upgrade of previously persisted data, not a write interrupted
+ // before Chromium has flushed its Local Storage journal.
+ await delay(8000);
+ adb('shell','am','force-stop',pkg);
+}
+async function recordExpense(web,amount,date){
+ await web.js(`(()=>{
+  document.querySelector('.tab[data-go=expense]').click();
+  document.querySelector('[data-ops-action=expense]').click();
+  document.querySelector('#smartOperationManual').click();
+  document.querySelector('#expenseAmount').value=${JSON.stringify(String(amount))};
+  document.querySelector('#expenseDate').value=${JSON.stringify(date)};
+  const category=document.querySelector('#expenseCategory');
+  category.value='family';
+  category.dispatchEvent(new Event('change'));
+  document.querySelector('#expenseType').value='Продукты';
+  document.querySelector('#expenseForm').requestSubmit();
+  return true;
+ })()`);
+ const row=(await getBudget(web)).expenses.find(row=>row.amount===amount);
+ assert(row,'Expense missing immediately after saving');
+ return row;
+}
 function tapNode(match){
  const xmlPath='/sdcard/saldoza-ui.xml';
  adb('shell','uiautomator','dump',xmlPath);
@@ -122,14 +148,19 @@ try{
  const old=await getBudget(web);
  old.welcomeSeen=true;
  old.startBalances={date:today,balances:{family:5000,utilities:0,savings:0,other:0},mortgage:10};
- old.expenses.push({id:'upgrade-record',date:today,category:'family',type:'Продукты',amount:123.45});
  await web.js(`localStorage.setItem(${JSON.stringify(key)},${JSON.stringify(JSON.stringify(old))});localStorage.setItem('saldoza-guide-stage','6');true`);
+ await stopAfterBackgrounding(web);
+ web=await start();
+ const previousRecord=await recordExpense(web,123.45,today);
+ await stopAfterBackgrounding(web);
+ web=await start();
+ assert.deepEqual((await getBudget(web)).expenses.find(row=>row.id===previousRecord.id),previousRecord);
  web.close();
 
  adb('install','-r','-t',candidate);
  web=await start();
  await waitWritable(web);
- assert.equal((await getBudget(web)).expenses.find(row=>row.id==='upgrade-record')?.amount,123.45);
+ assert.deepEqual((await getBudget(web)).expenses.find(row=>row.id===previousRecord.id),previousRecord);
  console.log('PASS signed update from original APK preserves the stored ledger');
 
  await web.js("document.querySelector('#exportData').click(); true");
@@ -143,18 +174,16 @@ try{
  });
  const exported=JSON.parse(adb('shell','cat',path));
  assert.equal(exported.version,1);
- assert.equal(exported.data.expenses.find(row=>row.id==='upgrade-record')?.amount,123.45);
+ assert.deepEqual(exported.data.expenses.find(row=>row.id===previousRecord.id),previousRecord);
  console.log('PASS Android document picker writes inspectable JSON to shared storage');
 
  // Change the ledger through the UI and use the real Android file picker to restore it.
- await web.js("document.querySelector('.tab[data-go=expense]').click();document.querySelector('[data-ops-action=expense]').click();document.querySelector('#smartOperationManual').click();document.querySelector('#expenseAmount').value='13';document.querySelector('#expenseCategory').value='family';document.querySelector('#expenseCategory').dispatchEvent(new Event('change'));document.querySelector('#expenseType').value='Продукты';document.querySelector('#expenseForm').requestSubmit();true");
- assert.ok((await getBudget(web)).expenses.some(row=>row.amount===13));
+ await recordExpense(web,13,today);
  await web.js("document.querySelector('#importClick').click(); true");
  await retry(()=>tapNode(node=>node.includes('text="'+backupName+'"')));
  await retry(()=>tapNode(node=>/resource-id="android:id\/button1"|text="(?:OK|ОК)"/.test(node)));
  await retry(async()=>assert.equal(await web.js("document.querySelector('#budgetSaveLabel').textContent"),'Данные восстановлены'));
- web.close();
- adb('shell','am','force-stop',pkg);
+ await stopAfterBackgrounding(web);
  web=await start();
  await waitWritable(web);
  assert.deepEqual((await getBudget(web)).expenses,exported.data.expenses);
