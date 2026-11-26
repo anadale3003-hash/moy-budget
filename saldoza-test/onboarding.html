@@ -2711,7 +2711,7 @@ else setup();
 function spouseLabel(text,gender){
  if(gender!=='female')return text;
  return text.replace(/жена потратила/g,'муж потратил').replace(/Отправил жене/g,'Отправила мужу').replace(/отправил жене/g,'отправила мужу')
-  .replace(/жене(?![а-я])/gi,'мужу').replace(/жены(?![а-я])/gi,'мужа').replace(/жена(?![а-я])/gi,'муж');
+  .replace(/(^|[^а-яё])жене(?![а-яё])/gi,'$1мужу').replace(/(^|[^а-яё])жены(?![а-яё])/gi,'$1мужа').replace(/(^|[^а-яё])жена(?![а-яё])/gi,'$1муж');
 }
 // Option values and saved transaction identifiers stay stable when the display language changes.
 function installSpouseLabels(){
