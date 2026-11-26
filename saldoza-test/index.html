@@ -5714,7 +5714,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.138';
+const APP_VERSION='1.5.139';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -7222,4 +7222,13 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .app .main #v-analytics.active .analytics-one-screen>button#advisorOpen.analytics-economy-card{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;height:auto!important;min-height:58px!important;max-height:80px!important;padding:10px 12px!important;flex:0 0 auto!important;aspect-ratio:auto!important;text-align:left!important}
 .app #v-analytics #advisorOpen .advisor-copy{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:3px!important;min-width:0;flex:1!important;text-align:left!important}
 .app #v-analytics #advisorOpen .advisor-copy strong{font-size:15px!important;margin:0!important}.app #v-analytics #advisorOpen .advisor-copy small{font-size:11px!important;margin:0!important}.app #v-analytics #advisorOpen :is(.advisor-symbol,.advisor-arrow){flex:0 0 auto!important;width:auto!important;margin:0!important;font-size:22px!important}
+
+.app .main #v-analytics.active .analytics-capital-unified{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important}
+.app .main #v-analytics.active .analytics-capital-unified>.analytics-capital-card{grid-column:1/-1!important}
+.app .main #v-analytics.active .analytics-capital-unified>.analytics-goal-overview,.app .main #v-analytics.active .analytics-capital-unified>.analytics-monthly-save{grid-column:auto!important;min-width:0!important;width:auto!important;margin:0!important;padding:8px 4px!important;border:0!important;background:var(--panel)!important;border-radius:10px!important;display:flex!important;flex-direction:column!important;justify-content:center!important;align-items:center!important;gap:5px!important;text-align:center!important}
+.app .main #v-analytics.active .analytics-capital-unified .analytics-goal-top{display:none!important}
+.app .main #v-analytics.active .analytics-capital-unified .analytics-goal-rest{background:transparent!important;padding:0!important;border:0!important;margin:0!important;width:100%!important}
+.app .main #v-analytics.active .analytics-capital-unified :is(.analytics-goal-rest,.analytics-monthly-save)>span{font-size:11px!important;line-height:1.3!important;font-weight:500!important}
+.app .main #v-analytics.active .analytics-capital-unified :is(.analytics-goal-rest,.analytics-monthly-save)>strong{font-size:clamp(14px,4.2vw,22px)!important;white-space:nowrap!important;letter-spacing:-.04em!important}
+.app .main #v-analytics.active .analytics-capital-unified>.analytics-monthly-save>small{font-size:10px!important;line-height:1.3!important}
 </style></body></html>
