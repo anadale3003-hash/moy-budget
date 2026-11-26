@@ -2432,7 +2432,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </section>
 <section class="view" id="v-settings">
 <div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge"></span></div>
-<button id="welcomeSettings" class="btn full light" type="button">Настроить бюджет</button><details class="card" id="layoutChoices"><summary>Главный экран и вкладки</summary>
+<button id="welcomeSettings" class="btn full light" type="button"><span class="settings-menu-icon" aria-hidden="true">⚙️</span><span class="settings-menu-label">Настроить бюджет</span></button><details class="card" id="layoutChoices"><summary>Главный экран и вкладки</summary>
  <label class="field"><span><input type="checkbox" id="showFamilySplit"> Показывать «У меня» и «У жены» на главной</span></label>
  <label class="field"><span><input type="checkbox" id="showCreditTab"> Показывать вкладку «Кредиты»</span></label>
 </details>
@@ -4907,6 +4907,9 @@ settings.forEach(el=>{
  const heading=el.querySelector(':scope > b, :scope > .row > b');
  const label=heading?.textContent?.trim()||'Дополнительные настройки';
  wrap(el,label);
+ const icons={'🔔 Push-уведомления':'🔔','Push-уведомления':'🔔','Тема оформления':'🎨','Обучение умного ввода':'🧠','Обновления приложения':'🔄','Резервная копия':'💾','Установка на iPhone':'📱'};
+ const summary=el.parentElement?.querySelector(':scope > summary');
+ if(summary&&icons[label]){const icon=document.createElement('span');icon.className='settings-menu-icon';icon.setAttribute('aria-hidden','true');icon.textContent=icons[label];const name=document.createElement('span');name.className='settings-menu-label';name.textContent=label.replace(/^🔔\s*/,'');summary.replaceChildren(icon,name);}
 });
 }
 
@@ -5719,7 +5722,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.148';
+const APP_VERSION='1.5.149';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -7266,4 +7269,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 #v-settings .compact-disclosure>.theme-card>b{display:none!important}
 #v-settings>.design-group:has(#themeSelect){--block-accent:transparent}
+
+.app .main #v-settings.active .compact-disclosure>summary:has(.settings-menu-icon),.app .main #v-settings.active #welcomeSettings{display:flex!important;align-items:center!important;justify-content:flex-start!important;text-align:left!important;gap:12px!important;padding-left:24px!important;padding-right:24px!important;font-size:16px!important;box-sizing:border-box!important}
+#v-settings .settings-menu-icon{display:inline-flex!important;align-items:center;justify-content:center;flex:0 0 24px;width:24px;font-size:20px;line-height:1}
+#v-settings .settings-menu-label{flex:1;min-width:0;text-align:left!important}
 </style></body></html>
