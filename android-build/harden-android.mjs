@@ -47,3 +47,14 @@ xml=xml.replace(/<application\b[^>]*>/,tag=>{
 assert(xml.includes('android:icon="@drawable/saldoza_launcher"')&&xml.includes('android:roundIcon="@drawable/saldoza_launcher"'),'Launcher icons not configured');
 await writeFile(file,xml);
 console.log('Saldoza adaptive and legacy launcher icons configured.');
+
+// Monochrome small icon for Android's notification status bar.
+await writeFile(new URL('drawable/ic_saldoza_notification.xml',res),`<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+ <path android:fillColor="#FFFFFFFF" android:pathData="M3,5 L19,5 Q21,5 21,7 L21,9 L16,9 Q13,9 13,12 Q13,15 16,15 L21,15 L21,17 Q21,19 19,19 L3,19 Q2,19 2,17 L2,7 Q2,5 3,5 Z M16,10 L22,10 L22,14 L16,14 Q14,14 14,12 Q14,10 16,10 Z"/>
+</vector>
+`);
+if(!xml.includes('android.permission.POST_NOTIFICATIONS')){
+ xml=xml.replace(/<application\b/,'<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <application');
+ await writeFile(file,xml);
+}
