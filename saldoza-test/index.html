@@ -2579,13 +2579,14 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
    </div>
    <div class="receipt-entry-error" id="paymentEntryError" role="alert" hidden></div>
    <button class="btn full" type="submit">✓ Подтвердить оплату</button>
+   <button class="btn secondary full" type="button" id="paymentEntryCloseAccount">Закрыть обязательство</button>
    <button class="btn secondary full" type="button" id="paymentEntryCancel">Отмена</button>
   </form>
  </section>
 </div>
 <div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="history-sort-control"><label for="envelopeHistorySort">По дате</label><select id="envelopeHistorySort" data-history-sort="envelopeHistoryList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 
-<dialog id="welcomeDialog" class="budget-alerts-dialog" aria-labelledby="welcomeTitle"><form id="welcomeForm" class="budget-alerts-shell"><h2 id="welcomeTitle">Настроим твой бюджет</h2><p class="foot">Укажи реальные деньги на сегодня. Доход нужен для прогноза и попадёт в бюджет после подтверждения.</p><label class="field"><span>Доступно на повседневные расходы сегодня, ₽</span><input id="welcomeCash" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><details id="welcomeExtras"><summary>Дата старта и остальные конверты</summary><label class="field"><span>Начало учёта</span><input id="welcomeDate" type="date" required></label><label class="field"><span>За какой месяц ипотека уже оплачена · если есть</span><input id="welcomePaid" type="month"></label><label class="field"><span>На коммуналку, ₽</span><input id="welcomeutilities" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Накопления, ₽</span><input id="welcomesavings" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Остальные деньги, ₽</span><input id="welcomeother" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Уже отложено на ипотеку, ₽</span><input id="welcomemortgage" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label></details><div id="welcomeExisting" class="foot" hidden>Текущие остатки уже учтены. <button id="welcomeEditStart" type="button" class="btn light">Изменить стартовые остатки</button></div><label class="field"><span>Месячный оклад, ₽ · если есть</span><input id="welcomeSalary" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Как указан оклад</span><select id="welcomeMode"><option value="net">На руки</option><option value="gross">До налога</option></select></label><div class="two"><label class="field"><span>День аванса</span><input id="welcomeAdvance" type="number" min="1" max="31" step="1" inputmode="numeric" required></label><label class="field"><span>День зарплаты</span><input id="welcomePay" type="number" min="1" max="31" step="1" inputmode="numeric" required></label></div><details id="welcomeWork"><summary>Рабочий календарь и налог</summary><p class="foot" id="welcomeWorkMonth"></p><label class="field"><span>Рабочих дней за месяц</span><input id="welcomeWorkTotal" type="number" min="1" max="31" step="1" placeholder="По календарю"></label><label class="field"><span>Из них с 1 по 15 число</span><input id="welcomeWorkFirst" type="number" min="0" max="15" step="1" placeholder="По календарю"></label><label class="field"><span>Налог с оклада до вычета, %</span><input id="welcomeTax" type="number" min="0" max="50" step="0.5" required></label></details><label class="field"><span>Обычный дневной бюджет семьи, ₽ · если знаешь</span><input id="welcomeDaily" type="number" step="0.01" min="0.01" max="999999999" inputmode="decimal"></label><label><input id="welcomeFamily" type="checkbox"> Показать на главной «У меня» и «У жены»</label><label><input id="welcomeCredits" type="checkbox"> Показать вкладку «Кредиты»</label><p class="foot">Платежи по кредитам и дополнительные доходы можно добавить отдельно.</p><div class="actions"><button type="submit" class="btn">Сохранить</button><button type="button" class="btn light" id="welcomeLater">Позже</button></div></form></dialog><dialog id="creditDialog" class="budget-alerts-dialog" aria-labelledby="creditTitle"><form class="budget-alerts-shell" id="creditForm"><h2 id="creditTitle">Кредит или карта</h2><label class="field"><span>Тип</span><select id="creditKind"><option value="loan">Потребительский кредит</option><option value="card">Кредитная карта</option><option value="mortgage">Ипотека</option></select></label><label class="field"><span>Название</span><input id="creditName" maxlength="80" placeholder="Например, карта банка" required></label><label class="field"><span>Остаток основного долга по данным банка, ₽</span><input id="creditBalance" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><details id="creditStatement"><summary>Ближайший платёж по выписке</summary><p class="foot">Введи сумму и дату из банка. Проценты и комиссии входят в платёж, но не уменьшают основной долг.</p><label class="field"><span>Дата платежа</span><input id="creditDue" type="date" min="1900-01-01" max="9999-12-31"></label><label class="field"><span>Полный платёж, ₽</span><input id="creditDueAmount" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>В том числе проценты и комиссии, ₽</span><input id="creditInterest" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Как откладывать из выплат</span><select id="creditFunding"><option value="nearest">С последней выплаты перед платежом</option><option value="split">Разделить между двумя выплатами</option></select></label></details><div class="actions"><button class="btn" type="submit">Сохранить</button><button type="button" class="btn light" id="creditCancel">Отмена</button></div></form></dialog><dialog id="smartOperationDialog" class="budget-alerts-dialog" aria-labelledby="smartOperationTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="smartOperationTitle">Умный ввод</h2><button type="button" class="btn light" id="smartOperationClose" aria-label="Закрыть">✕</button></div><p class="foot">Напиши уже совершённую операцию обычными словами. Разбор текста выполняется на устройстве. Голос распознаёт браузер или система — может потребоваться интернет.</p><form id="smartOperationForm"><label class="field"><span id="smartOperationLabel">Что потратили?</span><textarea id="smartOperationText" rows="3" maxlength="240" required placeholder="Вчера купил корм собаке за 1800"></textarea></label><button hidden class="btn full light" id="smartVoiceButton" type="button" aria-pressed="false">🎙 Продиктовать</button><p class="foot" id="smartVoiceStatus" role="status" aria-live="polite"></p><button class="btn full" type="submit">Распознать</button></form><p id="smartOperationPreview" aria-live="polite"></p><button class="btn full secondary" id="smartOperationContinue" type="button" disabled>Перейти к подтверждению</button><button class="btn full light" id="smartOperationManual" type="button" style="margin-top:8px">Ввести вручную</button><p class="foot">Поддерживаются одиночные расходы, дополнительные доходы и переводы между конвертами в рублях. Кредиты и зарплата — через обычные формы.</p></div></dialog><style>#smartOperationText{width:100%;box-sizing:border-box;resize:vertical;background:var(--input);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:16px}#smartOperationPreview{padding:10px;background:var(--panel);border-radius:12px;overflow-wrap:anywhere}#smartOperationContinue:disabled,#smartVoiceButton:disabled{opacity:.5}#smartVoiceButton{margin-top:6px;min-height:42px}#smartVoiceStatus{margin:5px 0 9px}</style>
+<dialog id="welcomeDialog" class="budget-alerts-dialog" aria-labelledby="welcomeTitle"><form id="welcomeForm" class="budget-alerts-shell"><h2 id="welcomeTitle">Настроим твой бюджет</h2><p class="foot">Укажи реальные деньги на сегодня. Доход нужен для прогноза и попадёт в бюджет после подтверждения.</p><label class="field"><span>Доступно на повседневные расходы сегодня, ₽</span><input id="welcomeCash" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><details id="welcomeExtras"><summary>Дата старта и остальные конверты</summary><label class="field"><span>Начало учёта</span><input id="welcomeDate" type="date" required></label><label class="field"><span>За какой месяц ипотека уже оплачена · если есть</span><input id="welcomePaid" type="month"></label><label class="field"><span>На коммуналку, ₽</span><input id="welcomeutilities" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Накопления, ₽</span><input id="welcomesavings" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Остальные деньги, ₽</span><input id="welcomeother" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Уже отложено на ипотеку, ₽</span><input id="welcomemortgage" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label></details><div id="welcomeExisting" class="foot" hidden>Текущие остатки уже учтены. <button id="welcomeEditStart" type="button" class="btn light">Изменить стартовые остатки</button></div><label class="field"><span>Месячный оклад, ₽ · если есть</span><input id="welcomeSalary" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Как указан оклад</span><select id="welcomeMode"><option value="net">На руки</option><option value="gross">До налога</option></select></label><div class="two"><label class="field"><span>День аванса</span><input id="welcomeAdvance" type="number" min="1" max="31" step="1" inputmode="numeric" required></label><label class="field"><span>День зарплаты</span><input id="welcomePay" type="number" min="1" max="31" step="1" inputmode="numeric" required></label></div><details id="welcomeWork"><summary>Рабочий календарь и налог</summary><p class="foot" id="welcomeWorkMonth"></p><label class="field"><span>Рабочих дней за месяц</span><input id="welcomeWorkTotal" type="number" min="1" max="31" step="1" placeholder="По календарю"></label><label class="field"><span>Из них с 1 по 15 число</span><input id="welcomeWorkFirst" type="number" min="0" max="15" step="1" placeholder="По календарю"></label><label class="field"><span>Налог с оклада до вычета, %</span><input id="welcomeTax" type="number" min="0" max="50" step="0.5" required></label></details><label class="field"><span>Обычный дневной бюджет семьи, ₽ · если знаешь</span><input id="welcomeDaily" type="number" step="0.01" min="0.01" max="999999999" inputmode="decimal"></label><label><input id="welcomeFamily" type="checkbox"> Показать на главной «У меня» и «У жены»</label><label><input id="welcomeCredits" type="checkbox"> Показать вкладку «Кредиты»</label><p class="foot">Платежи по кредитам и дополнительные доходы можно добавить отдельно.</p><div class="actions"><button type="submit" class="btn">Сохранить</button><button type="button" class="btn light" id="welcomeLater">Позже</button></div></form></dialog><dialog id="creditActionsDialog" class="budget-alerts-dialog" aria-labelledby="creditActionsTitle"><form class="budget-alerts-shell" id="creditActionsForm"><h2 id="creditActionsTitle">Кредит</h2><p class="foot" id="creditActionsInfo"></p><div id="creditActionsFields"><label class="field"><span>Фактически оплачено сегодня, ₽</span><input type="number" id="creditActualAmount" min="0.01" step="0.01" inputmode="decimal" required></label><label class="field"><span>Из них основной долг по выписке, ₽</span><input type="number" id="creditActualPrincipal" min="0" step="0.01" inputmode="decimal" required></label><p class="foot">Остальное — проценты и комиссии. Проверь суммы в банке перед сохранением.</p></div><p class="foot" role="alert" id="creditActionsError"></p><button type="submit" class="btn full" id="creditActionsSubmit">Отметить оплату</button><button type="button" class="btn full light" id="creditActionsEdit">Уточнить по выписке</button><button type="button" class="btn full secondary" id="creditActionsCloseAccount">Закрыть обязательство</button><button type="button" class="btn full light" id="creditActionsCancel">Отмена</button></form></dialog><dialog id="creditDialog" class="budget-alerts-dialog" aria-labelledby="creditTitle"><form class="budget-alerts-shell" id="creditForm"><h2 id="creditTitle">Кредит или карта</h2><label class="field"><span>Тип</span><select id="creditKind"><option value="loan">Потребительский кредит</option><option value="card">Кредитная карта</option><option value="mortgage">Ипотека</option></select></label><label class="field"><span>Название</span><input id="creditName" maxlength="80" placeholder="Например, карта банка" required></label><label class="field"><span>Остаток основного долга по данным банка, ₽</span><input id="creditBalance" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><details id="creditStatement"><summary>Ближайший платёж по выписке</summary><p class="foot">Введи сумму и дату из банка. Проценты и комиссии входят в платёж, но не уменьшают основной долг.</p><label class="field"><span>Дата платежа</span><input id="creditDue" type="date" min="1900-01-01" max="9999-12-31"></label><label class="field"><span>Полный платёж, ₽</span><input id="creditDueAmount" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>В том числе проценты и комиссии, ₽</span><input id="creditInterest" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><p class="foot">Резерв автоматически распределяется между двумя ближайшими выплатами до срока; если доступна только одна — с неё.</p></details><div class="actions"><button class="btn" type="submit">Сохранить</button><button type="button" class="btn light" id="creditCancel">Отмена</button></div></form></dialog><dialog id="smartOperationDialog" class="budget-alerts-dialog" aria-labelledby="smartOperationTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="smartOperationTitle">Умный ввод</h2><button type="button" class="btn light" id="smartOperationClose" aria-label="Закрыть">✕</button></div><p class="foot">Напиши уже совершённую операцию обычными словами. Разбор текста выполняется на устройстве. Голос распознаёт браузер или система — может потребоваться интернет.</p><form id="smartOperationForm"><label class="field"><span id="smartOperationLabel">Что потратили?</span><textarea id="smartOperationText" rows="3" maxlength="240" required placeholder="Вчера купил корм собаке за 1800"></textarea></label><button hidden class="btn full light" id="smartVoiceButton" type="button" aria-pressed="false">🎙 Продиктовать</button><p class="foot" id="smartVoiceStatus" role="status" aria-live="polite"></p><button class="btn full" type="submit">Распознать</button></form><p id="smartOperationPreview" aria-live="polite"></p><button class="btn full secondary" id="smartOperationContinue" type="button" disabled>Перейти к подтверждению</button><button class="btn full light" id="smartOperationManual" type="button" style="margin-top:8px">Ввести вручную</button><p class="foot">Поддерживаются одиночные расходы, дополнительные доходы и переводы между конвертами в рублях. Кредиты и зарплата — через обычные формы.</p></div></dialog><style>#smartOperationText{width:100%;box-sizing:border-box;resize:vertical;background:var(--input);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:16px}#smartOperationPreview{padding:10px;background:var(--panel);border-radius:12px;overflow-wrap:anywhere}#smartOperationContinue:disabled,#smartVoiceButton:disabled{opacity:.5}#smartVoiceButton{margin-top:6px;min-height:42px}#smartVoiceStatus{margin:5px 0 9px}</style>
 <dialog id="moneyCalendarDialog" class="budget-alerts-dialog" aria-labelledby="moneyCalendarTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="moneyCalendarTitle">Календарь денег</h2><button class="btn light" type="button" id="moneyCalendarClose" aria-label="Закрыть">✕</button></div><div id="calendarHorizon" role="group" aria-label="Горизонт прогноза"><button type="button" class="btn light" data-horizon="30" aria-pressed="true">30 дней</button><button type="button" class="btn light" data-horizon="60" aria-pressed="false">60 дней</button><button type="button" class="btn light" data-horizon="90" aria-pressed="false">90 дней</button></div><p id="moneyCalendarSummary" class="foot" aria-live="polite"></p><div id="calendarForecastSummary" aria-live="polite"></div><details id="calendarPurchaseEditor"><summary>＋ Запланировать покупку</summary><form id="calendarPurchaseForm"><label class="field">Название<input id="calendarPurchaseName" required maxlength="80"></label><label class="field">Дата<input id="calendarPurchaseDate" type="date" required></label><label class="field">Сумма, ₽<input id="calendarPurchaseAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><button class="btn full" type="submit">Сохранить план</button><p class="foot">Указывай только дополнительные покупки, не включённые в дневной бюджет. План не списывает деньги.</p></form><div id="calendarPurchaseList"></div></details><details id="incomeSchedulePanel"><summary>Регулярные дополнительные доходы</summary>
  <p class="foot">Добавь ожидаемый доход, например подработку. В бюджет деньги попадут после нажатия «Получено».</p>
  <div id="incomeScheduleList"></div><form id="incomeScheduleForm">
@@ -2980,6 +2981,12 @@ function fundingDates(bill,asOf,pending,split){
  if(pending)slots.push({id:pending.id,date:pending.date,type:pending.type});
  return slots.sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id)).slice(split?-2:-1);
 }
+function creditBillPaid(bill,asOf='9999-12-31'){
+ return data.expenses.filter(e=>e.billId===bill.id&&e.date<=asOf).reduce((sum,e)=>sum+Math.round(num(e.amount)*100),0);
+}
+function creditBillPrincipal(bill){
+ return data.expenses.filter(e=>e.billId===bill.id).reduce((sum,e)=>sum+(e.principalCents||0),0);
+}
 function accountFundingRows(receipts,capacity,pending){
  const date=pending?.date||iso(new Date()),rows=[];
  for(const a of [...(data.creditAccounts||[])].sort((a,b)=>(a.due||'').localeCompare(b.due||''))){
@@ -2987,9 +2994,9 @@ function accountFundingRows(receipts,capacity,pending){
   const row={id:key,name:a.name,a:num(receipts.advance?.amounts?.[key]),b:num(receipts.salary?.amounts?.[key])};
   if(a.closed&&!row.a&&!row.b)continue;
   rows.push(row);
-  if(a.closed||!bill||data.expenses.some(e=>e.billId===bill.id))continue;
-  const slots=fundingDates(bill,date,pending,a.funding==='split');
-  let need=Math.max(0,bill.cents-accountReserveCents(a.id,date));
+  if(a.closed||!bill||creditBillPaid(bill)>=bill.cents)continue;
+  const slots=fundingDates(bill,date,pending,true);
+  let need=Math.max(0,bill.cents-creditBillPaid(bill,date)-accountReserveCents(a.id,date));
   slots.forEach((s,i)=>{
    const share=Math.ceil(need/(slots.length-i)),col=s.type==='advance'?'a':'b';
    if(s.id===month+'-'+s.type&&!receipts[s.type]){
@@ -3008,7 +3015,11 @@ function monthlyBillRows(until){
   if(!paid.has(expense.billId))paid.set(expense.billId,new Set());
   paid.get(expense.billId).add(expense.billDue);
  }
- return (data.monthlyBills||[]).map(bill=>({bill,...monthlyBillSchedule(bill,until,paid.get(bill.id)||new Set())}))
+ return (data.monthlyBills||[]).map(bill=>{
+  if(!bill.creditAccount)return {bill,...monthlyBillSchedule(bill,until,paid.get(bill.id)||new Set())};
+  const remaining=Math.max(0,bill.cents-creditBillPaid(bill));
+  return {bill,nextDue:remaining?bill.firstDue:null,nextCents:remaining,count:remaining&&bill.firstDue<until?1:0,reserveCents:remaining&&bill.firstDue<until?remaining:0};
+ })
   .map(row=>{if(row.bill.creditAccount&&row.reserveCents)row.reserveCents=Math.max(0,row.reserveCents-accountReserveCents(row.bill.creditAccount,iso(new Date())));return row;})
   .sort((a,b)=>(a.nextDue||'9999').localeCompare(b.nextDue||'9999')||a.bill.name.localeCompare(b.bill.name,'ru'));
 }
@@ -3632,6 +3643,11 @@ function calendarSnapshot(now,horizon=30,scenario=null){
   }
  }
  for(const bill of (data.monthlyBills||[]).filter(validMonthlyBill)){
+  if(bill.creditAccount){
+   const remaining=Math.max(0,bill.cents-creditBillPaid(bill,today));
+   if(remaining&&bill.firstDue<=end)push(bill.firstDue<today?today:bill.firstDue,'bill',bill.name+(bill.firstDue<today?' · просрочено':''),Math.max(0,remaining-accountReserveCents(bill.creditAccount,today)));
+   continue;
+  }
   const paid=new Set((data.expenses||[]).filter(e=>e.date<=today&&e.billId===bill.id).map(e=>e.billDue));
   const first=fromISO(bill.firstDue);
   let overdue=0,overdueCents=0;
@@ -5093,39 +5109,85 @@ function paidPrincipal(id){
 function creditStatementFor(id){
  return monthlyBillRows(iso(new Date())).find(row=>row.bill.creditAccount===id&&row.nextDue);
 }
+let activeCreditKey=null;
+function openCreditActions(key){
+ const dialog=$('creditActionsDialog'),form=$('creditActionsForm');
+ form.reset();activeCreditKey=key;
+ const legacy=key==='mortgage'||key==='credit';
+ const a=legacy?null:(data.creditAccounts||[]).find(x=>x.id===key&&!x.closed);
+ if(!legacy&&!a)return;
+ const next=a&&creditStatementFor(key),date=iso(new Date());
+ $('creditActionsTitle').textContent=legacy?(key==='mortgage'?'Ипотека':'Кредитная карта'):a.name;
+ $('creditActionsInfo').textContent=legacy?$(key==='mortgage'?'mortgagePaymentStatus':'creditPaymentStatus').textContent:
+  'Остаток основного долга: '+rub((a.baseCents-paidPrincipal(key))/100)+' · Отложено: '+rub(Math.max(0,accountReserveCents(key,date))/100)+(next?' · Осталось по выписке: '+rub(next.nextCents/100):' · Уточни следующий платёж по выписке.');
+ $('creditActionsFields').hidden=legacy||!next;
+ for(const id of ['creditActualAmount','creditActualPrincipal'])$(id).disabled=legacy||!next;
+ $('creditActionsSubmit').hidden=!legacy&&!next;
+ $('creditActionsEdit').hidden=legacy;
+ $('creditActualAmount').value=next?Math.min(next.nextCents,Math.max(0,accountReserveCents(key,date)))/100:'';
+ $('creditActualAmount').max=next?next.nextCents/100:0;
+ $('creditActualPrincipal').max=a?(a.baseCents-paidPrincipal(key))/100:0;
+ $('creditActionsError').textContent='';
+ if(next)suggestCreditPrincipal();
+ dialog.showModal();
+}
+function suggestCreditPrincipal(){
+ const next=creditStatementFor(activeCreditKey);if(!next)return;
+ const amount=Math.round(Number($('creditActualAmount').value)*100);
+ const interest=Math.max(0,next.bill.cents-next.bill.principalCents-(creditBillPaid(next.bill)-creditBillPrincipal(next.bill)));
+ $('creditActualPrincipal').value=Math.max(0,Math.min(amount,amount-interest,Number($('creditActualPrincipal').max)*100))/100;
+}
+function recordCreditPayment(id,amountCents,principalCents,date){
+ const a=(data.creditAccounts||[]).find(x=>x.id===id&&!x.closed),next=a&&creditStatementFor(id);
+ if(!data.startBalances||date<data.startBalances.date)return 'Сначала укажи стартовые остатки.';
+ if(!next||!Number.isSafeInteger(amountCents)||amountCents<=0||amountCents>next.nextCents)return 'Укажи сумму не больше остатка платежа по выписке.';
+ if(!Number.isSafeInteger(principalCents)||principalCents<0||principalCents>amountCents||principalCents>a.baseCents-paidPrincipal(id))return 'Проверь часть платежа в погашение основного долга.';
+ if(accountReserveCents(id,date)<amountCents)return 'Недостаточно денег в резерве. Сначала подтверди поступление выплаты.';
+ data.expenses.push({id:'credit-payment-'+Date.now()+'-'+Math.random().toString(36).slice(2),date,category:'account-'+id,amount:amountCents/100,type:a.name,note:'Оплата по выписке',billId:next.bill.id,billDue:next.nextDue,creditAccount:id,principalCents});
+ if(!save()){data.expenses.pop();return 'Платёж не записан.';}
+ return '';
+}
 function renderCreditAccounts(){
  for(const target of ['credit','mortgage']){
-  const tile=$(target==='credit'?'confirmCreditPayment':'confirmMortgagePayment').closest('.payment-confirm');
+  const original=$(target==='credit'?'confirmCreditPayment':'confirmMortgagePayment'),tile=original.closest('.payment-confirm');
   tile.hidden=!!data.closedLegacy?.[target];
-  if(!tile.querySelector('.close-legacy')){
-   const close=document.createElement('button');close.type='button';close.className='btn light close-legacy';close.textContent=target==='credit'?'Закрыть карту':'Закрыть ипотеку';close.onclick=()=>closeLegacy(target);tile.append(close);
+  if(!tile.querySelector('.credit-wide-button')){
+   const wide=document.createElement('button');wide.type='button';wide.className='credit-wide-button';
+   wide.append(tile.querySelector('.payment-confirm-heading'));
+   const arrow=document.createElement('span');arrow.className='credit-wide-arrow';arrow.textContent='›';wide.append(arrow);
+   wide.onclick=()=>data.startBalances?openPaymentEntry(target):openCreditActions(target);tile.prepend(wide);original.hidden=true;original.classList.add('credit-original-action');
   }
  }
  const list=$('creditAccountList');list.replaceChildren();
  for(const a of (data.creditAccounts||[]).filter(a=>!a.closed)){
-  const row=document.createElement('article'),title=document.createElement('strong'),info=document.createElement('p');
-  row.className='payment-confirm extra-credit';title.textContent=a.name;const next=creditStatementFor(a.id);
-  info.textContent=(a.kind==='loan'?'Потребительский кредит':a.kind==='mortgage'?'Ипотека':'Кредитная карта')+' · Долг '+rub((a.baseCents-paidPrincipal(a.id))/100)+(next?' · Платёж '+rub(next.nextCents/100)+' до '+next.nextDue:' · Предстоящий платёж не указан');
-  info.textContent+=' · Отложено '+rub(accountReserveCents(a.id,iso(new Date()))/100);
-  const edit=document.createElement('button');edit.type='button';edit.className='btn light';edit.textContent='Уточнить по выписке';edit.onclick=()=>openCredit(a);
-  row.append(title,info,edit);
-  if(next){
-   const pay=document.createElement('button');pay.type='button';pay.className='btn';pay.textContent='Записать оплату';
-   pay.onclick=()=>{
-    if(!confirm('Записать оплату '+rub(next.nextCents/100)+' по «'+a.name+'» сегодня?'))return;
-    const err=payMonthlyBill(next.bill,next.nextDue,iso(new Date()));if(err){alert(err);return;}refreshBudgetView();
-   };
-   row.append(pay);
-  }
-  const close=document.createElement('button');close.type='button';close.className='btn light';close.textContent=a.kind==='card'?'Закрыть карту':a.kind==='mortgage'?'Закрыть ипотеку':'Закрыть кредит';close.onclick=()=>closeAccount(a);row.append(close);
-  list.append(row);
+  const row=document.createElement('button'),body=document.createElement('span'),title=document.createElement('strong'),info=document.createElement('span'),arrow=document.createElement('span');
+  row.type='button';row.className='payment-confirm extra-credit credit-wide-button';title.textContent=a.name;
+  const next=creditStatementFor(a.id),paid=data.expenses.filter(e=>e.creditAccount===a.id&&e.date.slice(0,7)===month).reduce((sum,e)=>sum+num(e.amount),0);
+  info.className='receipt-note';info.textContent='Оплачено за месяц: '+rub(paid)+' · Отложено: '+rub(Math.max(0,accountReserveCents(a.id,iso(new Date())))/100)+' · Долг: '+rub((a.baseCents-paidPrincipal(a.id))/100)+(next?' · К оплате '+rub(next.nextCents/100)+' до '+next.nextDue:' · Нет следующего платежа');
+  body.append(title,info);arrow.className='credit-wide-arrow';arrow.textContent='›';row.append(body,arrow);row.onclick=()=>openCreditActions(a.id);list.append(row);
  }
 }
+$('creditActualAmount').addEventListener('input',suggestCreditPrincipal);
+$('creditActionsCancel').onclick=()=>$('creditActionsDialog').close();
+$('creditActionsEdit').onclick=()=>{const a=(data.creditAccounts||[]).find(x=>x.id===activeCreditKey&&!x.closed);$('creditActionsDialog').close();if(a)openCredit(a);};
+$('creditActionsCloseAccount').onclick=()=>{
+ const key=activeCreditKey;
+ if(key==='credit'||key==='mortgage')closeLegacy(key);
+ else{const a=(data.creditAccounts||[]).find(x=>x.id===key&&!x.closed);if(a)closeAccount(a);}
+ if((key==='credit'||key==='mortgage')?data.closedLegacy?.[key]:(data.creditAccounts||[]).find(x=>x.id===key)?.closed)$('creditActionsDialog').close();
+};
+$('creditActionsForm').addEventListener('submit',e=>{
+ e.preventDefault();const key=activeCreditKey;
+ if(key==='mortgage'||key==='credit'){$('creditActionsDialog').close();$(key==='mortgage'?'confirmMortgagePayment':'confirmCreditPayment').click();return;}
+ const error=recordCreditPayment(key,Math.round(Number($('creditActualAmount').value)*100),Math.round(Number($('creditActualPrincipal').value)*100),iso(new Date()));
+ if(error){$('creditActionsError').textContent=error;return;}
+ $('creditActionsDialog').close();refreshBudgetView();
+});
 function releaseReserve(from,amount,date){
  if(amount>0)(data.transfers||=[]).push({id:crypto.randomUUID(),date,from,to:'family',amount,closeRelease:true,note:'Остаток резерва после закрытия'});
 }
 function closeAccount(a){
- if(!confirm('Убрать «'+a.name+'» из действующих кредитов? История останется, остаток резерва перейдёт в семейный конверт.'))return;
+ if(!confirm('Подтверждаешь, что «'+a.name+'» полностью закрыт в банке? История останется, остаток резерва перейдёт в семейный конверт.'))return;
  const prev=data;data=structuredClone(data);
  const date=iso(new Date());releaseReserve('account-'+a.id,accountReserveCents(a.id,date)/100,date);
  data.creditAccounts.find(item=>item.id===a.id).closed=true;
@@ -5133,7 +5195,7 @@ function closeAccount(a){
  if(!save()){data=prev;return;}refreshBudgetView();
 }
 function closeLegacy(target){
- if(!confirm('Убрать обязательство из действующих? История оплат сохранится, остаток резерва перейдёт в семейный конверт.'))return;
+ if(!confirm('Подтверждаешь, что обязательство полностью закрыто в банке? История оплат сохранится, остаток резерва перейдёт в семейный конверт.'))return;
  const prev=data;data=structuredClone(data);const date=iso(new Date());
  releaseReserve(target,target==='credit'?regularCreditAvailable(date):regularMortgageAvailable(date),date);
  if(target==='credit')data.debt=regularPaymentSum('credit')+repaymentTotal('credit');
@@ -5145,7 +5207,6 @@ function closeLegacy(target){
 function openCredit(account){
  editingCredit=account?.id||null;$('creditForm').reset();
  $('creditTitle').textContent=account?'Уточнить по выписке':'Добавить кредит или карту';
- $('creditFunding').value=account?.funding||'nearest';
  const next=account&&creditStatementFor(account.id);
  $('creditStatement').open=!!next;
  if(account){
@@ -5154,7 +5215,7 @@ function openCredit(account){
  }
  if(next){
   $('creditDue').value=next.nextDue;$('creditDueAmount').value=next.nextCents/100;
-  $('creditInterest').value=(next.nextCents-next.bill.principalCents)/100;
+  $('creditInterest').value=Math.min(next.nextCents,Math.max(0,next.bill.cents-next.bill.principalCents-(creditBillPaid(next.bill)-creditBillPrincipal(next.bill))))/100;
  }
  $('creditDialog').showModal();
 }
@@ -5169,7 +5230,7 @@ $('creditForm').addEventListener('submit',e=>{
   $('creditStatement').open=true;alert('Проверь название, дату и сумму. Часть платежа в погашение долга не может превышать остаток долга.');return;
  }
  const id=editingCredit||crypto.randomUUID(),kind=$('creditKind').value;
- const account={id,kind,name,funding:$('creditFunding').value,due:due||'',baseCents:balance+paidPrincipal(id)};
+ const account={id,kind,name,funding:'auto',due:due||'',baseCents:balance+paidPrincipal(id)};
  const oldAccounts=data.creditAccounts,oldBills=data.monthlyBills;
  const bills=(oldBills||[]).filter(b=>b.creditAccount!==id);
  if(hasStatement){
@@ -5593,7 +5654,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.126';
+const APP_VERSION='1.5.127';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -5777,7 +5838,7 @@ function openPaymentEntry(target){
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках.');return;}
  const isMortgage=target==='mortgage';
  paymentEntryTarget=target;paymentEntryMonth=month;
- paymentEntryTrigger=$(isMortgage?'confirmMortgagePayment':'confirmCreditPayment');
+ paymentEntryTrigger=$(isMortgage?'confirmMortgagePayment':'confirmCreditPayment').closest('.payment-confirm')?.querySelector('.credit-wide-button')||$(isMortgage?'confirmMortgagePayment':'confirmCreditPayment');
  $('paymentEntryTitle').textContent=isMortgage?'Оплата ипотеки':'Оплата кредитки';
  const todayKey=iso(new Date());
  $('paymentEntryDate').min=data.startBalances.date;
@@ -5812,6 +5873,7 @@ $('paymentEntryForm').addEventListener('submit',e=>{
 });
 $('paymentEntryClose').addEventListener('click',closePaymentEntry);
 $('paymentEntryCancel').addEventListener('click',closePaymentEntry);
+$('paymentEntryCloseAccount').addEventListener('click',()=>{const target=paymentEntryTarget;if(!target)return;closeLegacy(target);if(data.closedLegacy?.[target])closePaymentEntry();});
 $('paymentEntryOverlay').addEventListener('click',e=>{if(e.target===$('paymentEntryOverlay'))closePaymentEntry()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('paymentEntryOverlay').hidden)closePaymentEntry()});
 $('regularPaymentHistory').addEventListener('click',e=>{
@@ -7025,11 +7087,19 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #layoutChoices input[type=checkbox]{width:auto;min-height:auto;accent-color:var(--blue)}
 .app:has(#v-card.active)>.main,.app:has(#v-analytics.active)>.main{overflow-y:auto!important;touch-action:pan-y pinch-zoom!important}
 .app .main #v-card.active,.app .main #v-analytics.active{display:block!important;height:auto!important;max-height:none!important;overflow:visible!important;touch-action:pan-y pinch-zoom!important;padding-bottom:16px!important}
-#v-card .payment-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;align-items:stretch}
+#v-card .payment-grid{display:grid!important;grid-template-columns:minmax(0,1fr)!important;align-items:stretch}
 #creditAccountList{display:contents}#v-card #creditAccountList article{margin:0;padding:10px;border:1px solid var(--line);border-radius:14px;min-width:0;overflow-wrap:anywhere}
 #v-card .payment-confirm[hidden]{display:none!important}
 #v-card .payment-grid .payment-confirm{height:auto!important;max-height:none!important;min-width:0}
 #v-card .extra-credit p{font-size:12px;margin:4px 0}
+#v-card .payment-grid>.payment-confirm{padding:0!important}
+#v-card .credit-wide-button{display:flex!important;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:78px;text-align:left;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:14px!important;font:inherit;white-space:normal;cursor:pointer;box-sizing:border-box}
+#v-card .credit-wide-button>span:first-child,#v-card .credit-wide-button .payment-confirm-heading{display:grid;gap:5px;min-width:0;text-align:left}
+#v-card .credit-wide-button .receipt-note{display:block;line-height:1.4;white-space:normal;overflow-wrap:anywhere;text-align:left}
+#v-card .credit-wide-arrow{font-size:26px;color:var(--muted);flex:none}
+#v-card .credit-original-action[hidden],#creditActionsDialog [hidden]{display:none!important}
+#creditActionsDialog{width:min(94vw,440px);max-height:88dvh;overflow:auto}
+#creditActionsDialog form{display:grid;gap:10px}
 #nearestPayment summary,#homeCalendar{font:650 15px/1.3 system-ui;cursor:pointer}
 .app #v-home #nearestPayment{padding:9px 12px!important;flex:none}
 .app #v-home #homeCalendar{width:100%;padding:12px;min-height:44px;background:var(--card)}
