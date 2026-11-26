@@ -5313,7 +5313,7 @@ function recordCreditPayment(id,amountCents,principalCents,date){
 function renderCreditAccounts(){
  for(const target of ['credit','mortgage']){
   const original=$(target==='credit'?'confirmCreditPayment':'confirmMortgagePayment'),tile=original.closest('.payment-confirm');
-  tile.hidden=!!data.closedLegacy?.[target]||(target==='mortgage'?!num(data.mortgageMonthly)&&!num(data.startBalances?.mortgage):!num(data.debt)&&!num(data.reserved));const heading=tile.querySelector('.payment-confirm-heading strong,.payment-confirm-heading b');if(heading)heading.textContent=creditIcon(data.legacyCreditIcons?.[target],target==='credit'?'card':'mortgage')+' '+(target==='credit'?'Кредитка':'Ипотека');
+  tile.hidden=!!data.closedLegacy?.[target]||(target==='mortgage'?!num(data.mortgageMonthly)&&!num(data.startBalances?.mortgage)&&!num(data.months[month]?.mortgage)&&!upcomingMortgage(new Date()).plan:!num(data.debt)&&!num(data.reserved));const heading=tile.querySelector('.payment-confirm-heading strong,.payment-confirm-heading b');if(heading)heading.textContent=creditIcon(data.legacyCreditIcons?.[target],target==='credit'?'card':'mortgage')+' '+(target==='credit'?'Кредитка':'Ипотека');
   if(!tile.querySelector('.credit-wide-button')){
    const wide=document.createElement('button');wide.type='button';wide.className='credit-wide-button';
    wide.append(tile.querySelector('.payment-confirm-heading'));
