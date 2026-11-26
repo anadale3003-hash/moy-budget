@@ -3,11 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "prepare:web": "node test-financial-payments.mjs && node prepare-web.mjs"
+    "prepare:web": "node test-financial-payments.mjs && node test-local-reminders.mjs && node prepare-web.mjs"
   },
   "dependencies": {
     "@capacitor/core": "7.4.4",
-    "@capacitor/android": "7.4.4"
+    "@capacitor/android": "7.4.4",
+    "@capacitor/local-notifications": "7.0.1"
   },
   "devDependencies": {
     "@capacitor/cli": "7.4.4"
