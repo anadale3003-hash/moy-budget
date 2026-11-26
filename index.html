@@ -2494,7 +2494,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
       <div><span>Уже накоплено</span><strong id="savingsPlanCurrent">—</strong></div>
       <div class="analytics-plan-left"><span>Осталось накопить</span><strong id="savingsPlanRemaining">—</strong></div>
      </div>
-     <label class="field analytics-plan-input"><span>Размер подушки, ₽</span><input id="ladderReserveInput" type="number" inputmode="decimal" step="100" min="0" required value="500000"></label>
+     <label class="field analytics-plan-input"><span>Размер подушки, ₽</span><input id="ladderReserveInput" type="number" inputmode="decimal" step="100" min="0" required value="0"></label>
      <label class="analytics-plan-included"><input id="ladderIncluded" type="checkbox"><span>Подушка уже входит в остаток категории «Накопления»</span></label>
 <div id="personalGoals"><strong>Цели накоплений</strong>
  <div id="goalReserve"></div><div id="goalBalances"></div>
@@ -2777,7 +2777,12 @@ const fmt=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});const
 const alert=message=>window.alert(spouseLabel(message,data.gender));
 const confirm=message=>window.confirm(spouseLabel(message,data.gender));
 let data;const defaults=()=>({welcomeSeen:false,showFamilySplit:false,showCreditTab:true,gender:'male',payFrequency:'twice',closedLegacy:{mortgage:true,credit:true},months:{},mortgageMonthly:0,ladder:{reserve:0,included:false},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:0,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
-try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();
+let storedBudget;
+try{
+ storedBudget=localStorage.getItem(KEY);
+ data=JSON.parse(storedBudget||'null')||defaults();
+}catch(_){storedBudget=undefined;data=defaults();}
+if(!data.months||!data.weights||!Array.isArray(data.expenses)){storedBudget=undefined;data=defaults();}
 normalizeBudget(data);
 function normalizeBudget(data){
  for(const i of data.extraIncomes||[])if(i.source==='Доход мужа')i.source='Доход жены';
@@ -2796,15 +2801,13 @@ function normalizeBudget(data){
  if(!Array.isArray(data.earlyRepayments))data.earlyRepayments=[];
  if(!Array.isArray(data.transfers))data.transfers=[];
  if(!Array.isArray(data.regularPayments))data.regularPayments=[];
- if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
+ if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:0,included:false};
  if(!data.salaryConfig||typeof data.salaryConfig!=='object')data.salaryConfig={base:0,mode:'gross',taxRate:13};
  if(data.salaryConfig.taxRate===undefined)data.salaryConfig.taxRate=13;
  if(typeof data.paidMortgageMonth!=='string')data.paidMortgageMonth='';
- if(!Number.isFinite(Number(data.utilitiesAdvanceTarget))||Number(data.utilitiesAdvanceTarget)<0)data.utilitiesAdvanceTarget=15000;
+ if(!Number.isFinite(Number(data.utilitiesAdvanceTarget))||Number(data.utilitiesAdvanceTarget)<0)data.utilitiesAdvanceTarget=0;
  if(typeof data.utilitiesFromSalary!=='boolean')data.utilitiesFromSalary=true;
- // Первоначальные настройки старых версий были 15/30; для этого бюджета даты 16/1.
  if(!data.payDays||typeof data.payDays!=='object')data.payDays={advance:16,salary:1};
- if(!data.payDays2026Migrated){if(Number(data.payDays.advance)===15&&Number(data.payDays.salary)===30)data.payDays={advance:16,salary:1};data.payDays2026Migrated=true;}
 }
 let month=currentMonth;
 function setTheme(name,shouldSave=true){const key=Object.prototype.hasOwnProperty.call(THEMES,name)?name:'Outlook Dusk';const t=THEMES[key],root=document.documentElement;root.classList.toggle("orchid-gold",key==="Orchid Gold");for(const [k,v] of Object.entries(t)){root.style.setProperty('--'+k,v);}root.style.setProperty('--teal',t.blue);root.style.setProperty('--green',t.blue);root.style.setProperty('--orange',t.blue);root.style.setProperty('--accent-text',t.accentText);root.style.setProperty('--hero',t.hero);root.style.setProperty('--input',t.input);root.style.setProperty('--selected',t.selected);const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=t.hero;if(shouldSave){data.theme=key;save();}const select=$('themeSelect');if(select)select.value=key;}
@@ -2812,9 +2815,9 @@ window.addEventListener('onboarding:preview-theme',e=>setTheme(e.detail,false));
 function initTheme(){const select=$('themeSelect');select.innerHTML=Object.keys(THEMES).map(name=>`<option value="${esc(name)}">${esc(name)}</option>`).join('');select.onchange=e=>setTheme(e.target.value);setTheme(data.theme||'Outlook Dusk',false)}
 
 function monthData(){
- if(!data.months[month])data.months[month]={advance:0,salary:0,mortgage:Number.isFinite(Number(data.mortgageMonthly))&&data.mortgageMonthly!==undefined?num(data.mortgageMonthly):55000};
+ if(!data.months[month])data.months[month]={advance:0,salary:0,mortgage:num(data.mortgageMonthly)};
  const m=data.months[month];
- if(m.mortgage===undefined)m.mortgage=data.mortgageMonthly===undefined?55000:num(data.mortgageMonthly);
+ if(m.mortgage===undefined)m.mortgage=num(data.mortgageMonthly);
  return m;
 }
 const RU_NONWORK=["2026-01-01", "2026-01-02", "2026-01-05", "2026-01-06", "2026-01-07", "2026-01-08", "2026-01-09", "2026-02-23", "2026-03-09", "2026-05-01", "2026-05-11", "2026-06-12", "2026-11-04", "2026-12-31", "2027-01-01", "2027-01-04", "2027-01-05", "2027-01-06", "2027-01-07", "2027-01-08", "2027-02-22", "2027-02-23", "2027-03-08", "2027-05-03", "2027-05-10", "2027-06-14", "2027-11-04", "2027-11-05", "2027-12-31"];
@@ -2941,10 +2944,60 @@ function showSaveFeedback(message,button){
    setTimeout(()=>button.classList.remove('budget-action-saved'),490);
  }
 }
+// Hold the lock for the editing session so synchronous handlers can retain
+// their success and rollback semantics. A waiting window never writes.
+let canWriteBudget=false,releaseBudgetLock;
+const budgetLockDialog=document.createElement('dialog');
+budgetLockDialog.id='budgetLockDialog';
+budgetLockDialog.className='card';
+budgetLockDialog.style.maxWidth='min(92vw, 400px)';
+budgetLockDialog.setAttribute('aria-label','Доступ к бюджету');
+budgetLockDialog.addEventListener('cancel',event=>event.preventDefault());
+document.body.append(budgetLockDialog);
+function blockBudget(message,reload=false){
+ budgetLockDialog.textContent=message;
+ if(reload){
+  const button=document.createElement('button');
+  button.className='btn full';
+  button.textContent='Перезагрузить';
+  button.onclick=()=>location.reload();
+  budgetLockDialog.append(button);
+ }
+ if(!budgetLockDialog.open)budgetLockDialog.showModal();
+}
+function lockBudget(){
+ if(!navigator.locks||storedBudget===undefined){
+  blockBudget('Хранилище бюджета недоступно в этой версии браузера. Открой бюджет в обновлённом приложении.');
+  return;
+ }
+ blockBudget('Бюджет открыт в другом окне. Закрой его, чтобы продолжить здесь.');
+ navigator.locks.request(KEY,{mode:'exclusive'},async()=>{
+  // Reload consecutive editors from the committed state, including UI setup.
+  if(localStorage.getItem(KEY)!==storedBudget){location.reload();return;}
+  canWriteBudget=true;
+  budgetLockDialog.close();
+  save();
+  await new Promise(resolve=>{releaseBudgetLock=resolve;});
+ }).catch(()=>blockBudget('Не удалось открыть бюджет. Перезагрузи приложение.',true));
+}
+window.addEventListener('pagehide',()=>{
+ canWriteBudget=false;
+ releaseBudgetLock?.();
+});
+window.addEventListener('pageshow',event=>{if(event.persisted)location.reload();});
 let lastSavedReceiptSignature=JSON.stringify((data.receipts||[]).map(r=>r.id).sort());
 function save(){
+ if(!canWriteBudget)return false;
  try{
-   localStorage.setItem(KEY,JSON.stringify(data));
+   if(localStorage.getItem(KEY)!==storedBudget){
+    canWriteBudget=false;
+    blockBudget('Данные изменились в другом окне. Перезагрузи бюджет.',true);
+    releaseBudgetLock?.();
+    return false;
+   }
+   const next=JSON.stringify(data);
+   localStorage.setItem(KEY,next);
+   storedBudget=next;
  }catch(_){
    saveFeedbackIntent=null;
    if(saveFeedbackClearTimer!==null){clearTimeout(saveFeedbackClearTimer);saveFeedbackClearTimer=null;}
@@ -2999,7 +3052,7 @@ function nearestPayday(now=new Date()){
    const target=new Date(cycle.getFullYear(),cycle.getMonth()+(nextMonth?1:0),1);
    const key=iso(target).slice(0,7);
    const when=plannedPayday(key,Number(data.payDays[type])||1);
-   if((data.receipts||[]).some(r=>r.id===period+'-'+type))continue;
+   if(data.receipts.some(r=>r.id===period+'-'+type&&r.date<=iso(reference)))continue;
    if(when>=reference)options.push({date:when,type,month:period});
   }
  }
@@ -3085,19 +3138,19 @@ function accountFundingRows(receipts,capacity,pending){
  return rows;
 }
 
-function monthlyBillRows(until){
+function monthlyBillRows(until,asOf=iso(new Date())){
  const paid=new Map();
  for(const expense of data.expenses){
-  if(!expense.billId)continue;
+  if(!expense.billId||expense.date>asOf)continue;
   if(!paid.has(expense.billId))paid.set(expense.billId,new Set());
   paid.get(expense.billId).add(expense.billDue);
  }
  return (data.monthlyBills||[]).map(bill=>{
   if(!bill.creditAccount)return {bill,...monthlyBillSchedule(bill,until,paid.get(bill.id)||new Set())};
-  const remaining=Math.max(0,bill.cents-creditBillPaid(bill));
+  const remaining=Math.max(0,bill.cents-creditBillPaid(bill,asOf));
   return {bill,nextDue:remaining?bill.firstDue:null,nextCents:remaining,count:remaining&&bill.firstDue<until?1:0,reserveCents:remaining&&bill.firstDue<until?remaining:0};
  })
-  .map(row=>{if(row.bill.creditAccount&&row.reserveCents)row.reserveCents=Math.max(0,row.reserveCents-accountReserveCents(row.bill.creditAccount,iso(new Date())));return row;})
+  .map(row=>{if(row.bill.creditAccount&&row.reserveCents)row.reserveCents=Math.max(0,row.reserveCents-Math.max(0,accountReserveCents(row.bill.creditAccount,asOf)));return row;})
   .sort((a,b)=>(a.nextDue||'9999').localeCompare(b.nextDue||'9999')||a.bill.name.localeCompare(b.bill.name,'ru'));
 }
 function billReserve(rows,category){
@@ -3117,13 +3170,24 @@ function payMonthlyBill(bill,due,today){
  if(!save()){data.expenses.pop();return 'Платёж не записан.';}
  return '';
 }
-function spendingAfterBills(available,familyBalance,until){
- const rows=monthlyBillRows(until);
+function spendingAfterBills(available,familyBalance,until,now=new Date()){
+ const asOf=iso(now);
+ // The payday is a forecast until a matching receipt has been recorded.
+ const horizon=iso(calendarAddDays(fromISO(until),1));
+ const rows=monthlyBillRows(horizon,asOf);
+ const mortgage=upcomingMortgage(now);
+ const mortgageGap=iso(mortgage.due)<=until?mortgage.gap||0:0;
+ const creditGap=!data.closedLegacy?.credit&&fromISO(data.deadline)&&data.deadline<=until
+  ?Math.max(0,num(data.debt)-repaymentTotal('credit',null,asOf)-regularPaymentSum('credit',null,asOf)-Math.max(0,regularCreditAvailable(asOf))):0;
  const reserved=billReserve(rows,'family');
- const total=Math.max(0,available-billReserve(rows));
- const family=Math.max(0,Math.min(available,familyBalance)-reserved);
- const names=rows.filter(row=>row.count&&row.bill.category==='family').map(row=>row.bill.name);
- return {total,family,names,reserved};
+ const balance=available-billReserve(rows)-mortgageGap-creditGap;
+ const total=Math.max(0,balance);
+ const family=Math.max(0,Math.min(total,familyBalance-reserved-mortgageGap-creditGap));
+ const names=rows.filter(row=>row.reserveCents>0&&row.bill.category==='family').map(row=>row.bill.name);
+ if(mortgageGap)names.push('Ипотека');
+ if(creditGap)names.push('Кредитная карта');
+ const deficit=Math.max(0,Math.round(-balance*100)/100);
+ return {total,family,names,reserved:reserved+mortgageGap+creditGap,deficit};
 }
 
 function showPaydayCountdown(actual){
@@ -3139,8 +3203,13 @@ function showPaydayCountdown(actual){
  dateEl.textContent=label+' · '+date;
  where.textContent=(next.type==='advance'?'Аванс':'Зарплата')+(dayCount===0?' сегодня':' через '+dayCount+' '+daysWord);
  if(!actual){limit.textContent='Дневной лимит';dateEl.textContent='Сколько можно потратить сегодня';where.textContent='Укажи, сколько денег у тебя сейчас';note.textContent=where.textContent;return;}
- if(dayCount===0){limit.textContent='Выплата сегодня';note.textContent='Если деньги ещё не поступили, дождись фактического зачисления';return;}
- const budget=spendingAfterBills(actual.available,num(categoryBalanceAt('family',iso(now))),iso(next.date));
+ const budget=spendingAfterBills(actual.available,categoryBalanceAt('family',iso(now)),iso(next.date),now);
+ const deficitNotice=budget.deficit?' · Не хватает на обязательные платежи: '+rub(budget.deficit):'';
+ if(dayCount===0){
+  limit.textContent='Выплата сегодня';
+  note.textContent='До зачисления доступно на покупки '+rub(budget.family)+deficitNotice;
+  return;
+ }
  const spendable=budget.total;
  const dailyAmount=Math.floor(spendable/dayCount);
  const family=budget.family;
@@ -3152,7 +3221,7 @@ function showPaydayCountdown(actual){
  limit.append(amount,' в день');
  dateEl.textContent=(data.showFamilySplit===false?'На повседневные расходы до ':'На семейные покупки до ')+next.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
  if(budget.reserved)dateEl.textContent+=' · На платежи: '+rub(budget.reserved)+' ('+budget.names.join(', ')+')';
- note.textContent=rub(family)+' ÷ '+dayCount+' дн. = '+rub(familyDaily)+' в день · общий ориентир '+rub(dailyAmount)+'/день';
+ note.textContent=rub(family)+' ÷ '+dayCount+' дн. = '+rub(familyDaily)+' в день · общий ориентир '+rub(dailyAmount)+'/день'+deficitNotice;
 
 }
 function nextPaydays(now=new Date(),pendingReceipt=null,deadline=data.deadline){
@@ -3198,9 +3267,9 @@ function credit(pendingReceipt=null){const debt=Math.max(0,creditOutstanding()-(
 // funding from subsequent UNCONFIRMED wage distributions, in payment order.
 // Past receipts retain their original confirmed allocations.
 function mortgageDistributionBase(key){
- const m=data.months[key]||{advance:0,salary:0,mortgage:data.mortgageMonthly===undefined?55000:data.mortgageMonthly};
+ const m=data.months[key]||{advance:0,salary:0};
  const advance=plannedAdvance(m,key),salary=plannedSalary(m,key),total=advance+salary;
- const monthly=num(m.mortgage===undefined?(data.mortgageMonthly===undefined?55000:data.mortgageMonthly):m.mortgage);
+ const monthly=data.closedLegacy?.mortgage?0:num(m.mortgage??data.mortgageMonthly);
  const due=Math.min(monthly,total);
  return {advance:total?due*advance/total:0,salary:total?due*salary/total:0};
 }
@@ -3262,7 +3331,7 @@ function allocation(receiptDate=null,ruleOverrides=null,pendingReceipt=null){
  // spendable income on each remaining payday, not as identical payments.
  // Confirmed receipt allocations are frozen and never redistributed.
  const paydayWeight=p=>{
-  const pm=data.months[p.month]||{mortgage:data.mortgageMonthly===undefined?55000:data.mortgageMonthly};
+  const pm=data.months[p.month]||{mortgage:num(data.mortgageMonthly)};
   const income=p.type==='advance'?plannedAdvance(pm,p.month):plannedSalary(pm,p.month);
   const mortgage=mortgageDistributionBase(p.month);
   return Math.max(0,income-num(mortgage[p.type]));
@@ -3335,10 +3404,14 @@ function allocation(receiptDate=null,ruleOverrides=null,pendingReceipt=null){
  const rows=[{name:'Ипотека',a:mortgageA,b:mortgageB},{name:'Кредитная карта',a:ac,b:bc}];
  rows.push(...accountRows);
  for(const c of cats)rows.push({name:c.name,id:c.id,a:num(aa[c.id]),b:num(bb[c.id])});
- const due=Math.min(num(m.mortgage),total);
  const mortgage=mortgageA+mortgageB;
- const deficit=Math.max(0,mortgage+ac+bc-total);
- return {rows,total,mortgage,credit:ac+bc,deficit,unfundedMortgage:Math.max(0,due-(base.advance+base.salary)),weightTotal,offsets};
+ const requiredMortgage=data.closedLegacy?.mortgage?0:num(m.mortgage);
+ const mortgageCoverage=mortgage+offsets.advance+offsets.salary;
+ const unfundedMortgage=Math.max(0,Math.round((requiredMortgage-mortgageCoverage)*100)/100);
+ const creditTarget=(receipts.advance?0:intended('advance'))+(receipts.salary?0:intended('salary'));
+ const creditPlanned=(receipts.advance?0:ac)+(receipts.salary?0:bc);
+ const deficit=unfundedMortgage+Math.max(0,Math.round((creditTarget-creditPlanned)*100)/100);
+ return {rows,total,mortgage,credit:ac+bc,deficit,unfundedMortgage,weightTotal,offsets};
 }
 function displayAllocationRows(rows){
  // Balance the displayed columns to the nearest kopeck.
@@ -3360,7 +3433,7 @@ function incomeAmountFor(destination,fromDate=null){
 }
 function incomeTotalMonth(key){return data.extraIncomes.filter(i=>i.date?.startsWith(key)).reduce((a,i)=>a+num(i.amount),0);}
 function regularPaymentSum(target,fromDate=null,toDate=null){return (data.regularPayments||[]).filter(p=>p.target===target&&(!fromDate||p.date>=fromDate)&&(!toDate||p.date<=toDate)).reduce((a,p)=>a+num(p.amount),0)}
-function repaymentTotal(target,fromDate=null){return (data.earlyRepayments||[]).filter(x=>x.target===target&&(!fromDate||x.date>=fromDate)).reduce((sum,x)=>sum+num(x.amount),0)}
+function repaymentTotal(target,fromDate=null,toDate=null){return (data.earlyRepayments||[]).filter(x=>x.target===target&&(!fromDate||x.date>=fromDate)&&(!toDate||x.date<=toDate)).reduce((sum,x)=>sum+num(x.amount),0)}
 function repaymentSavingsSpent(fromDate){return (data.earlyRepayments||[]).filter(x=>x.date>=fromDate).reduce((sum,x)=>sum+num(x.amount),0)}
 function transferDelta(id,fromDate,toDate=null){return (data.transfers||[]).filter(t=>t.date>=fromDate&&(!toDate||t.date<=toDate)).reduce((sum,t)=>sum+(t.to===id?num(t.amount):0)-(t.from===id?num(t.amount):0),0)}
 function categoryBalanceAt(id,date){
@@ -3520,7 +3593,7 @@ function upcomingMortgage(now){
  const todayKey=iso(now);
  const due=new Date(now.getFullYear(),now.getMonth()+(now.getDate()===1?0:1),1);
  const cycle=iso(new Date(due.getFullYear(),due.getMonth()-1,1)).slice(0,7);
- const plan=data.closedLegacy?.mortgage?0:num(data.months[cycle]?.mortgage??data.mortgageMonthly??55000);
+ const plan=data.closedLegacy?.mortgage?0:num(data.months[cycle]?.mortgage??data.mortgageMonthly);
  const payments=(data.regularPayments||[]).filter(p=>p.target==='mortgage'&&p.month===cycle&&p.date<=todayKey);
  const paid=payments.length?payments.reduce((sum,p)=>sum+num(p.amount),0):data.paidMortgageMonth===cycle?plan:0;
  const reserve=data.startBalances?.date<=todayKey?Math.max(0,regularMortgageAvailable(todayKey)):null;
@@ -3533,9 +3606,9 @@ function advisorCashSnapshot(now){
  const wife=family===null?null:wifeFunds(today);
  const wifeCheck=(data.wifeBalanceReports||[]).filter(r=>r.date<=today&&(!data.startBalances||r.date>=data.startBalances.date)).map(r=>r.date).sort().pop()||null;
  const days=next?Math.max(0,Math.round((Date.UTC(next.date.getFullYear(),next.date.getMonth(),next.date.getDate())-Date.UTC(now.getFullYear(),now.getMonth(),now.getDate()))/86400000)):null;
- const before=next?monthlyBillRows(iso(next.date)):null;
- const after=next?monthlyBillRows(iso(new Date(next.date.getFullYear(),next.date.getMonth(),next.date.getDate()+1))):null;
- const budget=actual&&next?spendingAfterBills(actual.available,family,iso(next.date)):null;
+ const before=next?monthlyBillRows(iso(next.date),today):null;
+ const after=next?monthlyBillRows(iso(calendarAddDays(next.date,1)),today):null;
+ const budget=actual&&next?spendingAfterBills(actual.available,family,iso(next.date),now):null;
  const plan=next?data.months[next.month]||{}:null;
  const forecast=next?payrollForecast(plan,next.month):null;
  const expected=next&&(forecast.configured||(plan[next.type]!=null&&plan[next.type]!==''&&Number.isFinite(Number(plan[next.type]))))?(next.type==='advance'?plannedAdvance(plan,next.month):plannedSalary(plan,next.month)):null;
@@ -3775,7 +3848,7 @@ function calendarSnapshot(now,horizon=30,scenario=null){
  for(let offset=1;offset<=Math.ceil(length/28)+1;offset++){
   const following=new Date(mortgage.due.getFullYear(),mortgage.due.getMonth()+offset,1);
   if(iso(following)>end)break;
-  const cycle=iso(new Date(following.getFullYear(),following.getMonth()-1,1)).slice(0,7),plan=num(data.months[cycle]?.mortgage??data.mortgageMonthly??55000);
+  const cycle=iso(new Date(following.getFullYear(),following.getMonth()-1,1)).slice(0,7),plan=data.closedLegacy?.mortgage?0:num(data.months[cycle]?.mortgage??data.mortgageMonthly);
   const paid=(data.regularPayments||[]).filter(p=>p.target==='mortgage'&&p.month===cycle&&p.date<=today).reduce((n,p)=>n+num(p.amount),0);
   const remaining=Math.max(0,plan-(paid|| (data.paidMortgageMonth===cycle?plan:0)));
   if(remaining>0)push(iso(following),'mortgage','Ипотека',cents(remaining));
@@ -4313,10 +4386,10 @@ function renderEarlyAlerts(){
     const febDue=new Date(yy,1,1);
     const febKey=iso(febDue).slice(0,7);
     const febPlan=data.months[febKey];
-    const febMortgage=num(febPlan?.mortgage===undefined?(data.mortgageMonthly===undefined?55000:data.mortgageMonthly):febPlan.mortgage);
+    const febMortgage=num(febPlan?.mortgage===undefined?(num(data.mortgageMonthly)):febPlan.mortgage);
     const estimateText=smaller?'По расчёту аванс может быть около '+rub(janEstimate.advanceForecast)+' вместо декабрьских '+rub(decEstimate.advanceForecast)+'. ':'Из-за новогодних праздников аванс может быть меньше обычного. ';
     push('season','🎄 Подготовь деньги к январю',
-      estimateText+'На ипотеку к '+dateLabel(febDue)+' потребуется '+rub(febMortgage)+'. По возможности отложи деньги из декабрьских поступлений. Прогноз не учитывает все особенности расчёта работодателя.');
+      estimateText+(febMortgage&&!data.closedLegacy?.mortgage?'На ипотеку к '+dateLabel(febDue)+' потребуется '+rub(febMortgage)+'. ':'')+'Прогноз не учитывает все особенности расчёта работодателя.');
    }
   }
  }
@@ -4450,12 +4523,9 @@ const receivedLabel=type=>data.receipts.some(r=>r.id===month+'-'+type)?' ✓':''
 $('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс'+receivedLabel('advance')+'</th><th>Зарплата'+receivedLabel('salary')+'</th></tr></thead><tbody>'+visiblePlanRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
 const popupPreview=$('proportionDistributionPreview');
 if(popupPreview?.closest('details')?.open)popupPreview.querySelector('.payout-popup-preview-content').innerHTML=$('planTable').innerHTML;
-$('planWarnings').innerHTML=((!singlePay()&&!plannedAdvance(m))||!plannedSalary(m))
- ? '<div class="hint">Укажи оклад в настройках или фактические выплаты для полного расчёта.</div>'
- : ''
- + (calc.unfundedMortgage?`<div class="warning">Не хватает ${rub(calc.unfundedMortgage)} на ипотеку. Нужно покрыть разницу другим источником.</div>`:'')
+$('planWarnings').innerHTML=(calc.deficit?`<div class="warning" role="status">Дефицит бюджета на обязательные платежи: ${rub(calc.deficit)}.${calc.unfundedMortgage?' На ипотеку не хватает '+rub(calc.unfundedMortgage)+'.':''}</div>`:'')
+ + (((!singlePay()&&!plannedAdvance(m))||!plannedSalary(m))?'<div class="hint">Укажи оклад в настройках или фактические выплаты для полного расчёта.</div>':'')
  + ((calc.offsets.advance||calc.offsets.salary)?`<div class="hint">Учтена дополнительная оплата ипотеки из конвертов: меньше отложить с аванса на ${rub(calc.offsets.advance)}, с зарплаты на ${rub(calc.offsets.salary)}. Уже подтверждённые поступления не меняются.</div>`:'')
- + (calc.deficit?`<div class="warning">Ипотека и кредитка превышают доход месяца на ${rub(calc.deficit)}. Отложить требуемую сумму полностью не получится.</div>`:'')
  + (!calc.weightTotal?'<div class="warning">Укажи хотя бы один положительный вес для распределения остатка.</div>':'');
 
 $('debtRemaining').textContent=rub(cc.debt);$('payCount').textContent=cc.pays.length;$('perPay').textContent=rub(cc.per);let alert='';if(cc.debt===0)alert='<div class="success">Оставшаяся сумма к накоплению равна нулю. Проверь фактический долг и платежи в банке.</div>';else if(!cc.due||cc.pays.length===0)alert='<div class="warning">До указанного срока нет будущих выплат. Нужен другой источник денег или перенос срока с банком.</div>';else alert=`<div class="hint">До ${cc.due.toLocaleDateString('ru-RU')} нужно накопить ${rub(cc.debt)}. В расчёте ${cc.pays.length} будущих поступлений.</div>`;$('debtAlert').innerHTML=alert;
@@ -4479,7 +4549,7 @@ const rows=[...data.expenses.filter(e=>e.date?.startsWith(month)&&!e.creditAccou
 
 /* Capital goals use the existing savings category, plus any external protected deposit. */
 function ladderSettings(){
- if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
+ if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:0,included:false};
  return data.ladder;
 }
 /* Extra income credited directly to the protected cushion stays outside savings envelopes. */
@@ -5694,7 +5764,7 @@ $('deadline').addEventListener('change',e=>{data.deadline=e.target.value;render(
 $('mortgage').addEventListener('change',e=>{
  const raw=e.target.value.trim(),monthly=Number(raw);
  if(!raw||!Number.isFinite(monthly)||monthly<=0){
-  e.target.value=data.mortgageMonthly===undefined?55000:num(data.mortgageMonthly);
+  e.target.value=num(data.mortgageMonthly);
   $('mortgageMonthlyStatus').textContent='Платёж не изменён: введи сумму больше нуля.';
   return;
  }
@@ -5928,27 +5998,75 @@ $('expenseList').addEventListener('click',e=>{
   renderAll();return;
  }
  const b=e.target.closest('[data-del]');if(!b||data.expenses.some(x=>x.id===b.dataset.del&&x.creditAccount)||!confirm('Удалить этот расход?'))return;data.expenses=data.expenses.filter(x=>x.id!==b.dataset.del);renderAll()});
-$('exportData').onclick=()=>{const blob=new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download='moy-budget-backup-'+iso(new Date())+'.json';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);showSaveFeedback('Копия подготовлена',$('exportData'))};
+$('exportData').onclick=async()=>{
+ const button=$('exportData');
+ if(button.disabled)return;
+ button.disabled=true;
+ try{
+  const json=JSON.stringify({version:1,exportedAt:new Date().toISOString(),data},null,2);
+  const name='saldoza-backup-'+iso(new Date())+'.json';
+  if(window.Capacitor?.isNativePlatform()){
+   const result=await window.Capacitor.Plugins.BudgetBackup.exportBackup({name,json});
+   if(result.saved)showSaveFeedback('Резервная копия сохранена',button);
+   return;
+  }
+  const url=URL.createObjectURL(new Blob([json],{type:'application/json'}));
+  const link=document.createElement('a');
+  link.href=url;link.download=name;
+  document.body.append(link);link.click();link.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  showSaveFeedback('Копия подготовлена',button);
+ }catch(_){alert('Не удалось сохранить резервную копию. Попробуй выбрать другое место.');}
+ finally{button.disabled=false;}
+};
 function readBackup(text){
- const backup=JSON.parse(text);
+ const backup=JSON.parse(text.replace(/^﻿/,''),(key,value)=>{
+  if(key==='__proto__'||key==='constructor'||key==='prototype')throw new Error('Некорректная копия');
+  return value;
+ });
  const budget=backup?.data;
  const record=value=>value!==null&&typeof value==='object'&&!Array.isArray(value);
- const money=value=>(typeof value==='number'||typeof value==='string'&&value.trim()!=='')&&Number.isFinite(Number(value))&&Number(value)>=0;
+ const nonnegative=value=>(typeof value==='number'||typeof value==='string'&&value.trim()!=='')&&Number.isFinite(Number(value))&&Number(value)>=0;
+ const money=value=>nonnegative(value)&&purchaseCents(value)!==null;
+ const optionalMoney=(object,keys)=>keys.every(key=>object[key]==null||money(object[key]));
+ const moneyRecord=value=>record(value)&&Object.values(value).every(money);
+ const monthKey=key=>typeof key==='string'&&/^\d{4}-(0[1-9]|1[0-2])$/.test(key);
+ const rowsValid=(rows,check)=>{
+  if(!Array.isArray(rows)||!rows.every(check))return false;
+  const ids=rows.filter(row=>row.id!==undefined).map(row=>row.id);
+  return ids.every(id=>typeof id==='number'&&Number.isSafeInteger(id)||typeof id==='string'&&id.length>0)&&new Set(ids.map(String)).size===ids.length;
+ };
  const invalid=()=>{throw new Error('Некорректная копия')};
  if(backup?.version!==1||!record(budget)||!record(budget.months)||!record(budget.weights)||
     !Array.isArray(budget.expenses)||!money(budget.debt)||!money(budget.reserved))invalid();
- for(const entry of Object.values(budget.months))if(!record(entry))invalid();
+ if(!Object.values(budget.weights).every(nonnegative)||!optionalMoney(budget,['mortgageMonthly','mortgageBankBalance','utilitiesAdvanceTarget'])||
+    !Object.entries(budget.months).every(([key,entry])=>monthKey(key)&&record(entry)&&optionalMoney(entry,['advance','salary','mortgage'])))invalid();
  for(const field of ['expenseTypes','payDays','salaryConfig','ladder','categoryRules']){
   if(budget[field]!=null&&!record(budget[field]))invalid();
  }
  if(budget.startBalances!=null&&(!record(budget.startBalances)||!fromISO(budget.startBalances.date)||
-    !record(budget.startBalances.balances)))invalid();
+    !moneyRecord(budget.startBalances.balances)||!optionalMoney(budget.startBalances,['mortgage'])))invalid();
+ if(budget.payDays&&['advance','salary'].some(key=>budget.payDays[key]!=null&&
+    !(Number.isInteger(Number(budget.payDays[key]))&&Number(budget.payDays[key])>=1&&Number(budget.payDays[key])<=31)))invalid();
+ if(budget.salaryConfig&&(!optionalMoney(budget.salaryConfig,['base','taxRate'])||num(budget.salaryConfig.taxRate)>50))invalid();
+ if(budget.ladder&&!optionalMoney(budget.ladder,['reserve']))invalid();
+ if(budget.categoryRules&&!Object.values(budget.categoryRules).every(rule=>record(rule)&&
+    (rule.mode==='rub'?money(rule.value):rule.mode==='percent'&&nonnegative(rule.value)&&Number(rule.value)<=100)&&
+    ['advance','salary','both'].includes(rule.source)))invalid();
+ if(budget.expenseTypes&&!Object.values(budget.expenseTypes).every(types=>Array.isArray(types)&&types.every(type=>typeof type==='string')))invalid();
+ if(budget.confirmedSavings!=null&&(!record(budget.confirmedSavings)||!money(budget.confirmedSavings.base)||
+    !rowsValid(budget.confirmedSavings.entries,row=>record(row)&&fromISO(row.date)&&money(row.amount))))invalid();
+ if(budget.purposes!==undefined&&!rowsValid(budget.purposes,row=>record(row)&&typeof row.name==='string'&&money(row.target)&&money(row.start)))invalid();
  for(const field of ['expenses','receipts','earlyRepayments','transfers','regularPayments','extraIncomes','wifeMoves','wifeAdjustments','wifeBalanceReports']){
   const rows=budget[field];
   if(rows===undefined)continue;
-  if(!Array.isArray(rows)||rows.some(row=>!record(row)||!fromISO(row.date)||
-     !money(field==='wifeBalanceReports'?row.family??row.total:row.amount)))invalid();
+  if(!rowsValid(rows,row=>record(row)&&fromISO(row.date)&&
+     money(field==='wifeBalanceReports'?row.family??row.total:row.amount)))invalid();
  }
+ if((budget.receipts||[]).some(row=>!['advance','salary'].includes(row.type)||!monthKey(row.month)||
+    row.amounts!=null&&!moneyRecord(row.amounts)))invalid();
+ if((budget.regularPayments||[]).some(row=>!['credit','mortgage'].includes(row.target)||
+    !optionalMoney(row,['reserveUsed','creditIncomeUsed','extraAmount'])))invalid();
  if(budget.monthlyBills!==undefined&&(!Array.isArray(budget.monthlyBills)||!budget.monthlyBills.every(validMonthlyBill)||
     new Set(budget.monthlyBills.map(b=>b.id)).size!==budget.monthlyBills.length))invalid();
  if(budget.incomeSchedules!==undefined&&(!Array.isArray(budget.incomeSchedules)||!budget.incomeSchedules.every(validIncomeSchedule)||new Set(budget.incomeSchedules.map(i=>i.id)).size!==budget.incomeSchedules.length))invalid();
@@ -5979,6 +6097,7 @@ $('importData').onchange=async event=>{
  const input=event.currentTarget,file=input.files?.[0];
  if(!file)return;
  try{
+  if(file.size>32*1024*1024)throw new Error('Слишком большая копия');
   const candidate=readBackup(await file.text());
   if(!confirm('Заменить текущие данные данными из резервной копии?'))return;
   const previous=data;
@@ -6430,7 +6549,7 @@ $('ladderTransferForm').addEventListener('submit',event=>{
 const establishedBudget=!!(data.startBalances||data.welcomeSeen||data.salaryConfig.base||data.debt||data.mortgageMonthly||
  data.expenses.length||data.receipts.length||data.extraIncomes.length||data.creditAccounts?.length||data.transfers.length);
 if(establishedBudget&&localStorage.getItem('saldoza-guide-stage')===null)localStorage.setItem('saldoza-guide-stage','6');
-setupCompactPanels();initTheme();renderAll();
+setupCompactPanels();initTheme();refreshBudgetView();lockBudget();
 if('serviceWorker' in navigator&&location.protocol.startsWith('http'))installProductionWorker().catch(()=>{});
 
 const totalTile=$('heroTotal')?.parentElement;

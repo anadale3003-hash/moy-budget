@@ -1,0 +1,6 @@
+/android/
+/node_modules/
+/www/
+/*.p12
+/*.jks
+/*.keystore

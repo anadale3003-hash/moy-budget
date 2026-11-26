@@ -6,6 +6,9 @@ await mkdir(dest, { recursive: true });
 for (const name of ['icon.png','icon-512.png','icon.svg','manifest.webmanifest','version.json']) {
   await copyFile(new URL(name, root), new URL(name, dest));
 }
+for (const name of ['icon.png','icon-512.png']) {
+  await copyFile(new URL('./brand/icon-512.png',import.meta.url),new URL(name,dest));
+}
 let html = await readFile(new URL('index.html', root), 'utf8');
 const marker = '<script>\n/* Remote Web Push integration for the installed PWA. */';
 const start = html.indexOf(marker);
@@ -47,6 +50,7 @@ assert(updateStart >= 0 && updateEnd > updateStart, 'Expected PWA update handler
 html = html.slice(0, updateStart) + html.slice(updateEnd);
 const updateCard = /<div class="card"><b>Обновления приложения<\/b>[\s\S]*?<button[^>]*id="applyUpdate"[^>]*>[\s\S]*?<\/button><\/div>/;
 assert(updateCard.test(html), 'Expected update card');
+html = html.replace(/<div class="card"><b>Установка на iPhone<\/b>[\s\S]*?<\/div>/, '');
 html = html.replace(updateCard, '<div class="card"><b>Версия приложения</b><p class="foot">Saldoza '+version.versionName+'</p><p class="foot">После публикации новые версии устанавливаются через RuStore. Не удаляй приложение перед обновлением; рекомендуется сохранить резервную копию.</p><span id="appVersion" hidden></span><div id="updateStatus" hidden></div><button id="checkUpdate" type="button" hidden></button><button id="applyUpdate" type="button" hidden disabled></button></div>');
 assert(!html.includes("fetch('./version.json?check=") && !html.includes(workerInstall), 'PWA updater remains');
 assert(html.includes('<html lang="ru">') && html.includes('</body></html>'),'Expected HTML shell');

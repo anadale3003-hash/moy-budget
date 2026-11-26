@@ -36,7 +36,7 @@ await writeFile(new URL('drawable/saldoza_launcher_foreground.xml',res),`<?xml v
 <inset xmlns:android="http://schemas.android.com/apk/res/android" android:inset="18dp" android:drawable="@drawable/saldoza_launcher_bitmap"/>
 `);
 // Give the underlying bitmap a distinct name to avoid adaptive-icon recursion.
-await copyFile(new URL('../icon-512.png',import.meta.url),new URL('drawable-nodpi/saldoza_launcher_bitmap.png',res));
+await copyFile(new URL('./brand/icon-512.png',import.meta.url),new URL('drawable-nodpi/saldoza_launcher_bitmap.png',res));
 xml=xml.replace(/<application\b[^>]*>/,tag=>{
  for(const key of ['icon','roundIcon']){
   tag=tag.replace(new RegExp('\\sandroid:'+key+'="[^"]*"','g'),'');
@@ -57,4 +57,31 @@ await writeFile(new URL('drawable/ic_saldoza_notification.xml',res),`<?xml versi
 if(!xml.includes('android.permission.POST_NOTIFICATIONS')){
  xml=xml.replace(/<application\b/,'<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>\n    <application');
  await writeFile(file,xml);
+}
+
+// Restore the supplied Saldoza graphics and Capacitor's native document export.
+for (const [file, folder] of [['splash-light.png','drawable-nodpi/'],['splash-dark.png','drawable-night-nodpi/']]){
+ const dir=new URL(folder,res);
+ await mkdir(dir,{recursive:true});
+ await copyFile(new URL('./brand/'+file,import.meta.url),new URL('saldoza_splash.png',dir));
+}
+const themedColors=[['values/','#F4FCF8'],['values-night/','#031C17']];
+for(const [folder, color] of themedColors){
+ const dir=new URL(folder,res);
+ await mkdir(dir,{recursive:true});
+ await writeFile(new URL('saldoza_brand.xml',dir),`<resources><color name="saldoza_launch_background">${color}</color></resources>\n`);
+}
+const stylesFile=new URL('values/styles.xml',res);
+let styles=await readFile(stylesFile,'utf8');
+const splashTheme='<style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">';
+assert(styles.includes(splashTheme),'Launch theme absent');
+if(!styles.includes('windowSplashScreenAnimatedIcon'))styles=styles.replace(splashTheme,`${splashTheme}
+        <item name="windowSplashScreenBackground">@color/saldoza_launch_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/saldoza_launcher</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>`)
+ .replace('<item name="android:background">@drawable/splash</item>','');
+await writeFile(stylesFile,styles);
+const sources=new URL('./android/app/src/main/java/app/saldoza/budget/',import.meta.url);
+for(const name of ['MainActivity.java','BudgetBackup.java']){
+ await copyFile(new URL('./native/'+name,import.meta.url),new URL(name,sources));
 }
