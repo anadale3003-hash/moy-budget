@@ -13,6 +13,7 @@ for(const [width,height,file] of [[320,690,'preview.html'],[390,844,'index.html'
  await p.reload();assert.ok(await $('button.tab[data-go="card"]').isVisible());assert.ok(await $('.family-split').isVisible());
  await click('#firstBudget');await fill('#welcomeCash','15000');await fill('#welcomeDaily','500');await click('#welcomeForm button[type=submit]');assert.equal(await $('#v-home').evaluate(e=>e.classList.contains('active')),true);
  assert.deepEqual((await $('button.tab[data-go]').evaluateAll(nodes=>nodes.map(el=>el.dataset.go))).slice(0,2),['home','expense']);
+ assert.ok(await $('#obligations').isHidden());await click('#nearestPayment summary');assert.ok(await $('#obligations').isVisible());await click('#nearestPayment summary');
  await click('#homeCalendar');assert.ok(await $('#moneyCalendarDialog').isVisible());await click('#moneyCalendarClose');
  await click('button.tab[data-go="analytics"]');await click('#advisorOpen');assert.ok(await $('#adviceOpening').isVisible());await click('#advisorClose');
  await click('button.tab[data-go="home"]');
@@ -29,21 +30,34 @@ for(const [width,height,file] of [[320,690,'preview.html'],[390,844,'index.html'
    assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth),0,tab+' at width '+width);
  }
  await click('button.tab[data-go="expense"]');
+ await click('#monthlyBillsPanel > summary');assert.ok(await $('#monthlyBillName').isVisible());await click('#monthlyBillsPanel > summary');
  for(let i=0;i<2;i++){await click('[data-ops-action="expense"]');if(width<500)assert.ok(await $('#smartVoiceButton').isHidden());await fill('#smartOperationText','продукты 500');await click('#smartOperationForm button[type=submit]');assert.ok(await $('#smartOperationContinue').isEnabled());await click('#smartOperationClose')}
  await p.reload();assert.equal((await data()).expenses.length,1);assert.deepEqual(errors,[]);
  await click('button.tab[data-go="card"]');
  for(const [kind,name] of [['loan','Кредит на ремонт'],['card','Запасная карта'],['card','Другая карта']]){
   await click('#creditAdd');await $('#creditKind').selectOption(kind);await fill('#creditName',name);await fill('#creditBalance','7000');
   if(kind==='loan'){await click('#creditStatement summary');await fill('#creditDue','2026-11-28');await fill('#creditDueAmount','1000');await fill('#creditInterest','100');}
+  if(name==='Другая карта'){await click('#creditStatement summary');await fill('#creditDue','2026-12-02');await fill('#creditDueAmount','1000');await $('#creditFunding').selectOption('split');}
   await click('#creditForm button[type=submit]');
  }
  assert.equal((await data()).creditAccounts.length,3);
- await $('#creditAccountList').getByRole('button',{name:'Записать оплату'}).click();
+ await click('button.tab[data-go="plan"]');await click('#receiveAdvance');await fill('#receiptEntryAmount','5000');await click('#receiptEntryForm button[type=submit]');
+ assert.equal((await data()).receipts.at(-1).amounts['account-'+(await data()).creditAccounts[0].id],1000);
+ await click('button.tab[data-go="card"]');await $('#creditAccountList article').filter({hasText:'Кредит на ремонт'}).getByRole('button',{name:'Записать оплату'}).click();
  const saved=await data();assert.equal(saved.expenses.at(-1).principalCents,90000);assert.equal(saved.expenses.at(-1).amount,1000);
+ const splitId='account-'+(await data()).creditAccounts[2].id;
+ assert.equal((await data()).receipts.at(-1).amounts[splitId],500);
+ await p.clock.setFixedTime(new Date('2026-12-01T10:00:00+03:00'));
+ await click('button.tab[data-go="plan"]');await click('#receiveSalary');await fill('#receiptEntryAmount','5000');await click('#receiptEntryForm button[type=submit]');
+ assert.equal((await data()).receipts.at(-1).amounts[splitId],500);
+ await click('button.tab[data-go="card"]');
+ await $('#creditAccountList article').filter({hasText:'Другая карта'}).getByRole('button',{name:'Закрыть карту'}).click();
+ assert.equal((await data()).transfers.at(-1).amount,1000);assert.equal((await data()).transfers.at(-1).to,'family');
+ assert.equal(await $('#creditAccountList article').count(),2);
  assert.match(await $('#creditAccountList').innerText(),/6\s?100/);
  await click('button.tab[data-go="settings"]');await click('#welcomeSettings');
  assert.ok(await $('#welcomeCash').isDisabled());assert.equal(await $('#welcomeDaily').inputValue(),'500');await click('#welcomeLater');
- await click('button.tab[data-go="analytics"]');await click('#advisorOpen');assert.match(await $('#adviceText').inputValue(),/Потребительский кредит №1/);await click('#advisorClose');
+ await click('button.tab[data-go="analytics"]');await click('#advisorOpen');await click('#advisorGPT summary');assert.match(await $('#adviceText').inputValue(),/Потребительский кредит №1/);await click('#advisorClose');
  await p.reload();assert.ok(await $('#welcomeDialog').isHidden());
  assert.equal((await data()).creditAccounts.length,3);assert.deepEqual(errors,[]);
  // Simulate an existing profile from before the onboarding update.
@@ -52,8 +66,12 @@ for(const [width,height,file] of [[320,690,'preview.html'],[390,844,'index.html'
  await p.evaluate(profile=>localStorage.setItem('saldoza-test-budget-v1',JSON.stringify(profile)),legacy);
  await p.reload();assert.ok(await $('#welcomeDialog').isHidden());
  await click('button.tab[data-go="settings"]');await click('#welcomeSettings');
- await fill('#welcomeSalary','75000');await click('#welcomeForm button[type=submit]');
- assert.deepEqual((await data()).startBalances,legacy.startBalances);assert.equal((await data()).debt,18000);
+ await fill('#welcomeSalary','75000');await click('#welcomeWork summary');await fill('#welcomeWorkTotal','18');await fill('#welcomeWorkFirst','8');await fill('#welcomeTax','15');await $('#welcomeFamily').uncheck();await click('#welcomeForm button[type=submit]');
+ assert.deepEqual((await data()).startBalances,legacy.startBalances);assert.equal((await data()).debt,18000);assert.equal((await data()).showFamilySplit,false);assert.equal((await data()).salaryConfig.taxRate,15);assert.ok(Object.values((await data()).months).some(m=>m.manualDaysTotal==='18'&&m.manualDaysFirst==='8'));
+ await click('button.tab[data-go="card"]');await $('#v-card').getByRole('button',{name:'Закрыть ипотеку',exact:true}).click();
+ await $('#v-card').getByRole('button',{name:'Закрыть карту',exact:true}).click();
+ assert.ok(await $('#confirmMortgagePayment').isHidden());assert.ok(await $('#confirmCreditPayment').isHidden());
+ assert.equal((await data()).closedLegacy.mortgage,true);assert.equal((await data()).closedLegacy.credit,true);
  console.log('PASS',width,file);await ctx.close();
 }
 }finally{await close()}})().catch(e=>{console.error(e);process.exitCode=1});
