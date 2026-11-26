@@ -66,7 +66,7 @@
   const mode=choice.value;
   if(mode==='none'){
    const pending=(await p.getPending()).notifications||[];
-   const cancel=pending.filter(n=>own(n)||n.id===TEST_ID).map(n=>({id:n.id}));
+   const cancel=pending.filter(own).map(n=>({id:n.id}));
    if(cancel.length)await p.cancel({notifications:cancel});
    put(signatureKey,'{}');say('Напоминания выключены.');return;
   }
