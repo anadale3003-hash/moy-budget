@@ -2278,7 +2278,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div id="goalAllocationNote" class="goal-allocation-note">Проверяем цель...</div>
 </div>
 <div class="card payout-destinations"><h3 style="margin:8px 0;font-size:16px">Суммы по категориям</h3><div id="planTable"></div><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two" id="categoryRules"></div><div class="foot">Сначала выделяются суммы в ₽, затем проценты от оставшейся части выплаты. Нераспределённый остаток — в «Остальное». Настройки действуют для следующих поступлений.</div></div></section>
-<section class="view" id="v-card"><div class="section-heading"><h2>Кредиты</h2></div><div class="card" id="nearestPayment"><div class="nearest-payment-title">Ближайший платёж</div><div id="obligations"></div></div>
+<section class="view" id="v-card"><div class="section-heading"><h2>Кредиты</h2></div><div class="card" id="nearestPayment"><div class="nearest-payment-title">Ближайшие платежи</div><div id="obligations"></div></div>
 <div id="creditAccountsPanel"><h3>Мои кредиты и карты</h3></div><div class="card mortgage-monthly-settings"><b>🏠 Ипотека</b><label class="field"><span>Ежемесячный платёж по ипотеке, ₽</span><input id="mortgage" type="number" min="0" step="100" inputmode="decimal"></label><div id="mortgageMonthlyStatus" class="foot">Изменение платежа применяется к будущим неподтверждённым поступлениям.</div></div>
 <div class="section-heading"><h2>Ипотека и кредитка</h2></div>
 <div class="card payment-confirm-card payment-obligations">
@@ -4314,17 +4314,32 @@ $('envelopes').innerHTML=cats.map(cat=>{
 const cc=credit();
 const nextCreditPay=cc.pays[0];
 const planCreditRow=displayAllocationRows(calc.rows).find(row=>row.name==='Кредитная карта');
-const nextCreditText=nextCreditPay?.month===month
- ?(nextCreditPay.type==='advance'?'С аванса ':'С зарплаты ')+nextCreditPay.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+' по плану — '+rub(planCreditRow[nextCreditPay.type==='advance'?'a':'b'])
- :'В среднем по оставшимся выплатам — '+rub(cc.per);
-const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':nextCreditText;const homeMortgage=upcomingMortgage(new Date());
-$('obligations').innerHTML=homeMortgage.plan<=0?(creditOutstanding()>0?'Кредитная карта · остаток долга '+rub(creditOutstanding()):'Обязательных платежей по кредитам пока нет.'):`<div class="payment-summary"><span>Ипотека · ${homeMortgage.due.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}</span><strong>${homeMortgage.remaining?'Осталось внести '+rub(homeMortgage.remaining):'Платёж внесён'}</strong><small>Внесено ${rub(homeMortgage.paid)} из ${rub(homeMortgage.plan)}</small></div>`;
-const nextStatement=monthlyBillRows(iso(new Date())).find(r=>r.nextDue&&r.bill.creditAccount);
-if(nextStatement&&(!homeMortgage.remaining||nextStatement.nextDue<=iso(homeMortgage.due))){
- $('obligations').textContent=nextStatement.bill.name+' · '+fromISO(nextStatement.nextDue).toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+' · '+rub(nextStatement.nextCents/100);
-}else if(!homeMortgage.plan&&!creditOutstanding()&&(data.creditAccounts||[]).some(a=>!a.closed&&a.baseCents>paidPrincipal(a.id))){
- $('obligations').textContent='Уточни ближайший платёж по выписке во вкладке «Кредиты».';
+const homeMortgage=upcomingMortgage(new Date());
+const upcomingRows=[];
+const todayKeyForCredits=iso(new Date());
+const addUpcoming=(name,icon,date,amount,note)=>{if(amount>0)upcomingRows.push({name,icon,date,amount,note});};
+const paydayNote=p=>(p.type==='advance'?'С аванса · ':'С зарплаты · ')+dateLabel(p.date);
+if(homeMortgage.remaining>0)addUpcoming('Ипотека',creditIcon(data.legacyCreditIcons?.mortgage,'mortgage'),iso(homeMortgage.due),homeMortgage.remaining,dateLabel(homeMortgage.due));
+if(!data.closedLegacy?.card&&cc.debt>0){
+ const p=cc.pays[0];
+ const amount=p?(p.month===month&&planCreditRow?Math.min(cc.debt,num(planCreditRow[p.type==='advance'?'a':'b'])):Math.min(cc.debt,cc.per)):cc.debt;
+ addUpcoming('Кредитная карта',creditIcon(data.legacyCreditIcons?.card,'card'),p?iso(p.date):(data.deadline||todayKeyForCredits),amount,p?paydayNote(p):'До '+(cc.due?dateLabel(cc.due):'уточнения срока'));
 }
+const statementRows=monthlyBillRows(todayKeyForCredits);
+for(const a of data.creditAccounts||[]){
+ if(a.closed||a.baseCents<=paidPrincipal(a.id))continue;
+ if(a.kind==='card'){
+  const gap=Math.max(0,a.baseCents-paidPrincipal(a.id)-accountReserveCents(a.id,todayKeyForCredits));
+  const pays=a.graceDue?nextPaydays(new Date(),null,a.graceDue):[];
+  const p=pays[0];
+  addUpcoming(a.name,creditIcon(a.icon,a.kind),p?iso(p.date):(a.graceDue||todayKeyForCredits),(p?Math.ceil(gap/pays.length):gap)/100,p?paydayNote(p):a.graceDue?'До '+dateLabel(fromISO(a.graceDue)):'Уточни льготный период');
+ }else{
+  const row=statementRows.find(r=>r.bill.creditAccount===a.id&&r.nextDue);
+  if(row)addUpcoming(a.name,creditIcon(a.icon,a.kind),row.nextDue,row.nextCents/100,dateLabel(fromISO(row.nextDue)));
+ }
+}
+upcomingRows.sort((a,b)=>a.date.localeCompare(b.date));
+$('obligations').innerHTML=upcomingRows.map(r=>'<div class="upcoming-credit-row"><span class="upcoming-credit-icon">'+esc(r.icon)+'</span><div class="upcoming-credit-info"><b>'+esc(r.name)+'</b><small>'+esc(r.note)+'</small></div><strong>'+rub(r.amount)+'</strong></div>').join('')||'<div class="upcoming-credit-empty">Предстоящих платежей нет</div>';
 const visiblePlanRows=displayAllocationRows(calc.rows);
 const receivedLabel=type=>data.receipts.some(r=>r.id===month+'-'+type)?' ✓':'';
 $('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс'+receivedLabel('advance')+'</th><th>Зарплата'+receivedLabel('salary')+'</th></tr></thead><tbody>'+visiblePlanRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
@@ -5697,7 +5712,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.134';
+const APP_VERSION='1.5.135';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -7187,4 +7202,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #nearestPayment .payment-summary{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 10px;padding:0;background:none}
 #nearestPayment .payment-summary strong{font-size:14px;margin:0}
 #nearestPayment .payment-summary small{font-size:11px;flex-basis:100%}
+
+#nearestPayment .upcoming-credit-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+#nearestPayment .upcoming-credit-row:first-child{border-top:0}
+#nearestPayment .upcoming-credit-icon{font-size:20px;flex:none}
+#nearestPayment .upcoming-credit-info{flex:1;min-width:0;display:grid;gap:2px}
+#nearestPayment .upcoming-credit-info small,#nearestPayment .upcoming-credit-empty{font-size:11px;color:var(--muted)}
+#nearestPayment .upcoming-credit-row strong{font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
 </style></body></html>
