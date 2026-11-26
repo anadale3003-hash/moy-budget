@@ -191,9 +191,14 @@ try{
 
  adb('shell','pm','grant',pkg,'android.permission.POST_NOTIFICATIONS');
  await web.js("document.querySelector('#notifyReminderChoice').value='none';document.querySelector('#notifyTestBtn').click();true");
- await retry(async()=>assert.match(await web.js("document.querySelector('#notifyStatus').textContent"),/30 секунд/));
+ await retry(async()=>{
+  const pending=await web.js("Capacitor.Plugins.LocalNotifications.getPending().then(result=>result.notifications.some(n=>n.id===900000001))");
+  const status=await web.js("document.querySelector('#notifyStatus').textContent");
+  assert(pending,'Test notification not scheduled: '+status);
+  assert.match(status,/30 секунд/);
+ });
  await delay(30000);
- await retry(()=>assert.match(adb('shell','dumpsys','notification'),/NotificationRecord\([^\n]*pkg=app\.saldoza\.budget/),120000);
+ await retry(()=>assert.match(adb('shell','dumpsys','notification'),/NotificationRecord\([^\n]*pkg=app\.saldoza\.budget[^\n]*id=900000001/),120000);
  console.log('PASS local test notification delivered in airplane mode with reminders off');
 }catch(error){
  for(const cmd of [['shell','dumpsys','activity','activities'],['logcat','-d','-t','600']]){

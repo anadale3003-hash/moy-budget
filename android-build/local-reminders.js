@@ -51,7 +51,8 @@
  const plugin=()=>window.Capacitor?.Plugins?.LocalNotifications;
  const own=n=>Number(n.id)>=ID_MIN&&Number(n.id)<ID_MAX;
  const say=t=>status.textContent=t;
- let sequence=Promise.resolve(),timer=null;
+ let sequence=Promise.resolve(),timer=null,showingTestStatus=false;
+ const sayReminder=text=>{if(!showingTestStatus)say(text);};
  function plan(){
   const now=new Date(),key=localDate(now),mortgage=upcomingMortgage(now);
   return makeReminderPlan({now,mode:choice.value,receipts:data.receipts||[],frequency:data.payFrequency,days:data.payDays,payday:plannedPayday,
@@ -62,17 +63,17 @@
  }
  async function sync(request=false){
   const p=plugin();
-  if(!p){say('Нативные уведомления недоступны в этой сборке.');return;}
+  if(!p){sayReminder('Нативные уведомления недоступны в этой сборке.');return;}
   const mode=choice.value;
   if(mode==='none'){
    const pending=(await p.getPending()).notifications||[];
    const cancel=pending.filter(own).map(n=>({id:n.id}));
    if(cancel.length)await p.cancel({notifications:cancel});
-   put(signatureKey,'{}');say('Напоминания выключены.');return;
+   put(signatureKey,'{}');sayReminder('Напоминания выключены.');return;
   }
   let permission=await p.checkPermissions();
   if(request&&permission.display!=='granted')permission=await p.requestPermissions();
-  if(permission.display!=='granted'){say('Разреши уведомления Android кнопкой ниже или в настройках телефона.');return;}
+  if(permission.display!=='granted'){sayReminder('Разреши уведомления Android кнопкой ниже или в настройках телефона.');return;}
   const desired=plan();
   let previous={};try{previous=JSON.parse(get(signatureKey)||'{}')||{}}catch(_){}
   const signatures=Object.fromEntries(desired.map(n=>[n.id,JSON.stringify(n)]));
@@ -84,16 +85,17 @@
   const additions=desired.filter(n=>!existing.has(n.id)||removed.has(n.id));
   if(additions.length)await p.schedule({notifications:additions});
   put(signatureKey,JSON.stringify(signatures));
-  say(desired.length?'Напоминания включены. Время местное; Android может доставить их позже. Расписание обновляется при открытии приложения.':'Разрешение получено. Настрой бюджет, чтобы создать расписание.');
+  sayReminder(desired.length?'Напоминания включены. Время местное; Android может доставить их позже. Расписание обновляется при открытии приложения.':'Разрешение получено. Настрой бюджет, чтобы создать расписание.');
  }
  function enqueue(request=false){
-  sequence=sequence.catch(()=>{}).then(()=>sync(request)).catch(e=>say('Не удалось настроить напоминания. '+String(e?.message||e)));
+  sequence=sequence.catch(()=>{}).then(()=>sync(request)).catch(e=>sayReminder('Не удалось настроить напоминания. '+String(e?.message||e)));
   return sequence;
  }
  function debounce(){clearTimeout(timer);timer=setTimeout(()=>enqueue(),300);}
- choice.addEventListener('change',()=>{if(!put(pref,choice.value)){say('Не удалось сохранить выбор.');return;}enqueue();});
- enable.addEventListener('click',async()=>{if(choice.value==='none'){say('Сначала выбери, о чём напоминать.');return;}enable.disabled=true;try{await enqueue(true)}finally{enable.disabled=false;}});
+ choice.addEventListener('change',()=>{showingTestStatus=false;if(!put(pref,choice.value)){say('Не удалось сохранить выбор.');return;}enqueue();});
+ enable.addEventListener('click',async()=>{showingTestStatus=false;if(choice.value==='none'){say('Сначала выбери, о чём напоминать.');return;}enable.disabled=true;try{await enqueue(true)}finally{enable.disabled=false;}});
  test.addEventListener('click',async()=>{
+  showingTestStatus=true;
   const p=plugin();if(!p){say('Нативные уведомления недоступны.');return;}
   test.disabled=true;
   try{
