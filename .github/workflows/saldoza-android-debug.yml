@@ -28,11 +28,9 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Check preinstalled Android SDK
-        run: |
-          test -d "$ANDROID_HOME"
-          command -v sdkmanager
-          sdkmanager --list_installed
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
       - name: Install dependencies
         run: |
           if [ -f package-lock.json ]; then npm ci; else npm install --no-audit --no-fund; fi
