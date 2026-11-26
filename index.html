@@ -2579,6 +2579,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
    </div>
    <div class="receipt-entry-error" id="paymentEntryError" role="alert" hidden></div>
    <button class="btn full" type="submit">✓ Подтвердить оплату</button>
+   <button class="btn secondary full" type="button" id="paymentEntryCloseAccount">Закрыть обязательство</button>
    <button class="btn secondary full" type="button" id="paymentEntryCancel">Отмена</button>
   </form>
  </section>
@@ -5154,7 +5155,7 @@ function renderCreditAccounts(){
    const wide=document.createElement('button');wide.type='button';wide.className='credit-wide-button';
    wide.append(tile.querySelector('.payment-confirm-heading'));
    const arrow=document.createElement('span');arrow.className='credit-wide-arrow';arrow.textContent='›';wide.append(arrow);
-   wide.onclick=()=>openCreditActions(target);tile.prepend(wide);original.hidden=true;original.classList.add('credit-original-action');
+   wide.onclick=()=>data.startBalances?openPaymentEntry(target):openCreditActions(target);tile.prepend(wide);original.hidden=true;original.classList.add('credit-original-action');
   }
  }
  const list=$('creditAccountList');list.replaceChildren();
@@ -5837,7 +5838,7 @@ function openPaymentEntry(target){
  if(!data.startBalances){alert('Сначала укажи стартовые остатки в настройках.');return;}
  const isMortgage=target==='mortgage';
  paymentEntryTarget=target;paymentEntryMonth=month;
- paymentEntryTrigger=$(isMortgage?'confirmMortgagePayment':'confirmCreditPayment');
+ paymentEntryTrigger=$(isMortgage?'confirmMortgagePayment':'confirmCreditPayment').closest('.payment-confirm')?.querySelector('.credit-wide-button')||$(isMortgage?'confirmMortgagePayment':'confirmCreditPayment');
  $('paymentEntryTitle').textContent=isMortgage?'Оплата ипотеки':'Оплата кредитки';
  const todayKey=iso(new Date());
  $('paymentEntryDate').min=data.startBalances.date;
@@ -5872,6 +5873,7 @@ $('paymentEntryForm').addEventListener('submit',e=>{
 });
 $('paymentEntryClose').addEventListener('click',closePaymentEntry);
 $('paymentEntryCancel').addEventListener('click',closePaymentEntry);
+$('paymentEntryCloseAccount').addEventListener('click',()=>{const target=paymentEntryTarget;if(!target)return;closeLegacy(target);if(data.closedLegacy?.[target])closePaymentEntry();});
 $('paymentEntryOverlay').addEventListener('click',e=>{if(e.target===$('paymentEntryOverlay'))closePaymentEntry()});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('paymentEntryOverlay').hidden)closePaymentEntry()});
 $('regularPaymentHistory').addEventListener('click',e=>{
