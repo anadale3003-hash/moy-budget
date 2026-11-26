@@ -4314,16 +4314,19 @@ $('envelopes').innerHTML=cats.map(cat=>{
 const cc=credit();
 const nextCreditPay=cc.pays[0];
 const planCreditRow=displayAllocationRows(calc.rows).find(row=>row.name==='Кредитная карта');
+try {
+const upcomingDateLabel=d=>d?d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'}):'Уточни дату';
+const upcomingIcon=(value,kind)=>['🏠','💳','🚗','💰','🏦','🛒','📱','🎓','🛠️','✈️','💻','💵'].includes(value)?value:kind==='card'?'💳':kind==='mortgage'?'🏠':'💰';
 const homeMortgage=upcomingMortgage(new Date());
 const upcomingRows=[];
 const todayKeyForCredits=iso(new Date());
 const addUpcoming=(name,icon,date,amount,note)=>{if(amount>0)upcomingRows.push({name,icon,date,amount,note});};
-const paydayNote=p=>(p.type==='advance'?'С аванса · ':'С зарплаты · ')+dateLabel(p.date);
-if(homeMortgage.remaining>0)addUpcoming('Ипотека',creditIcon(data.legacyCreditIcons?.mortgage,'mortgage'),iso(homeMortgage.due),homeMortgage.remaining,dateLabel(homeMortgage.due));
+const paydayNote=p=>(p.type==='advance'?'С аванса · ':'С зарплаты · ')+upcomingDateLabel(p.date);
+if(homeMortgage.remaining>0)addUpcoming('Ипотека',upcomingIcon(data.legacyCreditIcons?.mortgage,'mortgage'),iso(homeMortgage.due),homeMortgage.remaining,upcomingDateLabel(homeMortgage.due));
 if(!data.closedLegacy?.card&&cc.debt>0){
  const p=cc.pays[0];
  const amount=p?(p.month===month&&planCreditRow?Math.min(cc.debt,num(planCreditRow[p.type==='advance'?'a':'b'])):Math.min(cc.debt,cc.per)):cc.debt;
- addUpcoming('Кредитная карта',creditIcon(data.legacyCreditIcons?.card,'card'),p?iso(p.date):(data.deadline||todayKeyForCredits),amount,p?paydayNote(p):'До '+(cc.due?dateLabel(cc.due):'уточнения срока'));
+ addUpcoming('Кредитная карта',upcomingIcon(data.legacyCreditIcons?.card,'card'),p?iso(p.date):(data.deadline||todayKeyForCredits),amount,p?paydayNote(p):'До '+(cc.due?upcomingDateLabel(cc.due):'уточнения срока'));
 }
 const statementRows=monthlyBillRows(todayKeyForCredits);
 for(const a of data.creditAccounts||[]){
@@ -4332,14 +4335,15 @@ for(const a of data.creditAccounts||[]){
   const gap=Math.max(0,a.baseCents-paidPrincipal(a.id)-accountReserveCents(a.id,todayKeyForCredits));
   const pays=a.graceDue?nextPaydays(new Date(),null,a.graceDue):[];
   const p=pays[0];
-  addUpcoming(a.name,creditIcon(a.icon,a.kind),p?iso(p.date):(a.graceDue||todayKeyForCredits),(p?Math.ceil(gap/pays.length):gap)/100,p?paydayNote(p):a.graceDue?'До '+dateLabel(fromISO(a.graceDue)):'Уточни льготный период');
+  addUpcoming(a.name,upcomingIcon(a.icon,a.kind),p?iso(p.date):(a.graceDue||todayKeyForCredits),(p?Math.ceil(gap/pays.length):gap)/100,p?paydayNote(p):a.graceDue?'До '+upcomingDateLabel(fromISO(a.graceDue)):'Уточни льготный период');
  }else{
   const row=statementRows.find(r=>r.bill.creditAccount===a.id&&r.nextDue);
-  if(row)addUpcoming(a.name,creditIcon(a.icon,a.kind),row.nextDue,row.nextCents/100,dateLabel(fromISO(row.nextDue)));
+  if(row)addUpcoming(a.name,upcomingIcon(a.icon,a.kind),row.nextDue,row.nextCents/100,upcomingDateLabel(fromISO(row.nextDue)));
  }
 }
 upcomingRows.sort((a,b)=>a.date.localeCompare(b.date));
 $('obligations').innerHTML=upcomingRows.map(r=>'<div class="upcoming-credit-row"><span class="upcoming-credit-icon">'+esc(r.icon)+'</span><div class="upcoming-credit-info"><b>'+esc(r.name)+'</b><small>'+esc(r.note)+'</small></div><strong>'+rub(r.amount)+'</strong></div>').join('')||'<div class="upcoming-credit-empty">Предстоящих платежей нет</div>';
+} catch(error){console.error('Upcoming credit payments',error);$('obligations').textContent='Не удалось рассчитать ближайшие платежи.';}
 const visiblePlanRows=displayAllocationRows(calc.rows);
 const receivedLabel=type=>data.receipts.some(r=>r.id===month+'-'+type)?' ✓':'';
 $('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс'+receivedLabel('advance')+'</th><th>Зарплата'+receivedLabel('salary')+'</th></tr></thead><tbody>'+visiblePlanRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
@@ -5712,7 +5716,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.135';
+const APP_VERSION='1.5.136';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
