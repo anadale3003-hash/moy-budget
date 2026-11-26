@@ -18,7 +18,7 @@ jobs:
     outputs:
       candidate: ${{ steps.signing.outputs.artifact }}
     if: github.ref == 'refs/heads/android-preparation'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     defaults:
       run:
@@ -73,7 +73,12 @@ jobs:
           node test-signing.mjs
       - name: Build debug APK
         working-directory: android-build/android
-        run: bash gradlew assembleDebug --no-daemon
+        run: |
+          set -o pipefail
+          log="$RUNNER_TEMP/saldoza-gradle.log"
+          if bash gradlew assembleDebug --no-daemon --max-workers=4 2>&1 | tee "$log"; then exit 0; fi
+          grep -q 'Received status code 429' "$log" || exit 1
+          bash gradlew -I "$GITHUB_WORKSPACE/android-build/maven-central-mirror.init.gradle" assembleDebug --no-daemon --max-workers=4
       - name: Upload debug APK
         uses: actions/upload-artifact@v4
         with:
@@ -105,7 +110,11 @@ jobs:
           fi
           signer="$ANDROID_HOME/build-tools/35.0.0/apksigner"
           "$signer" sign --ks "$SALDOZA_TEST_KEYSTORE" --ks-key-alias saldoza-test --ks-pass env:SALDOZA_TEST_KEYSTORE_PASSWORD --key-pass env:SALDOZA_TEST_KEYSTORE_PASSWORD --out "$work/previous.apk" "$work/app-debug.apk"
-          "$signer" verify "$work/previous.apk"
+          certificate() { "$signer" verify --print-certs "$1" | sed -n 's/^Signer #1 certificate SHA-256 digest: //p'; }
+          baseline_fingerprint="$(certificate "$work/previous.apk")"
+          candidate_fingerprint="$(certificate android/app/build/outputs/apk/debug/app-debug.apk)"
+          [[ -n "$baseline_fingerprint" && "$baseline_fingerprint" == "$candidate_fingerprint" ]]
+          echo "Upgrade APKs share signing certificate SHA-256 $candidate_fingerprint"
       - name: Remove temporary signing material
         if: always()
         run: rm -f "$RUNNER_TEMP/saldoza-test.p12"

@@ -1,0 +1,13 @@
+// Use the Maven Central mirror for CI retries after Maven Central rate limits.
+// Google's Android Maven repository remains unchanged.
+def redirectCentral = { repositories ->
+    repositories.whenObjectAdded { repository ->
+        if (repository instanceof MavenArtifactRepository && repository.url?.host == 'repo.maven.apache.org') {
+            repository.url = uri('https://maven-central.storage-download.googleapis.com/maven2/')
+        }
+    }
+}
+gradle.beforeProject { project ->
+    redirectCentral(project.buildscript.repositories)
+    redirectCentral(project.repositories)
+}
