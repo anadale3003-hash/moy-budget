@@ -7284,4 +7284,9 @@ html,body{touch-action:pan-x pan-y!important}
 #v-expense .ops-history-group>.compact-disclosure>summary{display:flex!important;align-items:center;gap:10px;padding:10px 0!important;min-height:44px}
 #v-expense .ops-history-icon{display:block;flex:0 0 24px;width:24px;height:24px;background:var(--art) center/contain no-repeat;pointer-events:none}
 #v-expense .ops-history-group .disclosure-title{flex:1;min-width:0}
-</style><script>document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});</script></body></html>
+
+#notifySettingsCard>.row:first-child{display:none!important}
+#notifySettingsCard>:is(#notifyEnableBtn,#notifyTestBtn,#notifyDelayedTestBtn){display:block!important;width:100%!important;min-height:44px!important;margin:8px 0 0!important;box-sizing:border-box}
+#notifySettingsCard #notifyStatus{margin-top:10px}
+.app .main #v-card.active #creditAdd{margin:var(--credit-add-space,8px) auto!important}
+</style><script>document.addEventListener('gesturestart',function(e){e.preventDefault()},{passive:false});document.addEventListener('gesturechange',function(e){e.preventDefault()},{passive:false});</script><script>(function(){const button=document.getElementById('creditAdd'),view=document.getElementById('v-card'),main=view?.closest('.main');if(!button||!main)return;function position(){if(!view.classList.contains('active'))return;const history=view.querySelector('.credit-history-disclosure');if(!history)return;const free=main.getBoundingClientRect().bottom-history.getBoundingClientRect().bottom;const space=Math.max(8,Math.floor((free-button.offsetHeight-16)/2));button.style.setProperty('--credit-add-space',space+'px')}const observer=new ResizeObserver(position);observer.observe(main);observer.observe(view);new MutationObserver(position).observe(view,{attributes:true,attributeFilter:['class']});view.addEventListener('toggle',position,true);window.addEventListener('resize',position);position()})();</script></body></html>
