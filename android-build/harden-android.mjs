@@ -18,8 +18,6 @@ console.log('Android manifest: automatic backup and cleartext traffic disabled.'
 // Do not depend on a remote resource or replace the user's web assets.
 const res=new URL('./android/app/src/main/res/',import.meta.url);
 for(const folder of ['drawable-nodpi/','drawable-v26/'])await mkdir(new URL(folder,res),{recursive:true});
-const bitmap=new URL('drawable-nodpi/saldoza_launcher.png',res);
-await copyFile(new URL('../icon-512.png',import.meta.url),bitmap);
 // The 108 dp adaptive layer is inset so the wallet remains inside the safe zone.
 await writeFile(new URL('drawable-v26/saldoza_launcher.xml',res),`<?xml version="1.0" encoding="utf-8"?>
 <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
@@ -28,6 +26,9 @@ await writeFile(new URL('drawable-v26/saldoza_launcher.xml',res),`<?xml version=
 </adaptive-icon>
 `);
 await mkdir(new URL('drawable/',res),{recursive:true});
+await writeFile(new URL('drawable/saldoza_launcher.xml',res),`<?xml version="1.0" encoding="utf-8"?>
+<bitmap xmlns:android="http://schemas.android.com/apk/res/android" android:src="@drawable/saldoza_launcher_bitmap" android:gravity="fill"/>
+`);
 await writeFile(new URL('drawable/saldoza_launcher_background.xml',res),`<?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android"><solid android:color="#132f53"/></shape>
 `);
@@ -36,9 +37,9 @@ await writeFile(new URL('drawable/saldoza_launcher_foreground.xml',res),`<?xml v
 `);
 // Give the underlying bitmap a distinct name to avoid adaptive-icon recursion.
 await copyFile(new URL('../icon-512.png',import.meta.url),new URL('drawable-nodpi/saldoza_launcher_bitmap.png',res));
-xml=xml.replace(/<application\\b[^>]*>/,tag=>{
+xml=xml.replace(/<application\b[^>]*>/,tag=>{
  for(const key of ['icon','roundIcon']){
-  tag=tag.replace(new RegExp('\\\\sandroid:'+key+'="[^"]*"','g'),'');
+  tag=tag.replace(new RegExp('\\sandroid:'+key+'="[^"]*"','g'),'');
   tag=tag.replace(/>$/,' android:'+key+'="@drawable/saldoza_launcher">');
  }
  return tag;
