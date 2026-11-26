@@ -3,13 +3,14 @@ import assert from 'node:assert/strict';
 const root = new URL('../', import.meta.url);
 const dest = new URL('./www/', import.meta.url);
 await mkdir(dest, { recursive: true });
-for (const name of ['icon.png','icon-512.png','icon.svg','manifest.webmanifest','version.json']) {
+for (const name of ['manifest.webmanifest','version.json']) {
   await copyFile(new URL(name, root), new URL(name, dest));
 }
-for (const name of ['icon.png','icon-512.png']) {
-  await copyFile(new URL('./brand/icon-512.png',import.meta.url),new URL(name,dest));
+for (const [source, name] of [['icon-192.png','icon.png'],['icon-512.png','icon-512.png']]) {
+  await copyFile(new URL('./brand/'+source,import.meta.url),new URL(name,dest));
 }
 let html = await readFile(new URL('index.html', root), 'utf8');
+html = html.replace('type="image/svg+xml" href="icon.svg"','type="image/png" href="icon.png"');
 const marker = '<script>\n/* Remote Web Push integration for the installed PWA. */';
 const start = html.indexOf(marker);
 assert(start >= 0 && html.indexOf(marker, start + 1) === -1, 'Expected exactly one remote push block');

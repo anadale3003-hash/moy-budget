@@ -18,7 +18,7 @@ jobs:
     outputs:
       candidate: ${{ steps.signing.outputs.artifact }}
     if: github.ref == 'refs/heads/android-preparation'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     defaults:
       run:
@@ -120,7 +120,7 @@ jobs:
 
   web-regression:
     if: github.ref == 'refs/heads/android-preparation'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     defaults:
       run:
@@ -137,7 +137,7 @@ jobs:
   android-regression:
     needs: debug
     if: github.ref == 'refs/heads/android-preparation'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4

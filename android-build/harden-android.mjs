@@ -65,7 +65,7 @@ for (const [file, folder] of [['splash-light.png','drawable-nodpi/'],['splash-da
  await mkdir(dir,{recursive:true});
  await copyFile(new URL('./brand/'+file,import.meta.url),new URL('saldoza_splash.png',dir));
 }
-const themedColors=[['values/','#F4FCF8'],['values-night/','#031C17']];
+const themedColors=[['values/','#FFFFFF'],['values-night/','#10251F']];
 for(const [folder, color] of themedColors){
  const dir=new URL(folder,res);
  await mkdir(dir,{recursive:true});
