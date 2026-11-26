@@ -145,7 +145,7 @@ jobs:
     needs: debug
     if: github.ref == 'refs/heads/android-preparation'
     runs-on: ubuntu-24.04
-    timeout-minutes: 25
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -168,8 +168,8 @@ jobs:
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 35
-          target: google_apis
+          target: default
           arch: x86_64
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot
-          script: node android-build/test-release-android.mjs artifacts/candidate/app-debug.apk artifacts/baseline/previous.apk
+          emulator-options: -no-window -gpu swiftshader -feature -Vulkan -noaudio -no-boot-anim -no-snapshot -memory 2048 -cores 2
+          script: timeout 420 node android-build/test-release-android.mjs artifacts/candidate/app-debug.apk artifacts/baseline/previous.apk

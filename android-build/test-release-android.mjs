@@ -8,15 +8,17 @@ const pkg='app.saldoza.budget';
 const key='my-budget-v1';
 const port=9222;
 const adb=(...args)=>execFileSync('adb',args,{encoding:'utf8',timeout:45000}).trim();
-async function retry(operation){
+async function retry(operation,timeout=45000){
+ const until=Date.now()+timeout;
  let error;
- for(let i=0;i<30;i++){
+ do{
   try{return await operation();}
   catch(e){error=e;await delay(1000);}
- }
+ }while(Date.now()<until);
  throw error;
 }
 async function webview(){
+ console.log('Waiting for Saldoza process and WebView');
  const pid=await retry(()=>adb('shell','pidof',pkg));
  adb('forward','tcp:'+port,'localabstract:webview_devtools_remote_'+pid);
  const target=await retry(async()=>{
@@ -27,9 +29,11 @@ async function webview(){
  });
  const socket=new WebSocket(target.webSocketDebuggerUrl);
  await new Promise((resolve,reject)=>{
-  socket.addEventListener('open',resolve,{once:true});
-  socket.addEventListener('error',reject,{once:true});
- });
+  const timer=setTimeout(()=>reject(new Error('WebView debugger did not connect')),12000);
+  socket.addEventListener('open',()=>{clearTimeout(timer);resolve();},{once:true});
+  socket.addEventListener('error',()=>{clearTimeout(timer);reject(new Error('WebView debugger socket error'));},{once:true});
+ }).catch(error=>{socket.close();throw error;});
+ console.log('Attached to local WebView');
  const pending=new Map();
  let sequence=0;
  socket.addEventListener('message',event=>{
@@ -54,8 +58,13 @@ async function webview(){
   if(response.exceptionDetails)throw new Error(response.exceptionDetails.exception?.description||response.exceptionDetails.text);
   return response.result.value;
  }
- await retry(async()=>assert(await js("document.querySelector('#v-home')?.classList.contains('active')")));
- return {js,close:()=>socket.close()};
+ try{
+  await retry(async()=>assert(await js("document.querySelector('#v-home')?.classList.contains('active')")));
+  return {js,close:()=>socket.close()};
+ }catch(error){
+  socket.close();
+  throw error;
+ }
 }
 function start(){
  adb('shell','am','start','-n',pkg+'/.MainActivity');
@@ -87,6 +96,7 @@ try{
  adb('shell','svc','wifi','disable');
  assert.equal(adb('shell','settings','get','global','airplane_mode_on'),'1');
 
+ console.log('Installing the candidate in airplane mode');
  adb('install','-t',candidate);
  web=await start();
  await waitWritable(web);
@@ -147,6 +157,14 @@ try{
  await delay(38000);
  assert.match(adb('shell','dumpsys','notification'),/NotificationRecord\([^\n]*pkg=app\.saldoza\.budget/);
  console.log('PASS local test notification delivered in airplane mode with reminders off');
+}catch(error){
+ for(const cmd of [['shell','dumpsys','activity','activities'],['logcat','-d','-t','600']]){
+  try{
+   const relevant=adb(...cmd).split('\n').filter(line=>/app\.saldoza\.budget|FATAL EXCEPTION|chromium|mResumedActivity/.test(line));
+   console.error(relevant.slice(-35).join('\n'));
+  }catch{}
+ }
+ throw error;
 }finally{
  web?.close();
  try{adb('forward','--remove','tcp:'+port);}catch{}
