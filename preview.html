@@ -2294,9 +2294,9 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
       <input type="number" id="creditPayAmount" hidden aria-hidden="true" tabindex="-1"><input type="date" id="creditPayDate" hidden aria-hidden="true" tabindex="-1">
       <button class="btn full secondary" type="button" id="confirmCreditPayment">Подтвердить оплату</button>
     </div>
-   <div id="creditAccountList"></div><button type="button" id="creditAdd" class="credit-add-plus" aria-label="Добавить кредит или карту" title="Добавить кредит или карту"><svg aria-hidden="true" width="36" height="36" viewBox="0 0 36 36" fill="none" style="display:block;flex:none"><path d="M18 5V31M5 18H31" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></button>
+   <div id="creditAccountList"></div>
   </div>
-  <div id="regularPaymentHistory"></div>
+  <div id="regularPaymentHistory"></div><button type="button" id="creditAdd" class="credit-add-plus" aria-label="Добавить кредит или карту" title="Добавить кредит или карту"><svg aria-hidden="true" width="36" height="36" viewBox="0 0 36 36" fill="none" style="display:block;flex:none"><path d="M18 5V31M5 18H31" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></button>
   <p class="foot">Ипотека и кредитка уже исключены из доступного бюджета. Отмечай оплату только после реального списания банком. Повторно из бюджета деньги не вычитаются.</p>
 </div>
 <div class="section-heading"><h2>Кредитная карта</h2><span class="pill">Без просрочки</span></div><div class="card"><label class="field"><span>Общий долг, ₽</span><input id="debt" type="number" min="0" step="100" inputmode="decimal"></label><label class="field"><span>Уже отложено на погашение, ₽</span><input id="reserved" type="number" min="0" step="100" inputmode="decimal"></label><label class="field"><span>Погасить не позднее</span><input id="deadline" type="date"></label><div class="divider"></div><div class="label">Ещё нужно накопить</div><div class="metric" id="debtRemaining"></div><div class="lineitem"><span>Оставшихся выплат до срока</span><span id="payCount"></span></div><div class="lineitem"><span>Откладывать с каждой выплаты</span><span id="perPay"></span></div><div id="debtAlert"></div></div><div class="card"><b>График погашения</b><div id="debtSchedule"></div><div class="foot">Расчёт без процентов, комиссий и новых покупок. Проверяй точную дату окончания льготного периода в банке. Досрочные погашения учитываются отдельно от накопленного резерва.</div></div>
@@ -5696,7 +5696,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.132';
+const APP_VERSION='1.5.133';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
