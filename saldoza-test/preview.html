@@ -2247,7 +2247,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </section>
 <button type="button" id="purchaseCheckOpen" class="btn light">Могу ли я позволить себе покупку?</button>
 <button type="button" class="btn full light" id="homeCalendar">Календарь денег</button>
-<details class="dashboard-frame" id="nearestPayment"><summary>Ближайший платёж</summary><div id="obligations"></div></details>
+
 </section>
 <section class="view" id="v-plan">
 <div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div>
@@ -2278,7 +2278,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div id="goalAllocationNote" class="goal-allocation-note">Проверяем цель...</div>
 </div>
 <div class="card payout-destinations"><h3 style="margin:8px 0;font-size:16px">Суммы по категориям</h3><div id="planTable"></div><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two" id="categoryRules"></div><div class="foot">Сначала выделяются суммы в ₽, затем проценты от оставшейся части выплаты. Нераспределённый остаток — в «Остальное». Настройки действуют для следующих поступлений.</div></div></section>
-<section class="view" id="v-card"><div class="section-heading"><h2>Кредиты</h2></div>
+<section class="view" id="v-card"><div class="section-heading"><h2>Кредиты</h2></div><div class="card" id="nearestPayment"><div class="nearest-payment-title">Ближайший платёж</div><div id="obligations"></div></div>
 <div id="creditAccountsPanel"><h3>Мои кредиты и карты</h3></div><div class="card mortgage-monthly-settings"><b>🏠 Ипотека</b><label class="field"><span>Ежемесячный платёж по ипотеке, ₽</span><input id="mortgage" type="number" min="0" step="100" inputmode="decimal"></label><div id="mortgageMonthlyStatus" class="foot">Изменение платежа применяется к будущим неподтверждённым поступлениям.</div></div>
 <div class="section-heading"><h2>Ипотека и кредитка</h2></div>
 <div class="card payment-confirm-card payment-obligations">
@@ -2645,7 +2645,8 @@ function setup(){
   if(creditCard){creditCard.classList.add('credit-basic-card');group(section,'Кредитка',[creditCard],'credit-balance-group')}
   const all=Array.from(section.children);
   section.prepend(document.getElementById('creditAccountsPanel'));
-  all.filter(n=>n.id!=='creditAccountsPanel'&&!n.classList.contains('design-group')).forEach(n=>n.classList.add('legacy-credit-extras'));
+  section.prepend(document.getElementById('nearestPayment'));
+  all.filter(n=>n.id!=='creditAccountsPanel'&&n.id!=='nearestPayment'&&!n.classList.contains('design-group')).forEach(n=>n.classList.add('legacy-credit-extras'));
  }
  ['v-plan','v-expense','v-analytics','v-settings'].forEach(groupHeadings);
  // Compress only the payouts section: advanced weights stay available in a closed disclosure.
@@ -4317,7 +4318,7 @@ const nextCreditText=nextCreditPay?.month===month
  ?(nextCreditPay.type==='advance'?'С аванса ':'С зарплаты ')+nextCreditPay.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+' по плану — '+rub(planCreditRow[nextCreditPay.type==='advance'?'a':'b'])
  :'В среднем по оставшимся выплатам — '+rub(cc.per);
 const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':nextCreditText;const homeMortgage=upcomingMortgage(new Date());
-$('obligations').innerHTML=homeMortgage.plan<=0?(creditOutstanding()>0?'Кредитная карта · остаток долга '+rub(creditOutstanding()):'Обязательных платежей по кредитам пока нет.'):`<div class="payment-summary"><span>Ипотека · ${homeMortgage.due.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}</span><strong>${homeMortgage.remaining?'Осталось внести '+rub(homeMortgage.remaining):'Платёж внесён'}</strong><small>Внесено ${rub(homeMortgage.paid)} из ${rub(homeMortgage.plan)}</small><details><summary>Кредитная карта</summary><p>Ещё собрать ${rub(cc.debt)}. ${esc(state)}</p></details></div>`;
+$('obligations').innerHTML=homeMortgage.plan<=0?(creditOutstanding()>0?'Кредитная карта · остаток долга '+rub(creditOutstanding()):'Обязательных платежей по кредитам пока нет.'):`<div class="payment-summary"><span>Ипотека · ${homeMortgage.due.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}</span><strong>${homeMortgage.remaining?'Осталось внести '+rub(homeMortgage.remaining):'Платёж внесён'}</strong><small>Внесено ${rub(homeMortgage.paid)} из ${rub(homeMortgage.plan)}</small></div>`;
 const nextStatement=monthlyBillRows(iso(new Date())).find(r=>r.nextDue&&r.bill.creditAccount);
 if(nextStatement&&(!homeMortgage.remaining||nextStatement.nextDue<=iso(homeMortgage.due))){
  $('obligations').textContent=nextStatement.bill.name+' · '+fromISO(nextStatement.nextDue).toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+' · '+rub(nextStatement.nextCents/100);
@@ -5696,7 +5697,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.133';
+const APP_VERSION='1.5.134';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -7180,4 +7181,10 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #legacyCreditEditDialog [hidden]{display:none!important}
 #legacyCreditEditForm{display:grid;gap:12px}
  #creditDialog [hidden]{display:none!important}
- </style></body></html>
+ 
+.app #v-card.active #nearestPayment{display:block!important;padding:10px 12px!important;margin:0 0 10px!important;flex:none;font-size:13px;line-height:1.35}
+#nearestPayment .nearest-payment-title{font-size:12px;font-weight:650;color:var(--muted);margin-bottom:4px}
+#nearestPayment .payment-summary{display:flex;flex-wrap:wrap;align-items:baseline;gap:3px 10px;padding:0;background:none}
+#nearestPayment .payment-summary strong{font-size:14px;margin:0}
+#nearestPayment .payment-summary small{font-size:11px;flex-basis:100%}
+</style></body></html>
