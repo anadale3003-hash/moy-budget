@@ -5717,7 +5717,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.142';
+const APP_VERSION='1.5.143';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -7252,4 +7252,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #welcomeDialog .actions{margin:4px 0 0!important;gap:8px!important}#welcomeDialog details summary{font-size:14px;padding:5px 0}
 
 #v-settings #layoutChoices,#v-settings #dailyBudgetSettingsCard,#v-settings #salarySettingsCard,#v-settings #duplicateStartSettings{display:none!important}
+
+.app .main #v-settings.active :is(.design-group,details):has(:is(#dailyBudgetSettingsCard,#salarySettingsCard,#duplicateStartSettings,#layoutChoices)){display:none!important}
+.app .main #v-settings.active #welcomeSettings{min-height:66px!important;padding:16px!important;font-size:19px!important;font-weight:700!important;width:100%!important;border-radius:18px!important}
 </style></body></html>
