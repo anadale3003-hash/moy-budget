@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "prepare:web": "node prepare-web.mjs"
+    "prepare:web": "node test-financial-payments.mjs && node prepare-web.mjs"
   },
   "dependencies": {
     "@capacitor/core": "7.4.4",
