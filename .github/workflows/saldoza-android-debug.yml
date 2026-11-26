@@ -41,6 +41,7 @@ jobs:
           if [ ! -d android ]; then npx --no-install cap add android; fi
           npx --no-install cap sync android
           node apply-version.mjs
+          node harden-android.mjs
       - name: Build debug APK
         working-directory: android-build/android
         run: bash gradlew assembleDebug --no-daemon
