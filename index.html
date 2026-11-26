@@ -2453,7 +2453,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <label class="field"><span>Как указан оклад</span><select id="salaryMode"><option value="gross">До вычета НДФЛ</option><option value="net">На руки (после НДФЛ)</option></select></label>
 <label class="field"><span>Расчётный НДФЛ, %</span><input id="salaryTaxRate" type="number" min="0" max="50" step="0.5" inputmode="decimal"></label>
 <div class="foot">Для расчёта используется пятидневная рабочая неделя и календарь РФ на 2026–2027 годы. При другом графике, отпуске, премии или повышенной ставке НДФЛ скорректируй расчёт вручную. Прогноз не является гарантированной выплатой.</div>
-<div class="two"><label class="field"><span>Рабочих дней в месяце (необязательно)</span><input id="manualDaysTotal" type="number" min="1" max="31" step="1" placeholder="Автоматически"></label><label class="field"><span>Из них с 1 по 15 (необязательно)</span><input id="manualDaysFirst" type="number" min="0" max="15" step="1" placeholder="Автоматически"></label></div>
+<div class="two"><label class="field"><span>Рабочих дней за весь месяц (необязательно)</span><input id="manualDaysTotal" type="number" min="1" max="31" step="1" placeholder="Автоматически"></label><label class="field"><span>Рабочих дней с 1 по 15 включительно (необязательно)</span><input id="manualDaysFirst" type="number" min="0" max="15" step="1" placeholder="Автоматически"></label></div>
 <div id="salaryCalendarInfo" class="hint"></div></div>
 <div class="card" id="duplicateStartSettings"><b>Старт с текущих остатков</b><p class="foot">Установи реальные деньги на счетах. Старые покупки до даты старта не будут вычтены ещё раз. Плановые зарплаты не считаются полученными.</p><label class="field"><span>Дата начала учёта</span><input id="startDate" type="date"></label><div class="two"><label class="field"><span>Семейные нужды, ₽</span><input id="start-family" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Коммуналка, ₽</span><input id="start-utilities" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Накопления, ₽</span><input id="start-savings" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Остальное, ₽</span><input id="start-other" type="number" min="0" inputmode="decimal"></label></div><button class="btn full" id="saveStart" type="button">Сохранить стартовые остатки</button><div id="startStatus" class="foot"></div></div>
 <div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion"></strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
@@ -2593,8 +2593,8 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <section hidden data-category="Мой доход"><label class="field"><span>Налог с оклада до вычета, %</span><input id="welcomeTax" type="number" min="0" max="50" step="0.5" required></label></section>
 <section hidden data-category="Мой доход"><label class="field"><span>Число аванса</span><input id="welcomeAdvance" type="number" min="1" max="31" step="1" inputmode="numeric" required></label></section>
 <section hidden data-category="Мой доход"><label class="field"><span>Число зарплаты</span><input id="welcomePay" type="number" min="1" max="31" step="1" inputmode="numeric" required></label></section>
-<section hidden data-category="Мой доход"><label class="field"><span>Рабочих дней за месяц</span><input id="welcomeWorkTotal" type="number" min="1" max="31" step="1" placeholder="По календарю"></label></section>
-<section hidden data-category="Мой доход"><label class="field"><span>Из них с 1 по 15 число</span><input id="welcomeWorkFirst" type="number" min="0" max="15" step="1" placeholder="По календарю"></label></section>
+<section hidden data-category="Мой доход"><label class="field"><span>Сколько рабочих дней в этом месяце?</span><input id="welcomeWorkTotal" type="number" min="1" max="31" step="1" placeholder="По календарю"></label><p class="foot" id="welcomeWorkTotalHint">Оставь поле пустым, если работаешь по обычному графику 5/2. Saldoza посчитает дни автоматически.</p></section>
+<section hidden data-category="Мой доход"><label class="field"><span>Сколько рабочих дней с 1 по 15 число включительно?</span><input id="welcomeWorkFirst" type="number" min="0" max="15" step="1" placeholder="По календарю"></label><p class="foot" id="welcomeWorkFirstHint">Это дни для расчёта аванса. Если график обычный, оставь поле пустым.</p></section>
 <section hidden data-category="Деньги на старте"><label class="field"><span>Сколько денег сейчас можно потратить на еду и другие покупки?</span><input aria-describedby="welcomeCashHelp" id="welcomeCash" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><p class="foot" id="welcomeCashHelp">Сложите деньги на карте и наличные. Например, 25 000 ₽ на карте и 5 000 ₽ в кошельке — введите 30 000. Деньги, которые уже отложили, сюда не включайте.</p></section>
 <section hidden data-category="С какого дня начнём считать деньги?">
 <input id="welcomeDate" type="date" hidden required>
@@ -2835,7 +2835,7 @@ function payrollForecast(m,key=month,asOf=null){
  const cfg=data.salaryConfig,base=num(cfg.base),work=countWorkdays(key);
  const overrideTotal=Number(m.manualDaysTotal),overrideFirst=Number(m.manualDaysFirst);
  const total=m.manualDaysTotal!==undefined&&m.manualDaysTotal!==''&&overrideTotal>0?Math.min(31,overrideTotal):work.total;
- const first=m.manualDaysFirst!==undefined&&m.manualDaysFirst!==''&&overrideFirst>=0?Math.min(total,overrideFirst):work.first;
+ const first=Math.min(total,m.manualDaysFirst!==undefined&&m.manualDaysFirst!==''&&overrideFirst>=0?overrideFirst:work.first);
  const rate=Math.min(50,num(cfg.taxRate));
  const net=cfg.mode==='net'?base:base*(1-rate/100);
  const advanceForecast=!singlePay()&&total>0?net*first/total:0;
@@ -3487,7 +3487,7 @@ function toggleNewType(){
   note.textContent='Это перевод, не расход семьи. У тебя доступно для перевода: '+(mine===null?'укажи начальные остатки':rub(mine));
  }
 }
-function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(salaryNextMonth()?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=Math.round(creditOutstanding()*100)/100;$('reserved').value=data.reserved;$('deadline').value=data.deadline;renderCategoryRules();}
+function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const work=countWorkdays(month);$('manualDaysTotal').placeholder='Авто: '+work.total;$('manualDaysFirst').placeholder='Авто: '+Math.min(Number(m.manualDaysTotal)||work.total,work.first);const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(salaryNextMonth()?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=Math.round(creditOutstanding()*100)/100;$('reserved').value=data.reserved;$('deadline').value=data.deadline;renderCategoryRules();}
 // Fit the label and amount to the actual available tile width, including large balances.
 function fitTotalMoneyTile(){
  const tile=document.querySelector('.hero-overview .hero-all');
@@ -5599,6 +5599,17 @@ function sizeWizard(){
 }
 window.visualViewport?.addEventListener('resize',sizeWizard);
 window.visualViewport?.addEventListener('scroll',sizeWizard);
+function updateWorkdayHints(){
+ const work=countWorkdays(currentMonth),total=Number($('welcomeWorkTotal').value)||work.total;
+ const first=Math.min(total,work.first);
+ const period=new Date(Number(currentMonth.slice(0,4)),Number(currentMonth.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+ $('welcomeWorkTotal').placeholder='Автоматически: '+work.total;
+ $('welcomeWorkFirst').placeholder='Автоматически: '+first;
+ const calendar=work.official?'Учтены выходные и праздники РФ.':'Учтены только выходные; проверь праздники.';
+ $('welcomeWorkTotalHint').textContent=period+' · По календарю: '+work.total+' рабочих дней. '+calendar+' Оставь поле пустым для автоматического расчёта или укажи число по своему графику.';
+ $('welcomeWorkFirstHint').textContent='С 1 по 15 число: '+first+' рабочих дней по календарю. Это нужно для расчёта аванса. Оставь пустым для автоматического расчёта или измени число.';
+}
+$('welcomeWorkTotal').addEventListener('input',updateWorkdayHints);
 function openWelcome(){
  const start=data.startBalances,m=data.months[currentMonth]||{};
  const values={Gender:data.gender||'male',Frequency:data.payFrequency||'twice',Salary:data.salaryConfig.base||'',Mode:data.salaryConfig.base?data.salaryConfig.mode:'net',Tax:data.salaryConfig.taxRate??13,
@@ -5606,6 +5617,7 @@ function openWelcome(){
   Date:start?.date||iso(new Date()),Daily:data.usualDailyBudget??''};
  for(const k of ['utilities','savings','other'])values[k]=start?.balances?.[k]??'';
  for(const [k,v] of Object.entries(values))$('welcome'+k).value=v;
+ updateWorkdayHints();
  $('welcomeDate').max=iso(new Date());$('welcomeFamily').checked=data.showFamilySplit!==false;$('welcomeCredits').checked=data.showCreditTab!==false;
  $('welcomeGender').onchange();sizeWizard();wizardDialog.showModal();showPanel(panels[0]);
 }
