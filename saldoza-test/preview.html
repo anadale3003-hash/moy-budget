@@ -5715,7 +5715,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.137';
+const APP_VERSION='1.5.138';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -7219,4 +7219,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #v-analytics .analytics-capital-details{background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;padding:6px 0 0;margin-top:6px}
 #v-analytics .analytics-capital-details>div{font-size:12px;padding:3px 0}#v-analytics #ladderNote{font-size:11px;margin:4px 0 0}
 .app #v-analytics .analytics-one-screen>.analytics-economy-card{height:auto!important;min-height:0!important;flex:none!important}
+
+.app .main #v-analytics.active .analytics-one-screen>button#advisorOpen.analytics-economy-card{display:flex!important;flex-direction:row!important;align-items:center!important;justify-content:flex-start!important;gap:10px!important;height:auto!important;min-height:58px!important;max-height:80px!important;padding:10px 12px!important;flex:0 0 auto!important;aspect-ratio:auto!important;text-align:left!important}
+.app #v-analytics #advisorOpen .advisor-copy{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;gap:3px!important;min-width:0;flex:1!important;text-align:left!important}
+.app #v-analytics #advisorOpen .advisor-copy strong{font-size:15px!important;margin:0!important}.app #v-analytics #advisorOpen .advisor-copy small{font-size:11px!important;margin:0!important}.app #v-analytics #advisorOpen :is(.advisor-symbol,.advisor-arrow){flex:0 0 auto!important;width:auto!important;margin:0!important;font-size:22px!important}
 </style></body></html>
