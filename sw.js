@@ -1,4 +1,4 @@
-const CACHE='family-budget-v1-5-104';
+const CACHE='family-budget-v1-5-151';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./version.json','./icon.svg','./icon.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('family-budget-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
@@ -26,9 +26,9 @@ self.addEventListener('fetch',event=>{
 self.addEventListener('push', event => {
   let message = {};
   try { message = event.data ? event.data.json() : {}; } catch (_) {
-    message = { title: 'Мой бюджет', body: event.data ? event.data.text() : 'Новое напоминание' };
+    message = { title: 'Saldoza', body: event.data ? event.data.text() : 'Новое напоминание' };
   }
-  const title = message.title || 'Мой бюджет';
+  const title = message.title || 'Saldoza';
   const options = {
     body: message.body || 'У тебя есть напоминание.',
     icon: new URL('./icon.png', self.registration.scope).href,
