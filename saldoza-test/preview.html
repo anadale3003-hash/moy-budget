@@ -2398,20 +2398,13 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 
 <section class="view" id="v-analytics">
  <div class="analytics-one-screen">
-  <div class="analytics-dash-header"><h2>Накопления</h2></div><div class="advisor-economy-pair"><button type="button" class="analytics-economy-card" id="advisorOpen"><strong>Советник</strong><span>Поможет разобраться в бюджете</span></button>
-  <div class="analytics-economy-card">
-   <div class="analytics-panel-top"><b>💡 Найденная экономия</b><button type="button" class="analytics-text-button" data-anal-open="economy">Подробнее ›</button></div>
-   <div class="analytics-economy-total"><strong id="ladderSaving">—</strong><span id="ladderPeriod">Сравнение с прошлым месяцем</span></div>
-   <div class="analytics-economy-peek" id="analyticsEconomyPreview"><div class="foot">Анализируем расходы…</div></div>
-   <div class="analytics-economy-sub" id="analyticsEconomyNote">Только предварительное снижение затрат</div>
-   <button type="button" class="btn full analytics-economy-cta" id="analyticsEconomyToSavings" data-anal-open="transfer" disabled>Перевести свободное в накопления</button>
-  </div>
-  </div><div class="analytics-capital-unified" aria-label="План накоплений">
+  <div class="analytics-dash-header"><h2>Накопления</h2></div><div class="analytics-capital-unified" aria-label="План накоплений">
   <div class="analytics-capital-card">
-   <div class="analytics-panel-top"><b>🎯 Лестница капитала</b><button type="button" class="analytics-text-button" data-anal-open="capital">Подробнее ›</button></div>
+   <div class="analytics-panel-top"><b>🎯 Лестница капитала</b><button type="button" class="analytics-text-button capital-settings-icon" data-anal-open="plan" aria-label="Настроить цель и срок">⚙</button></div>
    <div class="analytics-capital-numbers"><strong id="ladderTotal">—</strong><span id="ladderBadge">Цель: 1 млн ₽</span></div>
    <div class="ladder-track" role="progressbar" aria-label="Прогресс накоплений" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ladderTrack"><div id="ladderFill"></div></div>
-   <div class="analytics-capital-note" id="ladderRemaining">До следующей ступени —</div>
+   <div class="analytics-capital-note" id="ladderRemaining">До следующей ступени —</div><div class="analytics-capital-details"><div><span>🛡 Неприкосновенная подушка</span><b id="ladderReserve">500 000 ₽</b></div><div><span>🏦 Сверх подушки</span><b id="ladderExtra">—</b></div><div><span>Следующая ступень</span><b id="ladderGoal">1 000 000 ₽</b></div></div>
+     <p class="foot" id="ladderNote"></p>
   </div>
   <div class="analytics-goal-overview" aria-label="Сводка цели накоплений">
    <div class="analytics-goal-top">
@@ -2426,7 +2419,14 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
    <small id="analyticsMonthlySaveDeadline">—</small>
   </div>
   </div>
-  <button class="analytics-bottom-link analytics-goal-settings" type="button" data-anal-open="plan">⚙️ Настроить цель и срок <span>›</span></button>
+  <button type="button" class="analytics-economy-card" id="advisorOpen"><span class="advisor-symbol">✦</span><span class="advisor-copy"><strong>Финансовый советник</strong><small>Анализ бюджета и рекомендации</small></span><span class="advisor-arrow">›</span></button><div class="analytics-economy-card">
+   <div class="analytics-panel-top"><b>💡 Найденная экономия</b><button type="button" class="analytics-text-button" data-anal-open="economy">Подробнее ›</button></div>
+   <div class="analytics-economy-total"><strong id="ladderSaving">—</strong><span id="ladderPeriod">Сравнение с прошлым месяцем</span></div>
+   <div class="analytics-economy-peek" id="analyticsEconomyPreview"><div class="foot">Анализируем расходы…</div></div>
+   <div class="analytics-economy-sub" id="analyticsEconomyNote">Только предварительное снижение затрат</div>
+   <button type="button" class="btn full analytics-economy-cta" id="analyticsEconomyToSavings" data-anal-open="transfer" disabled>Перевести свободное в накопления</button>
+  </div>
+  
  </div>
  
 </section>
@@ -2483,8 +2483,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
      <p class="foot">Это не доход и не банковский перевод. Ипотечные и кредитные резервы не затрагиваются.</p>
     </div>
     <div class="analytics-sheet-page" id="analyticsModalCapital" hidden>
-     <div class="analytics-capital-details"><div><span>🛡 Неприкосновенная подушка</span><b id="ladderReserve">500 000 ₽</b></div><div><span>🏦 Сверх подушки</span><b id="ladderExtra">—</b></div><div><span>Следующая ступень</span><b id="ladderGoal">1 000 000 ₽</b></div></div>
-     <p class="foot" id="ladderNote"></p>
+     
 
     </div>
     
@@ -5716,7 +5715,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.136';
+const APP_VERSION='1.5.137';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -7213,4 +7212,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 #nearestPayment .upcoming-credit-info{flex:1;min-width:0;display:grid;gap:2px}
 #nearestPayment .upcoming-credit-info small,#nearestPayment .upcoming-credit-empty{font-size:11px;color:var(--muted)}
 #nearestPayment .upcoming-credit-row strong{font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+.app #v-analytics #advisorOpen{display:flex!important;align-items:center!important;justify-content:flex-start!important;gap:12px!important;min-height:64px!important;height:auto!important;cursor:pointer!important;border:1px solid var(--line)!important;pointer-events:auto!important;text-align:left!important}
+#advisorOpen .advisor-copy{display:grid;gap:3px;flex:1}#advisorOpen .advisor-copy small{color:var(--muted);font-size:12px}#advisorOpen .advisor-symbol,#advisorOpen .advisor-arrow{color:var(--blue);font-size:25px}
+#v-analytics .capital-settings-icon{font-size:25px!important;min-width:40px;min-height:36px;padding:0!important;cursor:pointer}
+#v-analytics .analytics-capital-details{background:transparent;border:0;border-top:1px solid var(--line);border-radius:0;padding:6px 0 0;margin-top:6px}
+#v-analytics .analytics-capital-details>div{font-size:12px;padding:3px 0}#v-analytics #ladderNote{font-size:11px;margin:4px 0 0}
+.app #v-analytics .analytics-one-screen>.analytics-economy-card{height:auto!important;min-height:0!important;flex:none!important}
 </style></body></html>
