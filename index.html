@@ -2246,7 +2246,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  <small id="milestoneCredit" hidden></small>
 </section>
 <button type="button" id="purchaseCheckOpen" class="btn light">Могу ли я позволить себе покупку?</button>
-<div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайший платёж</h2><button class="analytics-icon-button alert-bell home-alert-trigger" type="button" id="budgetAlertsOpen" aria-label="Открыть советы для бюджета" title="Советы">🔔 <span class="home-alert-label">Советы</span><span id="budgetAlertsCount" class="alert-bell-count" hidden></span></button></div><div id="obligations"></div></div>
+<div class="dashboard-frame dashboard-obligations"><div class="section-heading"><h2>Ближайший платёж</h2><button class="btn light" type="button" id="homeCalendar">Календарь денег</button></div><div id="obligations"></div></div>
 </section>
 <section class="view" id="v-plan">
 <div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div>
@@ -2278,7 +2278,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 <div class="card payout-destinations"><h3 style="margin:8px 0;font-size:16px">Суммы по категориям</h3><div id="planTable"></div><div id="planWarnings"></div></div><div class="card"><div class="row"><b>Пропорции остатка</b><span class="quiet">Можно изменить</span></div><div class="two" id="categoryRules"></div><div class="foot">Сначала выделяются суммы в ₽, затем проценты от оставшейся части выплаты. Нераспределённый остаток — в «Остальное». Настройки действуют для следующих поступлений.</div></div></section>
 <section class="view" id="v-card"><div class="section-heading"><h2>Кредиты</h2></div>
-<div class="card mortgage-monthly-settings"><b>🏠 Ипотека</b><label class="field"><span>Ежемесячный платёж по ипотеке, ₽</span><input id="mortgage" type="number" min="0" step="100" inputmode="decimal"></label><div id="mortgageMonthlyStatus" class="foot">Изменение платежа применяется к будущим неподтверждённым поступлениям.</div></div>
+<div class="card" id="creditAccountsPanel"><h3>Мои кредиты и карты</h3><div id="creditAccountList"></div><button type="button" id="creditAdd" class="btn full">Добавить кредит или карту</button></div><div class="card mortgage-monthly-settings"><b>🏠 Ипотека</b><label class="field"><span>Ежемесячный платёж по ипотеке, ₽</span><input id="mortgage" type="number" min="0" step="100" inputmode="decimal"></label><div id="mortgageMonthlyStatus" class="foot">Изменение платежа применяется к будущим неподтверждённым поступлениям.</div></div>
 <div class="section-heading"><h2>Ипотека и кредитка</h2></div>
 <div class="card payment-confirm-card payment-obligations">
   <div class="row"><b>Фактическая оплата</b><span class="quiet">после перевода в банк</span></div>
@@ -2430,7 +2430,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </section>
 <section class="view" id="v-settings">
 <div class="section-heading"><h2>Настройки</h2><span class="pill" id="settingsVersionBadge"></span></div>
-<details class="card" id="layoutChoices"><summary>Главный экран и вкладки</summary>
+<button id="welcomeSettings" class="btn full light" type="button">Первичная настройка бюджета</button><details class="card" id="layoutChoices"><summary>Главный экран и вкладки</summary>
  <label class="field"><span><input type="checkbox" id="showFamilySplit"> Показывать «У меня» и «У жены» на главной</span></label>
  <label class="field"><span><input type="checkbox" id="showCreditTab"> Показывать вкладку «Кредиты»</span></label>
 </details>
@@ -2457,7 +2457,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="card"><b>Резервная копия</b><p class="foot">Сохрани данные перед обновлением или переносом на другой телефон.</p><div class="actions"><button class="btn secondary" id="exportData" type="button">Сохранить копию</button><button class="btn light" id="importClick" type="button">Восстановить</button></div><input type="file" id="importData" accept="application/json,.json" style="display:none"></div>
 <div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
 <div class="hint">Финансовые данные остаются в хранилище браузера на этом устройстве. Не очищай данные сайта, если не сохранил резервную копию.</div>
-</section></main><nav class="nav" aria-label="Разделы"><button type="button" class="tab active" aria-current="page" data-go="home" aria-label="Главная"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-0" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-0)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="M4 11 12 4l8 7v10h-6v-7h-4v7H4z"/><path d="m2 11 10-9 10 9-2 2-8-7-8 7z"/></g></svg></span><span class="tab-label">Главная</span></button><button type="button" class="tab" data-go="plan" aria-label="Выплаты"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-1" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-1)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="m2 8 17-5 3 12-17 5z"/><rect x="2" y="8" width="19" height="12" rx="2"/><ellipse cx="11.5" cy="14" rx="3" ry="4"/><path d="M5 11h2m9 6h2"/></g></svg></span><span class="tab-label">Выплаты</span></button><button type="button" class="tab" data-go="card" aria-label="Кредиты"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-2" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-2)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><rect x="2" y="5" width="20" height="15" rx="3"/><path d="M3 9h18v2H3z"/><rect x="5" y="14" width="4" height="3" rx=".6"/><path d="M13 16h5"/></g></svg></span><span class="tab-label">Кредиты</span></button><button type="button" class="tab" data-go="expense" aria-label="Операции"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-3" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-3)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="M5 2h14v20l-2-1.5-2.5 1.5-2.5-1.5L9.5 22 7 20.5 5 22z"/><path d="M8 7h8m-8 4h8m-8 5h3m2 0h3"/></g></svg></span><span class="tab-label">Операции</span></button><button type="button" class="tab" data-go="analytics" aria-label="Накопления"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-4" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-4)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="m2 13 3-1 3 1v8H2zM10 9l3-1 2 1v12h-5zM17 4l3-1 2 1v17h-5z"/></g></svg></span><span class="tab-label">Накопления</span></button><button type="button" class="tab" data-go="settings" aria-label="Настройки"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-5" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-5)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path fill-rule="evenodd" d="m9 2 1 2h4l1-2 4 2-1 3 2 3 2 1v3l-3 1-1 3 1 2-4 2-2-2h-3l-2 2-4-2 1-3-2-3-2-1v-3l3-1 1-3-1-2z M16 12a4 4 0 1 0-8 0 4 4 0 0 0 8 0z"/></g></svg></span><span class="tab-label">Настройки</span></button></nav></div>
+</section></main><nav class="nav" aria-label="Разделы"><button type="button" class="tab active" aria-current="page" data-go="home" aria-label="Главная"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-0" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-0)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="M4 11 12 4l8 7v10h-6v-7h-4v7H4z"/><path d="m2 11 10-9 10 9-2 2-8-7-8 7z"/></g></svg></span><span class="tab-label">Главная</span></button><button type="button" class="tab" data-go="expense" aria-label="Операции"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-3" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-3)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="M5 2h14v20l-2-1.5-2.5 1.5-2.5-1.5L9.5 22 7 20.5 5 22z"/><path d="M8 7h8m-8 4h8m-8 5h3m2 0h3"/></g></svg></span><span class="tab-label">Операции</span></button><button type="button" class="tab" data-go="plan" aria-label="Выплаты"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-1" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-1)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="m2 8 17-5 3 12-17 5z"/><rect x="2" y="8" width="19" height="12" rx="2"/><ellipse cx="11.5" cy="14" rx="3" ry="4"/><path d="M5 11h2m9 6h2"/></g></svg></span><span class="tab-label">Выплаты</span></button><button type="button" class="tab" data-go="card" aria-label="Кредиты"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-2" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-2)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><rect x="2" y="5" width="20" height="15" rx="3"/><path d="M3 9h18v2H3z"/><rect x="5" y="14" width="4" height="3" rx=".6"/><path d="M13 16h5"/></g></svg></span><span class="tab-label">Кредиты</span></button><button type="button" class="tab" data-go="analytics" aria-label="Накопления"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-4" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-4)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path d="m2 13 3-1 3 1v8H2zM10 9l3-1 2 1v12h-5zM17 4l3-1 2 1v17h-5z"/></g></svg></span><span class="tab-label">Накопления</span></button><button type="button" class="tab" data-go="settings" aria-label="Настройки"><span class="tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><defs><linearGradient id="nav-material-5" x2=".45" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fafafa"/><stop offset=".48" stop-color="#bcc1c6"/><stop offset=".55" stop-color="#969ca2"/><stop offset="1" stop-color="#d5d8db"/></linearGradient></defs><g fill="url(#nav-material-5)" stroke="#50575e" stroke-width="1" stroke-linejoin="round" stroke-linecap="round"><path fill-rule="evenodd" d="m9 2 1 2h4l1-2 4 2-1 3 2 3 2 1v3l-3 1-1 3 1 2-4 2-2-2h-3l-2 2-4-2 1-3-2-3-2-1v-3l3-1 1-3-1-2z M16 12a4 4 0 1 0-8 0 4 4 0 0 0 8 0z"/></g></svg></span><span class="tab-label">Настройки</span></button></nav></div>
 <div class="analytics-overlay" id="analyticsOverlay" hidden>
   <section class="analytics-sheet" role="dialog" aria-modal="true" aria-labelledby="analyticsSheetTitle">
    <div class="analytics-sheet-head"><h2 id="analyticsSheetTitle">Подробности</h2><button id="analyticsSheetClose" type="button" class="analytics-sheet-close" aria-label="Закрыть">×</button></div>
@@ -2583,7 +2583,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 <div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="history-sort-control"><label for="envelopeHistorySort">По дате</label><select id="envelopeHistorySort" data-history-sort="envelopeHistoryList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 
-<dialog id="smartOperationDialog" class="budget-alerts-dialog" aria-labelledby="smartOperationTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="smartOperationTitle">Умный ввод</h2><button type="button" class="btn light" id="smartOperationClose" aria-label="Закрыть">✕</button></div><p class="foot">Напиши уже совершённую операцию обычными словами. Разбор текста выполняется на устройстве. Голос распознаёт браузер или система — может потребоваться интернет.</p><form id="smartOperationForm"><label class="field"><span id="smartOperationLabel">Что потратили?</span><textarea id="smartOperationText" rows="3" maxlength="240" required placeholder="Вчера купил корм собаке за 1800"></textarea></label><button hidden class="btn full light" id="smartVoiceButton" type="button" aria-pressed="false">🎙 Продиктовать</button><button class="btn full light" id="smartVoiceKeyboard" type="button" style="margin-top:5px">Диктовка клавиатурой</button><p class="foot" id="smartVoiceStatus" role="status" aria-live="polite"></p><button class="btn full" type="submit">Распознать</button></form><p id="smartOperationPreview" aria-live="polite"></p><button class="btn full secondary" id="smartOperationContinue" type="button" disabled>Перейти к подтверждению</button><button class="btn full light" id="smartOperationManual" type="button" style="margin-top:8px">Ввести вручную</button><p class="foot">Поддерживаются одиночные расходы, дополнительные доходы и переводы между конвертами в рублях. Кредиты и зарплата — через обычные формы.</p></div></dialog><style>#smartOperationText{width:100%;box-sizing:border-box;resize:vertical;background:var(--input);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:16px}#smartOperationPreview{padding:10px;background:var(--panel);border-radius:12px;overflow-wrap:anywhere}#smartOperationContinue:disabled,#smartVoiceButton:disabled{opacity:.5}#smartVoiceButton{margin-top:6px;min-height:42px}#smartVoiceStatus{margin:5px 0 9px}</style>
+<dialog id="welcomeDialog" class="budget-alerts-dialog" aria-labelledby="welcomeTitle"><form id="welcomeForm" class="budget-alerts-shell"><h2 id="welcomeTitle">Настроим твой бюджет</h2><p class="foot">Укажи реальные деньги на сегодня. Доход нужен для прогноза и попадёт в бюджет после подтверждения.</p><label class="field"><span>Доступно на повседневные расходы сегодня, ₽</span><input id="welcomeCash" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><details id="welcomeExtras"><summary>Есть деньги в других конвертах</summary><label class="field"><span>На коммуналку, ₽</span><input id="welcomeutilities" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Накопления, ₽</span><input id="welcomesavings" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Остальные деньги, ₽</span><input id="welcomeother" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Уже отложено на ипотеку, ₽</span><input id="welcomemortgage" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label></details><div id="welcomeExisting" class="foot" hidden>Текущие остатки уже учтены. Здесь можно уточнить доход и график выплат.</div><label class="field"><span>Месячный оклад, ₽ · если есть</span><input id="welcomeSalary" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Как указан оклад</span><select id="welcomeMode"><option value="net">На руки</option><option value="gross">До налога</option></select></label><div class="two"><label class="field"><span>День аванса</span><input id="welcomeAdvance" type="number" min="1" max="31" step="1" inputmode="numeric" required></label><label class="field"><span>День зарплаты</span><input id="welcomePay" type="number" min="1" max="31" step="1" inputmode="numeric" required></label></div><label class="field"><span>Обычные расходы в день, ₽ · если знаешь</span><input id="welcomeDaily" type="number" step="0.01" min="0.01" max="999999999" inputmode="decimal"></label><label><input id="welcomeCredits" type="checkbox"> Показать вкладку «Кредиты»</label><p class="foot">Платежи по кредитам и дополнительные доходы можно добавить отдельно.</p><div class="actions"><button type="submit" class="btn">Сохранить</button><button type="button" class="btn light" id="welcomeLater">Позже</button></div></form></dialog><dialog id="creditDialog" class="budget-alerts-dialog" aria-labelledby="creditTitle"><form class="budget-alerts-shell" id="creditForm"><h2 id="creditTitle">Кредит или карта</h2><label class="field"><span>Тип</span><select id="creditKind"><option value="loan">Потребительский кредит</option><option value="card">Кредитная карта</option></select></label><label class="field"><span>Название</span><input id="creditName" maxlength="80" placeholder="Например, карта банка" required></label><label class="field"><span>Остаток основного долга по данным банка, ₽</span><input id="creditBalance" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><details id="creditStatement"><summary>Ближайший платёж по выписке</summary><p class="foot">Введи сумму и дату из банка. Проценты и комиссии входят в платёж, но не уменьшают основной долг.</p><label class="field"><span>Дата платежа</span><input id="creditDue" type="date" min="1900-01-01" max="9999-12-31"></label><label class="field"><span>Полный платёж, ₽</span><input id="creditDueAmount" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>В том числе проценты и комиссии, ₽</span><input id="creditInterest" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Из какого конверта платить</span><select id="creditEnvelope"></select></label></details><div class="actions"><button class="btn" type="submit">Сохранить</button><button type="button" class="btn light" id="creditCancel">Отмена</button></div></form></dialog><dialog id="smartOperationDialog" class="budget-alerts-dialog" aria-labelledby="smartOperationTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="smartOperationTitle">Умный ввод</h2><button type="button" class="btn light" id="smartOperationClose" aria-label="Закрыть">✕</button></div><p class="foot">Напиши уже совершённую операцию обычными словами. Разбор текста выполняется на устройстве. Голос распознаёт браузер или система — может потребоваться интернет.</p><form id="smartOperationForm"><label class="field"><span id="smartOperationLabel">Что потратили?</span><textarea id="smartOperationText" rows="3" maxlength="240" required placeholder="Вчера купил корм собаке за 1800"></textarea></label><button hidden class="btn full light" id="smartVoiceButton" type="button" aria-pressed="false">🎙 Продиктовать</button><p class="foot" id="smartVoiceStatus" role="status" aria-live="polite"></p><button class="btn full" type="submit">Распознать</button></form><p id="smartOperationPreview" aria-live="polite"></p><button class="btn full secondary" id="smartOperationContinue" type="button" disabled>Перейти к подтверждению</button><button class="btn full light" id="smartOperationManual" type="button" style="margin-top:8px">Ввести вручную</button><p class="foot">Поддерживаются одиночные расходы, дополнительные доходы и переводы между конвертами в рублях. Кредиты и зарплата — через обычные формы.</p></div></dialog><style>#smartOperationText{width:100%;box-sizing:border-box;resize:vertical;background:var(--input);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:16px}#smartOperationPreview{padding:10px;background:var(--panel);border-radius:12px;overflow-wrap:anywhere}#smartOperationContinue:disabled,#smartVoiceButton:disabled{opacity:.5}#smartVoiceButton{margin-top:6px;min-height:42px}#smartVoiceStatus{margin:5px 0 9px}</style>
 <dialog id="moneyCalendarDialog" class="budget-alerts-dialog" aria-labelledby="moneyCalendarTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="moneyCalendarTitle">Календарь денег</h2><button class="btn light" type="button" id="moneyCalendarClose" aria-label="Закрыть">✕</button></div><div id="calendarHorizon" role="group" aria-label="Горизонт прогноза"><button type="button" class="btn light" data-horizon="30" aria-pressed="true">30 дней</button><button type="button" class="btn light" data-horizon="60" aria-pressed="false">60 дней</button><button type="button" class="btn light" data-horizon="90" aria-pressed="false">90 дней</button></div><p id="moneyCalendarSummary" class="foot" aria-live="polite"></p><div id="calendarForecastSummary" aria-live="polite"></div><details id="calendarPurchaseEditor"><summary>＋ Запланировать покупку</summary><form id="calendarPurchaseForm"><label class="field">Название<input id="calendarPurchaseName" required maxlength="80"></label><label class="field">Дата<input id="calendarPurchaseDate" type="date" required></label><label class="field">Сумма, ₽<input id="calendarPurchaseAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><button class="btn full" type="submit">Сохранить план</button><p class="foot">Указывай только дополнительные покупки, не включённые в дневной бюджет. План не списывает деньги.</p></form><div id="calendarPurchaseList"></div></details><details id="incomeSchedulePanel"><summary>Регулярные дополнительные доходы</summary>
  <p class="foot">Добавь ожидаемый доход, например подработку. В бюджет деньги попадут после нажатия «Получено».</p>
  <div id="incomeScheduleList"></div><form id="incomeScheduleForm">
@@ -2600,7 +2600,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <style>#moneyCalendarDialog{max-height:90dvh;overflow:auto}#calendarHorizon{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:8px 0}#calendarHorizon button{padding:8px 3px;font-size:13px;white-space:nowrap}#calendarHorizon button[aria-pressed="true"]{background:var(--blue);color:var(--accent-text,var(--ink));border-color:var(--blue);font-weight:700}#calendarForecastSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 12px}#calendarForecastSummary>div{background:var(--panel);border-radius:12px;padding:9px;min-width:0;overflow-wrap:anywhere}#calendarForecastSummary small,#calendarForecastSummary strong{display:block}#calendarForecastSummary small{color:var(--muted);font-size:12px}#calendarForecastSummary strong{margin-top:5px;font-size:15px}#moneyCalendarDialog summary{cursor:pointer;font-weight:650;padding:10px 0}#moneyCalendarDialog .field{display:grid;gap:4px;margin:8px 0}.calendar-day{padding:9px 4px;border-bottom:1px solid var(--line)}.calendar-day-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.calendar-day small{display:block;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}.calendar-risk{color:var(--red);font-weight:700}.calendar-plan-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);align-items:center;overflow-wrap:anywhere}.calendar-plan-row>div{min-width:0}.calendar-plan-row button{flex-shrink:0}</style>
 <dialog id="purchaseCheckDialog" class="budget-alerts-dialog" aria-labelledby="purchaseCheckTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="purchaseCheckTitle">Могу ли я позволить себе покупку?</h2><button type="button" class="btn light" id="purchaseCheckClose" aria-label="Закрыть">✕</button></div><p class="foot" id="purchaseCheckContext"></p><form id="purchaseCheckForm"><label class="field">Название покупки (по желанию)<input id="purchaseName" maxlength="80" placeholder="Например, зимние ботинки"></label><label class="field">Стоимость дополнительной покупки, ₽<input id="purchasePrice" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><label class="field">Необходимые расходы семьи в день, ₽<input id="purchaseDaily" type="number" inputmode="decimal" min="0" step="0.01" required placeholder="Из настроек или введи вручную"></label><label class="field">Другие разовые расходы до выплаты, ₽<input id="purchaseExtra" type="number" inputmode="decimal" min="0" step="0.01" value="0"></label><p class="foot">Не включай покупку и уже учтённые обязательные платежи в дневной бюджет или разовые расходы. Корм, лекарства и прочие необходимые покупки укажи отдельно, если они ещё не включены.</p><button class="btn full" type="submit">Проверить покупку</button></form><div id="purchaseCheckResult" aria-live="polite"></div><button hidden id="planAfterPayday" type="button" class="btn full">Запланировать после выплаты</button></div></dialog>
 <style>#purchaseCheckOpen{width:100%;min-height:38px;margin:4px 0;font-size:13px;flex-shrink:0}#purchaseCheckDialog .field{display:grid;gap:5px;margin:10px 0}#purchaseCheckResult{margin-top:12px;padding:12px;border-radius:12px;background:var(--panel);overflow-wrap:anywhere}#purchaseCheckResult p{margin:6px 0;font-size:13px}#purchaseCheckResult small{display:block;color:var(--muted);margin-top:8px}.purchase-ok{color:var(--green)}.purchase-bad{color:var(--red)}</style>
-<dialog id="budgetAlertsDialog" class="budget-alerts-dialog" aria-labelledby="budgetAlertsTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="budgetAlertsTitle">Советы для твоего бюджета</h2><button type="button" class="btn light" id="budgetAlertsClose" aria-label="Закрыть">✕</button></div><p class="budget-alerts-help" id="adviceOpening"></p><div id="budgetEarlyAlerts" class="budget-early-alerts" aria-live="polite"></div></div></dialog>
+
 <script>
 /* Layout-only grouping. IDs/forms remain intact so accounting calculations and saved data are unchanged. */
 (function(){
@@ -2641,7 +2641,8 @@ function setup(){
   if(mortgage)group(section,'Ипотека',[mortgage],'credit-mortgage-group');
   if(creditCard){creditCard.classList.add('credit-basic-card');group(section,'Кредитка',[creditCard],'credit-balance-group')}
   const all=Array.from(section.children);
-  all.filter(n=>!n.classList.contains('design-group')).forEach(n=>n.classList.add('legacy-credit-extras'));
+  section.prepend(document.getElementById('creditAccountsPanel'));
+  all.filter(n=>n.id!=='creditAccountsPanel'&&!n.classList.contains('design-group')).forEach(n=>n.classList.add('legacy-credit-extras'));
  }
  ['v-plan','v-expense','v-analytics','v-settings'].forEach(groupHeadings);
  // Compress only the payouts section: advanced weights stay available in a closed disclosure.
@@ -2710,7 +2711,7 @@ async function testPushRegistration(){
 }
 (function(){'use strict';
 const THEMES={"Orchid Gold":{"bg":"#100f15","card":"#211e28","panel":"#282431","ink":"#f5f0e8","muted":"#bcb2c4","line":"#423a48","blue":"#e2c494","accentText":"#261c18","hero":"#19151e","input":"#19171e","selected":"#433746","red":"#ffa3ab"},"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY=SALDOZA_BUDGET_KEY;const fmt=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});const rub=n=>fmt.format(Number.isFinite(n)?n:0);const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
-let data;const defaults=()=>({showFamilySplit:false,showCreditTab:false,months:{},mortgageMonthly:0,ladder:{reserve:0,included:false},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:0,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
+let data;const defaults=()=>({welcomeSeen:false,showFamilySplit:false,showCreditTab:false,months:{},mortgageMonthly:0,ladder:{reserve:0,included:false},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:0,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
 try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();
 normalizeBudget(data);
 function normalizeBudget(data){
@@ -2977,6 +2978,7 @@ function payMonthlyBill(bill,due,today){
  const available=balance-(bill.category==='family'?wifeFunds(today):0);
  if(balance===null||Math.round(available*100)<occurrence.nextCents)return 'Недостаточно денег в выбранном конверте для оплаты.';
  const expense={id:'bill-'+bill.id+'-'+due,date:today,category:bill.category,amount,type:bill.name,note:bill.name,billId:bill.id,billDue:due};
+ if(bill.creditAccount){expense.creditAccount=bill.creditAccount;expense.principalCents=bill.principalCents;}
  data.expenses.push(expense);
  if(!save()){data.expenses.pop();return 'Платёж не записан.';}
  return '';
@@ -3014,7 +3016,7 @@ function showPaydayCountdown(actual){
  amount.className=familyDaily>5000?'daily-good':familyDaily>3000?'daily-medium':'daily-low';
  amount.textContent=rub(familyDaily);
  limit.append(amount,' в день');
- dateEl.textContent='На семейные покупки с обеих карт до '+next.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+ dateEl.textContent=(data.showFamilySplit===false?'На повседневные расходы до ':'На семейные покупки до ')+next.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
  if(budget.reserved)dateEl.textContent+=' · На платежи: '+rub(budget.reserved)+' ('+budget.names.join(', ')+')';
  note.textContent=rub(family)+' ÷ '+dayCount+' дн. = '+rub(familyDaily)+' в день · общий ориентир '+rub(dailyAmount)+'/день';
 
@@ -3735,6 +3737,7 @@ function setupMoneyCalendar(){
    });row.append(description,pay,remove);list.append(row);
   }
  }
+ $('homeCalendar').addEventListener('click',()=>$('moneyCalendarOpen').click());
  $('moneyCalendarOpen').addEventListener('click',()=>{
   const today=iso(new Date());$('calendarPurchaseDate').min=today;$('calendarPurchaseDate').value=today;render();if(!dialog.open)dialog.showModal();
  });
@@ -3809,17 +3812,15 @@ function normalizeSpokenAmount(text){
 // iOS workaround for WebKit bug 321436: synthesize a fixed prompt, then
 // start a fresh non-continuous session and let it end naturally.
 function setupIOSSmartVoice(dialog,input,form){
- const button=$('smartVoiceButton'),status=$('smartVoiceStatus'),keyboard=$('smartVoiceKeyboard');
+ const button=$('smartVoiceButton'),status=$('smartVoiceStatus');
  button.hidden=true;button.style.display='none';button.disabled=true;
- keyboard.textContent='🎙 Диктовка клавиатурой';
- const reset=()=>{status.textContent='На iPhone используй микрофон клавиатуры. Встроенная диктовка браузера пока нестабильна.';};
- keyboard.addEventListener('click',()=>{input.focus();status.textContent='Нажми микрофон на клавиатуре, продиктуй фразу и нажми «Распознать».';});
+ const reset=()=>{status.textContent='Коснись поля и нажми микрофон на клавиатуре iPhone. После диктовки нажми «Распознать».';};
  reset();return reset;
 }
 function setupSmartVoice(dialog,input,form){
  const ios=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
  if(ios)return setupIOSSmartVoice(dialog,input,form);
- const button=$('smartVoiceButton'),status=$('smartVoiceStatus'),keyboard=$('smartVoiceKeyboard');
+ const button=$('smartVoiceButton'),status=$('smartVoiceStatus');
  const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
  button.hidden=!Recognition;
  const fallback='Можно использовать микрофон клавиатуры или ввести текст.';
@@ -3886,7 +3887,6 @@ function setupSmartVoice(dialog,input,form){
   status.textContent=Recognition?'Речь распознаёт браузер или система; может потребоваться интернет.':('Распознавание браузером недоступно. '+fallback);
  };
  resetVoice();
- keyboard.addEventListener('click',()=>{cancel();status.textContent='Нажми микрофон на клавиатуре iPhone, продиктуй фразу и нажми «Распознать».';input.focus();});
  button.addEventListener('click',()=>{
   if(session){finish(session);return;}
   if(cooldown!==null||!Recognition||!dialog.open)return;
@@ -4211,16 +4211,8 @@ function renderEarlyAlerts(){
  if(!visible.length&&!urgent)visible.push(notes[0]);
  const rest=notes.filter(n=>n!==urgent&&!visible.includes(n)&&!visible.some(v=>v.kind===n.kind));
  host.innerHTML=(urgent?card(urgent):'')+(visible.length?'<p class="budget-alerts-help">'+(visible.length>1?'Можно выбрать один из этих шагов.':'Ближайший шаг')+'</p>'+visible.map(card).join(''):'')+(rest.length?'<details class="more-budget-tips"><summary>Ещё по бюджету · '+rest.length+'</summary>'+rest.map(card).join('')+'</details>':'');
- const count=$('budgetAlertsCount');count.textContent=String(visible.length+rest.length+(urgent?1:0));count.hidden=false;
 }
 
-const budgetAlertsDialog=$('budgetAlertsDialog');
-$('budgetAlertsOpen').addEventListener('click',()=>{
- renderEarlyAlerts();
- if(!budgetAlertsDialog.open)budgetAlertsDialog.showModal();
-});
-$('budgetAlertsClose').addEventListener('click',()=>budgetAlertsDialog.close());
-budgetAlertsDialog.addEventListener('click',e=>{if(e.target===budgetAlertsDialog)budgetAlertsDialog.close()});
 const historySortDirections={expenseList:'desc',incomeList:'desc',transferList:'desc',earlyHistory:'desc',envelopeHistoryList:'desc'};
 function sortHistoryRows(rows,key){
  const direction=historySortDirections[key]==='asc'?1:-1;
@@ -4250,6 +4242,12 @@ const nextCreditText=nextCreditPay?.month===month
  :'В среднем по оставшимся выплатам — '+rub(cc.per);
 const state=cc.debt===0?'Погашение обеспечено':cc.pays.length===0?'Срок погашения истёк или выплат больше нет':nextCreditText;const homeMortgage=upcomingMortgage(new Date());
 $('obligations').innerHTML=homeMortgage.plan<=0?(creditOutstanding()>0?'Кредитная карта · остаток долга '+rub(creditOutstanding()):'Обязательных платежей по кредитам пока нет.'):`<div class="payment-summary"><span>Ипотека · ${homeMortgage.due.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}</span><strong>${homeMortgage.remaining?'Осталось внести '+rub(homeMortgage.remaining):'Платёж внесён'}</strong><small>Внесено ${rub(homeMortgage.paid)} из ${rub(homeMortgage.plan)}</small><details><summary>Кредитная карта</summary><p>Ещё собрать ${rub(cc.debt)}. ${esc(state)}</p></details></div>`;
+const nextStatement=monthlyBillRows(iso(new Date())).find(r=>r.nextDue&&r.bill.creditAccount);
+if(nextStatement&&(!homeMortgage.remaining||nextStatement.nextDue<=iso(homeMortgage.due))){
+ $('obligations').textContent=nextStatement.bill.name+' · '+fromISO(nextStatement.nextDue).toLocaleDateString('ru-RU',{day:'numeric',month:'long'})+' · '+rub(nextStatement.nextCents/100);
+}else if(!homeMortgage.plan&&!creditOutstanding()&&(data.creditAccounts||[]).some(a=>a.baseCents>paidPrincipal(a.id))){
+ $('obligations').textContent='Уточни ближайший платёж по выписке во вкладке «Кредиты».';
+}
 const visiblePlanRows=displayAllocationRows(calc.rows);
 const receivedLabel=type=>data.receipts.some(r=>r.id===month+'-'+type)?' ✓':'';
 $('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс'+receivedLabel('advance')+'</th><th>Зарплата'+receivedLabel('salary')+'</th></tr></thead><tbody>'+visiblePlanRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
@@ -4984,8 +4982,9 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('envelopeHistory
 
 function renderMonthlyBills(){
  const today=iso(new Date()),rows=monthlyBillRows(today);
- $('monthlyBillCount').textContent=rows.length?' · '+rows.length:'';
- $('monthlyBillList').innerHTML=rows.map(({bill,nextDue,nextCents})=>{
+ const ordinary=rows.filter(row=>!row.bill.creditAccount);
+ $('monthlyBillCount').textContent=ordinary.length?' · '+ordinary.length:'';
+ $('monthlyBillList').innerHTML=ordinary.map(({bill,nextDue,nextCents})=>{
   if(!nextDue)return '<div class="monthly-bill-row"><b>'+esc(bill.name)+'</b><small>Рассрочка погашена</small></div>';
   const cat=cats.find(c=>c.id===bill.category);
   const due=fromISO(nextDue).toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'});
@@ -5028,6 +5027,71 @@ $('monthlyBillList').addEventListener('click',event=>{
 $('monthlyBillCategory').replaceChildren(...cats.map(c=>new Option(c.name,c.id)));
 $('monthlyBillDate').value=iso(new Date());
 
+let editingCredit=null;
+function paidPrincipal(id){
+ return data.expenses.filter(e=>e.creditAccount===id).reduce((s,e)=>s+(Number.isSafeInteger(e.principalCents)?e.principalCents:0),0);
+}
+function creditStatementFor(id){
+ return monthlyBillRows(iso(new Date())).find(row=>row.bill.creditAccount===id&&row.nextDue);
+}
+function renderCreditAccounts(){
+ const list=$('creditAccountList');list.replaceChildren();
+ for(const a of data.creditAccounts||[]){
+  const row=document.createElement('article'),title=document.createElement('strong'),info=document.createElement('p');
+  title.textContent=a.name;const next=creditStatementFor(a.id);
+  info.textContent=(a.kind==='loan'?'Потребительский кредит':'Кредитная карта')+' · Долг '+rub((a.baseCents-paidPrincipal(a.id))/100)+(next?' · Платёж '+rub(next.nextCents/100)+' до '+next.nextDue:' · Предстоящий платёж не указан');
+  const edit=document.createElement('button');edit.type='button';edit.className='btn light';edit.textContent='Уточнить по выписке';edit.onclick=()=>openCredit(a);
+  row.append(title,info,edit);
+  if(next){
+   const pay=document.createElement('button');pay.type='button';pay.className='btn';pay.textContent='Записать оплату';
+   pay.onclick=()=>{
+    if(!confirm('Записать оплату '+rub(next.nextCents/100)+' по «'+a.name+'» сегодня?'))return;
+    const err=payMonthlyBill(next.bill,next.nextDue,iso(new Date()));if(err){alert(err);return;}refreshBudgetView();
+   };
+   row.append(pay);
+  }
+  list.append(row);
+ }
+}
+function openCredit(account){
+ editingCredit=account?.id||null;$('creditForm').reset();
+ $('creditTitle').textContent=account?'Уточнить по выписке':'Добавить кредит или карту';
+ $('creditEnvelope').replaceChildren(...cats.map(c=>new Option(c.name,c.id)));
+ const next=account&&creditStatementFor(account.id);
+ $('creditStatement').open=!!next;
+ if(account){
+  $('creditName').value=account.name;$('creditKind').value=account.kind;
+  $('creditBalance').value=(account.baseCents-paidPrincipal(account.id))/100;
+ }
+ if(next){
+  $('creditDue').value=next.nextDue;$('creditDueAmount').value=next.nextCents/100;
+  $('creditInterest').value=(next.nextCents-next.bill.principalCents)/100;$('creditEnvelope').value=next.bill.category;
+ }
+ $('creditDialog').showModal();
+}
+$('creditAdd').onclick=()=>openCredit(null);
+$('creditCancel').onclick=()=>$('creditDialog').close();
+$('creditForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const name=$('creditName').value.trim(),balance=Math.round(Number($('creditBalance').value)*100);
+ const due=$('creditDue').value,amount=Math.round(Number($('creditDueAmount').value)*100),interest=Math.round(Number($('creditInterest').value)*100);
+ const hasStatement=!!(due||amount||interest);
+ if(!name||hasStatement&&(!due||amount<=0||interest>amount||amount-interest>balance)){
+  $('creditStatement').open=true;alert('Проверь название, дату и сумму. Часть платежа в погашение долга не может превышать остаток долга.');return;
+ }
+ const id=editingCredit||crypto.randomUUID(),kind=$('creditKind').value;
+ const account={id,kind,name,baseCents:balance+paidPrincipal(id)};
+ const oldAccounts=data.creditAccounts,oldBills=data.monthlyBills;
+ const bills=(oldBills||[]).filter(b=>b.creditAccount!==id);
+ if(hasStatement){
+  const bill={id:crypto.randomUUID(),creditAccount:id,name,category:$('creditEnvelope').value,cents:amount,totalCents:amount,firstDue:due,principalCents:amount-interest};
+  if(!validMonthlyBill(bill)){alert('Проверь платёж по выписке.');return;}bills.push(bill);
+ }
+ data.creditAccounts=[...(oldAccounts||[]).filter(a=>a.id!==id),account];data.monthlyBills=bills;
+ if(!save()){data.creditAccounts=oldAccounts;data.monthlyBills=oldBills;return;}
+ $('creditDialog').close();refreshBudgetView();
+});
+
 function syncLayoutChoices(){
  const family=data.showFamilySplit!==false,credit=data.showCreditTab!==false;
  $('showFamilySplit').checked=family;$('showCreditTab').checked=credit;
@@ -5042,13 +5106,40 @@ for(const field of ['showFamilySplit','showCreditTab']){
   syncLayoutChoices();
  });
 }
-function refreshBudgetView(){syncLayoutChoices();window.refreshSmartLearning?.();syncDailyBudgetSetting();renderMonthlyBills();syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();updateExpenseOptions()}
+function refreshBudgetView(){renderCreditAccounts();syncLayoutChoices();window.refreshSmartLearning?.();syncDailyBudgetSetting();renderMonthlyBills();syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();updateExpenseOptions()}
 function renderAll(){refreshBudgetView();return save()}
-$('firstBudget').addEventListener('click',()=>{
-  go('settings');const field=$('start-family');
-  for(let parent=field.parentElement;parent;parent=parent.parentElement)if(parent.tagName==='DETAILS')parent.open=true;
-  field.scrollIntoView({block:'center'});field.focus({preventScroll:true});
+function openWelcome(){
+ const existing=!!data.startBalances;
+ $('welcomeCash').parentElement.hidden=existing;$('welcomeCash').disabled=existing;
+ $('welcomeExtras').hidden=existing;$('welcomeExisting').hidden=!existing;
+ $('welcomeCash').value='';$('welcomeSalary').value=data.salaryConfig.base||'';
+ $('welcomeMode').value=data.salaryConfig.base?data.salaryConfig.mode:'net';
+ $('welcomeAdvance').value=data.payDays.advance;$('welcomePay').value=data.payDays.salary;
+ $('welcomeDaily').value=dailyBudgetValue(data.usualDailyBudget)??'';
+ $('welcomeCredits').checked=data.showCreditTab!==false;
+ $('welcomeDialog').showModal();
+}
+$('firstBudget').addEventListener('click',openWelcome);
+$('welcomeSettings').addEventListener('click',openWelcome);
+$('welcomeLater').addEventListener('click',()=>$('welcomeDialog').close());
+$('welcomeDialog').addEventListener('close',()=>{
+ if(!data.welcomeSeen){data.welcomeSeen=true;if(!save())delete data.welcomeSeen;}
 });
+$('welcomeForm').addEventListener('submit',e=>{
+ e.preventDefault();
+ const advance=Number($('welcomeAdvance').value),salary=Number($('welcomePay').value);
+ const previous=data;
+ data={...data,usualDailyBudget:dailyBudgetValue($('welcomeDaily').value),welcomeSeen:true,showCreditTab:$('welcomeCredits').checked,payDays:{advance,salary},
+  salaryConfig:{...data.salaryConfig,base:Number($('welcomeSalary').value),mode:$('welcomeMode').value}};
+ if(!data.startBalances){
+  const balances={family:Number($('welcomeCash').value)};
+  for(const key of ['utilities','savings','other'])balances[key]=Number($('welcome'+key).value);
+  data.startBalances={date:iso(new Date()),balances,mortgage:Number($('welcomemortgage').value)};
+ }
+ if(!save()){data=previous;return;}
+ refreshBudgetView();$('welcomeDialog').close();go('home');
+});
+
 function go(page){for(const tab of document.querySelectorAll('.tab[data-go]')){if(tab.dataset.go===page)tab.setAttribute('aria-current','page');else tab.removeAttribute('aria-current');}document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));document.querySelector('.app').classList.toggle('home-active',page==='home');const main=document.querySelector('.main');if(main)main.scrollTop=0;}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
 
@@ -5356,6 +5447,20 @@ function readBackup(text){
     new Set(budget.monthlyBills.map(b=>b.id)).size!==budget.monthlyBills.length))invalid();
  if(budget.incomeSchedules!==undefined&&(!Array.isArray(budget.incomeSchedules)||!budget.incomeSchedules.every(validIncomeSchedule)||new Set(budget.incomeSchedules.map(i=>i.id)).size!==budget.incomeSchedules.length))invalid();
  if(budget.calendarPurchases!==undefined&&(!Array.isArray(budget.calendarPurchases)||!budget.calendarPurchases.every(calendarValidPlan)||new Set(budget.calendarPurchases.map(p=>p.id)).size!==budget.calendarPurchases.length))invalid();
+ const creditExpenses=budget.expenses.filter(e=>e.creditAccount!==undefined);
+ if(creditExpenses.length||(budget.monthlyBills||[]).some(b=>b.creditAccount!==undefined)||budget.creditAccounts!==undefined){
+  if(!Array.isArray(budget.creditAccounts)||budget.creditAccounts.some(a=>!a||typeof a.id!=='string'||!a.id||typeof a.name!=='string'||!a.name.trim()||a.name.length>80||!['card','loan'].includes(a.kind)||!Number.isSafeInteger(a.baseCents)||a.baseCents<0))invalid();
+  const ids=new Set(budget.creditAccounts.map(a=>a.id));
+  if(ids.size!==budget.creditAccounts.length)invalid();
+  const paid=new Map();
+  for(const entry of creditExpenses){
+   if(!ids.has(entry.creditAccount)||!Number.isSafeInteger(entry.principalCents)||entry.principalCents<0||entry.principalCents>Math.round(Number(entry.amount)*100))invalid();
+   paid.set(entry.creditAccount,(paid.get(entry.creditAccount)||0)+entry.principalCents);
+  }
+  if(budget.creditAccounts.some(a=>(paid.get(a.id)||0)>a.baseCents))invalid();
+  const linked=(budget.monthlyBills||[]).filter(b=>b.creditAccount);
+  if(new Set(linked.map(b=>b.creditAccount)).size!==linked.length||linked.some(b=>!ids.has(b.creditAccount)||b.totalCents!==b.cents||!Number.isSafeInteger(b.principalCents)||b.principalCents<0||b.principalCents>b.cents))invalid();
+ }
  normalizeBudget(budget);
  return budget;
 }
@@ -5380,7 +5485,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.124';
+const APP_VERSION='1.5.125';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -5797,6 +5902,7 @@ $('ladderTransferForm').addEventListener('submit',event=>{
 });
 
 setupCompactPanels();initTheme();renderAll();
+if(!data.startBalances&&data.welcomeSeen===false&&!data.expenses.length&&!(data.receipts||[]).length&&!data.salaryConfig.base&&!data.debt&&!data.mortgageMonthly)openWelcome();
 const totalTile=$('heroTotal')?.parentElement;
 if(totalTile&&'ResizeObserver' in window)new ResizeObserver(fitTotalMoneyTile).observe(totalTile);
 window.addEventListener('resize',fitTotalMoneyTile);
@@ -6471,7 +6577,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))installTes
 </style>
 <dialog id="adviceDialog" aria-labelledby="advisorTitle"><div class="advisor-shell">
 <div class="advisor-head"><h2 id="advisorTitle">🤖 Финансовый советник</h2><button class="btn light" id="advisorClose" type="button" aria-label="Закрыть">✕</button></div>
-<p class="advisor-desc">Подготовим обезличенную финансовую сводку для ChatGPT. Советник ищет способы увеличивать капитал: экономия, вклады, ипотека, кредитка. Никаких платных API и автоматической отправки данных.</p>
+<details class="advisor-tips" open><summary>Что сейчас важно</summary><p class="foot" id="adviceOpening"></p><div id="budgetEarlyAlerts" class="budget-early-alerts"></div></details><p class="advisor-desc">Подготовим обезличенную финансовую сводку для ChatGPT. Советник ищет способы увеличивать капитал: экономия, вклады, ипотека, кредитка. Никаких платных API и автоматической отправки данных.</p>
 <label class="field"><span>Формат ответа ChatGPT</span><select id="advisorResponseMode" aria-label="Формат финансового анализа"><option value="short" selected>⚡ Только важное</option><option value="full">📊 Развёрнутый анализ</option></select></label>
 <label class="utilities-fixed-switch"><input type="checkbox" id="advisorDetailed"> Включить разбивку расходов по видам</label>
 <textarea id="adviceText" readonly aria-label="Отчёт для финансового анализа"></textarea>
@@ -6529,7 +6635,7 @@ function setupAdvisor(){
    'ЗАДАЧА ДЛЯ CHATGPT:',
    'Выступи финансовым советником семьи. Цель — безопасно увеличивать чистый капитал.',
    'Не предлагай акции, криптовалюту, спекуляции и рискованный бизнес.',
-   'Неприкосновенная подушка — 500 000 ₽; её фактический остаток может быть неизвестен.',
+   reserve>0?'Целевой резерв по настройкам — '+ru(reserve)+'. Фактический остаток может быть неизвестен.':'Целевой резерв не указан.',
    'Не выдумывай данные. Различай факты, планы, гипотезы, проценты и доходы. Переводы между счетами — не доход.',
    'Начни с одного подтверждённого достижения в рублях, если оно есть. Предложи один посильный шаг до следующей выплаты. Учитывай расходы семьи. Не обещай экономию без подтверждения.',
    'Сначала составь конкретный план до ближайшей выплаты: питание семьи, лекарства и корм домашних животных, затем обязательные платежи с учётом их сроков. Если остаток неизвестен, запроси сверку; не выдумывай суммы и не считай прогноз дохода доступными деньгами. Не рекомендуй досрочные платежи или пополнение накоплений, если это оставит семью без необходимого. Защищённую подушку не расходуй без явного решения пользователя.',
@@ -6573,6 +6679,10 @@ function setupAdvisor(){
    'СОСТОЯНИЕ:',
    'Ипотека к '+mortgage.due.toLocaleDateString('ru-RU')+' — платёж '+ru(mortgage.plan)+', оплачено '+ru(mortgage.paid)+', к оплате '+ru(mortgage.remaining)+(mortgage.reserve===null?' (резерв неизвестен)':', в резерве '+ru(mortgage.reserve)+', ещё собрать '+ru(mortgage.gap)),
    'Кредитная карта — учтённый долг: '+ru(debt)+'; отдельно отложено: '+ru(reserved)+'; срок: '+(d.deadline||'не указан'),
+   ...(d.creditAccounts||[]).map((a,i)=>{
+    const paid=(d.expenses||[]).filter(e=>e.creditAccount===a.id&&e.date<=today).reduce((v,e)=>v+(e.principalCents||0),0);
+    return (a.kind==='loan'?'Потребительский кредит':'Дополнительная карта')+' №'+(i+1)+' — остаток основного долга '+ru((a.baseCents-paid)/100);
+   }),
    'Подушка безопасности — значение в настройках: '+ru(reserve)+' (может быть не равно остатку на счёте)',
    'Накопления: точный свободный остаток не выводится, если он неотличим от бюджетных переводов.',
    'Текущий месяц: '+month,
@@ -6801,6 +6911,11 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .app.hide-credit-tab>.nav{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 #layoutChoices summary{cursor:pointer;font-weight:650}
 #layoutChoices input[type=checkbox]{width:auto;min-height:auto;accent-color:var(--blue)}
+#welcomeDialog [hidden]{display:none!important}
+#welcomeDialog,#creditDialog{width:min(94vw,440px);max-height:88dvh;overflow:auto}
+#welcomeDialog form,#creditDialog form{display:grid;gap:12px}
+#creditAccountList article{margin:8px 0;padding:10px 0;border-top:1px solid var(--line)}
+#homeCalendar{white-space:normal;min-height:40px}
 #firstBudget[hidden],#planAfterPayday[hidden],#smartVoiceButton[hidden]{display:none!important}
  #firstBudget{min-height:44px}
  #scenarioPanel input{font-size:16px}

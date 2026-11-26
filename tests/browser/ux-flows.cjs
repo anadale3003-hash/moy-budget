@@ -6,11 +6,16 @@ for(const [width,height,file] of [[320,690,'preview.html'],[390,844,'index.html'
  await p.clock.setFixedTime(new Date('2026-11-25T10:00:00+03:00'));
  await p.goto(url+'/'+file);const $=s=>p.locator(s),click=s=>$(s).click(),fill=(s,v)=>$(s).fill(v);
  const data=()=>p.evaluate(()=>JSON.parse(localStorage.getItem('saldoza-test-budget-v1')));
+ await click('#welcomeLater');
  assert.ok(await $('.family-split').isHidden());assert.ok(await $('button.tab[data-go="card"]').isHidden());
  await click('button.tab[data-go="settings"]');await click('#layoutChoices summary');
  await $('#showCreditTab').check();await $('#showFamilySplit').check();
  await p.reload();assert.ok(await $('button.tab[data-go="card"]').isVisible());assert.ok(await $('.family-split').isVisible());
- await click('#firstBudget');await fill('#start-family','15000');await click('#saveStart');assert.equal(await $('#v-home').evaluate(e=>e.classList.contains('active')),true);
+ await click('#firstBudget');await fill('#welcomeCash','15000');await fill('#welcomeDaily','500');await click('#welcomeForm button[type=submit]');assert.equal(await $('#v-home').evaluate(e=>e.classList.contains('active')),true);
+ assert.deepEqual((await $('button.tab[data-go]').evaluateAll(nodes=>nodes.map(el=>el.dataset.go))).slice(0,2),['home','expense']);
+ await click('#homeCalendar');assert.ok(await $('#moneyCalendarDialog').isVisible());await click('#moneyCalendarClose');
+ await click('button.tab[data-go="analytics"]');await click('#advisorOpen');assert.ok(await $('#adviceOpening').isVisible());await click('#advisorClose');
+ await click('button.tab[data-go="home"]');
  await click('#purchaseCheckOpen');await fill('#purchaseName','Ботинки');await fill('#purchasePrice','4000');await fill('#purchaseDaily','1500');
  await click('#planAfterPayday');assert.equal(await $('#calendarPurchaseName').inputValue(),'Ботинки');assert.equal(await $('#calendarPurchaseAmount').inputValue(),'4000');assert.equal(await $('#calendarPurchaseDate').inputValue(),'2026-12-02');
  await click('#calendarPurchaseForm button[type=submit]');assert.equal((await data()).expenses.length,0);
@@ -26,6 +31,29 @@ for(const [width,height,file] of [[320,690,'preview.html'],[390,844,'index.html'
  await click('button.tab[data-go="expense"]');
  for(let i=0;i<2;i++){await click('[data-ops-action="expense"]');if(width<500)assert.ok(await $('#smartVoiceButton').isHidden());await fill('#smartOperationText','продукты 500');await click('#smartOperationForm button[type=submit]');assert.ok(await $('#smartOperationContinue').isEnabled());await click('#smartOperationClose')}
  await p.reload();assert.equal((await data()).expenses.length,1);assert.deepEqual(errors,[]);
+ await click('button.tab[data-go="card"]');
+ for(const [kind,name] of [['loan','Кредит на ремонт'],['card','Запасная карта'],['card','Другая карта']]){
+  await click('#creditAdd');await $('#creditKind').selectOption(kind);await fill('#creditName',name);await fill('#creditBalance','7000');
+  if(kind==='loan'){await click('#creditStatement summary');await fill('#creditDue','2026-11-28');await fill('#creditDueAmount','1000');await fill('#creditInterest','100');}
+  await click('#creditForm button[type=submit]');
+ }
+ assert.equal((await data()).creditAccounts.length,3);
+ await $('#creditAccountList').getByRole('button',{name:'Записать оплату'}).click();
+ const saved=await data();assert.equal(saved.expenses.at(-1).principalCents,90000);assert.equal(saved.expenses.at(-1).amount,1000);
+ assert.match(await $('#creditAccountList').innerText(),/6\s?100/);
+ await click('button.tab[data-go="settings"]');await click('#welcomeSettings');
+ assert.ok(await $('#welcomeCash').isDisabled());assert.equal(await $('#welcomeDaily').inputValue(),'500');await click('#welcomeLater');
+ await click('button.tab[data-go="analytics"]');await click('#advisorOpen');assert.match(await $('#adviceText').inputValue(),/Потребительский кредит №1/);await click('#advisorClose');
+ await p.reload();assert.ok(await $('#welcomeDialog').isHidden());
+ assert.equal((await data()).creditAccounts.length,3);assert.deepEqual(errors,[]);
+ // Simulate an existing profile from before the onboarding update.
+ const legacy=await data();delete legacy.welcomeSeen;delete legacy.creditAccounts;
+ legacy.monthlyBills=[];legacy.expenses=legacy.expenses.filter(e=>!e.creditAccount);legacy.debt=18000;
+ await p.evaluate(profile=>localStorage.setItem('saldoza-test-budget-v1',JSON.stringify(profile)),legacy);
+ await p.reload();assert.ok(await $('#welcomeDialog').isHidden());
+ await click('button.tab[data-go="settings"]');await click('#welcomeSettings');
+ await fill('#welcomeSalary','75000');await click('#welcomeForm button[type=submit]');
+ assert.deepEqual((await data()).startBalances,legacy.startBalances);assert.equal((await data()).debt,18000);
  console.log('PASS',width,file);await ctx.close();
 }
 }finally{await close()}})().catch(e=>{console.error(e);process.exitCode=1});
