@@ -5,5 +5,9 @@
   "server": {
     "hostname": "localhost",
     "androidScheme": "https"
+  },
+  "android": {
+    "adjustMarginsForEdgeToEdge": "auto",
+    "backgroundColor": "#101e35"
   }
 }
