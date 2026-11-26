@@ -5685,7 +5685,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.128';
+const APP_VERSION='1.5.129';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -7164,7 +7164,7 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 .app .main #v-card.active #creditAccountsPanel{padding:0!important;background:none!important;border:0!important;margin:0 0 8px!important}
 #creditAccountsPanel h3{margin:0;font-size:18px}
 .app .main #v-card.active>.credit-payments-group>h2:empty,.app .main #v-card.active>.credit-payments-group>.section-heading:has(h2:empty){display:none!important}
-.app .main #v-card.active #creditAdd{display:flex!important;align-items:center;justify-content:center;width:100%;height:56px;min-height:56px;background:var(--card);border:1px dashed var(--line);border-radius:16px;color:var(--blue);font:400 38px/1 system-ui;cursor:pointer}
+.app .main #v-card.active #creditAdd{display:flex!important;align-items:center;justify-content:center;align-self:center!important;margin:8px auto!important;width:76px!important;height:76px!important;min-height:76px!important;min-width:76px!important;max-width:76px!important;padding:0!important;background:transparent!important;border:1px solid var(--blue)!important;border-radius:50%!important;color:var(--blue)!important;font:300 56px/1 system-ui!important;box-shadow:none!important;cursor:pointer;box-sizing:border-box}
 #legacyCreditEditDialog{width:min(94vw,440px);max-height:88dvh;overflow:auto}
 #legacyCreditEditDialog [hidden]{display:none!important}
 #legacyCreditEditForm{display:grid;gap:12px}
