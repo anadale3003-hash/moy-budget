@@ -5718,7 +5718,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.143';
+const APP_VERSION='1.5.144';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -7254,6 +7254,8 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 
 #v-settings #layoutChoices,#v-settings #dailyBudgetSettingsCard,#v-settings #salarySettingsCard,#v-settings #duplicateStartSettings{display:none!important}
 
-.app .main #v-settings.active :is(.design-group,details):has(:is(#dailyBudgetSettingsCard,#salarySettingsCard,#duplicateStartSettings,#layoutChoices)){display:none!important}
+#v-settings details:has(> :is(#dailyBudgetSettingsCard,#salarySettingsCard,#duplicateStartSettings)),#v-settings .design-group:has(:is(#dailyBudgetSettingsCard,#salarySettingsCard,#duplicateStartSettings)):not(:has(#welcomeSettings)){display:none!important}
+#v-settings .design-group:has(#welcomeSettings){display:block!important}
+#v-settings #welcomeSettings{display:block!important}
 .app .main #v-settings.active #welcomeSettings{min-height:66px!important;padding:16px!important;font-size:19px!important;font-weight:700!important;width:100%!important;border-radius:18px!important}
 </style></body></html>
