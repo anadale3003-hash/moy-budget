@@ -2251,7 +2251,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </section>
 <section class="view" id="v-plan">
 <div class="month-strip" aria-label="Выбранный месяц"><div class="month-buttons"><button id="monthPrev" aria-label="Предыдущий месяц">‹</button><span id="monthName" style="font-size:13px;font-weight:700;min-width:99px;text-align:center"></span><button id="monthNext" aria-label="Следующий месяц">›</button></div></div>
-<div class="section-heading"><h2>Аванс и зарплата</h2></div><div class="card payment-inputs">
+<div class="section-heading"><h2 id="payHeading">Аванс и зарплата</h2></div><div class="card payment-inputs">
 <div class="payment-grid">
 <div class="payment-receipt"><input id="advance" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💵</span> Аванс</div><button class="btn full receipt-button" id="receiveAdvance" type="button">Подтвердить аванс</button><div class="receipt-note" id="advanceReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoAdvance" type="button">Отменить зачисление</button></div>
 <div class="payment-receipt"><input id="salary" type="number" hidden aria-hidden="true" tabindex="-1"><div class="receipt-action-label"><span class="payout-small-icon" aria-hidden="true">💰</span> Зарплата</div><button class="btn full receipt-button secondary" id="receiveSalary" type="button">Подтвердить зарплату</button><div class="receipt-note" id="salaryReceiptNote" aria-live="polite"></div><button class="receipt-undo" id="undoSalary" type="button">↶ Отменить зачисление</button></div>
@@ -2296,7 +2296,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
     </div>
    <div id="creditAccountList"></div>
   </div>
-  <div id="regularPaymentHistory"></div><button type="button" id="creditAdd" class="credit-add-plus" aria-label="Добавить кредит или карту" title="Добавить кредит или карту"><svg aria-hidden="true" width="36" height="36" viewBox="0 0 36 36" fill="none" style="display:block;flex:none"><path d="M18 5V31M5 18H31" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></button>
+  <div id="regularPaymentHistory"></div><p class="foot" id="creditEmpty">Есть кредиты или ипотека? Добавьте их, чтобы учитывать платежи в бюджете</p><button type="button" id="creditAdd" class="credit-add-plus" aria-label="Добавить кредит или карту" title="Добавить кредит или карту"><svg aria-hidden="true" width="36" height="36" viewBox="0 0 36 36" fill="none" style="display:block;flex:none"><path d="M18 5V31M5 18H31" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg></button>
   <p class="foot">Ипотека и кредитка уже исключены из доступного бюджета. Отмечай оплату только после реального списания банком. Повторно из бюджета деньги не вычитаются.</p>
 </div>
 <div class="section-heading"><h2>Кредитная карта</h2><span class="pill">Без просрочки</span></div><div class="card"><label class="field"><span>Общий долг, ₽</span><input id="debt" type="number" min="0" step="100" inputmode="decimal"></label><label class="field"><span>Уже отложено на погашение, ₽</span><input id="reserved" type="number" min="0" step="100" inputmode="decimal"></label><label class="field"><span>Погасить не позднее</span><input id="deadline" type="date"></label><div class="divider"></div><div class="label">Ещё нужно накопить</div><div class="metric" id="debtRemaining"></div><div class="lineitem"><span>Оставшихся выплат до срока</span><span id="payCount"></span></div><div class="lineitem"><span>Откладывать с каждой выплаты</span><span id="perPay"></span></div><div id="debtAlert"></div></div><div class="card"><b>График погашения</b><div id="debtSchedule"></div><div class="foot">Расчёт без процентов, комиссий и новых покупок. Проверяй точную дату окончания льготного периода в банке. Досрочные погашения учитываются отдельно от накопленного резерва.</div></div>
@@ -2345,7 +2345,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div id="familyActions" class="family-actions" role="group" aria-label="Деньги у жены">
 <button type="button" class="btn secondary" id="wifeTransferOpen" hidden style="display:none!important">Перевод жене</button>
 <button type="button" class="btn secondary" id="supportOpen" hidden style="display:none!important">Доход жены</button>
-<button type="button" class="btn secondary" id="wifeCheckOpen">Сверить остаток у жены</button>
+<button type="button" class="btn secondary" id="wifeCheckOpen">Уточнить остаток у жены</button>
 </div>
 <div class="card" id="wifeTransferCard" hidden style="display:none!important"><form id="wifeTransferForm">
 <label class="field"><span>Откуда переводишь</span><select id="wifeTransferSource" required>
@@ -2383,7 +2383,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <label class="field"><span>Сумма, ₽</span><input id="incomeAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 1500"></label>
 <label class="field"><span>Дата поступления</span><input id="incomeDate" type="date" required></label>
 </div>
-<label class="field"><span>Источник дохода</span><select id="incomeSource"><option>Проценты по вкладу</option><option>Премия</option><option>Кэшбэк</option><option>Возврат покупки</option><option>Подработка</option><option>Подарок</option><option>Доход жены</option><option>Другое</option></select></label>
+<label class="field"><span>Источник дохода</span><select id="incomeSource"><option>Проценты по вкладу</option><option>Премия</option><option>Кэшбэк</option><option>Возврат покупки</option><option>Подработка</option><option>Подарок</option><option value="Доход жены">Доход жены</option><option>Другое</option></select></label>
 <label class="field"><span>Куда зачислить</span><select id="incomeDestination" required>
 <option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option>
 <option value="savings">Накопления</option><option value="reserve">🛡 Подушка безопасности</option><option value="other">Доступный бюджет (Остальное)</option>
@@ -2455,7 +2455,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <div class="foot">Для расчёта используется пятидневная рабочая неделя и календарь РФ на 2026–2027 годы. При другом графике, отпуске, премии или повышенной ставке НДФЛ скорректируй расчёт вручную. Прогноз не является гарантированной выплатой.</div>
 <div class="two"><label class="field"><span>Рабочих дней в месяце (необязательно)</span><input id="manualDaysTotal" type="number" min="1" max="31" step="1" placeholder="Автоматически"></label><label class="field"><span>Из них с 1 по 15 (необязательно)</span><input id="manualDaysFirst" type="number" min="0" max="15" step="1" placeholder="Автоматически"></label></div>
 <div id="salaryCalendarInfo" class="hint"></div></div>
-<div class="card" id="duplicateStartSettings"><b>Старт с текущих остатков</b><p class="foot">Установи реальные деньги на счетах. Старые покупки до даты старта не будут вычтены ещё раз. Плановые зарплаты не считаются полученными.</p><label class="field"><span>Дата начала учёта</span><input id="startDate" type="date"></label><div class="two"><label class="field"><span>Семейные нужды, ₽</span><input id="start-family" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Коммуналка, ₽</span><input id="start-utilities" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Накопления, ₽</span><input id="start-savings" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Остальное, ₽</span><input id="start-other" type="number" min="0" inputmode="decimal"></label></div><label class="field"><span>Уже отложено на следующую ипотеку, ₽</span><input id="startMortgageFund" type="number" min="0" inputmode="decimal"></label><label class="field"><span>За какой месяц ипотека уже оплачена</span><input id="paidMortgageMonth" type="month"></label><button class="btn full" id="saveStart" type="button">Сохранить стартовые остатки</button><div id="startStatus" class="foot"></div></div>
+<div class="card" id="duplicateStartSettings"><b>Старт с текущих остатков</b><p class="foot">Установи реальные деньги на счетах. Старые покупки до даты старта не будут вычтены ещё раз. Плановые зарплаты не считаются полученными.</p><label class="field"><span>Дата начала учёта</span><input id="startDate" type="date"></label><div class="two"><label class="field"><span>Семейные нужды, ₽</span><input id="start-family" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Коммуналка, ₽</span><input id="start-utilities" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Накопления, ₽</span><input id="start-savings" type="number" min="0" inputmode="decimal"></label><label class="field"><span>Остальное, ₽</span><input id="start-other" type="number" min="0" inputmode="decimal"></label></div><button class="btn full" id="saveStart" type="button">Сохранить стартовые остатки</button><div id="startStatus" class="foot"></div></div>
 <div class="card"><b>Обновления приложения</b><p class="foot">Текущая версия: <strong id="appVersion"></strong>. Для проверки нужен интернет и установленная версия на HTTPS-сайте.</p><button class="btn full" id="checkUpdate" type="button">Проверить обновления</button><div id="updateStatus" class="foot" role="status" aria-live="polite">Данные не удаляются при обычном обновлении.</div><button class="btn secondary full" id="applyUpdate" type="button" style="display:none;margin-top:10px">Установить обновление</button></div>
 <div class="card"><b>Резервная копия</b><p class="foot">Сохрани данные перед обновлением или переносом на другой телефон. Не очищай данные сайта без резервной копии.</p><div class="actions"><button class="btn secondary" id="exportData" type="button">Сохранить копию</button><button class="btn light" id="importClick" type="button">Восстановить</button></div><input type="file" id="importData" accept="application/json,.json" style="display:none"></div>
 <div class="card"><b>Установка на iPhone</b><p class="foot">Открой опубликованную HTTPS-ссылку в Safari → Поделиться → На экран «Домой». Приложение будет открываться с иконки.</p></div>
@@ -2586,7 +2586,22 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 </div>
 <div class="envelope-history-overlay" id="envelopeHistoryOverlay" role="presentation" hidden><section class="envelope-history-sheet" role="dialog" aria-modal="true" aria-labelledby="envelopeHistoryTitle"><div class="envelope-history-top"><h2 id="envelopeHistoryTitle">История конверта</h2><button type="button" class="envelope-history-close" id="envelopeHistoryClose" aria-label="Закрыть историю">×</button></div><div class="envelope-history-summary" id="envelopeHistorySummary"></div><div class="history-sort-control"><label for="envelopeHistorySort">По дате</label><select id="envelopeHistorySort" data-history-sort="envelopeHistoryList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="envelope-history-list" id="envelopeHistoryList"></div></section></div>
 
-<dialog id="welcomeDialog" class="budget-alerts-dialog" aria-labelledby="welcomeTitle"><form id="welcomeForm" class="budget-alerts-shell"><h2 id="welcomeTitle" tabindex="-1" autofocus>Настроим твой бюджет</h2><div class="welcome-scroll"><div class="welcome-group-title">💰 Стартовые остатки</div><p class="foot">Укажи, сколько денег у тебя сейчас на картах и наличными для повседневных покупок. Не включай накопления и деньги, отложенные на обязательные платежи. Например, 25 000 ₽.</p><label class="field"><span>Доступные деньги на текущие расходы, ₽</span><input id="welcomeCash" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><div id="welcomeExtras" class="welcome-start-fields"><label class="field"><span>С какого дня ведём бюджет</span><input id="welcomeDate" type="date" required></label><input id="welcomePaid" type="hidden"><label class="field"><span>Отложено на коммунальные услуги, ₽</span><input id="welcomeutilities" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Деньги в накоплениях, ₽</span><input id="welcomesavings" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Другие свободные деньги, ₽</span><input id="welcomeother" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><input id="welcomemortgage" type="hidden"></div><div id="welcomeExisting" class="foot" hidden>Начальные суммы уже сохранены. <button id="welcomeEditStart" type="button" class="btn light">Изменить стартовые остатки</button></div><button type="button" class="btn light" id="welcomeCancelStart" hidden>Не менять начальные суммы</button><div class="welcome-group-title">💵 Мой доход</div><label class="field"><span>Зарплата за месяц, ₽ (если есть)</span><input id="welcomeSalary" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Сумма зарплаты</span><select id="welcomeMode"><option value="net">На руки</option><option value="gross">До налога</option></select></label><div class="two"><label class="field"><span>Число аванса</span><input id="welcomeAdvance" type="number" min="1" max="31" step="1" inputmode="numeric" required></label><label class="field"><span>Число зарплаты</span><input id="welcomePay" type="number" min="1" max="31" step="1" inputmode="numeric" required></label></div><details id="welcomeWork"><summary>Дополнительно: рабочие дни и налог</summary><p class="foot" id="welcomeWorkMonth"></p><label class="field"><span>Рабочих дней за месяц</span><input id="welcomeWorkTotal" type="number" min="1" max="31" step="1" placeholder="По календарю"></label><label class="field"><span>Из них с 1 по 15 число</span><input id="welcomeWorkFirst" type="number" min="0" max="15" step="1" placeholder="По календарю"></label><label class="field"><span>Налог с оклада до вычета, %</span><input id="welcomeTax" type="number" min="0" max="50" step="0.5" required></label></details><div class="welcome-group-title">🛒 Расходы семьи</div><label class="field"><span>Сколько обычно тратим в день, ₽ (необязательно)</span><input id="welcomeDaily" type="number" step="0.01" min="0.01" max="999999999" inputmode="decimal"></label><div class="welcome-group-title">📱 Что показывать в приложении</div><label class="welcome-toggle"><input id="welcomeFamily" type="checkbox"> Показать на главной «У меня» и «У жены»</label><label class="welcome-toggle"><input id="welcomeCredits" type="checkbox"> Показать вкладку «Кредиты»</label><p class="foot">Платежи по кредитам и дополнительные доходы можно добавить отдельно.</p></div><div class="actions"><button type="submit" class="btn">Сохранить</button><button type="button" class="btn light" id="welcomeLater">Позже</button></div></form></dialog><dialog id="legacyCreditEditDialog" class="budget-alerts-dialog" aria-labelledby="legacyCreditEditTitle"><form class="budget-alerts-shell" id="legacyCreditEditForm"><h2 id="legacyCreditEditTitle" tabindex="-1" autofocus style="outline:none">Изменить</h2><label class="field"><span>Иконка</span><select id="legacyCreditIcon"><option value="🏠">🏠</option><option value="💳">💳</option><option value="🚗">🚗</option><option value="💰">💰</option><option value="🏦">🏦</option><option value="🛒">🛒</option><option value="📱">📱</option><option value="🎓">🎓</option><option value="🛠️">🛠️</option><option value="✈️">✈️</option><option value="💻">💻</option><option value="💵">💵</option></select></label><div id="legacyMortgageFields"><label class="field"><span>Ежемесячный платёж, ₽</span><input id="legacyMortgageAmount" type="number" min="0.01" max="999999999" step="0.01" inputmode="decimal"></label><label class="field"><span>Остаток основного долга по данным банка, ₽ (необязательно)</span><input id="legacyMortgageBalance" type="number" min="0" max="999999999" step="0.01" inputmode="decimal"></label><p class="foot">Остаток долга по выписке справочный: ежемесячная оплата включает проценты. Суммы уже подтверждённых выплат не меняются.</p></div><div id="legacyCardFields"><label class="field"><span>Остаток долга по кредитке, ₽</span><input id="legacyCardBalance" type="number" min="0" max="999999999" step="0.01" inputmode="decimal"></label><label class="field"><span>Погасить не позднее</span><input id="legacyCardDeadline" type="date"></label></div><p class="foot" id="legacyCreditEditError" role="alert"></p><button type="submit" class="btn full">Сохранить</button><button type="button" id="legacyCreditEditCancel" class="btn full light">Отмена</button></form></dialog><dialog id="creditActionsDialog" class="budget-alerts-dialog" aria-labelledby="creditActionsTitle"><form class="budget-alerts-shell" id="creditActionsForm"><h2 id="creditActionsTitle">Кредит</h2><p class="foot" id="creditActionsInfo"></p><div id="creditActionsFields"><label class="field"><span>Фактически оплачено сегодня, ₽</span><input type="number" id="creditActualAmount" min="0.01" step="0.01" inputmode="decimal" required></label><label class="field"><span>Из них основной долг по выписке, ₽</span><input type="number" id="creditActualPrincipal" min="0" step="0.01" inputmode="decimal" required></label><p class="foot">Остальное — проценты и комиссии. Проверь суммы в банке перед сохранением.</p></div><p class="foot" role="alert" id="creditActionsError"></p><button type="submit" class="btn full" id="creditActionsSubmit">Отметить оплату</button><button type="button" class="btn full light" id="creditActionsEdit">Уточнить по выписке</button><button type="button" class="btn full secondary" id="creditActionsCloseAccount">Закрыть обязательство</button><button type="button" class="btn full light" id="creditActionsCancel">Отмена</button></form></dialog><dialog id="creditDialog" class="budget-alerts-dialog" aria-labelledby="creditTitle"><form class="budget-alerts-shell" id="creditForm"><h2 id="creditTitle" tabindex="-1" autofocus style="outline:none">Кредит или карта</h2><label class="field"><span>Тип</span><select id="creditKind"><option value="loan">Потребительский кредит</option><option value="card">Кредитная карта</option><option value="mortgage">Ипотека</option></select></label><label class="field"><span>Название</span><input id="creditName" maxlength="80" placeholder="Например, карта банка" required></label><label class="field"><span>Иконка</span><select id="creditIcon"><option value="🏠">🏠</option><option value="💳">💳</option><option value="🚗">🚗</option><option value="💰">💰</option><option value="🏦">🏦</option><option value="🛒">🛒</option><option value="📱">📱</option><option value="🎓">🎓</option><option value="🛠️">🛠️</option><option value="✈️">✈️</option><option value="💻">💻</option><option value="💵">💵</option></select></label><label class="field" id="creditGraceField" hidden><span>Дата окончания льготного периода</span><input id="creditGrace" type="date" min="1900-01-01" max="9999-12-31"></label><label class="field"><span>Остаток основного долга по данным банка, ₽</span><input id="creditBalance" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><details id="creditStatement"><summary>Ближайший платёж по выписке</summary><p class="foot">Введи сумму и дату из банка. Проценты и комиссии входят в платёж, но не уменьшают основной долг.</p><label class="field"><span>Дата платежа</span><input id="creditDue" type="date" min="1900-01-01" max="9999-12-31"></label><label class="field"><span>Полный платёж, ₽</span><input id="creditDueAmount" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>В том числе проценты и комиссии, ₽</span><input id="creditInterest" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><p class="foot">Резерв автоматически распределяется между двумя ближайшими выплатами до срока; если доступна только одна — с неё.</p></details><div class="actions"><button class="btn" type="submit">Сохранить</button><button type="button" class="btn light" id="creditCancel">Отмена</button></div></form></dialog><dialog id="smartOperationDialog" class="budget-alerts-dialog" aria-labelledby="smartOperationTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="smartOperationTitle">Умный ввод</h2><button type="button" class="btn light" id="smartOperationClose" aria-label="Закрыть">✕</button></div><p class="foot">Напиши уже совершённую операцию обычными словами. Разбор текста выполняется на устройстве. Голос распознаёт браузер или система — может потребоваться интернет.</p><form id="smartOperationForm"><label class="field"><span id="smartOperationLabel">Что потратили?</span><textarea id="smartOperationText" rows="3" maxlength="240" required placeholder="Вчера купил корм собаке за 1800"></textarea></label><button hidden class="btn full light" id="smartVoiceButton" type="button" aria-pressed="false">🎙 Продиктовать</button><p class="foot" id="smartVoiceStatus" role="status" aria-live="polite"></p><button class="btn full" type="submit">Распознать</button></form><p id="smartOperationPreview" aria-live="polite"></p><button class="btn full secondary" id="smartOperationContinue" type="button" disabled>Перейти к подтверждению</button><button class="btn full light" id="smartOperationManual" type="button" style="margin-top:8px">Ввести вручную</button><p class="foot">Поддерживаются одиночные расходы, дополнительные доходы и переводы между конвертами в рублях. Кредиты и зарплата — через обычные формы.</p></div></dialog><style>#smartOperationText{width:100%;box-sizing:border-box;resize:vertical;background:var(--input);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:16px}#smartOperationPreview{padding:10px;background:var(--panel);border-radius:12px;overflow-wrap:anywhere}#smartOperationContinue:disabled,#smartVoiceButton:disabled{opacity:.5}#smartVoiceButton{margin-top:6px;min-height:42px}#smartVoiceStatus{margin:5px 0 9px}</style>
+<dialog id="welcomeDialog" aria-labelledby="welcomeTitle"><form novalidate id="welcomeForm"><small id="welcomeProgress"></small><h2 id="welcomeTitle" tabindex="-1"></h2><div class="welcome-scroll"><section hidden data-category="Профиль"><label class="field"><span>Ваш пол</span><select id="welcomeGender"><option value="male">Мужчина</option><option value="female">Женщина</option></select></label></section>
+<section hidden data-category="Мой доход"><label class="field"><span>Как часто приходит зарплата?</span><select id="welcomeFrequency"><option value="twice">Два раза в месяц (аванс и зарплата)</option><option value="once">Один раз в месяц</option></select></label></section>
+<section hidden data-category="Мой доход"><label class="field"><span>Зарплата за месяц, ₽ (если есть)</span><input id="welcomeSalary" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label></section>
+<section hidden data-category="Мой доход"><label class="field"><span>Сумма зарплаты</span><select id="welcomeMode"><option value="net">На руки</option><option value="gross">До налога</option></select></label></section>
+<section hidden data-category="Мой доход"><label class="field"><span>Налог с оклада до вычета, %</span><input id="welcomeTax" type="number" min="0" max="50" step="0.5" required></label></section>
+<section hidden data-category="Мой доход"><label class="field"><span>Число аванса</span><input id="welcomeAdvance" type="number" min="1" max="31" step="1" inputmode="numeric" required></label></section>
+<section hidden data-category="Мой доход"><label class="field"><span>Число зарплаты</span><input id="welcomePay" type="number" min="1" max="31" step="1" inputmode="numeric" required></label></section>
+<section hidden data-category="Мой доход"><label class="field"><span>Рабочих дней за месяц</span><input id="welcomeWorkTotal" type="number" min="1" max="31" step="1" placeholder="По календарю"></label></section>
+<section hidden data-category="Мой доход"><label class="field"><span>Из них с 1 по 15 число</span><input id="welcomeWorkFirst" type="number" min="0" max="15" step="1" placeholder="По календарю"></label></section>
+<section hidden data-category="Стартовые остатки"><label class="field"><span>Доступные деньги на текущие расходы, ₽</span><input id="welcomeCash" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label></section>
+<section hidden data-category="Стартовые остатки"><label class="field"><span>С какого дня ведём бюджет</span><input id="welcomeDate" type="date" required></label></section>
+<section hidden data-category="Стартовые остатки"><label class="field"><span>Отложено на коммунальные услуги, ₽</span><input id="welcomeutilities" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label></section>
+<section hidden data-category="Стартовые остатки"><label class="field"><span>Деньги в накоплениях, ₽</span><input id="welcomesavings" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label></section>
+<section hidden data-category="Стартовые остатки"><label class="field"><span>Другие свободные деньги, ₽</span><input id="welcomeother" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label></section>
+<section hidden data-category="Расходы семьи"><label class="field"><span>Сколько обычно тратим в день, ₽ (необязательно)</span><input id="welcomeDaily" type="number" step="0.01" min="0.01" max="999999999" inputmode="decimal"></label></section>
+<section hidden data-category="Что показывать в приложении"><label class="welcome-toggle"><input id="welcomeFamily" type="checkbox"> Показать на главной «У меня» и «У жены»</label><label class="welcome-toggle"><input id="welcomeCredits" type="checkbox"> Показать вкладку «Кредиты»</label></section></div><p role="alert" id="welcomeError"></p><div class="actions"><button type="button" class="btn light" id="welcomeBack">Назад</button><button type="button" class="btn" id="welcomeNext">Далее</button><button type="submit" class="btn" hidden>Сохранить</button></div><button type="button" class="btn light" id="welcomeLater">Отмена</button></form></dialog><dialog id="legacyCreditEditDialog" class="budget-alerts-dialog" aria-labelledby="legacyCreditEditTitle"><form class="budget-alerts-shell" id="legacyCreditEditForm"><h2 id="legacyCreditEditTitle" tabindex="-1" autofocus style="outline:none">Изменить</h2><label class="field"><span>Иконка</span><select id="legacyCreditIcon"><option value="🏠">🏠</option><option value="💳">💳</option><option value="🚗">🚗</option><option value="💰">💰</option><option value="🏦">🏦</option><option value="🛒">🛒</option><option value="📱">📱</option><option value="🎓">🎓</option><option value="🛠️">🛠️</option><option value="✈️">✈️</option><option value="💻">💻</option><option value="💵">💵</option></select></label><div id="legacyMortgageFields"><label class="field"><span>Ежемесячный платёж, ₽</span><input id="legacyMortgageAmount" type="number" min="0.01" max="999999999" step="0.01" inputmode="decimal"></label><label class="field"><span>Остаток основного долга по данным банка, ₽ (необязательно)</span><input id="legacyMortgageBalance" type="number" min="0" max="999999999" step="0.01" inputmode="decimal"></label><p class="foot">Остаток долга по выписке справочный: ежемесячная оплата включает проценты. Суммы уже подтверждённых выплат не меняются.</p></div><div id="legacyCardFields"><label class="field"><span>Остаток долга по кредитке, ₽</span><input id="legacyCardBalance" type="number" min="0" max="999999999" step="0.01" inputmode="decimal"></label><label class="field"><span>Погасить не позднее</span><input id="legacyCardDeadline" type="date"></label></div><p class="foot" id="legacyCreditEditError" role="alert"></p><button type="submit" class="btn full">Сохранить</button><button type="button" id="legacyCreditEditCancel" class="btn full light">Отмена</button></form></dialog><dialog id="creditActionsDialog" class="budget-alerts-dialog" aria-labelledby="creditActionsTitle"><form class="budget-alerts-shell" id="creditActionsForm"><h2 id="creditActionsTitle">Кредит</h2><p class="foot" id="creditActionsInfo"></p><div id="creditActionsFields"><label class="field"><span>Фактически оплачено сегодня, ₽</span><input type="number" id="creditActualAmount" min="0.01" step="0.01" inputmode="decimal" required></label><label class="field"><span>Из них основной долг по выписке, ₽</span><input type="number" id="creditActualPrincipal" min="0" step="0.01" inputmode="decimal" required></label><p class="foot">Остальное — проценты и комиссии. Проверь суммы в банке перед сохранением.</p></div><p class="foot" role="alert" id="creditActionsError"></p><button type="submit" class="btn full" id="creditActionsSubmit">Отметить оплату</button><button type="button" class="btn full light" id="creditActionsEdit">Уточнить по выписке</button><button type="button" class="btn full secondary" id="creditActionsCloseAccount">Закрыть обязательство</button><button type="button" class="btn full light" id="creditActionsCancel">Отмена</button></form></dialog><dialog id="creditDialog" class="budget-alerts-dialog" aria-labelledby="creditTitle"><form class="budget-alerts-shell" id="creditForm"><h2 id="creditTitle" tabindex="-1" autofocus style="outline:none">Кредит или карта</h2><label class="field"><span>Тип</span><select id="creditKind"><option value="loan">Потребительский кредит</option><option value="card">Кредитная карта</option><option value="mortgage">Ипотека</option></select></label><label class="field"><span>Название</span><input id="creditName" maxlength="80" placeholder="Например, карта банка" required></label><label class="field"><span>Иконка</span><select id="creditIcon"><option value="🏠">🏠</option><option value="💳">💳</option><option value="🚗">🚗</option><option value="💰">💰</option><option value="🏦">🏦</option><option value="🛒">🛒</option><option value="📱">📱</option><option value="🎓">🎓</option><option value="🛠️">🛠️</option><option value="✈️">✈️</option><option value="💻">💻</option><option value="💵">💵</option></select></label><label class="field" id="creditGraceField" hidden><span>Дата окончания льготного периода</span><input id="creditGrace" type="date" min="1900-01-01" max="9999-12-31"></label><label class="field"><span>Остаток основного долга по данным банка, ₽</span><input id="creditBalance" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><label class="field"><span>Уже отложено на ближайший платёж, ₽</span><input id="creditSaved" type="number" inputmode="decimal" min="0" max="999999999" step="0.01" placeholder="0"></label><div id="creditStatement"><p class="foot">Введи сумму и дату из банка. Проценты и комиссии входят в платёж, но не уменьшают основной долг.</p><label class="field"><span>Дата платежа</span><input id="creditDue" type="date" min="1900-01-01" max="9999-12-31"></label><label class="field"><span>Ежемесячный платёж, ₽</span><input id="creditDueAmount" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>В том числе проценты и комиссии, ₽</span><input id="creditInterest" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><p class="foot">Резерв автоматически распределяется между двумя ближайшими выплатами до срока; если доступна только одна — с неё.</p></div><div class="actions"><button class="btn" type="submit">Сохранить</button><button type="button" class="btn light" id="creditCancel">Отмена</button></div></form></dialog><dialog id="smartOperationDialog" class="budget-alerts-dialog" aria-labelledby="smartOperationTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="smartOperationTitle">Умный ввод</h2><button type="button" class="btn light" id="smartOperationClose" aria-label="Закрыть">✕</button></div><p class="foot">Напиши уже совершённую операцию обычными словами. Разбор текста выполняется на устройстве. Голос распознаёт браузер или система — может потребоваться интернет.</p><form id="smartOperationForm"><label class="field"><span id="smartOperationLabel">Что потратили?</span><textarea id="smartOperationText" rows="3" maxlength="240" required placeholder="Вчера купил корм собаке за 1800"></textarea></label><button hidden class="btn full light" id="smartVoiceButton" type="button" aria-pressed="false">🎙 Продиктовать</button><p class="foot" id="smartVoiceStatus" role="status" aria-live="polite"></p><button class="btn full" type="submit">Распознать</button></form><p id="smartOperationPreview" aria-live="polite"></p><button class="btn full secondary" id="smartOperationContinue" type="button" disabled>Перейти к подтверждению</button><button class="btn full light" id="smartOperationManual" type="button" style="margin-top:8px">Ввести вручную</button><p class="foot">Поддерживаются одиночные расходы, дополнительные доходы и переводы между конвертами в рублях. Кредиты и зарплата — через обычные формы.</p></div></dialog><style>#smartOperationText{width:100%;box-sizing:border-box;resize:vertical;background:var(--input);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:16px}#smartOperationPreview{padding:10px;background:var(--panel);border-radius:12px;overflow-wrap:anywhere}#smartOperationContinue:disabled,#smartVoiceButton:disabled{opacity:.5}#smartVoiceButton{margin-top:6px;min-height:42px}#smartVoiceStatus{margin:5px 0 9px}</style>
 <dialog id="moneyCalendarDialog" class="budget-alerts-dialog" aria-labelledby="moneyCalendarTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="moneyCalendarTitle">Календарь денег</h2><button class="btn light" type="button" id="moneyCalendarClose" aria-label="Закрыть">✕</button></div><div id="calendarHorizon" role="group" aria-label="Горизонт прогноза"><button type="button" class="btn light" data-horizon="30" aria-pressed="true">30 дней</button><button type="button" class="btn light" data-horizon="60" aria-pressed="false">60 дней</button><button type="button" class="btn light" data-horizon="90" aria-pressed="false">90 дней</button></div><p id="moneyCalendarSummary" class="foot" aria-live="polite"></p><div id="calendarForecastSummary" aria-live="polite"></div><details id="calendarPurchaseEditor"><summary>＋ Запланировать покупку</summary><form id="calendarPurchaseForm"><label class="field">Название<input id="calendarPurchaseName" required maxlength="80"></label><label class="field">Дата<input id="calendarPurchaseDate" type="date" required></label><label class="field">Сумма, ₽<input id="calendarPurchaseAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><button class="btn full" type="submit">Сохранить план</button><p class="foot">Указывай только дополнительные покупки, не включённые в дневной бюджет. План не списывает деньги.</p></form><div id="calendarPurchaseList"></div></details><details id="incomeSchedulePanel"><summary>Регулярные дополнительные доходы</summary>
  <p class="foot">Добавь ожидаемый доход, например подработку. В бюджет деньги попадут после нажатия «Получено».</p>
  <div id="incomeScheduleList"></div><form id="incomeScheduleForm">
@@ -2693,33 +2708,57 @@ else setup();
 })();
 </script>
 <script>
+function spouseLabel(text,gender){
+ if(gender!=='female')return text;
+ return text.replace(/жена потратила/g,'муж потратил').replace(/Отправил жене/g,'Отправила мужу').replace(/отправил жене/g,'отправила мужу')
+  .replace(/жене(?![а-я])/gi,'мужу').replace(/жены(?![а-я])/gi,'мужа').replace(/жена(?![а-я])/gi,'муж');
+}
+// Option values and saved transaction identifiers stay stable when the display language changes.
+function installSpouseLabels(){
+ const originals=new WeakMap(),root=document.documentElement;
+ const update=node=>{
+  const parent=node.parentElement;
+  if(!parent||parent.closest('script,style,textarea,#welcomeForm'))return;
+  const text=node.data,last=originals.get(node),raw=last?.visible===text?last.raw:text;
+  if(!/жен[аеы]/i.test(raw))return;
+  if(parent.tagName==='OPTION'&&!parent.hasAttribute('value'))parent.value=raw;
+  const visible=spouseLabel(raw,root.dataset.gender);
+  originals.set(node,{raw,visible});if(text!==visible)node.data=visible;
+ };
+ const visit=node=>{
+  if(node.nodeType===3){update(node);return;}
+  if(node.nodeType!==1||node.matches('script,style'))return;
+  const walker=document.createTreeWalker(node,NodeFilter.SHOW_TEXT);
+  while(walker.nextNode())update(walker.currentNode);
+ };
+ const refresh=()=>{
+  visit(document.body);
+  document.getElementById('familyActions').setAttribute('aria-label',spouseLabel('Деньги у жены',root.dataset.gender));
+ };
+ refresh();
+ new MutationObserver(records=>{for(const r of records){if(r.type==='characterData')update(r.target);else r.addedNodes.forEach(visit);}}).observe(document.body,{subtree:true,characterData:true,childList:true});
+ new MutationObserver(refresh).observe(root,{attributes:true,attributeFilter:['data-gender']});
+}
+document.addEventListener('DOMContentLoaded',installSpouseLabels,{once:true});
+function updateReminderLabels(single){
+ const choice=document.getElementById('notifyReminderChoice');
+ choice.options[0].textContent=single?'Зарплата и итоги месяца':'Аванс, зарплата и итоги месяца';
+ choice.options[1].textContent=single?'Только зарплата':'Аванс и зарплата';
+}
+
 const SALDOZA_BUDGET_KEY='saldoza-onboarding-budget-v1';
 const SALDOZA_REMINDERS_KEY='saldoza-onboarding-reminders-v1';
-const testWorkerUrl=new URL('./sw.js?profile=saldoza-test',location.href).href;
-const testScope=new URL('./',location.href).href;
-async function testRegistration(){
- const registration=await navigator.serviceWorker.getRegistration(testScope);
- if(!registration||registration.scope!==testScope)return null;
- const workers=[registration.active,registration.waiting,registration.installing].filter(Boolean);
- return workers.length&&workers.every(worker=>worker.scriptURL===testWorkerUrl)?registration:null;
-}
-async function installTestWorker(){
- const existing=await navigator.serviceWorker.getRegistration(testScope);
- if(existing?.scope===testScope&&!(await testRegistration()))return;
- await navigator.serviceWorker.register(testWorkerUrl,{scope:testScope});
-}
-async function testPushRegistration(){
- const registration=await testRegistration();
- if(!registration?.active)throw new Error('Для тестовых уведомлений открой отдельную установленную версию Saldoza');
- return registration;
-}
+async function testRegistration(){return null}
 (function(){'use strict';
 const THEMES={"Orchid Gold":{"bg":"#100f15","card":"#211e28","panel":"#282431","ink":"#f5f0e8","muted":"#bcb2c4","line":"#423a48","blue":"#e2c494","accentText":"#261c18","hero":"#19151e","input":"#19171e","selected":"#433746","red":"#ffa3ab"},"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY=SALDOZA_BUDGET_KEY;
 const fmt=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});const rub=n=>fmt.format(Number.isFinite(n)?n:0);const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
-let data;const defaults=()=>({welcomeSeen:false,showFamilySplit:false,showCreditTab:false,months:{},mortgageMonthly:0,ladder:{reserve:0,included:false},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:0,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
+const alert=message=>window.alert(spouseLabel(message,data.gender));
+const confirm=message=>window.confirm(spouseLabel(message,data.gender));
+let data;const defaults=()=>({welcomeSeen:false,showFamilySplit:false,showCreditTab:true,gender:'male',payFrequency:'twice',closedLegacy:{mortgage:true,credit:true},months:{},mortgageMonthly:0,ladder:{reserve:0,included:false},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:0,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
 try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();
 normalizeBudget(data);
 function normalizeBudget(data){
+ for(const i of data.extraIncomes||[])if(i.source==='Доход мужа')i.source='Доход жены';
  for(const e of data.expenses||[])if(e.smartCategoryKey!==undefined&&(typeof e.smartCategoryKey!=='string'||smartCategoryKey(e.smartCategoryKey)!==e.smartCategoryKey||!e.smartCategoryKey||isWifeTransferType(e.type)))delete e.smartCategoryKey;
  if(!Array.isArray(data.calendarPurchases))data.calendarPurchases=[];
  data.usualDailyBudget=dailyBudgetValue(data.usualDailyBudget);
@@ -2766,6 +2805,9 @@ function countWorkdays(key){
  }
  return {total,first,official:y===2026||y===2027};
 }
+function singlePay(){return data.payFrequency==='once'}
+function payTypes(){return singlePay()?['salary']:['advance','salary']}
+function salaryNextMonth(){return !singlePay()&&Number(data.payDays.salary)<=Number(data.payDays.advance)}
 function payrollForecast(m,key=month,asOf=null){
  const cfg=data.salaryConfig,base=num(cfg.base),work=countWorkdays(key);
  const overrideTotal=Number(m.manualDaysTotal),overrideFirst=Number(m.manualDaysFirst);
@@ -2773,7 +2815,7 @@ function payrollForecast(m,key=month,asOf=null){
  const first=m.manualDaysFirst!==undefined&&m.manualDaysFirst!==''&&overrideFirst>=0?Math.min(total,overrideFirst):work.first;
  const rate=Math.min(50,num(cfg.taxRate));
  const net=cfg.mode==='net'?base:base*(1-rate/100);
- const advanceForecast=total>0?net*first/total:0;
+ const advanceForecast=!singlePay()&&total>0?net*first/total:0;
  // Legacy month.advance/month.salary may contain a stale or cancelled
  // manually entered amount. Treat an amount as ACTUAL only if a matching receipt
  // exists. When the salary is configured, the remaining amount is a forecast.
@@ -2786,7 +2828,7 @@ function plannedAdvance(m,key=month){
  const receipt=(data.receipts||[]).find(r=>r.id===key+'-advance');
  if(receipt)return num(receipt.amount);
  const forecast=payrollForecast(m,key);
- return forecast.configured?forecast.advanceForecast:num(m.advance);
+ return singlePay()?0:forecast.configured?forecast.advanceForecast:num(m.advance);
 }
 function plannedSalary(m,key=month){
  const receipt=(data.receipts||[]).find(r=>r.id===key+'-salary');
@@ -2920,9 +2962,9 @@ function nearestPayday(now=new Date()){
  for(let i=-2;i<=3;i++){
   const cycle=new Date(reference.getFullYear(),reference.getMonth()+i,1);
   const period=iso(cycle).slice(0,7);
-  for(const type of ['advance','salary']){
+  for(const type of payTypes()){
    // Salary on the 1st of the NEXT calendar month belongs to this cycle.
-   const nextMonth=type==='salary'&&Number(data.payDays.salary)<=Number(data.payDays.advance);
+   const nextMonth=type==='salary'&&salaryNextMonth();
    const target=new Date(cycle.getFullYear(),cycle.getMonth()+(nextMonth?1:0),1);
    const key=iso(target).slice(0,7);
    const when=plannedPayday(key,Number(data.payDays[type])||1);
@@ -2966,22 +3008,24 @@ function accountReserveCents(id,date){
  const receipts=(data.receipts||[]).filter(r=>r.date>=start&&r.date<=date);
  const allocated=receipts.reduce((v,r)=>v+Math.round(num(r.amounts?.[key])*100),0);
  const used=data.expenses.filter(e=>e.category===key&&e.date>=start&&e.date<=date).reduce((v,e)=>v+Math.round(num(e.amount)*100),0);
- return allocated-used+Math.round(transferDelta(key,start,date)*100);
+ const adjustments=(data.creditAccounts||[]).find(a=>a.id===id)?.reserveAdjustments||[];
+ const opening=adjustments.filter(x=>x.date>=start&&x.date<=date).reduce((sum,x)=>sum+x.cents,0);
+ return opening+allocated-used+Math.round(transferDelta(key,start,date)*100);
 }
 // Use the last one or two unconfirmed paydays before the bank's due date.
 function fundingDates(bill,asOf,pending,split){
  const due=fromISO(bill.firstDue),slots=[];
  for(let offset=-2;offset<=1;offset++){
   const base=new Date(due.getFullYear(),due.getMonth()+offset,1),cycle=iso(base).slice(0,7);
-  for(const type of ['advance','salary']){
-   const shift=type==='salary'&&Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0;
+  for(const type of payTypes()){
+   const shift=type==='salary'&&salaryNextMonth()?1:0;
    const target=iso(new Date(base.getFullYear(),base.getMonth()+shift,1)).slice(0,7);
    const id=cycle+'-'+type,date=iso(plannedPayday(target,Number(data.payDays[type])));
    if(date>=asOf&&date<=bill.firstDue&&!data.receipts.some(r=>r.id===id))slots.push({id,date,type});
   }
  }
- if(pending)slots.push({id:pending.id,date:pending.date,type:pending.type});
- return slots.sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id)).slice(split?-2:-1);
+ if(pending&&pending.date<=bill.firstDue)slots.push({id:pending.id,date:pending.date,type:pending.type});
+ return slots.sort((a,b)=>a.date.localeCompare(b.date)||a.id.localeCompare(b.id)).slice(split&&!singlePay()?-2:-1);
 }
 function creditBillPaid(bill,asOf='9999-12-31'){
  return data.expenses.filter(e=>e.billId===bill.id&&e.date<=asOf).reduce((sum,e)=>sum+Math.round(num(e.amount)*100),0);
@@ -3087,11 +3131,11 @@ function nextPaydays(now=new Date(),pendingReceipt=null,deadline=data.deadline){
   const due=fromISO(deadline);if(!due)return [];
   const start=new Date(now.getFullYear(),now.getMonth(),now.getDate());
   const arr=[];
-  const earlySalary=Number(data.payDays.salary)<=Number(data.payDays.advance);
+  const earlySalary=salaryNextMonth();
   for(let i=-1;i<48;i++){
     const base=new Date(start.getFullYear(),start.getMonth()+i,1);
     const cycle=iso(base).slice(0,7);
-    for(const type of ['advance','salary']){
+    for(const type of payTypes()){
       const shift=type==='salary'&&earlySalary?1:0;
       const target=new Date(base.getFullYear(),base.getMonth()+shift,1);
       const day=type==='advance'?data.payDays.advance:data.payDays.salary;
@@ -3144,8 +3188,8 @@ function mortgageDistributionOffsets(targetMonth){
  for(let i=0;i<=count;i++){
   const d=new Date(y,m-1+i,1),key=iso(d).slice(0,7);
   const base=mortgageDistributionBase(key);
-  for(const type of ['advance','salary']){
-   const salaryInNextMonth=type==='salary'&&Number(data.payDays.salary)<=Number(data.payDays.advance);
+  for(const type of payTypes()){
+   const salaryInNextMonth=type==='salary'&&salaryNextMonth();
    const payMonth=new Date(d.getFullYear(),d.getMonth()+(salaryInNextMonth?1:0),1);
    const when=plannedPayday(iso(payMonth).slice(0,7),Number(data.payDays[type])||1);
    slots.push({key,type,date:iso(when),base:num(base[type])});
@@ -3223,7 +3267,7 @@ function allocation(receiptDate=null,ruleOverrides=null,pendingReceipt=null){
   // The advance-only utilities amount is a target envelope balance, not
   // another transfer on top of savings already held for the next bill.
   if(c.id==='utilities'&&rule.mode==='rub'&&rule.source==='advance'&&!confirmed.advance&&data.startBalances){
-   const date=receiptDate||iso(plannedPayday(month,Number(data.payDays.advance)||16));
+   const date=receiptDate||iso(plannedPayday(month,Number(singlePay()?data.payDays.salary:data.payDays.advance)||1));
    amount=Math.max(0,amount-Math.max(0,num(categoryBalanceAt('utilities',date))));
   }
   const already=num(confirmed.advance?.[c.id])+num(confirmed.salary?.[c.id]);
@@ -3248,13 +3292,13 @@ function allocation(receiptDate=null,ruleOverrides=null,pendingReceipt=null){
  };
  const ids=(mode,source)=>cats.filter(c=>rules[c.id]?.mode===mode&&rules[c.id]?.source===source).map(c=>c.id);
  for(const mode of ['rub','percent']){
-  allocateGroup(ids(mode,'advance'),['advance']);
+  allocateGroup(ids(mode,'advance'),singlePay()?['salary']:['advance']);
   allocateGroup(ids(mode,'salary'),['salary']);
   allocateGroup(ids(mode,'both'),['advance','salary']);
  }
  // Unallocated income remains available in "Other", so every actual
  // receipt still distributes exactly its full amount.
- for(const type of ['advance','salary'])if(!confirmed[type])out[type].other+=cap[type];
+ for(const type of payTypes())if(!confirmed[type])out[type].other+=cap[type];
  const aa=out.advance,bb=out.salary;
  const weightTotal=1;
  const rows=[{name:'Ипотека',a:mortgageA,b:mortgageB},{name:'Кредитная карта',a:ac,b:bc}];
@@ -3276,7 +3320,7 @@ function displayAllocationRows(rows){
   for(let k=0;k<remaining&&k<order.length;k++)bases[order[k].i]++;
   shown.forEach((r,i)=>r[key]=bases[i]/100);
  }
- return shown;
+ return shown.filter(r=>r.id||r.a||r.b||(r.name==='Ипотека'?num(data.mortgageMonthly):num(data.debt)));
 }
 function esc(s){return String(s||'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 function sumExpenses(id){return data.expenses.filter(e=>e.date?.startsWith(month)&&e.category===id).reduce((a,e)=>a+num(e.amount),0)}
@@ -3318,7 +3362,7 @@ function actualMoneyToday(now=new Date()){
  return {envelopes,savings,available,reserve,mortgage,creditReserve,total:envelopes+reserve};
 }
 function mortgageFund(){if(!data.startBalances)return null;return num(data.startBalances.mortgage)+data.receipts.filter(r=>r.date>=data.startBalances.date).reduce((a,r)=>a+num(r.amounts?.mortgage),0)+incomeAmountFor('mortgage',data.startBalances.date)-mortgageReserveSpent(data.startBalances.date)}
-function updateStartFields(){const x=data.startBalances||{date:iso(new Date()),balances:{},mortgage:0};$('startDate').value=x.date;$('startMortgageFund').value=x.mortgage||0;for(const c of cats)$('start-'+c.id).value=x.balances?.[c.id]||0;$('paidMortgageMonth').value=data.paidMortgageMonth||'';}
+function updateStartFields(){const x=data.startBalances||{date:iso(new Date()),balances:{},mortgage:0};$('startDate').value=x.date;for(const c of cats)$('start-'+c.id).value=x.balances?.[c.id]||0;}
 function regularPaidForMonth(target,key){return (data.regularPayments||[]).filter(p=>p.target===target&&p.month===key).reduce((a,p)=>a+num(p.amount),0)}
 function regularCreditAvailable(date){
  if(!data.startBalances)return 0;
@@ -3364,7 +3408,7 @@ function paymentInfo(){
  $('regularPaymentHistory').innerHTML=rows.length?'<div class="foot"><b>Подтверждённые платежи</b></div>'+rows.map(p=>`<div class="transaction"><div><b>${p.target==='mortgage'?'🏠 Ипотека':'💳 Кредитка'}</b><small>${esc(p.date)} · подтверждено${p.part==='advance'?' · с аванса':p.part==='salary'?' · с зарплаты':''}${num(p.extraAmount)>0?' · из конверта '+esc(cats.find(c=>c.id===p.extraSource)?.name||'—')+' '+rub(p.extraAmount):''}</small></div><div class="row"><b>${rub(p.amount)}</b><button class="delete" type="button" data-undo-regular="${esc(p.id)}" title="Отменить подтверждение">↶</button></div></div>`).join(''):'<div class="foot">Подтверждённых платежей за выбранный месяц пока нет.</div>';
 }
 function receiptInfo(){
- for(const type of ['advance','salary']){
+ for(const type of payTypes()){
   const receipt=data.receipts.find(r=>r.id===month+'-'+type);
   const button=$(type==='advance'?'receiveAdvance':'receiveSalary');
   const note=$(type+'ReceiptNote');
@@ -3389,7 +3433,7 @@ function receiptInfo(){
 
 function isWifeTransferType(label){
  const name=String(label).trim().replace(/\s+/g,' ').toLocaleLowerCase('ru').replace(/ё/g,'е');
- return /^(?:отправил|отправить|перевод|перевел|перевести)(?: деньги)? жене$/.test(name);
+ return name==='отправила мужу'||/^(?:отправил|отправить|перевод|перевел|перевести)(?: деньги)? жене$/.test(name);
 }
 function refreshTypes(preferred){const category=$('expenseCategory').value;const types=(data.expenseTypes?.[category]||[]).filter(type=>!isWifeTransferType(type));types.push('Отправил жене');const old=preferred??$('expenseType').value;const options=types.map(t=>`<option value="${esc(t)}">${esc(t)}</option>`).join('');$('expenseType').innerHTML='<option value="">Выбери вид расхода</option>'+options+'<option value="__new__">＋ Добавить новый…</option>';
 $('expenseType').value=types.includes(old)||old==='__new__'?old:'';toggleNewType();}
@@ -3407,7 +3451,7 @@ function toggleNewType(){
   note.textContent='Это перевод, не расход семьи. У тебя доступно для перевода: '+(mine===null?'укажи начальные остатки':rub(mine));
  }
 }
-function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=Math.round(creditOutstanding()*100)/100;$('reserved').value=data.reserved;$('deadline').value=data.deadline;renderCategoryRules();}
+function syncInputs(){const m=monthData();$('mortgage').value=data.mortgageMonthly===undefined?num(m.mortgage):num(data.mortgageMonthly);$('advance').value=num(m.advance)===0?'':m.advance;$('salary').value=num(m.salary)===0?'':m.salary;const cfg=data.salaryConfig;$('baseSalary').value=cfg.base||'';$('salaryMode').value=cfg.mode||'gross';$('salaryTaxRate').value=cfg.taxRate??13;$('manualDaysTotal').value=m.manualDaysTotal??'';$('manualDaysFirst').value=m.manualDaysFirst??'';const p0=plannedPayday(month,data.payDays.advance),p1=plannedPayday(iso(new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1+(salaryNextMonth()?1:0),1)).slice(0,7),data.payDays.salary);$('advanceDate').value=iso(p0);$('salaryDate').value=iso(p1);$('debt').value=Math.round(creditOutstanding()*100)/100;$('reserved').value=data.reserved;$('deadline').value=data.deadline;renderCategoryRules();}
 // Fit the label and amount to the actual available tile width, including large balances.
 function fitTotalMoneyTile(){
  const tile=document.querySelector('.hero-overview .hero-all');
@@ -3634,9 +3678,9 @@ function calendarSnapshot(now,horizon=30,scenario=null){
  for(let i=-2;i<=Math.ceil(length/28)+1;i++){
   const cycle=new Date(now.getFullYear(),now.getMonth()+i,1),key=iso(cycle).slice(0,7),plan=data.months[key]||{};
   const forecast=payrollForecast(plan,key,today);
-  for(const type of ['advance','salary']){
+  for(const type of payTypes()){
    if(received.has(key+'-'+type))continue;
-   const shift=type==='salary'&&Number(data.payDays.salary)<=Number(data.payDays.advance)?1:0;
+   const shift=type==='salary'&&salaryNextMonth()?1:0;
    const target=new Date(cycle.getFullYear(),cycle.getMonth()+shift,1);
    const date=iso(plannedPayday(iso(target).slice(0,7),Number(data.payDays[type])||1));
    const manual=Number(plan[type]),estimate=forecast.configured?(type==='advance'?forecast.advanceForecast:forecast.salaryForecast):(Number.isFinite(manual)&&manual>0?manual:null);
@@ -3647,6 +3691,21 @@ function calendarSnapshot(now,horizon=30,scenario=null){
  for(const bill of (data.monthlyBills||[]).filter(validMonthlyBill)){
   if(bill.creditAccount){
    const remaining=Math.max(0,bill.cents-creditBillPaid(bill,today));
+   const account=data.creditAccounts?.find(a=>a.id===bill.creditAccount);
+   if(account?.monthlyCents&&remaining){
+    const first=fromISO(bill.firstDue);
+    let outstanding=Math.max(0,account.baseCents-paidPrincipal(account.id)-(bill.principalCents-creditBillPrincipal(bill)));
+    let reserve=Math.max(0,accountReserveCents(account.id,today)-remaining);
+    for(let i=1;outstanding>0;i++){
+     const next=new Date(first.getFullYear(),first.getMonth()+i+1,0);
+     next.setDate(Math.min(next.getDate(),account.dueDay));
+     const date=iso(next);if(date>end)break;
+     const principal=Math.min(outstanding,account.monthlyCents-account.interestCents);
+     const payment=principal+account.interestCents,used=Math.min(payment,reserve);
+     push(date,'bill',bill.name+' · план',payment-used);
+     outstanding-=principal;reserve-=used;
+    }
+   }
    if(remaining&&bill.firstDue<=end)push(bill.firstDue<today?today:bill.firstDue,'bill',bill.name+(bill.firstDue<today?' · просрочено':''),Math.max(0,remaining-accountReserveCents(bill.creditAccount,today)));
    continue;
   }
@@ -4045,6 +4104,7 @@ function parseSmartOperation(raw,now,types,mode=null){
  let t=text.toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[\u00a0\u202f]/g,' ');
  if(/(?:^|[^\p{L}])(?:не|нет|планирую|хочу|буду|надо|нужно|завтра|послезавтра|если|может|примерно|около|от\s+\d+|до\s+\d+)(?=$|[^\p{L}])/u.test(t)||/[?;+\n]/.test(t))return fail('Укажи одну уже совершённую операцию, без планов, отрицаний или приблизительных сумм.');
  if(/[$€£]|(?:usd|eur|доллар|евро|злот|тенге)/i.test(t))return fail('Сейчас умный ввод поддерживает только рубли.');
+ t=t.replace(/(?<![а-я])мужу(?![а-я])/g,'жене').replace(/доход мужа/g,'доход жены');
  let date=iso(now),dates=[];
  t=t.replace(/\b\d{4}-\d{2}-\d{2}\b|\b\d{1,2}[./]\d{1,2}[./]\d{4}\b/g,x=>{let d=x;if(!x.includes('-')){const [a,b,c]=x.split(/[./]/);d=c+'-'+b.padStart(2,'0')+'-'+a.padStart(2,'0');}dates.push(d);return ' ';});
  t=t.replace(/(?:^|[^\p{L}])(позавчера|вчера|сегодня)(?=$|[^\p{L}])/gu,(m,x)=>{dates.push(iso(new Date(now.getFullYear(),now.getMonth(),now.getDate()-(x==='позавчера'?2:x==='вчера'?1:0))));return ' ';});
@@ -4206,7 +4266,7 @@ function renderEarlyAlerts(){
  const jan=new Date(yy,0,1),janKey=iso(jan).slice(0,7);
  const janPayday=plannedPayday(janKey,Number(data.payDays.advance)||16);
  const janRangeDays=daysUntil(janPayday);
- if(now.getMonth()>=10||now.getMonth()===0){
+ if(!singlePay()&&(now.getMonth()>=10||now.getMonth()===0)){
   if(janRangeDays>=-17&&janRangeDays<=100){
    const decKey=(yy-1)+'-12';
    const janCfg=data.months[janKey]||{},decCfg=data.months[decKey]||{};
@@ -4305,7 +4365,12 @@ document.querySelectorAll('[data-history-sort]').forEach(select=>{
 });
 let lastEnvelopeHistoryId=null;
 
-function render(){renderEarlyAlerts();const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);renderFamilyBalances();
+function render(){
+ document.documentElement.classList.toggle('single-pay',singlePay());
+ document.getElementById('payHeading').textContent=singlePay()?'Зарплата':'Аванс и зарплата';
+ document.documentElement.dataset.gender=data.gender||'male';
+ updateReminderLabels(singlePay());
+ renderEarlyAlerts();const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);renderFamilyBalances();
 $('envelopes').innerHTML=cats.map(cat=>{
  const row=calc.rows.find(r=>r.id===cat.id);
  const balance=realBalance(cat.id)??(num(row?.a)+num(row?.b)-sumExpenses(cat.id));
@@ -4349,7 +4414,7 @@ const receivedLabel=type=>data.receipts.some(r=>r.id===month+'-'+type)?' ✓':''
 $('planTable').innerHTML='<table class="table"><thead><tr><th>Категория</th><th>Аванс'+receivedLabel('advance')+'</th><th>Зарплата'+receivedLabel('salary')+'</th></tr></thead><tbody>'+visiblePlanRows.map(r=>`<tr><td>${esc(r.name)}</td><td>${rub(r.a)}</td><td>${rub(r.b)}</td></tr>`).join('')+`<tr><td>Всего</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.a,0))}</td><td>${rub(visiblePlanRows.reduce((a,r)=>a+r.b,0))}</td></tr></tbody></table>`;
 const popupPreview=$('proportionDistributionPreview');
 if(popupPreview?.closest('details')?.open)popupPreview.querySelector('.payout-popup-preview-content').innerHTML=$('planTable').innerHTML;
-$('planWarnings').innerHTML=(!plannedAdvance(m)||!plannedSalary(m))
+$('planWarnings').innerHTML=((!singlePay()&&!plannedAdvance(m))||!plannedSalary(m))
  ? '<div class="hint">Укажи оклад в настройках или фактические выплаты для полного расчёта.</div>'
  : ''
  + (calc.unfundedMortgage?`<div class="warning">Не хватает ${rub(calc.unfundedMortgage)} на ипотеку. Нужно покрыть разницу другим источником.</div>`:'')
@@ -4694,14 +4759,14 @@ function savingsPlanRender(){
    return;
  }
  const perMonth=Math.ceil(info.remaining/parsed);
- const fromAdvance=Math.floor(perMonth/2);
+ const fromAdvance=singlePay()?0:Math.floor(perMonth/2);
  const fromSalary=perMonth-fromAdvance;
  const deadline=savingsPlanTarget(parsed);
  const [y,m]=deadline.split('-').map(Number);
  const displayDate=new Date(y,m-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
  $('savingsPlanPerMonth').textContent=rub(perMonth);
  $('savingsPlanDeadline').textContent='Плановая цель — '+displayDate+' · '+parsed+' мес. включая текущий';
- $('savingsPlanSplit').textContent='Поровну: с аванса '+rub(fromAdvance)+' · с зарплаты '+rub(fromSalary);
+ $('savingsPlanSplit').textContent=singlePay()?'С зарплаты '+rub(fromSalary):'Поровну: с аванса '+rub(fromAdvance)+' · с зарплаты '+rub(fromSalary);
 }
 function savingsPlanOpen(){
  renderPurposes();
@@ -5140,6 +5205,7 @@ function syncCreditKind(){
  const card=$('creditKind').value==='card';
  $('creditGraceField').hidden=!card;$('creditGrace').disabled=!card;$('creditGrace').required=card;
  $('creditStatement').hidden=card;
+ $('creditDue').required=!card;$('creditDueAmount').required=!card;
  for(const id of ['creditDue','creditDueAmount','creditInterest'])$(id).disabled=card;
 }
 $('creditKind').addEventListener('change',()=>{ $('creditIcon').value=creditIcon(null,$('creditKind').value);syncCreditKind(); });
@@ -5209,13 +5275,23 @@ function recordCreditPayment(id,amountCents,principalCents,date){
  if(!Number.isSafeInteger(principalCents)||principalCents<0||principalCents>amountCents||principalCents>a.baseCents-paidPrincipal(id))return 'Проверь часть платежа в погашение основного долга.';
  if(accountReserveCents(id,date)<amountCents)return 'Недостаточно денег в резерве. Сначала подтверди поступление выплаты.';
  data.expenses.push({id:'credit-payment-'+Date.now()+'-'+Math.random().toString(36).slice(2),date,category:'account-'+id,amount:amountCents/100,type:a.name,note:'Оплата по выписке',billId:next.bill.id,billDue:next.nextDue,creditAccount:id,principalCents});
- if(!save()){data.expenses.pop();return 'Платёж не записан.';}
+ const previousBills=data.monthlyBills,previousDue=a.due;
+ if(a.kind!=='card'&&a.monthlyCents&&amountCents===next.nextCents&&a.baseCents>paidPrincipal(id)){
+  const due=fromISO(next.nextDue);
+  const following=new Date(due.getFullYear(),due.getMonth()+2,0);
+  following.setDate(Math.min(following.getDate(),a.dueDay));
+  const principal=Math.min(a.baseCents-paidPrincipal(id),a.monthlyCents-a.interestCents);
+  a.due=iso(following);
+  const cents=principal+a.interestCents;
+  data.monthlyBills=previousBills.map(b=>b.id!==next.bill.id?b:{...b,id:crypto.randomUUID(),firstDue:a.due,cents,totalCents:cents,principalCents:principal});
+ }
+ if(!save()){data.expenses.pop();data.monthlyBills=previousBills;a.due=previousDue;return 'Платёж не записан.';}
  return '';
 }
 function renderCreditAccounts(){
  for(const target of ['credit','mortgage']){
   const original=$(target==='credit'?'confirmCreditPayment':'confirmMortgagePayment'),tile=original.closest('.payment-confirm');
-  tile.hidden=!!data.closedLegacy?.[target];const heading=tile.querySelector('.payment-confirm-heading strong,.payment-confirm-heading b');if(heading)heading.textContent=creditIcon(data.legacyCreditIcons?.[target],target==='credit'?'card':'mortgage')+' '+(target==='credit'?'Кредитка':'Ипотека');
+  tile.hidden=!!data.closedLegacy?.[target]||(target==='mortgage'?!num(data.mortgageMonthly)&&!num(data.startBalances?.mortgage):!num(data.debt)&&!num(data.reserved));const heading=tile.querySelector('.payment-confirm-heading strong,.payment-confirm-heading b');if(heading)heading.textContent=creditIcon(data.legacyCreditIcons?.[target],target==='credit'?'card':'mortgage')+' '+(target==='credit'?'Кредитка':'Ипотека');
   if(!tile.querySelector('.credit-wide-button')){
    const wide=document.createElement('button');wide.type='button';wide.className='credit-wide-button';
    wide.append(tile.querySelector('.payment-confirm-heading'));
@@ -5224,6 +5300,9 @@ function renderCreditAccounts(){
   }
  }
  const list=$('creditAccountList');list.replaceChildren();
+ const empty=!(data.creditAccounts||[]).some(a=>!a.closed)&&['confirmCreditPayment','confirmMortgagePayment'].every(id=>$(id).closest('.payment-confirm').hidden);
+ $('creditEmpty').hidden=!empty;
+ $('v-card').classList.toggle('no-accounts',empty);
  for(const a of (data.creditAccounts||[]).filter(a=>!a.closed)){
   const row=document.createElement('button'),body=document.createElement('span'),title=document.createElement('strong'),info=document.createElement('span'),arrow=document.createElement('span');
   row.type='button';row.className='payment-confirm extra-credit credit-wide-button';title.textContent=creditIcon(a.icon,a.kind)+' '+a.name;
@@ -5272,6 +5351,7 @@ function closeLegacy(target){
 function openCredit(account){
  editingCredit=account?.id||null;$('creditForm').reset();$('creditIcon').value=creditIcon(account?.icon,account?.kind||'loan');$('creditGrace').value=account?.graceDue||'';
  $('creditTitle').textContent=account?'Уточнить по выписке':'Добавить кредит или карту';
+ $('creditSaved').value=account?Math.max(0,accountReserveCents(account.id,iso(new Date())))/100:'';
  const next=account&&creditStatementFor(account.id);
  $('creditStatement').open=!!next;
  if(account){
@@ -5296,10 +5376,25 @@ $('creditForm').addEventListener('submit',e=>{
  }
  const id=editingCredit||crypto.randomUUID();
  const account={id,kind,name,icon:$('creditIcon').value,funding:'auto',due:due||'',...(card?{graceDue:due}:{}),baseCents:balance+paidPrincipal(id)};
+ const existing=(data.creditAccounts||[]).find(a=>a.id===id);
+ const asOf=iso(new Date());
+ const adjustment=Math.round(Number($('creditSaved').value)*100)-accountReserveCents(id,asOf);
+ account.reserveAdjustments=[...(existing?.reserveAdjustments||[]),...(adjustment?[{date:asOf,cents:adjustment}]:[])];
  const oldAccounts=data.creditAccounts,oldBills=data.monthlyBills;
  const bills=(oldBills||[]).filter(b=>b.creditAccount!==id);
+ if(!card){
+  const oldBill=(oldBills||[]).find(b=>b.creditAccount===id);
+  const sameDue=oldBill?.firstDue===due;
+  const paid=sameDue?creditBillPaid(oldBill):0;
+  account.monthlyCents=amount+paid;
+  account.interestCents=interest+(sameDue?paid-creditBillPrincipal(oldBill):0);
+  account.dueDay=sameDue?(existing.dueDay||fromISO(due).getDate()):fromISO(due).getDate();
+ }
  if(hasStatement){
-  const bill={id:crypto.randomUUID(),creditAccount:id,name,category:'family',cents:amount,totalCents:amount,firstDue:due,principalCents:amount-interest};
+  const prior=(oldBills||[]).find(b=>b.creditAccount===id&&b.firstDue===due);
+  const previouslyPaid=prior?creditBillPaid(prior):0;
+  const cents=amount+previouslyPaid;
+  const bill={id:prior?.id||crypto.randomUUID(),creditAccount:id,name,category:'family',cents,totalCents:cents,firstDue:due,principalCents:amount-interest+(prior?creditBillPrincipal(prior):0)};
   if(!validMonthlyBill(bill)){alert('Проверь платёж по выписке.');return;}bills.push(bill);
  }
  data.creditAccounts=[...(oldAccounts||[]).filter(a=>a.id!==id),account];data.monthlyBills=bills;
@@ -5323,59 +5418,90 @@ for(const field of ['showFamilySplit','showCreditTab']){
 }
 function refreshBudgetView(){renderCreditAccounts();syncLayoutChoices();window.refreshSmartLearning?.();syncDailyBudgetSetting();renderMonthlyBills();syncInputs();refreshTypes();updateStartFields();render();analyticsRender();receiptInfo();paymentInfo();updateTransferAvailable();updateExpenseOptions()}
 function renderAll(){refreshBudgetView();return save()}
-function openWelcome(){
- const existing=!!data.startBalances;
- $('welcomeCash').parentElement.hidden=false;$('welcomeCash').disabled=false;
- $('welcomeExtras').hidden=false;$('welcomeExisting').hidden=true;$('welcomeCancelStart').hidden=true;
- $('welcomeCancelStart').onclick=()=>{$('welcomeCash').parentElement.hidden=true;$('welcomeCash').disabled=true;$('welcomeExtras').hidden=true;$('welcomeExtras').open=false;$('welcomeExisting').hidden=false;$('welcomeCancelStart').hidden=true;};
- $('welcomeEditStart').onclick=()=>{
-  $('welcomeCash').parentElement.hidden=false;$('welcomeCash').disabled=false;$('welcomeExtras').hidden=false;$('welcomeExtras').open=true;$('welcomeExisting').hidden=true;$('welcomeCancelStart').hidden=false;
- };
- const start=data.startBalances;
- $('welcomeDate').value=start?.date||iso(new Date());$('welcomeDate').max=iso(new Date());
- $('welcomeExtras').open=false;$('welcomeWork').open=false;$('welcomePaid').value=data.paidMortgageMonth||'';
- for(const key of ['utilities','savings','other'])$('welcome'+key).value=start?.balances?.[key]??'';
- $('welcomemortgage').value=start?.mortgage??'';
- $('welcomeFamily').checked=data.showFamilySplit!==false;
- const m=data.months[currentMonth]||{};
- $('welcomeWorkMonth').textContent='Рабочие дни за '+currentMonth+' считаются автоматически по пятидневке. Для другого графика укажи свои значения.';
- $('welcomeWorkTotal').value=m.manualDaysTotal??'';$('welcomeWorkFirst').value=m.manualDaysFirst??'';$('welcomeTax').value=data.salaryConfig.taxRate??13;
- $('welcomeCash').value=start?.balances?.family??'';$('welcomeSalary').value=data.salaryConfig.base||'';
- $('welcomeMode').value=data.salaryConfig.base?data.salaryConfig.mode:'net';
- $('welcomeAdvance').value=data.payDays.advance;$('welcomePay').value=data.payDays.salary;
- $('welcomeDaily').value=dailyBudgetValue(data.usualDailyBudget)??'';
- $('welcomeCredits').checked=data.showCreditTab!==false;
- $('welcomeLater').textContent=existing?'Отмена':'Позже';
- $('welcomeTitle').textContent=existing?'Настройки бюджета':'Настроим твой бюджет';
- $('welcomeDialog').showModal();
- $('welcomeTitle').focus({preventScroll:true});$('welcomeDialog').scrollTop=0;$('welcomeForm').scrollTop=0;$('welcomeForm').querySelector('.welcome-scroll').scrollTop=0;
+const wizard=$('welcomeForm'), wizardDialog=$('welcomeDialog');
+const panels=Array.from(wizard.querySelectorAll('[data-category]'));
+let currentPanel;
+function activePanels(){
+ const single=$('welcomeFrequency').value==='once';
+ return panels.filter(panel=>{
+  const id=panel.querySelector('input,select').id;
+  const enabled=!((single&&['welcomeAdvance','welcomeWorkTotal','welcomeWorkFirst'].includes(id))||
+    (id==='welcomeTax'&&$('welcomeMode').value!=='gross'));
+  panel.querySelector('input,select').disabled=!enabled;return enabled;
+ });
 }
-$('firstBudget').addEventListener('click',openWelcome);
-$('welcomeSettings').addEventListener('click',openWelcome);
-$('welcomeLater').addEventListener('click',()=>$('welcomeDialog').close());
-$('welcomeDialog').addEventListener('close',()=>{
- if(!data.welcomeSeen){data.welcomeSeen=true;if(!save())delete data.welcomeSeen;}
-});
-$('welcomeForm').addEventListener('submit',e=>{
+function wizardIssue(panel){
+ const field=panel.querySelector('input,select');
+ const name=field.labels?.[0]?.querySelector('span')?.textContent||'Значение';
+ if(!field.validity.valid)return name+' — '+(field.validity.valueMissing?'заполните поле.':field.validationMessage);
+ if(field.id==='welcomePay'&&$('welcomeFrequency').value==='twice'&&field.value===$('welcomeAdvance').value)return 'Выберите разные числа для аванса и зарплаты.';
+ if(field.id==='welcomeWorkFirst'&&Number(field.value||0)>Number($('welcomeWorkTotal').value||countWorkdays(currentMonth).total))return 'Дней в первой половине больше, чем за месяц.';
+ return '';
+}
+function showPanel(panel,focusField=false){
+ currentPanel=panel;
+ for(const el of panels)el.hidden=el!==panel;
+ const steps=activePanels(),last=panel===steps.at(-1),bad=steps.find(x=>wizardIssue(x));
+ $('welcomeTitle').textContent=panel.dataset.category;
+ $('welcomeProgress').textContent='Шаг '+(steps.indexOf(panel)+1)+' из '+steps.length;
+ $('welcomeBack').disabled=panel===steps[0];
+ $('welcomeNext').hidden=last&&!bad;
+ wizard.querySelector('[type=submit]').hidden=!last||!!bad;
+ $('welcomeNext').textContent=last?'Исправить поле':'Далее';
+ $('welcomeError').textContent=last&&bad?wizardIssue(bad):'';
+ (focusField?panel.querySelector('input,select'):$('welcomeTitle')).focus({preventScroll:true});
+ wizard.querySelector('.welcome-scroll').scrollTop=0;
+}
+function nextPanel(){
+ const steps=activePanels(),issue=wizardIssue(currentPanel);
+ if(issue){$('welcomeError').textContent=issue;currentPanel.querySelector('input,select').focus();return;}
+ if(currentPanel===steps.at(-1)){
+  const bad=steps.find(x=>wizardIssue(x));if(bad){showPanel(bad);$('welcomeError').textContent=wizardIssue(bad);}
+ }else showPanel(steps[steps.indexOf(currentPanel)+1],true);
+}
+$('welcomeBack').onclick=()=>{const steps=activePanels();showPanel(steps[Math.max(0,steps.indexOf(currentPanel)-1)]);};
+$('welcomeNext').onclick=nextPanel;
+wizard.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('input:not([type=checkbox])')){e.preventDefault();nextPanel();}});
+wizard.addEventListener('input',()=>{$('welcomeError').textContent='';});
+$('welcomeDate').onchange=()=>{if(currentPanel.contains($('welcomeDate'))&&$('welcomeDate').validity.valid)nextPanel();};
+$('welcomeGender').onchange=()=>{$('welcomeFamily').parentElement.lastChild.textContent=' Показать на главной «У меня» и «У '+($('welcomeGender').value==='female'?'мужа':'жены')+'»';};
+function sizeWizard(){
+ const viewport=window.visualViewport;
+ wizardDialog.style.setProperty('--wizard-top',(viewport?.offsetTop||0)+'px');
+ wizardDialog.style.setProperty('--wizard-height',(viewport?.height||innerHeight)+'px');
+}
+window.visualViewport?.addEventListener('resize',sizeWizard);
+window.visualViewport?.addEventListener('scroll',sizeWizard);
+function openWelcome(){
+ const start=data.startBalances,m=data.months[currentMonth]||{};
+ const values={Gender:data.gender||'male',Frequency:data.payFrequency||'twice',Salary:data.salaryConfig.base||'',Mode:data.salaryConfig.base?data.salaryConfig.mode:'net',Tax:data.salaryConfig.taxRate??13,
+  Advance:data.payDays.advance,Pay:data.payDays.salary,WorkTotal:m.manualDaysTotal??'',WorkFirst:m.manualDaysFirst??'',Cash:start?.balances?.family??'',
+  Date:start?.date||iso(new Date()),Daily:data.usualDailyBudget??''};
+ for(const k of ['utilities','savings','other'])values[k]=start?.balances?.[k]??'';
+ for(const [k,v] of Object.entries(values))$('welcome'+k).value=v;
+ $('welcomeDate').max=iso(new Date());$('welcomeFamily').checked=data.showFamilySplit!==false;$('welcomeCredits').checked=data.showCreditTab!==false;
+ $('welcomeGender').onchange();sizeWizard();wizardDialog.showModal();showPanel(panels[0]);
+}
+$('firstBudget').onclick=openWelcome;$('welcomeSettings').onclick=openWelcome;
+$('welcomeLater').onclick=()=>wizardDialog.close();
+wizard.onsubmit=e=>{
  e.preventDefault();
- const advance=Number($('welcomeAdvance').value),salary=Number($('welcomePay').value);
- const previous=data;
- const total=$('welcomeWorkTotal').value,first=$('welcomeWorkFirst').value;
- const calendar=countWorkdays(currentMonth);
- if(Number(first||0)>Number(total||calendar.total)||(first===''&&total!==''&&calendar.first>Number(total))){$('welcomeWork').open=true;alert('Проверь рабочие дни. В первой половине месяца их не может быть больше, чем за месяц.');return;}
- const startChanged=!data.startBalances||$('welcomeDate').value!==data.startBalances.date||$('welcomePaid').value!==(data.paidMortgageMonth||'')||Number($('welcomeCash').value)!==Number(data.startBalances.balances?.family||0)||['utilities','savings','other'].some(k=>Number($('welcome'+k).value)!==Number(data.startBalances.balances?.[k]||0))||Number($('welcomemortgage').value)!==Number(data.startBalances.mortgage||0);
- if(data.startBalances&&startChanged&&!confirm('Пересчитать бюджет с изменёнными стартовыми остатками?'))return;
- data={...data,months:{...data.months,[currentMonth]:{...data.months[currentMonth],manualDaysTotal:total,manualDaysFirst:first}},showFamilySplit:$('welcomeFamily').checked,usualDailyBudget:dailyBudgetValue($('welcomeDaily').value),welcomeSeen:true,showCreditTab:$('welcomeCredits').checked,payDays:{advance,salary},
-  salaryConfig:{...data.salaryConfig,taxRate:Number($('welcomeTax').value),base:Number($('welcomeSalary').value),mode:$('welcomeMode').value}};
- if(startChanged){
-  data.paidMortgageMonth=$('welcomePaid').value;
-  const balances={family:Number($('welcomeCash').value)};
-  for(const key of ['utilities','savings','other'])balances[key]=Number($('welcome'+key).value);
-  data.startBalances={date:$('welcomeDate').value,balances,mortgage:Number($('welcomemortgage').value)};
- }
- if(!save()){data=previous;return;}
- refreshBudgetView();$('welcomeDialog').close();go('home');window.dispatchEvent(new Event('onboarding:budget-saved'));
-});
+ if(currentPanel!==activePanels().at(-1)){nextPanel();return;}
+ const bad=activePanels().find(x=>wizardIssue(x));
+ if(bad){showPanel(bad);$('welcomeError').textContent=wizardIssue(bad);return;}
+ const previous=data,values=k=>$('welcome'+k).value;
+ const balances={family:Number(values('Cash'))};
+ for(const key of ['utilities','savings','other'])balances[key]=Number(values(key));
+ const start=data.startBalances;
+ if(start&&(start.date!==values('Date')||Object.keys(balances).some(k=>balances[k]!==num(start.balances?.[k])))&&!confirm('Пересчитать бюджет с изменёнными стартовыми остатками?'))return;
+ data={...data,welcomeSeen:true,gender:values('Gender'),payFrequency:values('Frequency'),payDays:{advance:Number(values('Advance'))||16,salary:Number(values('Pay'))},
+  salaryConfig:{...data.salaryConfig,base:Number(values('Salary')),mode:values('Mode'),taxRate:Number(values('Tax'))},
+  months:{...data.months,[currentMonth]:{...data.months[currentMonth],manualDaysTotal:values('WorkTotal'),manualDaysFirst:values('WorkFirst')}},
+  startBalances:{...start,date:values('Date'),balances:{...start?.balances,...balances}},usualDailyBudget:dailyBudgetValue(values('Daily')),
+  showCreditTab:$('welcomeCredits').checked,showFamilySplit:$('welcomeFamily').checked};
+ if(!save()){data=previous;$('welcomeError').textContent='Не удалось записать бюджет в хранилище браузера.';return;}
+ refreshBudgetView();renderCategoryRules();wizardDialog.close();window.dispatchEvent(new Event('onboarding:budget-saved'));
+};
 
 function go(page){for(const tab of document.querySelectorAll('.tab[data-go]')){if(tab.dataset.go===page)tab.setAttribute('aria-current','page');else tab.removeAttribute('aria-current');}document.querySelectorAll('.view').forEach(el=>el.classList.toggle('active',el.id==='v-'+page));document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active',el.dataset.go===page));document.querySelector('.app').classList.toggle('home-active',page==='home');const main=document.querySelector('.main');if(main)main.scrollTop=0;}
 document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go)));
@@ -5479,11 +5605,11 @@ function renderCategoryRules(){
  const rules=categoryRules();
  $('categoryRules').innerHTML=cats.map(c=>{
   const r=rules[c.id];
-  return `<div class="field"><span>${c.name}</span><div class="category-value"><input aria-label="${c.name}" value="${Number(r.value.toFixed(2))} ${r.mode==='rub'?'₽':'%'}" readonly><button class="category-gear" type="button" data-rule="${c.id}" aria-label="Настройки: ${c.name}">⚙</button></div><div class="rule-caption">${r.source==='advance'?'С аванса':r.source==='salary'?'С зарплаты':'С каждой выплаты'}</div></div>`;
+  return `<div class="field"><span>${c.name}</span><div class="category-value"><input aria-label="${c.name}" value="${Number(r.value.toFixed(2))} ${r.mode==='rub'?'₽':'%'}" readonly><button class="category-gear" type="button" data-rule="${c.id}" aria-label="Настройки: ${c.name}">⚙</button></div><div class="rule-caption">${singlePay()?'С зарплаты':r.source==='advance'?'С аванса':r.source==='salary'?'С зарплаты':'С каждой выплаты'}</div></div>`;
  }).join('');
 }
 const ruleDialog=document.createElement('dialog');ruleDialog.className='rule-dialog';
-ruleDialog.innerHTML=`<form id="ruleForm"><h3 id="ruleTitle" tabindex="-1" autofocus></h3><div class="rule-live-plan"><div class="rule-live-title">Распределение по прогнозу <span id="rulePreviewTotal"></span></div><div id="rulePreviewTable"></div><div id="rulePreviewWarning" class="rule-live-warning" hidden></div></div><label class="field"><span>Откуда выделять</span><select id="ruleSource"><option value="advance">С аванса</option><option value="salary">С зарплаты</option><option value="both">С каждой выплаты</option></select></label><label class="field"><span>Способ расчёта</span><select id="ruleMode"><option value="rub">Сумма, ₽</option><option value="percent">Процент, %</option></select></label><label class="field"><span id="ruleValueLabel">Значение</span><input id="ruleValue" type="number" min="0" step="0.01" inputmode="decimal" required></label><p class="foot">Процент считается от общего прогноза на месяц (аванс + зарплата), а сумма в ₽ задаётся на месяц один раз. Выбранные выплаты определяют источник денег. Ипотека и кредитка резервируются в первую очередь; при нехватке денег суммы категорий уменьшаются.</p><div class="actions"><button type="button" class="btn light" id="ruleCancel">Отмена</button><button class="btn" type="submit">Сохранить</button></div></form>`;
+ruleDialog.innerHTML=`<form id="ruleForm"><h3 id="ruleTitle" tabindex="-1" autofocus></h3><div class="rule-live-plan"><div class="rule-live-title">Распределение по прогнозу <span id="rulePreviewTotal"></span></div><div id="rulePreviewTable"></div><div id="rulePreviewWarning" class="rule-live-warning" hidden></div></div><label class="field"><span>Откуда выделять</span><select id="ruleSource"><option value="advance">С аванса</option><option value="salary">С зарплаты</option><option value="both">С каждой выплаты</option></select></label><label class="field"><span>Способ расчёта</span><select id="ruleMode"><option value="rub">Сумма, ₽</option><option value="percent">Процент, %</option></select></label><label class="field"><span id="ruleValueLabel">Значение</span><input id="ruleValue" type="number" min="0" step="0.01" inputmode="decimal" required></label><p class="foot">Процент считается от общего прогноза на месяц, а сумма в ₽ задаётся на месяц один раз. Выбранные выплаты определяют источник денег. Ипотека и кредитка резервируются в первую очередь; при нехватке денег суммы категорий уменьшаются.</p><div class="actions"><button type="button" class="btn light" id="ruleCancel">Отмена</button><button class="btn" type="submit">Сохранить</button></div></form>`;
 document.body.append(ruleDialog);
 let editingRule=null,ruleTrigger=null;
 function renderRulePreview(){
@@ -5689,6 +5815,10 @@ function readBackup(text){
  const creditExpenses=budget.expenses.filter(e=>e.creditAccount!==undefined);
  if(creditExpenses.length||(budget.monthlyBills||[]).some(b=>b.creditAccount!==undefined)||budget.creditAccounts!==undefined){
   if(!Array.isArray(budget.creditAccounts)||budget.creditAccounts.some(a=>!a||typeof a.id!=='string'||!a.id||typeof a.name!=='string'||!a.name.trim()||a.name.length>80||!['card','loan','mortgage'].includes(a.kind)||!Number.isSafeInteger(a.baseCents)||a.baseCents<0))invalid();
+  for(const a of budget.creditAccounts){
+   if(a.reserveAdjustments!==undefined&&(!Array.isArray(a.reserveAdjustments)||a.reserveAdjustments.some(x=>!x||!fromISO(x.date)||!Number.isSafeInteger(x.cents))))invalid();
+   if(a.monthlyCents!==undefined&&(!Number.isSafeInteger(a.monthlyCents)||a.monthlyCents<=0||!Number.isSafeInteger(a.interestCents)||a.interestCents<0||a.interestCents>a.monthlyCents||!Number.isInteger(a.dueDay)||a.dueDay<1||a.dueDay>31))invalid();
+  }
   const ids=new Set(budget.creditAccounts.map(a=>a.id));
   if(ids.size!==budget.creditAccounts.length)invalid();
   const paid=new Map();
@@ -5733,11 +5863,11 @@ $('saveStart').addEventListener('click',()=>{
  const date=$('startDate').value;
  if(!fromISO(date)){alert('Укажи корректную дату начала учёта');return;}
  const balances={};for(const c of cats)balances[c.id]=num($('start-'+c.id).value);
- const mortgage=num($('startMortgageFund').value);
+ const mortgage=num(data.startBalances?.mortgage);
  if(data.startBalances&&!confirm('Изменение стартовых остатков пересчитает текущие остатки. Продолжить?'))return;
  const previousStart=data.startBalances,previousPaidMonth=data.paidMortgageMonth;
  data.startBalances={date,balances,mortgage};
- data.paidMortgageMonth=$('paidMortgageMonth').value||'';
+
  if(!renderAll()){data.startBalances=previousStart;data.paidMortgageMonth=previousPaidMonth;refreshBudgetView();return;}
  if(!previousStart)go('home');
  $('startStatus').textContent='Стартовые остатки сохранены. Старые покупки до '+date+' не списываются.';
@@ -5751,6 +5881,7 @@ function closeReceiptEntry(){
  if(receiptEntryFocus?.focus)receiptEntryFocus.focus();
 }
 function receive(type){
+ if(!payTypes().includes(type))return;
  if(!data.startBalances){alert('Сначала сохрани начальные остатки в настройках.');return;}
  if(data.receipts.some(r=>r.id===month+'-'+type)){alert('Это поступление уже учтено.');return;}
  receiptEntryType=type;receiptEntryMonth=month;
@@ -6227,7 +6358,7 @@ window.addEventListener('resize',fitTotalMoneyTile);
   const showSheet=type=>{
    if(!parts[type])return;trigger=type==='wifeTransfer'?document.getElementById('wifeTransferOpen'):type==='wifeCheck'?document.getElementById('wifeCheckOpen'):type==='support'?document.getElementById('supportOpen'):grid.querySelector('[data-ops-action="'+type+'"]');
    Object.entries(parts).forEach(([name,card])=>{card.hidden=name!==type});
-   title.textContent=type==='wifeTransfer'?'Перевод жене':type==='wifeCheck'?'Сверить остаток у жены':type==='support'?'Доход жены':type==='expense'?'Новый расход':type==='income'?'Новый доход':'Новый перевод';
+   title.textContent=type==='wifeTransfer'?'Перевод жене':type==='wifeCheck'?'Уточнить остаток у жены':type==='support'?'Доход жены':type==='expense'?'Новый расход':type==='income'?'Новый доход':'Новый перевод';
    overlay.hidden=false;body.scrollTop=0;
   };
   document.getElementById('wifeTransferOpen').addEventListener('click',()=>{
@@ -6318,153 +6449,16 @@ window.addEventListener('resize',fitTotalMoneyTile);
 </script>
 <div id="budgetSaveToast" class="budget-save-toast" role="status" aria-live="polite" aria-atomic="true" hidden><span class="budget-save-symbol" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span id="budgetSaveLabel">Сохранено</span></div>
 <script>
-/* Remote Web Push integration for the installed PWA. */
-(function(){
- const API='https://autumn-resonance-d140.anadale3003.workers.dev';
- const ready=()=>{
-  const choice=document.getElementById('notifyReminderChoice');
-  const enable=document.getElementById('notifyEnableBtn');
-  const test=document.getElementById('notifyTestBtn');
-  const delayed=document.getElementById('notifyDelayedTestBtn');
-  const status=document.getElementById('notifyStatus');
-  if(!choice||!enable||!test||!delayed||!status)return;
-  const preferenceKey=SALDOZA_REMINDERS_KEY;
-  choice.value=localStorage.getItem(preferenceKey)||'all';
-  const isInstalled=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
-  const supported=()=>('Notification' in window)&&('serviceWorker' in navigator)&&('PushManager' in window)&&window.isSecureContext;
-  const appSettings=()=>{
-   try{return JSON.parse(localStorage.getItem(SALDOZA_BUDGET_KEY)||'{}')||{};}catch(_){return {};}
-  };
-  const b64ToBytes=value=>{
-   const normalized=String(value).replace(/-/g,'+').replace(/_/g,'/');
-   const padded=normalized+'='.repeat((4-normalized.length%4)%4);
-   return Uint8Array.from(atob(padded),c=>c.charCodeAt(0));
-  };
-  const post=async(path,payload)=>{
-   const response=await fetch(API+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
-   let result={};try{result=await response.json();}catch(_){}
-   if(!response.ok)throw new Error(result.detail||result.error||('HTTP '+response.status));
-   return result;
-  };
-  const preferences=()=>{
-   const d=appSettings();
-   return {reminders:choice.value,advanceDay:Number(d.payDays?.advance)||16,salaryDay:Number(d.payDays?.salary)||1};
-  };
-  const currentSubscription=async()=>{
-   const reg=await testPushRegistration();
-   return reg.pushManager.getSubscription();
-  };
-  const confirmedPeriods=()=>{
-   const d=appSettings();
-   return (Array.isArray(d.receipts)?d.receipts:[])
-    .map(r=>r&&typeof r.id==='string'?r.id:'')
-    .filter(id=>/^20\d{2}-(0[1-9]|1[0-2])-(advance|salary)$/.test(id));
-  };
-  // Serialize writes so an old confirmation state cannot overwrite a newer one.
-  let syncSequence=Promise.resolve();
-  const saveSubscription=async(sub)=>{
-   const payload={subscription:sub.toJSON(),preferences:preferences(),confirmedPeriods:confirmedPeriods()};
-   const operation=syncSequence.catch(()=>{}).then(()=>post('/subscribe',payload));
-   syncSequence=operation;
-   await operation;
-  };
-  const syncReceipts=async()=>{
-   if(!supported()||Notification.permission!=='granted')return;
-   try{
-    const sub=await currentSubscription();
-    if(sub)await saveSubscription(sub);
-   }catch(e){
-    status.textContent='Поступление сохранено в приложении, но сервер уведомлений не обновлён: '+e.message+'. Открой настройки при наличии интернета.';
-   }
-  };
-  const refresh=async()=>{
-   if(!supported()){status.textContent='Push недоступен. На iPhone установи приложение на экран «Домой» и открой его оттуда.';return;}
-   if(!isInstalled()){status.textContent='Сначала добавь приложение на экран «Домой»: Safari → Поделиться → На экран «Домой».';return;}
-   if(Notification.permission==='denied'){status.textContent='Уведомления запрещены в настройках iPhone. Разреши их для «Моего бюджета».';return;}
-   try{
-    const sub=await currentSubscription();
-    if(sub){
-     await saveSubscription(sub);
-     status.textContent='Push подключён. Подтверждённые выплаты исключены из напоминаний.';
-    }else{
-     status.textContent='Разрешение: '+Notification.permission+'. Нажми «Подключить push-уведомления».';
-    }
-   }catch(e){status.textContent='Не удалось проверить подписку: '+e.message;}
-  };
-  window.addEventListener('budget:receipts-changed',()=>{void syncReceipts();});
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')void syncReceipts();});
-  window.addEventListener('pageshow',()=>{void syncReceipts();});
-  choice.addEventListener('change',async()=>{
-   localStorage.setItem(preferenceKey,choice.value);
-   try{const sub=await currentSubscription();if(sub){await saveSubscription(sub);status.textContent=choice.value==='none'?'Автоматические напоминания выключены.':'Настройки напоминаний обновлены на сервере.';}else status.textContent='Выбор сохранён. Подключи push, чтобы активировать расписание.';}
-   catch(e){status.textContent='Не удалось обновить настройки: '+e.message;}
-  });
-  enable.addEventListener('click',async()=>{
-   if(!supported()){await refresh();return;}
-   if(!isInstalled()){status.textContent='Открой «Мой бюджет» с иконки на экране «Домой». Push на iPhone работает для установленного веб-приложения.';return;}
-   enable.disabled=true;status.textContent='Подключаем push…';
-   try{
-    if(Notification.permission!=='granted'){
-     const permission=await Notification.requestPermission();
-     if(permission!=='granted')throw new Error('Разрешение на уведомления не получено.');
-    }
-    const reg=await testPushRegistration();
-    if(!reg.pushManager)throw new Error('PushManager недоступен в этом браузере.');
-    let sub=await reg.pushManager.getSubscription();
-    if(!sub){
-     const keyResponse=await fetch(API+'/vapid-public-key',{cache:'no-store'});
-     if(!keyResponse.ok)throw new Error('Не удалось получить ключ сервера (HTTP '+keyResponse.status+').');
-     const keyData=await keyResponse.json();
-     sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64ToBytes(keyData.publicKey)});
-    }
-    await saveSubscription(sub);
-    status.textContent='Готово! iPhone подписан на push. Можно отправить тест.';
-   }catch(e){status.textContent='Не удалось подключить push: '+e.message;}
-   finally{enable.disabled=false;}
-  });
-  for(const id of ['advanceDate','salaryDate']){
-   document.getElementById(id)?.addEventListener('change',async()=>{
-    try{const sub=await currentSubscription();if(sub){await saveSubscription(sub);status.textContent='Даты выплат обновлены на сервере.';}}
-    catch(e){status.textContent='Не удалось обновить даты выплат: '+e.message;}
-   });
-  }
-  delayed.addEventListener('click',async()=>{
-   if(!supported()||Notification.permission!=='granted'){
-    await refresh();
-    return;
-   }
-   delayed.disabled=true;
-   try{
-    const sub=await currentSubscription();
-    if(!sub)throw new Error('Сначала подключи push-уведомления.');
-    const result=await post('/test-delayed',{endpoint:sub.endpoint,auth:sub.toJSON().keys.auth});
-    if(!result.ok)throw new Error('Сервер не подтвердил запланированную отправку.');
-    status.textContent='Тест назначен: через 30 секунд. Заблокируй iPhone и дождись push на экране блокировки.';
-   }catch(e){
-    status.textContent='Не удалось запланировать тест: '+e.message;
-   }finally{
-    delayed.disabled=false;
-   }
-  });
-  test.addEventListener('click',async()=>{
-   if(!supported()||Notification.permission!=='granted'){await refresh();return;}
-   test.disabled=true;
-   try{
-    const sub=await currentSubscription();
-    if(sub){
-     await post('/test',{endpoint:sub.endpoint,auth:sub.toJSON().keys.auth});
-     status.textContent='Тестовый push отправлен сервером. Проверь уведомления iPhone.';
-    }else{
-     const reg=await testPushRegistration();
-     await reg.showNotification('Мой бюджет — локальный тест 🔔',{body:'Локальные уведомления работают. Для серверного push сначала подключи подписку.',icon:'./icon.png',badge:'./icon.png',tag:'budget-local-test'});
-     status.textContent='Показан локальный тест. Сначала подключи серверный push.';
-    }
-   }catch(e){status.textContent='Тестовый push не отправлен: '+e.message;}
-   finally{test.disabled=false;}
-  });
-  refresh();
- };
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',ready,{once:true});else ready();
+// The zero profile simulates reminders locally and never shares the installed PWA subscription.
+(()=>{
+ const choice=document.getElementById('notifyReminderChoice'),status=document.getElementById('notifyStatus');
+ const enabledKey='saldoza-onboarding-notifications-enabled';
+ choice.value=localStorage.getItem(SALDOZA_REMINDERS_KEY)||'all';
+ const refresh=()=>{status.textContent=localStorage.getItem(enabledKey)==='yes'&&choice.value!=='none'?'Тестовые напоминания включены.':'Тестовые напоминания выключены.';};
+ choice.onchange=()=>{localStorage.setItem(SALDOZA_REMINDERS_KEY,choice.value);refresh();};
+ document.getElementById('notifyEnableBtn').onclick=()=>{localStorage.setItem(enabledKey,choice.value==='none'?'no':'yes');refresh();};
+ for(const id of ['notifyTestBtn','notifyDelayedTestBtn'])document.getElementById(id).onclick=()=>{status.textContent='Тестовое напоминание · проверьте бюджет.';};
+ refresh();
 })();
 </script>
 
@@ -6884,7 +6878,7 @@ function setupAdvisor(){
    'Начни с одного подтверждённого достижения в рублях, если оно есть. Предложи один посильный шаг до следующей выплаты. Учитывай расходы семьи. Не обещай экономию без подтверждения.',
    'Сначала составь конкретный план до ближайшей выплаты: питание семьи, лекарства и корм домашних животных, затем обязательные платежи с учётом их сроков. Если остаток неизвестен, запроси сверку; не выдумывай суммы и не считай прогноз дохода доступными деньгами. Не рекомендуй досрочные платежи или пополнение накоплений, если это оставит семью без необходимого. Защищённую подушку не расходуй без явного решения пользователя.',
    'Проверь долг и сроки кредитки, сохранность резерва и реалистичность платежей.',
-   'Отвечай простым разговорным языком, без финансового жаргона. Предупреждай заранее о будущей нехватке денег: январский аванс после праздников, ближайшая ипотека, кредитка. Называй дату, конкретную сумму и действие. Прогноз отделяй от фактов.',
+   'Отвечай простым разговорным языком, без финансового жаргона. Предупреждай заранее о будущей нехватке денег: сезонное снижение выплат после праздников, ближайшая ипотека, кредитка. Называй дату, конкретную сумму и действие. Прогноз отделяй от фактов.',
    'Не сравнивай ипотеку и вклад без ставки ипотеки, чистой ставки вклада, налогов и ограничений.',
    ...(responseMode==='short'?[
     'ФОРМАТ ОТВЕТА: ТОЛЬКО ВАЖНОЕ.',
@@ -6930,7 +6924,7 @@ function setupAdvisor(){
    'Подушка безопасности — значение в настройках: '+ru(reserve)+' (может быть не равно остатку на счёте)',
    'Накопления: точный свободный остаток не выводится, если он неотличим от бюджетных переводов.',
    'Текущий месяц: '+month,
-   'Поступления зарплаты/аванса, записанные как полученные: '+ru(sum(monthReceipt,x=>amount(x.amount))),
+   'Подтверждённые выплаты: '+ru(sum(monthReceipt,x=>amount(x.amount))),
    'Дополнительные доходы: '+ru(sum(monthIncome,x=>amount(x.amount))),
    'Записанные расходы: '+ru(sum(monthExpense,x=>amount(x.amount))),
    'По категориям расходов:',
@@ -6946,7 +6940,7 @@ function setupAdvisor(){
   }
   if(detail){lines.push('','ВИДЫ РАСХОДОВ ЗА ТЕКУЩИЙ МЕСЯЦ:',group(monthExpense,x=>x.type||catNames[x.category]||'Без вида'));}
   lines.push('','Примечание: отчёт не содержит ФИО, заметок к операциям, номеров счетов и полных журналов транзакций.');
-  return lines.join('\n');
+  return spouseLabel(lines.join('\n'),d.gender);
  }
  const feedback=(id,message)=>{
  const button=$a(id);
@@ -7300,7 +7294,66 @@ html,body{touch-action:pan-x pan-y!important}
 #obGuide{position:fixed;z-index:90;left:50%;transform:translateX(-50%);bottom:calc(76px + env(safe-area-inset-bottom));width:min(92%,420px);background:var(--card);color:var(--ink);border:1px solid var(--blue);border-radius:18px;padding:16px;box-shadow:0 8px 32px #0004;animation:obEnter .35s ease both}
 #obGuide[hidden]{display:none}#obGuide p{margin:8px 0 12px}#obGuide button{min-height:44px}#obReset{position:fixed;z-index:95;top:env(safe-area-inset-top);right:4px;font-size:10px;padding:5px;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:8px}.obFocus{outline:2px solid var(--blue)!important;outline-offset:2px;animation:obPulse 1.4s infinite}@keyframes obEnter{from{opacity:0;translate:0 12px}to{opacity:1;translate:0 0}}@keyframes obPulse{50%{outline-offset:5px}}@media(prefers-reduced-motion:reduce){#obGuide,.obFocus{animation:none}}
 </style><button id="obReset">↻ Первый запуск</button><aside id="obGuide" hidden><small id="obStep"></small><h3 id="obTitle" style="margin:5px 0"></h3><p id="obText"></p><button id="obNext" class="btn full"></button></aside><script>
-(()=>{const key='saldoza-onboarding-stage-v1',g=document.getElementById('obGuide'),q=id=>document.getElementById(id);let stage=Number(localStorage.getItem(key)||0);const settings=()=>document.querySelector('[data-go="settings"]')?.click();function show(n){stage=n;localStorage.setItem(key,String(n));document.querySelectorAll('.obFocus').forEach(x=>x.classList.remove('obFocus'));g.hidden=n===5;if(n===5)return;const steps=[['Добро пожаловать в Saldoza!','Начни с настройки своего бюджета.','Перейти в настройки'],['Настрой бюджет','Укажи доход, даты выплат и стартовые остатки.','Настроить бюджет'],['Выбери свою тему','Подбери оформление, с которым приятно работать.','Выбрать тему'],['Не пропускай выплаты','Подключи напоминания. В этом тесте разрешение имитируется.','Включить уведомления'],['🎉 Ваш бюджет готов!','Теперь можно начать пользоваться Saldoza.','На главную']];const t=steps[n];q('obStep').textContent=n===4?'Готово':'Шаг '+(n+1)+' из 4';q('obTitle').textContent=t[0];q('obText').textContent=t[1];q('obNext').textContent=t[2];const target=[document.querySelector('[data-go="settings"]'),q('welcomeSettings'),q('themeSelect'),q('notifyEnableBtn')][n];target?.classList.add('obFocus');}
-q('obNext').onclick=()=>{if(stage===0){settings();show(1)}else if(stage===1){settings();g.hidden=true;q('welcomeSettings').click()}else if(stage===2){settings();const el=q('themeSelect');const d=el.closest('details');if(d)d.open=true;g.hidden=true;el.focus();el.scrollIntoView({block:'center'}); }else if(stage===3){settings();show(4)}else{document.querySelector('[data-go="home"]')?.click();show(5)}};
-q('welcomeDialog').addEventListener('close',()=>{if(stage===1)show(1)});window.addEventListener('onboarding:budget-saved',()=>{settings();show(2)});q('themeSelect').addEventListener('change',()=>{if(stage===2)show(3)});q('themeSelect').addEventListener('blur',()=>{if(stage===2){show(2);q('obNext').textContent='Продолжить с этой темой';q('obNext').onclick=()=>{show(3);q('obNext').onclick=()=>show(4)}}});q('obReset').onclick=()=>{if(confirm('Сбросить только данные первого запуска?')){for(const k of Object.keys(localStorage))if(k.startsWith('saldoza-onboarding-'))localStorage.removeItem(k);location.reload()}};for(const id of ['notifyEnableBtn','notifyTestBtn','notifyDelayedTestBtn'])q(id)?.addEventListener('click',e=>{e.preventDefault();e.stopImmediatePropagation();q('notifyStatus').textContent='Тест: уведомления подключены (имитация).';if(stage===3)show(4)},true);show(stage);
-})();</script><style>#obGuide{background:linear-gradient(135deg,#1646bd,#6334b5)!important;color:#fff!important;border:2px solid #f9d66c!important;box-shadow:0 12px 42px #0008,0 0 0 4px #f9d66c33!important;z-index:1000!important}#obGuide h3{font-size:20px;line-height:1.2;color:white}#obGuide p{color:#fff;font-size:14px}#obStep{display:inline-block;background:#ffffff25;padding:4px 10px;border-radius:20px;font-weight:700;color:white}#obGuide #obNext{background:#ffdf75!important;color:#30204e!important;font-size:15px;font-weight:800}#obGuide #obNext:active{transform:scale(.97)}.obFocus{outline-color:#f9b72b!important;box-shadow:0 0 0 4px #f9b72b55!important}#obGuide h3:before{content:'✦ ';color:#ffdf75}</style><style>body:has(#obGuide:not([hidden]))::after{content:'';position:fixed;inset:0;z-index:999;background:rgba(12,18,38,.42);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);animation:obShade .25s ease both}#obGuide{top:50%!important;bottom:auto!important;left:50%!important;transform:translate(-50%,-50%)!important;max-height:85dvh;overflow:auto;padding:22px;text-align:center}#obGuide p{margin:12px 0 18px}#obGuide h3{margin-top:12px!important}@keyframes obShade{from{opacity:0}to{opacity:1}}@media(prefers-reduced-motion:reduce){body:has(#obGuide:not([hidden]))::after{animation:none}}</style><style>#welcomeDialog .welcome-scroll{min-height:0;overflow-y:auto!important;scroll-padding-bottom:70px}#welcomeProgress{font-size:12px;color:var(--blue);font-weight:700;text-align:center;padding:5px}#welcomeDialog{max-height:var(--welcome-height,85dvh)!important}#welcomeDialog #welcomeForm{max-height:var(--welcome-height,85dvh)!important}</style><script>(()=>{const f=document.getElementById('welcomeForm'),d=document.getElementById('welcomeDialog'),sc=f.querySelector('.welcome-scroll'),p=document.createElement('div');p.id='welcomeProgress';f.insertBefore(p,sc);const active=document.createElement('div');active.id='welcomeActiveLabel';f.insertBefore(active,sc);const fields=()=>Array.from(sc.querySelectorAll('input:not([type=hidden]):not([type=checkbox]),select')).filter(x=>x.getClientRects().length&&!x.disabled);function reveal(el){const block=el.closest('label')||el;const a=block.getBoundingClientRect(),b=sc.getBoundingClientRect();if(a.bottom>b.bottom-4)sc.scrollTop+=a.bottom-b.bottom+4;else if(a.top<b.top+4)sc.scrollTop+=a.top-b.top-4;}function update(){const a=fields(),i=a.indexOf(document.activeElement);const el=a[i]||last;const label=el?.closest('label');let category='';if(label){for(const h of sc.querySelectorAll('.welcome-group-title'))if(h.compareDocumentPosition(label)&4)category=h.textContent.trim();}const name=label?.querySelector('span')?.textContent||label?.textContent.trim()||'';document.getElementById('welcomeActiveLabel').textContent=name?[category,name].filter(Boolean).join(' — '):'';const visited=window.__welcomeVisited||(window.__welcomeVisited=new Set());if(i>=0)visited.add(a[i]);const ready=a.every(x=>x.checkValidity());f.classList.toggle('welcome-ready',ready);const end=sc.scrollTop+sc.clientHeight>=sc.scrollHeight-8;f.classList.toggle('welcome-end',end);if(end&&i<0)document.getElementById('welcomeActiveLabel').textContent='📱 Что показывать в приложении';p.textContent=(i>=0?'Поле '+(i+1)+' из '+a.length+' · ':'')+(sc.scrollTop+sc.clientHeight<sc.scrollHeight-8?'↓ Ниже есть ещё поля':'Все поля доступны');}sc.addEventListener('scroll',update);f.addEventListener('input',update);f.addEventListener('change',e=>{update();if(e.target.type==='date'&&e.target.value){const a=fields(),n=a[a.indexOf(e.target)+1];if(n)setTimeout(()=>{last=n;e.target.blur();reveal(n);update()},200)}});f.addEventListener('focusin',e=>{update();if(fields().includes(e.target))setTimeout(()=>reveal(e.target),250)});const next=document.createElement('button');next.type='button';next.className='btn secondary full';next.textContent='Следующее поле ↓';f.insertBefore(next,f.querySelector('.actions'));var last;f.addEventListener('focusin',e=>{if(fields().includes(e.target)){last=e.target;update()}});next.onclick=()=>{const a=fields(),n=a[a.indexOf(last)+1];if(n){n.focus();reveal(n)}else{document.activeElement.blur();sc.scrollTop=sc.scrollHeight;last=null}update()};function resize(){if(window.visualViewport)d.style.setProperty('--welcome-height',Math.floor(window.visualViewport.height*.96)+'px');update()}window.visualViewport?.addEventListener('resize',()=>{resize();if(fields().includes(document.activeElement))requestAnimationFrame(()=>reveal(document.activeElement))});new MutationObserver(resize).observe(d,{attributes:true,attributeFilter:['open']});resize()})();</script><style>#welcomeDialog label:has(#welcomePaid),#welcomeDialog label:has(#welcomemortgage),#welcomePaid,#welcomemortgage{display:none!important}</style><style>#welcomeDialog .welcome-scroll{scroll-padding:8px!important}#welcomeDialog:focus-within #welcomeProgress{padding:2px}</style><style>#welcomeActiveLabel{flex:none;font-size:13px;font-weight:750;color:var(--ink);background:var(--selected);padding:7px 10px;border-radius:8px;line-height:1.3}#welcomeActiveLabel:empty{display:none}</style><style>#welcomeDialog #welcomeForm:not(.welcome-ready) button[type=submit]{display:none!important}#welcomeDialog #welcomeForm:not(.welcome-ready) .actions{grid-template-columns:1fr!important}#welcomeDialog #welcomeForm{padding:10px!important;gap:5px!important}#welcomeDialog .welcome-scroll{flex:1 1 auto!important;min-height:65px!important}#welcomeActiveLabel{padding:5px 8px!important;font-size:12px!important}#welcomeDialog #welcomeTitle{font-size:18px!important}#welcomeDialog .actions{padding-top:4px!important}</style><style>#welcomeDialog #welcomeForm:not(.welcome-end) button[type=submit]{display:none!important}#welcomeDialog #welcomeForm.welcome-end.welcome-ready button[type=submit]{display:block!important}#welcomeDialog #welcomeForm.welcome-end.welcome-ready .actions{grid-template-columns:1fr 1fr!important}#welcomeDialog #welcomeForm.welcome-end.welcome-ready>button.btn.secondary{display:none!important}</style></body></html>
+(()=>{
+ const q=id=>document.getElementById(id),guide=q('obGuide'),key='saldoza-onboarding-guide-v2';
+ const legacy=Number(localStorage.getItem('saldoza-onboarding-stage-v1')||0);
+ let stage=Number(localStorage.getItem(key)??([0,1,3,4,5,6][legacy]||0));
+ const stages=[
+  ['Добро пожаловать в Saldoza!','Начнём с дохода и денег, которые уже есть.','Начать'],
+  ['Настройте бюджет','Укажите даты выплат и стартовые остатки.','Настроить бюджет'],
+  ['Есть кредиты или ипотека?','Добавьте их, чтобы учитывать платежи в бюджете.','Добавить кредит'],
+  ['Выберите тему','Как будет выглядеть ваш бюджет?','Применить тему'],
+  ['Настройте уведомления','В этой версии напоминания работают в тестовом режиме.','Сохранить выбор'],
+  ['🎉 Ваш бюджет готов!','Теперь можно записывать покупки и подтверждать выплаты.','На главную']
+ ];
+ const choices=document.createElement('div'),skip=document.createElement('button');
+ q('obNext').before(choices);q('obNext').after(skip);skip.type='button';skip.className='btn light';skip.textContent='Продолжить без кредита';
+ function selectFrom(id){
+  const source=q(id),select=source.cloneNode(true);select.removeAttribute('id');select.setAttribute('aria-label',q('obTitle').textContent);select.value=source.value;choices.append(select);
+ }
+ function show(n){
+  stage=n;localStorage.setItem(key,String(n));guide.hidden=n>=stages.length;if(guide.hidden)return;
+  const [title,desc,action]=stages[n];q('obStep').textContent='Шаг '+(n+1)+' из 6';q('obTitle').textContent=title;q('obText').textContent=desc;q('obNext').textContent=action;
+  choices.replaceChildren();skip.hidden=n!==2;
+  if(n===2)skip.textContent=q('creditAccountList').children.length?'Продолжить':'Пропустить';
+  if(n===3)selectFrom('themeSelect');if(n===4)selectFrom('notifyReminderChoice');
+ }
+ skip.onclick=()=>show(3);
+ q('obNext').onclick=()=>{
+  if(stage===0){show(1);return;}
+  if(stage===1){guide.hidden=true;q('welcomeSettings').click();return;}
+  if(stage===2){guide.hidden=true;q('creditAdd').click();return;}
+  if(stage===3||stage===4){
+   const source=q(stage===3?'themeSelect':'notifyReminderChoice');
+   source.value=choices.querySelector('select').value;source.dispatchEvent(new Event('change'));
+   if(stage===4)q('notifyEnableBtn').click();
+  }
+  if(stage===5)document.querySelector('[data-go="home"]').click();
+  show(stage+1);
+ };
+ window.addEventListener('onboarding:budget-saved',()=>{if(stage===1)show(2);});
+ q('welcomeDialog').addEventListener('close',()=>{if(stage===1)show(1);});
+ q('creditDialog').addEventListener('close',()=>{if(stage===2)show(2);});
+ q('obReset').onclick=()=>{if(confirm('Сбросить только данные нулевой тестовой версии?')){
+  for(const k of Object.keys(localStorage))if(k.startsWith('saldoza-onboarding-'))localStorage.removeItem(k);location.reload();
+ }};
+ show(stage);
+})();
+</script><style>#obGuide{background:linear-gradient(135deg,#1646bd,#6334b5)!important;color:#fff!important;border:2px solid #f9d66c!important;box-shadow:0 12px 42px #0008,0 0 0 4px #f9d66c33!important;z-index:1000!important}#obGuide h3{font-size:20px;line-height:1.2;color:white}#obGuide p{color:#fff;font-size:14px}#obStep{display:inline-block;background:#ffffff25;padding:4px 10px;border-radius:20px;font-weight:700;color:white}#obGuide #obNext{background:#ffdf75!important;color:#30204e!important;font-size:15px;font-weight:800}#obGuide #obNext:active{transform:scale(.97)}.obFocus{outline-color:#f9b72b!important;box-shadow:0 0 0 4px #f9b72b55!important}#obGuide h3:before{content:'✦ ';color:#ffdf75}</style><style>body:has(#obGuide:not([hidden]))::after{content:'';position:fixed;inset:0;z-index:999;background:rgba(12,18,38,.42);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);animation:obShade .25s ease both}#obGuide{top:50%!important;bottom:auto!important;left:50%!important;transform:translate(-50%,-50%)!important;max-height:85dvh;overflow:auto;padding:22px;text-align:center}#obGuide p{margin:12px 0 18px}#obGuide h3{margin-top:12px!important}@keyframes obShade{from{opacity:0}to{opacity:1}}@media(prefers-reduced-motion:reduce){body:has(#obGuide:not([hidden]))::after{animation:none}}</style><style>#welcomeDialog[open]{position:fixed!important;inset:auto 0 auto!important;top:calc(var(--wizard-top) + var(--wizard-height) / 2)!important;transform:translateY(-50%)!important;margin:0 auto!important;width:min(94vw,440px);max-height:calc(var(--wizard-height) - 12px)!important;background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:20px}
+#welcomeDialog #welcomeForm{max-height:calc(var(--wizard-height) - 12px)!important;padding:14px!important;display:flex!important;gap:8px!important}
+#welcomeForm [hidden],#obGuide [hidden],#creditStatement[hidden],#creditEmpty[hidden],#v-card .payment-confirm[hidden]{display:none!important}
+#welcomeDialog .welcome-scroll{min-height:0;overflow:auto!important;padding:0!important}
+#welcomeProgress{color:var(--blue);font-weight:bold}#welcomeError{margin:0;color:var(--red)}#welcomeError:empty{display:none}
+#welcomeDialog .actions{display:flex!important;flex-wrap:wrap}#welcomeDialog .actions button{flex:1}
+#obGuide select{width:100%;margin-bottom:12px;padding:10px;border-radius:12px}#obGuide button+button{margin-top:8px}
+#v-card.no-accounts #nearestPayment,#v-card.no-accounts .credit-history-disclosure{display:none!important}
+#v-card.no-accounts #creditAdd{margin:12px auto!important}#creditEmpty{text-align:center}
+.single-pay .payment-receipt:has(#advance),.single-pay span:has(>#goalSplitAdvance),.single-pay label:has(>#ruleSource),.single-pay :is(#rulePreviewTable,#planTable,.payout-popup-preview-content) tr>:nth-child(2){display:none!important}
+.single-pay #v-plan .payment-grid{grid-template-columns:1fr!important}
+html.single-pay .app #v-plan.active .payment-inputs .payment-grid{grid-template-columns: minmax(0,1fr)!important}
+html.single-pay .app #v-plan.active .payment-inputs .payment-receipt:has(#advance){display:none!important}
+html.single-pay .app #v-plan.active .payment-inputs .payment-receipt:has(#salary){aspect-ratio:auto;min-height:145px!important}
+.app .main #v-card.active.no-accounts #creditEmpty{display:block!important}
+.app .main #v-card.active.no-accounts #creditAdd{margin:12px auto!important}
+.app .main #v-card.active.no-accounts #nearestPayment,.app .main #v-card.active.no-accounts .credit-history-disclosure,.app .main #v-card.active .payment-grid .payment-confirm[hidden]{display:none!important}
+</style></body></html>
