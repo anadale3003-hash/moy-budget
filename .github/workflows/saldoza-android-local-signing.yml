@@ -4,6 +4,8 @@ on:
   push:
     branches: [android-preparation]
     paths:
+      - 'index.html'
+      - 'android-build/**'
       - '.github/workflows/saldoza-android-local-signing.yml'
 permissions:
   contents: read
