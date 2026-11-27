@@ -2231,7 +2231,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <main class="main">
 <section class="view active" id="v-home">
 <button class="btn full" type="button" id="firstBudget" hidden>Начать учёт · указать остатки</button>
-<div class="home-balances"><div><span>Доступно на расходы</span><strong id="heroTotal">—</strong></div><div><span>Всего в бюджете</span><strong id="heroAll">—</strong></div></div>
+<div class="home-balances"><div><span>Доступно на расходы</span><strong id="heroTotal">—</strong></div><div><span>Всего с подушкой</span><strong id="heroAll">—</strong></div></div>
 
 <section class="family-split" aria-label="Остаток на семейные покупки">
 <div hidden style="display:none!important"><span>На семейные покупки</span><strong id="familyTotalNow">—</strong></div>
@@ -2369,8 +2369,8 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <button class="btn" type="submit">Учесть поступление</button>
 </form></div>
 <div class="card"><form id="expenseForm">
- <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory" required><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><p class="foot" id="expenseWifeTransferAvailable" hidden></p><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="history-sort-control"><label for="expenseListSort">По дате</label><select id="expenseListSort" data-history-sort="expenseList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевести между категориями</span></summary><div class="card"><form id="transferForm">
-<div class="two transfer-envelopes"><label class="field"><span>Откуда</span><select id="transferFrom" required><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Куда</span><select id="transferTo" required><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option></select></label></div>
+ <div class="two"><label class="field"><span>Сумма, ₽</span><input id="expenseAmount" type="number" min="0.01" step="0.01" required inputmode="decimal" placeholder="1500"></label><label class="field"><span>Дата</span><input id="expenseDate" type="date" required></label></div><label class="field"><span>Категория</span><select id="expenseCategory" required><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option></select></label><label class="field"><span>Вид расхода</span><select id="expenseType"></select></label><label class="field" id="newTypeWrap" style="display:none"><span>Название нового вида расхода</span><input id="newExpenseType" maxlength="50" placeholder="Например, Продукты"></label><div class="foot" style="margin-top:-5px">Создай новый вид расхода один раз — потом выбирай его из списка.</div><label class="field"><span>Примечание (необязательно)</span><input id="expenseNote" maxlength="120" placeholder="Например, Пятёрочка"></label><p class="foot" id="expenseWifeTransferAvailable" hidden></p><button class="btn full" type="submit">Добавить расход</button></form></div><details class="compact-disclosure operation-disclosure" id="expenseHistoryPanel"><summary><span class="disclosure-title">История расходов</span><span class="disclosure-count" id="expenseCount">0</span></summary><div class="history-sort-control"><label for="expenseListSort">По дате</label><select id="expenseListSort" data-history-sort="expenseList"><option value="desc">Сначала новые ↓</option><option value="asc">Сначала старые ↑</option></select></div><div class="card" id="expenseList"></div></details><details class="compact-disclosure operation-disclosure" id="transferPanel"><summary><span class="disclosure-title">⇄ Перевод</span></summary><div class="card"><form id="transferForm">
+<div class="two transfer-envelopes"><label class="field"><span>Откуда</span><select id="transferFrom" required><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="savings">Накопления</option><option value="other">Остальное</option><option value="reserve">Неприкосновенная подушка</option></select></label><label class="field"><span>Куда</span><select id="transferTo" required><option value="savings">Накопления</option><option value="family">Семейные нужды</option><option value="utilities">Коммуналка</option><option value="other">Остальное</option><option value="reserve">Неприкосновенная подушка</option></select></label></div>
 <div class="two"><label class="field"><span>Сумма, ₽</span><input id="transferAmount" type="number" inputmode="decimal" min="0.01" step="0.01" required placeholder="Например, 5000"></label><label class="field"><span>Дата перевода</span><input id="transferDate" type="date" required></label></div>
 <label class="field"><span>Примечание (необязательно)</span><input id="transferNote" maxlength="120" placeholder="Остаток коммуналки"></label>
 <div class="foot" id="transferAvailable"></div><div class="foot">Перевод меняет только остатки категорий. Не учитывается как доход или расход. Делай запись после фактического перевода денег.</div><button type="submit" class="btn full">Перевести деньги</button>
@@ -2403,7 +2403,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
    <div class="analytics-panel-top"><b>🎯 Лестница капитала</b><button type="button" class="analytics-text-button capital-settings-icon" data-anal-open="plan" aria-label="Настроить цель и срок">⚙</button></div>
    <div class="analytics-capital-numbers"><strong id="ladderTotal">—</strong><span id="ladderBadge">Цель: 1 млн ₽</span></div>
    <div class="ladder-track" role="progressbar" aria-label="Прогресс накоплений" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ladderTrack"><div id="ladderFill"></div></div>
-   <div class="analytics-capital-note" id="ladderRemaining">До следующей ступени —</div><div class="analytics-capital-details"><div><span>🛡 Неприкосновенная подушка</span><b id="ladderReserve">500 000 ₽</b></div><div><span>🏦 Сверх подушки</span><b id="ladderExtra">—</b></div><div><span>Следующая ступень</span><b id="ladderGoal">1 000 000 ₽</b></div></div>
+   <div class="analytics-capital-note" id="ladderRemaining">До следующей ступени —</div><div class="analytics-capital-details"><div><span>🛡 Неприкосновенная подушка</span><b id="ladderReserve">—</b></div><div><span>Целевой размер подушки</span><b id="ladderReserveGoal">—</b></div><div><span>🏦 Сверх подушки</span><b id="ladderExtra">—</b></div><div><span>Следующая ступень</span><b id="ladderGoal">1 000 000 ₽</b></div></div>
      <p class="foot" id="ladderNote"></p>
   </div>
   <div class="analytics-goal-overview" aria-label="Сводка цели накоплений">
@@ -2493,7 +2493,8 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
       <div><span>Уже накоплено</span><strong id="savingsPlanCurrent">—</strong></div>
       <div class="analytics-plan-left"><span>Осталось накопить</span><strong id="savingsPlanRemaining">—</strong></div>
      </div>
-     <label class="field analytics-plan-input"><span>Размер подушки, ₽</span><input id="ladderReserveInput" type="number" inputmode="decimal" step="100" min="0" required value="500000"></label>
+     <label class="field analytics-plan-input"><span>Фактический остаток подушки, ₽</span><input id="ladderReserveInput" type="number" inputmode="decimal" step="0.01" min="0" max="1000000000" required></label>
+     <label class="field analytics-plan-input"><span>Целевой размер подушки, ₽</span><input id="ladderReserveTarget" type="number" inputmode="decimal" step="0.01" min="0" max="1000000000" required></label>
      <label class="analytics-plan-included"><input id="ladderIncluded" type="checkbox"><span>Подушка уже входит в остаток категории «Накопления»</span></label>
 <div id="personalGoals"><strong>Цели накоплений</strong>
  <div id="goalReserve"></div><div id="goalBalances"></div>
@@ -2713,7 +2714,9 @@ async function testPushRegistration(){
  return registration;
 }
 (function(){'use strict';
-const THEMES={"Orchid Gold":{"bg":"#100f15","card":"#211e28","panel":"#282431","ink":"#f5f0e8","muted":"#bcb2c4","line":"#423a48","blue":"#e2c494","accentText":"#261c18","hero":"#19151e","input":"#19171e","selected":"#433746","red":"#ffa3ab"},"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY=SALDOZA_BUDGET_KEY;const fmt=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});const rub=n=>fmt.format(Number.isFinite(n)?n:0);const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
+const THEMES={"Orchid Gold":{"bg":"#100f15","card":"#211e28","panel":"#282431","ink":"#f5f0e8","muted":"#bcb2c4","line":"#423a48","blue":"#e2c494","accentText":"#261c18","hero":"#19151e","input":"#19171e","selected":"#433746","red":"#ffa3ab"},"Office Light":{"bg":"#DFE6EF","card":"#F0F4F9","panel":"#E4EBF4","ink":"#182B40","muted":"#53677F","line":"#BAC7D7","blue":"#245FA9","accentText":"#FFFFFF","hero":"#213349","input":"#F3F6FA","selected":"#CFDEF1","red":"#AD374C"},"Outlook Dusk":{"bg":"#CED8E5","card":"#EAF0F6","panel":"#D8E3EE","ink":"#162A41","muted":"#465F78","line":"#AEBFD2","blue":"#1666B1","accentText":"#FFFFFF","hero":"#162C45","input":"#F2F6FA","selected":"#BFD5EB","red":"#AE3548"},"Midnight Blue":{"bg":"#101A2B","card":"#1B2A40","panel":"#253851","ink":"#E7F0FC","muted":"#A5BAD0","line":"#39516A","blue":"#78B1FF","accentText":"#0C1C31","hero":"#0D1726","input":"#15263B","selected":"#284E79","red":"#FF9CA6"},"Slate Dark":{"bg":"#171D25","card":"#25313C","panel":"#2D3F4B","ink":"#F0F5F8","muted":"#B1C2CE","line":"#455A68","blue":"#79CABD","accentText":"#102E2A","hero":"#121820","input":"#1B2A33","selected":"#2C5654","red":"#FEA0A2"},"Warm Sand":{"bg":"#DCD7C9","card":"#F0EBDF","panel":"#E2DACB","ink":"#342D29","muted":"#685D54","line":"#C0B3A3","blue":"#9A593C","accentText":"#FFFFFF","hero":"#333C3C","input":"#F5F0E7","selected":"#E2C7B4","red":"#A53240"},"Aubergine":{"bg":"#201A2B","card":"#30293D","panel":"#3D344B","ink":"#F2EAF9","muted":"#BEAFCE","line":"#584A67","blue":"#D5A4E8","accentText":"#291A34","hero":"#171322","input":"#282237","selected":"#59436B","red":"#FF9EB5"},"Black Cherry":{"bg":"#1D1720","card":"#302633","panel":"#3A2C40","ink":"#F7EAF2","muted":"#C5B2C4","line":"#625064","blue":"#F0A6C4","accentText":"#311723","hero":"#130F18","input":"#251D2A","selected":"#60405B","red":"#FF9CA7"},"Night Orchid":{"bg":"#181525","card":"#29253C","panel":"#36304B","ink":"#F2EDFF","muted":"#B9B0D5","line":"#554C70","blue":"#BBA8FF","accentText":"#241C44","hero":"#100E1C","input":"#211D33","selected":"#4B4273","red":"#FFADC0"},"Velvet Plum":{"bg":"#261C2A","card":"#3A2B41","panel":"#4A3751","ink":"#F8EDF7","muted":"#D0BCD1","line":"#6F5876","blue":"#E5AEDF","accentText":"#38233B","hero":"#19121F","input":"#302438","selected":"#64476B","red":"#FFADBE"},"Smoky Lilac":{"bg":"#24222C","card":"#35323E","panel":"#413C4B","ink":"#F1ECF7","muted":"#C2BACD","line":"#625B71","blue":"#C6B1DB","accentText":"#292238","hero":"#19171F","input":"#2E2937","selected":"#5A4E6C","red":"#FCA8B2"},"Mulberry Ink":{"bg":"#1D2029","card":"#2E303D","panel":"#3D3D4B","ink":"#EDF0F8","muted":"#B9C0D4","line":"#5A5B70","blue":"#D0A4C7","accentText":"#312337","hero":"#141821","input":"#252734","selected":"#56455D","red":"#FEA7B4"}};const KEY=SALDOZA_BUDGET_KEY;const fmt=new Intl.NumberFormat('ru-RU',{style:'currency',currency:'RUB'});const rub=n=>fmt.format(Number.isFinite(n)?n:0);const cats=[{id:'family',name:'Семейные нужды',icon:'🛒',color:'#2965eb'},{id:'utilities',name:'Коммуналка',icon:'💡',color:'#14a59c'},{id:'savings',name:'Накопления',icon:'🏦',color:'#20a27a'},{id:'other',name:'Остальное',icon:'✨',color:'#ed9d45'}];const $=id=>document.getElementById(id);
+const reserveCategory={id:'reserve',name:'Неприкосновенная подушка'};
+const transferCategories=[...cats,reserveCategory];const pad=n=>String(n).padStart(2,'0');const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());const fromISO=s=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(s||''))return null;const [y,m,d]=s.split('-').map(Number);const x=new Date(y,m-1,d);return x.getFullYear()===y&&x.getMonth()===m-1&&x.getDate()===d?x:null};const today=new Date(); const currentMonth=iso(today).slice(0,7);
 let data;const defaults=()=>({welcomeSeen:false,showFamilySplit:false,showCreditTab:false,months:{},mortgageMonthly:0,ladder:{reserve:0,included:false},weights:{family:50,utilities:7.5,savings:7.5,other:7.5},debt:0,reserved:0,deadline:iso(new Date(today.getFullYear(),today.getMonth()+4,0)),expenses:[],expenseTypes:{family:['Продукты','Бытовая химия','Гигиена','Одежда и дети','Здоровье','Питомцы'],utilities:['ЖКХ','Электричество','Вода','Интернет'],savings:['Пополнение резерва'],other:['Автомобиль','Кафе','Подарки','Прочее']},payDays:{advance:16,salary:1},salaryConfig:{base:0,mode:"gross",taxRate:13}});
 try{data=JSON.parse(localStorage.getItem(KEY)||'null')||defaults()}catch(_){data=defaults()} if(!data.months||!data.weights||!Array.isArray(data.expenses))data=defaults();
 normalizeBudget(data);
@@ -2734,6 +2737,13 @@ function normalizeBudget(data){
  if(!Array.isArray(data.transfers))data.transfers=[];
  if(!Array.isArray(data.regularPayments))data.regularPayments=[];
  if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
+ const ladder=data.ladder;
+ ladder.reserve=num(ladder.reserve);
+ ladder.reserveTarget??=ladder.reserve;
+ ladder.reserveSince??=data.startBalances?.date||'0000-01-01';
+ // Older budgets stored the reserve base inside the gross savings envelope.
+ // Freeze the shared starting amount so new transfers never change the overlap.
+ ladder.includedAmount??=ladder.included?embeddedSavings(data,ladder.reserve):0;
  if(!data.salaryConfig||typeof data.salaryConfig!=='object')data.salaryConfig={base:0,mode:'gross',taxRate:13};
  if(data.salaryConfig.taxRate===undefined)data.salaryConfig.taxRate=13;
  if(typeof data.paidMortgageMonth!=='string')data.paidMortgageMonth='';
@@ -3285,20 +3295,25 @@ function incomeTotalMonth(key){return data.extraIncomes.filter(i=>i.date?.starts
 function regularPaymentSum(target,fromDate=null,toDate=null){return (data.regularPayments||[]).filter(p=>p.target===target&&(!fromDate||p.date>=fromDate)&&(!toDate||p.date<=toDate)).reduce((a,p)=>a+num(p.amount),0)}
 function repaymentTotal(target,fromDate=null){return (data.earlyRepayments||[]).filter(x=>x.target===target&&(!fromDate||x.date>=fromDate)).reduce((sum,x)=>sum+num(x.amount),0)}
 function repaymentSavingsSpent(fromDate){return (data.earlyRepayments||[]).filter(x=>x.date>=fromDate).reduce((sum,x)=>sum+num(x.amount),0)}
-function transferDelta(id,fromDate,toDate=null){return (data.transfers||[]).filter(t=>t.date>=fromDate&&(!toDate||t.date<=toDate)).reduce((sum,t)=>sum+(t.to===id?num(t.amount):0)-(t.from===id?num(t.amount):0),0)}
+function transferDelta(id,fromDate,toDate=null,budget=data){return (budget.transfers||[]).filter(t=>t.date>=fromDate&&(!toDate||t.date<=toDate)).reduce((sum,t)=>sum+(t.to===id?num(t.amount):0)-(t.from===id?num(t.amount):0),0)}
 function categoryBalanceAt(id,date){
- if(!data.startBalances||date<data.startBalances.date)return null;
- const start=data.startBalances.date;
- const base=num(data.startBalances.balances[id]);
- const received=data.receipts.filter(r=>r.date>=start&&r.date<=date).reduce((a,r)=>a+num(r.amounts?.[id]),0);
- const spent=data.expenses.filter(e=>e.date>=start&&e.date<=date&&e.category===id).reduce((a,e)=>a+num(e.amount),0);
- const income=data.extraIncomes.filter(i=>i.destination===id&&i.date>=start&&i.date<=date).reduce((a,i)=>a+num(i.amount),0);
- const wifeCorrection=id==='family'?(data.wifeAdjustments||[]).filter(a=>a.date>=start&&a.date<=date).reduce((sum,a)=>sum+num(a.amount),0):0;
- const early=id==='savings'?(data.earlyRepayments||[]).filter(x=>x.date>=start&&x.date<=date).reduce((a,x)=>a+num(x.amount),0):0;
- const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start&&p.date<=date).reduce((a,p)=>a+num(p.extraAmount),0);
- return base+received+income+wifeCorrection-spent-early-creditExtra+transferDelta(id,start,date);
+ if(id==='reserve')return actualReserve(date);
+ const balance=rawCategoryBalanceAt(id,date);
+ return balance===null?null:balance-(id==='savings'&&data.ladder.included?data.ladder.includedAmount:0);
 }
-function realBalance(id){if(!data.startBalances)return null;const start=data.startBalances.date;const base=num(data.startBalances.balances[id]);const received=data.receipts.filter(r=>r.date>=start).reduce((a,r)=>a+num(r.amounts?.[id]),0);const spent=data.expenses.filter(e=>e.date>=start&&e.category===id).reduce((a,e)=>a+num(e.amount),0);const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start).reduce((a,p)=>a+num(p.extraAmount),0);return base+received+incomeAmountFor(id,start)+(id==='family'?(data.wifeAdjustments||[]).filter(a=>a.date>=start).reduce((sum,a)=>sum+num(a.amount),0):0)-spent-(id==='savings'?repaymentSavingsSpent(start):0)-creditExtra+transferDelta(id,start)}
+function rawCategoryBalanceAt(id,date,budget=data){
+ if(!budget.startBalances||date<budget.startBalances.date)return null;
+ const start=budget.startBalances.date;
+ const base=num(budget.startBalances.balances[id]);
+ const received=budget.receipts.filter(r=>r.date>=start&&r.date<=date).reduce((a,r)=>a+num(r.amounts?.[id]),0);
+ const spent=budget.expenses.filter(e=>e.date>=start&&e.date<=date&&e.category===id).reduce((a,e)=>a+num(e.amount),0);
+ const income=budget.extraIncomes.filter(i=>i.destination===id&&i.date>=start&&i.date<=date).reduce((a,i)=>a+num(i.amount),0);
+ const wifeCorrection=id==='family'?(budget.wifeAdjustments||[]).filter(a=>a.date>=start&&a.date<=date).reduce((sum,a)=>sum+num(a.amount),0):0;
+ const early=id==='savings'?(budget.earlyRepayments||[]).filter(x=>x.date>=start&&x.date<=date).reduce((a,x)=>a+num(x.amount),0):0;
+ const creditExtra=(budget.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start&&p.date<=date).reduce((a,p)=>a+num(p.extraAmount),0);
+ return base+received+income+wifeCorrection-spent-early-creditExtra+transferDelta(id,start,date,budget);
+}
+function realBalance(id){if(!data.startBalances)return null;const start=data.startBalances.date;const base=num(data.startBalances.balances[id]);const received=data.receipts.filter(r=>r.date>=start).reduce((a,r)=>a+num(r.amounts?.[id]),0);const spent=data.expenses.filter(e=>e.date>=start&&e.category===id).reduce((a,e)=>a+num(e.amount),0);const creditExtra=(data.regularPayments||[]).filter(p=>(p.target==='credit'||p.target==='mortgage')&&p.extraSource===id&&p.date>=start).reduce((a,p)=>a+num(p.extraAmount),0);return base+received+incomeAmountFor(id,start)+(id==='family'?(data.wifeAdjustments||[]).filter(a=>a.date>=start).reduce((sum,a)=>sum+num(a.amount),0):0)-spent-(id==='savings'?repaymentSavingsSpent(start):0)-creditExtra+transferDelta(id,start)-(id==='savings'&&data.ladder.included?data.ladder.includedAmount:0)}
 // Фактический остаток на сегодня, без планируемых и датированных будущим операций.
 // Бюджетные конверты, ипотечный резерв и резерв кредитки не пересекаются.
 function actualMoneyToday(now=new Date()){
@@ -3313,7 +3328,7 @@ function actualMoneyToday(now=new Date()){
  const savings=categoryBalanceAt('savings',asOf);
  const available=envelopes-savings;
  const reserve=mortgage+creditReserve+(data.creditAccounts||[]).reduce((sum,a)=>sum+accountReserveCents(a.id,asOf)/100,0);
- return {envelopes,savings,available,reserve,mortgage,creditReserve,total:envelopes+reserve};
+ return {envelopes,savings,available,reserve,mortgage,creditReserve,total:Math.round((envelopes+reserve+actualReserve(asOf))*100)/100};
 }
 function mortgageFund(){if(!data.startBalances)return null;return num(data.startBalances.mortgage)+data.receipts.filter(r=>r.date>=data.startBalances.date).reduce((a,r)=>a+num(r.amounts?.mortgage),0)+incomeAmountFor('mortgage',data.startBalances.date)-mortgageReserveSpent(data.startBalances.date)}
 function updateStartFields(){const x=data.startBalances||{date:iso(new Date()),balances:{},mortgage:0};$('startDate').value=x.date;$('startMortgageFund').value=x.mortgage||0;for(const c of cats)$('start-'+c.id).value=x.balances?.[c.id]||0;$('paidMortgageMonth').value=data.paidMortgageMonth||'';}
@@ -4063,12 +4078,13 @@ function parseSmartOperation(raw,now,types,mode=null){
    .replace(/₽|(?:^|\s)(?:рублей|рубля|рубль|руб\.?|р\.?)(?=\s|$)/gu,' ').trim().replace(/[.!]+$/,'').replace(/\s+/g,' ').trim();
  const explicitWife=/^(?:(?:перевод|перевел[аи]?|отправил[аи]?|перекинул[аи]?|скинул[аи]?|дал[аи]?) (?:деньги |денег )?жене|жене (?:перевод|перевел[аи]?|отправил[аи]?|перекинул[аи]?|скинул[аи]?|дал[аи]?))(?: на продукты)?$/u.test(rest);
  if(mode==='transfer'){
-  if(/жене|жен[аы]|ипотек|кредит|подушк|зарплат|аванс|долг|погасил|получил|потратил|купил|оплатил/.test(rest))return fail('Это не перевод между конвертами. Используй соответствующую форму.');
+  if(/жене|жен[аы]|ипотек|кредит|зарплат|аванс|долг|погасил|получил|потратил|купил|оплатил/.test(rest))return fail('Это не перевод между конвертами. Используй соответствующую форму.');
   const envelope=name=>{
    const n=String(name||'').trim().replace(/^(?:конверта|конверт|категории|категорию)\s+/,'').replace(/[«»"']/g,'').trim();
    if(/^(?:семейные нужды|семейных нужд|семейный бюджет|семейного бюджета|семейный|семейного|семья|семьи|семью|продукты|продуктов)$/.test(n))return 'family';
    if(/^(?:коммуналка|коммуналки|коммуналку|коммунальные платежи|коммунальных платежей|жкх)$/.test(n))return 'utilities';
    if(/^(?:накопления|накоплений|накопление|сбережения|сбережений)$/.test(n))return 'savings';
+   if(/^(?:неприкосновенн(?:ая|ую|ой) )?подушк(?:а|у|и)(?: безопасности)?$/.test(n))return 'reserve';
    if(/^(?:остальное|остального|остальных|остаток|остатка|прочее|прочего|доступный бюджет|доступного бюджета)$/.test(n))return 'other';
    return '';
   };
@@ -4152,7 +4168,7 @@ function setupSmartOperation(){
   if(r.kind==='expense'&&!r.wifeTransfer&&r.learningKey){const learned=learnedSmartCategory(r.learningKey,data.expenses,data.expenseTypes);if(learned){Object.assign(r,learned);r.hint='Категория из твоих предыдущих записей.';}}
   draft=r;const category=cats.find(c=>c.id===r.category)?.name;
   if(r.kind==='transfer'){
-   const name=id=>cats.find(c=>c.id===id)?.name||'не выбран';
+   const name=id=>transferCategories.find(c=>c.id===id)?.name||'не выбран';
    preview.textContent='Перевод · '+rub(r.amount)+' · '+r.date+' · '+name(r.from)+' → '+name(r.to)+' · '+r.hint+'. Запись ещё не сохранена.';
   }else{
   preview.textContent=(r.wifeTransfer?'Перевод жене':r.kind==='expense'?'Расход':'Дополнительный доход')+' · '+rub(r.amount)+' · '+r.date+' · '+(r.kind==='expense'?((category||'Категория не выбрана')+' / '+(r.type||'выбери вид расхода')):(r.source+' / '+(r.destination==='family'?'Семейные нужды':'выбери конверт')))+(r.hint?' · '+r.hint:'')+'. Запись ещё не сохранена.';
@@ -4364,7 +4380,7 @@ $('earlyCount').textContent='· '+earlyRows.length;
 $('earlyHistory').innerHTML=earlyRows.length?earlyRows.map(x=>`<div class="transaction"><div><b>${x.target==='credit'?'Кредитная карта':'Ипотека'}</b><small>${esc(x.date)} · Из накоплений${x.note?' · '+esc(x.note):''}</small></div><div class="row"><b>${rub(x.amount)}</b><button class="delete" type="button" data-del-early="${esc(x.id)}" title="Удалить запись">✕</button></div></div>`).join(''):'<div class="empty">Нет досрочных погашений за месяц</div>';
 const transferRows=sortHistoryRows((data.transfers||[]).filter(t=>t.date?.startsWith(month)),'transferList');
 $('transferCount').textContent=String(transferRows.length);
-$('transferList').innerHTML=transferRows.length?transferRows.map(t=>{const from=cats.find(c=>c.id===t.from)?.name||(data.creditAccounts||[]).find(a=>'account-'+a.id===t.from)?.name||({credit:'Кредитная карта',mortgage:'Ипотека'}[t.from])||'Категория',to=cats.find(c=>c.id===t.to)?.name||'Категория';return `<div class="transaction"><div><b>${esc(from)} → ${esc(to)}</b><small>${esc(t.date)}${t.note?' · '+esc(t.note):''}</small></div><div class="row"><b>${rub(t.amount)}</b>${t.closeRelease?'':'<button type="button" class="delete" data-del-transfer="'+esc(t.id)+'" title="Отменить перевод">✕</button>'}</div></div>`}).join(''):'<div class="empty">За этот месяц переводов нет</div>';
+$('transferList').innerHTML=transferRows.length?transferRows.map(t=>{const from=transferCategories.find(c=>c.id===t.from)?.name||(data.creditAccounts||[]).find(a=>'account-'+a.id===t.from)?.name||({credit:'Кредитная карта',mortgage:'Ипотека'}[t.from])||'Категория',to=transferCategories.find(c=>c.id===t.to)?.name||'Категория';return `<div class="transaction"><div><b>${esc(from)} → ${esc(to)}</b><small>${esc(t.date)}${t.note?' · '+esc(t.note):''}</small></div><div class="row"><b>${rub(t.amount)}</b>${t.closeRelease?'':'<button type="button" class="delete" data-del-transfer="'+esc(t.id)+'" title="Отменить перевод">✕</button>'}</div></div>`}).join(''):'<div class="empty">За этот месяц переводов нет</div>';
 const incomeRows=sortHistoryRows(data.extraIncomes.filter(i=>i.date?.startsWith(month)),'incomeList');
 $('incomeCount').textContent=String(incomeRows.length);
 $('incomeList').innerHTML=incomeRows.length?incomeRows.map(i=>{
@@ -4379,14 +4395,30 @@ function ladderSettings(){
  if(!data.ladder||typeof data.ladder!=='object')data.ladder={reserve:500000,included:false};
  return data.ladder;
 }
-/* Extra income credited directly to the protected cushion stays outside savings envelopes. */
-function reserveIncomeTotal(asOf=iso(new Date())){
- const start=data.startBalances?.date||'0000-01-01';
- return (data.extraIncomes||[]).filter(i=>i.destination==='reserve'&&i.date>=start&&i.date<=asOf)
-   .reduce((sum,i)=>sum+num(i.amount),0);
+function embeddedSavings(budget,reserve){
+ const raw=rawCategoryBalanceAt('savings',iso(new Date()),budget)??confirmedSavingsBalance(budget);
+ return Math.round(Math.min(reserve,Math.max(0,raw??0))*100)/100;
+}
+function reserveIncomeTotal(asOf){
+ return data.extraIncomes.filter(i=>i.destination==='reserve'&&i.date>=data.ladder.reserveSince&&i.date<=asOf)
+   .reduce((sum,i)=>sum+Math.round(num(i.amount)*100),0)/100;
+}
+function reserveNetMovement(asOf){
+ return reserveIncomeTotal(asOf)+transferDelta('reserve','',asOf);
 }
 function actualReserve(asOf=iso(new Date())){
- return num(ladderSettings().reserve)+reserveIncomeTotal(asOf);
+ return Math.round((data.ladder.reserve+reserveNetMovement(asOf))*100)/100;
+}
+function isReserveTransfer(t){return t.from==='reserve'||t.to==='reserve'}
+function reserveIsSolvent(budget){
+ const movements=budget.extraIncomes.filter(i=>i.destination==='reserve'&&i.date>=budget.ladder.reserveSince)
+  .map(i=>({date:i.date,cents:Math.round(num(i.amount)*100)}));
+ for(const t of budget.transfers.filter(isReserveTransfer)){
+  movements.push({date:t.date,cents:Math.round(num(t.amount)*100)*(t.from==='reserve'?-1:1)});
+ }
+ movements.sort((a,b)=>a.date.localeCompare(b.date));
+ let cents=Math.round(budget.ladder.reserve*100);
+ return cents>=0&&Number.isSafeInteger(cents)&&movements.every(m=>(cents+=m.cents)>=0);
 }
 
 /* v1.5.32: automatic, conservative economy discovery from recorded expenses.
@@ -4496,27 +4528,27 @@ function analyticsReportRender(){
 /* v1.5.35: capital goal planner. Same reserve accounting as the ladder above. */
 /* Actual external savings are confirmed manually; planning allocations
    remain budget earmarks, not evidence of a bank transfer. */
-function confirmedSavingsBalance(){
- const v=data.confirmedSavings;
+function confirmedSavingsBalance(budget=data){
+ const v=budget.confirmedSavings;
  if(!v||!Number.isFinite(Number(v.base))||Number(v.base)<0)return null;
  return Math.max(0,num(v.base)+(v.entries||[]).reduce((sum,e)=>sum+(e.kind==='withdrawal'?-num(e.amount):num(e.amount)),0));
 }
 function goalSavingsBalance(){
  const envelope=categoryBalanceAt('savings',iso(new Date()));
- return envelope===null?confirmedSavingsBalance():envelope;
+ if(envelope!==null)return envelope;
+ const confirmed=confirmedSavingsBalance();
+ return confirmed===null?null:confirmed-(data.ladder.included?data.ladder.includedAmount:0);
 }
 function capitalSnapshot(goalOverride){
  const settings=ladderSettings(),reserve=actualReserve();
- const baseReserve=num(settings.reserve);
  const savings=goalSavingsBalance();
- const booked=savings===null?0:Math.max(0,savings);
- const extra=settings.included?Math.max(0,booked-baseReserve):booked;
+ const extra=Math.max(0,savings??0);
  const total=Math.round((reserve+extra)*100)/100;
  const automaticGoal=total<1000000?1000000:(Math.floor(total/500000)+1)*500000;
  const userGoal=typeof settings.targetAmount==='number'&&Number.isFinite(settings.targetAmount)
-   &&settings.targetAmount>=reserve&&settings.targetAmount<=1000000000;
+   &&settings.targetAmount>=0&&settings.targetAmount<=1000000000;
  const override=typeof goalOverride==='number'&&Number.isInteger(goalOverride)
-   &&goalOverride>=reserve&&goalOverride<=1000000000;
+   &&goalOverride>=settings.reserveTarget&&goalOverride<=1000000000;
  const goal=override?goalOverride:(userGoal?settings.targetAmount:automaticGoal);
  return {settings,reserve,savings,extra,total,goal,automatic:!override&&!userGoal,
    remaining:Math.max(0,goal-total)};
@@ -4658,35 +4690,44 @@ $('confirmedSavingsHistory').addEventListener('click',e=>{
  renderAll();savingsPlanOpen();
 });
 
+function readSavingsPlanInputs(){
+ const reserveInput=$('ladderReserveInput'),targetInput=$('ladderReserveTarget'),goalInput=$('savingsPlanTargetAmount');
+ const reserve=reserveInput.valueAsNumber,target=targetInput.valueAsNumber,goal=goalInput.valueAsNumber;
+ const validMoney=value=>Number.isFinite(value)&&value>=0&&value<=1000000000&&value===Math.round(value*100)/100;
+ const validReserve=validMoney(reserve)&&reserveIsSolvent({...data,ladder:{...data.ladder,reserve:reserveOpeningBalance(reserve)}});
+ const validTarget=validMoney(target);
+ const validGoal=Number.isInteger(goal)&&goal>=target&&goal<=1000000000;
+ return {reserve:validReserve?reserve:actualReserve(),target,goal,validReserve,validTarget,validGoal};
+}
+function reserveOpeningBalance(reserve){
+ return Math.round((reserve-reserveNetMovement(iso(new Date())))*100)/100;
+}
+function plannedSavingsOverlap(reserve){
+ if(!$('ladderIncluded').checked)return 0;
+ if(data.ladder.included)return data.ladder.includedAmount;
+ return embeddedSavings(data,reserve);
+}
 function savingsPlanRender(){
  const input=$('savingsPlanMonths');
  const parsed=Number(input.value);
  const validMonths=input.value.trim()!==''&&Number.isInteger(parsed)&&parsed>=1&&parsed<=120;
- const targetInput=$('savingsPlanTargetAmount');
- const proposedGoal=Number(targetInput.value);
- const reserveInput=$('ladderReserveInput');
- const reserveValue=Number(reserveInput.value);
- const incoming=reserveIncomeTotal();
- const validReserve=reserveInput.value.trim()!==''&&Number.isFinite(reserveValue)&&reserveValue>=incoming&&reserveValue<=1000000000;
- const reserve=validReserve?reserveValue:actualReserve();
- const savings=goalSavingsBalance();
- const booked=savings===null?0:Math.max(0,savings);
- const baseReserve=Math.max(0,reserve-incoming);
- const total=Math.round((reserve+($('ladderIncluded').checked?Math.max(0,booked-baseReserve):booked))*100)/100;
- const validGoal=targetInput.value.trim()!==''&&Number.isInteger(proposedGoal)
-   &&proposedGoal>=reserve&&proposedGoal<=1000000000;
- const info={goal:proposedGoal,total,remaining:Math.max(0,proposedGoal-total),reserve};
+ const {validReserve,validTarget,validGoal,reserve,target,goal}=readSavingsPlanInputs();
+ const raw=rawCategoryBalanceAt('savings',iso(new Date()))??confirmedSavingsBalance();
+ const overlap=plannedSavingsOverlap(reserve);
+ const total=Math.round((reserve+Math.max(0,(raw??0)-overlap))*100)/100;
+ const info={goal,total,remaining:Math.max(0,goal-total),target};
  $('savingsPlanGoal').textContent=validGoal?rub(info.goal):'—';
  $('savingsPlanCurrent').textContent=rub(info.total);
  $('savingsPlanRemaining').textContent=validGoal?rub(info.remaining):'—';
- $('savingsPlanSave').disabled=!(validMonths&&validGoal&&validReserve);
+ $('savingsPlanSave').disabled=!(validMonths&&validGoal&&validReserve&&validTarget);
  document.querySelectorAll('[data-savings-months]').forEach(btn=>{
    btn.classList.toggle('active',validMonths&&Number(btn.dataset.savingsMonths)===parsed);
  });
- if(!validMonths||!validGoal||!validReserve){
+ if(!validMonths||!validGoal||!validReserve||!validTarget){
    $('savingsPlanPerMonth').textContent='—';
    $('savingsPlanDeadline').textContent=!validReserve?'Укажи корректный размер подушки':
-    !validGoal?'Цель должна быть не ниже подушки: '+rub(info.reserve)
+    !validTarget?'Укажи целевой размер подушки':
+    !validGoal?'Общая цель должна быть не ниже цели подушки: '+rub(info.target)
      :'Выбери срок от 1 до 120 месяцев';
    $('savingsPlanSplit').textContent='—';
    return;
@@ -4710,6 +4751,7 @@ function savingsPlanOpen(){
  $('savingsGoalName').value=settings.name||'';
  $('savingsPlanTargetAmount').value=String(capitalSnapshot().goal);
  $('ladderReserveInput').value=String(actualReserve());
+ $('ladderReserveTarget').value=String(settings.reserveTarget);
  $('ladderIncluded').checked=!!settings.included;
  $('savingsPlanMonths').value=String(remaining===null?12:Math.max(1,Math.min(120,remaining)));
  $('savingsPlanStatus').textContent=remaining===null?'Выбери срок и сохрани его, чтобы план запомнился.':
@@ -4750,6 +4792,7 @@ function ladderRender(){
  $('ladderGoal').textContent=rub(goal);
  $('ladderBadge').textContent='Цель: '+rub(goal);
  $('ladderReserve').textContent=rub(reserve);
+ $('ladderReserveGoal').textContent=rub(settings.reserveTarget);
  $('ladderExtra').textContent=savings===null?'—':rub(extra);
  $('ladderRemaining').textContent=total>=goal?'Цель достигнута! · 100%':
    'Достигнуто '+progress+'% цели';
@@ -4757,7 +4800,7 @@ function ladderRender(){
  $('ladderTrack').setAttribute('aria-valuenow',progress);
  $('ladderNote').textContent=savings===null
    ?'Дополнительные накопления появятся после ввода стартовых остатков. Подушка указана отдельно.'
-   :settings.included?'Подушка уже внутри категории «Накопления». Повторно не учитываем.'
+   :settings.included?'Остаток конверта «Накопления» показан за вычетом учтённой в нём подушки.'
    :'Подушка считается отдельно. Если она уже есть в остатке «Накоплений», включи переключатель.';
  if(document.activeElement!==$('ladderReserveInput'))$('ladderReserveInput').value=reserve;
 
@@ -5528,12 +5571,7 @@ $('earlyForm').addEventListener('submit',e=>{
  if(date>iso(new Date())){alert('Будущий платёж пока не выполнен. Добавь запись после фактического погашения.');return;}
  if(date<data.startBalances.date){alert('Дата платежа раньше даты начала учёта. Учти его в стартовых остатках.');return;}
  // Calculate balance as of payment date to avoid spending future receipts on earlier transactions.
- const savingsAtDate=num(data.startBalances.balances.savings)
- +data.receipts.filter(r=>r.date>=data.startBalances.date&&r.date<=date).reduce((a,r)=>a+num(r.amounts?.savings),0)
- +data.extraIncomes.filter(i=>i.destination==='savings'&&i.date>=data.startBalances.date&&i.date<=date).reduce((a,i)=>a+num(i.amount),0)
- -data.expenses.filter(x=>x.category==='savings'&&x.date>=data.startBalances.date&&x.date<=date).reduce((a,x)=>a+num(x.amount),0)
- -(data.earlyRepayments||[]).filter(x=>x.date<=date&&x.date>=data.startBalances.date).reduce((a,x)=>a+num(x.amount),0)
- +transferDelta('savings',data.startBalances.date,date);
+ const savingsAtDate=categoryBalanceAt('savings',date);
  if(amount>Math.round((savingsAtDate+0.000001)*100)/100){alert('Недостаточно накоплений на дату платежа. Доступно: '+rub(savingsAtDate));return;}
  if(target==='credit'&&amount>creditOutstanding()+0.001){alert('Сумма превышает остаток долга по кредитке. Проверь задолженность.');return;}
  const label=target==='credit'?'кредитную карту':'ипотеку';
@@ -5551,7 +5589,7 @@ function transferableKopeks(from,date){
  return balance===null?null:Math.max(0,Math.round(balance*100));
 }
 function labelEnvelopeOptions(selectIds,date){
- for(const category of cats){
+ for(const category of transferCategories){
   const balance=fromISO(date)?categoryBalanceAt(category.id,date):null;
   const isExpense=selectIds.includes('expenseCategory');
   const own=category.id==='family'&&balance!==null&&isExpense?Math.max(0,Math.round((balance-wifeFunds(date))*100)/100):balance;
@@ -5578,21 +5616,45 @@ $('transferForm').addEventListener('submit',e=>{
  e.preventDefault();
  if(!data.startBalances){alert('Сначала задай стартовые остатки в настройках.');go('settings');return;}
  const from=$('transferFrom').value,to=$('transferTo').value,date=$('transferDate').value,amount=num($('transferAmount').value),note=$('transferNote').value.trim();
- if(!cats.some(c=>c.id===from)||!cats.some(c=>c.id===to)||!fromISO(date)||!Number.isFinite(amount)||amount<=0){alert('Проверь поля перевода.');return;}
+ if(!transferCategories.some(c=>c.id===from)||!transferCategories.some(c=>c.id===to)||!fromISO(date)||!Number.isSafeInteger(Math.round(amount*100))||amount<=0||amount!==Math.round(amount*100)/100){alert('Проверь поля перевода.');return;}
  if(from===to){alert('Выбери разные категории.');return;}
  if(date>iso(new Date())){alert('Будущие переводы пока не учитываются.');return;}
  if(date<data.startBalances.date){alert('Дата перевода раньше начала учёта.');return;}
  const available=transferableKopeks(from,date);
  if(available===null||Math.round(amount*100)>available){alert('Недостаточно средств в исходной категории. Доступно: '+rub((available||0)/100)+' · Введено: '+rub(amount));return;}
- const fromName=cats.find(c=>c.id===from).name,toName=cats.find(c=>c.id===to).name;
- if(!confirm('Перевести '+rub(amount)+' из «'+fromName+'» в «'+toName+'»?'))return;
- recordEnvelopeTransfer({id:'tr-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),from,to,date,amount,note});
- $('transferAmount').value='';$('transferNote').value='';month=date.slice(0,7);renderAll();
+ const fromName=transferCategories.find(c=>c.id===from).name,toName=transferCategories.find(c=>c.id===to).name;
+ const transfer={id:crypto.randomUUID(),from,to,date,amount,note};
+ if(from==='reserve'&&!reserveIsSolvent({...data,transfers:[...data.transfers,transfer]})){
+  alert('Этот перевод оставит подушку без средств для более поздних записей. Проверь историю переводов.');return;
+ }
+ const warning=from==='reserve'?'\n\nПодушка уменьшится на '+rub(amount)+'. Остаток на сегодня составит '+rub(actualReserve()-amount)+'.':'';
+ if(!confirm('Перевести '+rub(amount)+' из «'+fromName+'» в «'+toName+'»?'+warning))return;
+ const previousMonth=month;
+ recordEnvelopeTransfer(transfer);
+ month=date.slice(0,7);
+ if(!renderAll()){data.transfers.pop();month=previousMonth;refreshBudgetView();return;}
+ $('transferAmount').value='';$('transferNote').value='';
 });
 $('transferList').addEventListener('click',e=>{
  const b=e.target.closest('[data-del-transfer]');if(!b)return;
- if(!confirm('Отменить перевод? Сумма вернётся в исходную категорию.'))return;
- data.transfers=data.transfers.filter(t=>t.id!==b.dataset.delTransfer);renderAll();
+ const previous=data.transfers,transfer=previous.find(t=>t.id===b.dataset.delTransfer);
+ if(!transfer||transfer.closeRelease)return;
+ const remaining=previous.filter(t=>t!==transfer);
+ if(isReserveTransfer(transfer)){
+  if(!data.startBalances||transfer.date<data.startBalances.date){
+   alert('Этот перевод предшествует текущим стартовым остаткам. Чтобы отменить его, сначала восстанови прежнюю дату начала учёта.');return;
+  }
+  if(transfer.to==='reserve'&&!reserveIsSolvent({...data,transfers:remaining})){
+   alert('Эти деньги уже были переведены из подушки. Сначала отмени связанные переводы.');return;
+  }
+  if(transfer.from==='reserve'&&transferableKopeks(transfer.to,iso(new Date()))<Math.round(transfer.amount*100)){
+   alert('В категории назначения уже не хватает денег для отмены. Сначала восстанови её остаток.');return;
+  }
+ }
+ const warning=transfer.to==='reserve'?'\n\nПодушка уменьшится на '+rub(transfer.amount)+'. Остаток на сегодня составит '+rub(actualReserve()-transfer.amount)+'.':'';
+ if(!confirm('Отменить перевод? Сумма вернётся в исходную категорию.'+warning))return;
+ data.transfers=remaining;
+ if(!renderAll()){data.transfers=previous;refreshBudgetView();}
 });
 $('incomeDate').value=iso(new Date());
 
@@ -5610,7 +5672,12 @@ $('incomeForm').addEventListener('submit',e=>{
 });
 $('incomeList').addEventListener('click',e=>{
  const b=e.target.closest('[data-del-income]');if(!b||!confirm('Удалить это поступление?'))return;
- data.extraIncomes=data.extraIncomes.filter(i=>i.id!==b.dataset.delIncome);renderAll();
+ const previous=data.extraIncomes,remaining=previous.filter(i=>i.id!==b.dataset.delIncome);
+ if(!reserveIsSolvent({...data,extraIncomes:remaining})){
+  alert('Деньги из этого поступления уже переведены из подушки. Сначала отмени связанные переводы.');return;
+ }
+ data.extraIncomes=remaining;
+ if(!renderAll()){data.extraIncomes=previous;refreshBudgetView();}
 });
 $('expenseDate').value=iso(new Date());
 $('expenseDate').addEventListener('input',updateExpenseOptions);
@@ -5698,7 +5765,21 @@ function readBackup(text){
   const linked=(budget.monthlyBills||[]).filter(b=>b.creditAccount);
   if(new Set(linked.map(b=>b.creditAccount)).size!==linked.length||linked.some(b=>!ids.has(b.creditAccount)||b.totalCents!==b.cents||!Number.isSafeInteger(b.principalCents)||b.principalCents<0||b.principalCents>b.cents))invalid();
  }
+ const ladder=budget.ladder;
+ if(ladder?.reserveTarget!==undefined&&!money(ladder.reserveTarget)||
+    ladder?.includedAmount!==undefined&&!money(ladder.includedAmount)||
+    ladder?.reserveSince!==undefined&&ladder.reserveSince!=='0000-01-01'&&!fromISO(ladder.reserveSince))invalid();
+ const reserveTransfers=(budget.transfers||[]).filter(isReserveTransfer);
+ const validEndpoint=id=>transferCategories.some(c=>c.id===id);
+ const transferIds=new Set();
+ for(const t of reserveTransfers){
+  const amount=Number(t.amount);
+  if(typeof t.id!=='string'||!t.id||transferIds.has(t.id)||!validEndpoint(t.from)||!validEndpoint(t.to)||
+     t.from===t.to||t.date>iso(new Date())||amount<=0||!Number.isSafeInteger(Math.round(amount*100))||amount!==Math.round(amount*100)/100)invalid();
+  transferIds.add(t.id);
+ }
  normalizeBudget(budget);
+ if(!reserveIsSolvent(budget))invalid();
  return budget;
 }
 $('importClick').onclick=()=>$('importData').click();
@@ -5722,7 +5803,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.150';
+const APP_VERSION='1.5.153';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
@@ -6059,6 +6140,7 @@ $('savingsPlanTargetAmount').addEventListener('input',()=>{
  $('savingsPlanStatus').textContent='Сохрани цель и срок, чтобы использовать их дальше.';
  savingsPlanRender();
 });
+$('ladderReserveTarget').addEventListener('input',savingsPlanRender);
 $('ladderReserveInput').addEventListener('input',()=>{
  $('savingsPlanStatus').textContent='Сохрани размер подушки и параметры цели.';
  savingsPlanRender();
@@ -6074,24 +6156,20 @@ document.querySelectorAll('[data-savings-months]').forEach(btn=>btn.addEventList
 }));
 $('savingsPlanSave').addEventListener('click',()=>{
  const months=Number($('savingsPlanMonths').value);
- const targetInput=$('savingsPlanTargetAmount');
- const reserveInput=$('ladderReserveInput');
- const reserve=Number(reserveInput.value);
- const incoming=reserveIncomeTotal();
- const goal=Number(targetInput.value);
+ const {reserve,target,goal,validReserve,validTarget,validGoal}=readSavingsPlanInputs();
  if(!Number.isInteger(months)||months<1||months>120){alert('Выбери срок от 1 до 120 месяцев.');return;}
- if(reserveInput.value.trim()===''||!Number.isFinite(reserve)||reserve<incoming||reserve>1000000000){alert('Размер подушки не может быть меньше уже записанных в неё поступлений ('+rub(incoming)+'). Чтобы уменьшить эту сумму, удали ошибочные доходы.');return;}
- if(targetInput.value.trim()===''||!Number.isInteger(goal)||goal<reserve||goal>1000000000){
-   alert('Цель должна быть не меньше защищённой подушки: '+rub(reserve)+'.');return;
- }
- const settings=ladderSettings();
- settings.reserve=Math.round((reserve-incoming)*100)/100;
- settings.included=$('ladderIncluded').checked;
+ if(!validReserve||!validTarget||!validGoal)return;
+ const previous=data.ladder;
+ data.ladder={
+  ...previous,reserve:reserveOpeningBalance(reserve),reserveTarget:target,
+  included:$('ladderIncluded').checked,includedAmount:plannedSavingsOverlap(reserve)
+ };
+ const settings=data.ladder;
  settings.name=$('savingsGoalName').value.trim();
  settings.targetAmount=goal;
  settings.targetMonth=savingsPlanTarget(months);
  if(settings.autoAllocateSavings===undefined)settings.autoAllocateSavings=true;
- if(!renderAll())return;
+ if(!renderAll()){data.ladder=previous;refreshBudgetView();return;}
  $('savingsPlanStatus').textContent='Цель сохранена. Распределение по процентам не меняется; приложение показывает недостающий ежемесячный взнос.';
  savingsPlanRender();
 });
@@ -6177,7 +6255,7 @@ if('serviceWorker' in navigator&&location.protocol.startsWith('http'))installTes
   introTitle.innerHTML='<h2>Операции</h2>';intro.append(introTitle);
   const grid=document.createElement('div');grid.className='ops-action-grid';
   const actions=[
-   ['expense','Расход','↘'],['income','Доход','↗'],['transfer','Между конвертами','⇄']
+   ['expense','Расход','↘'],['income','Доход','↗'],['transfer','Перевод','⇄']
   ];
   for(const [type,label,symbol] of actions){
    const button=document.createElement('button');button.type='button';button.className='ops-action-tile';
@@ -6861,7 +6939,7 @@ function setupAdvisor(){
   const receipts=Array.isArray(d.receipts)?d.receipts.filter(x=>validDate(x.date)&&x.date<=today):[];
   const periods=[...new Set([...expenses.map(x=>x.date.slice(0,7)),...receipts.map(x=>x.date.slice(0,7)),...incomes.map(x=>x.date.slice(0,7))])].filter(x=>x<=month).sort().slice(-6);
   if(!periods.includes(month)) periods.push(month);
-  const reserve=amount(d.ladder?.reserve);
+  const reserve=amount(d.ladder?.reserveTarget??d.ladder?.reserve);
   const catNames={family:'Семейные нужды',utilities:'Коммуналка',savings:'Накопления',other:'Остальное'};
   const monthExpense=expenses.filter(x=>x.date.startsWith(month));
   const monthIncome=incomes.filter(x=>x.date.startsWith(month));
