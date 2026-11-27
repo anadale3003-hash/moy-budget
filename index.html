@@ -2231,7 +2231,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <main class="main">
 <section class="view active" id="v-home">
 <button class="btn full" type="button" id="firstBudget" hidden>Начать учёт · указать остатки</button>
-<div class="home-balances"><div><span>Доступно на расходы</span><strong id="heroTotal">—</strong></div><div><span>Всего с подушкой</span><strong id="heroAll">—</strong></div></div>
+<div class="home-balances"><div><span>Доступно на расходы</span><strong id="heroTotal">—</strong></div><div><span>Всего в бюджете</span><strong id="heroAll">—</strong></div></div>
 
 <section class="family-split" aria-label="Остаток на семейные покупки">
 <div hidden style="display:none!important"><span>На семейные покупки</span><strong id="familyTotalNow">—</strong></div>
@@ -4408,7 +4408,7 @@ function render(){
  document.getElementById('payHeading').textContent=singlePay()?'Зарплата':'Аванс и зарплата';
  document.documentElement.dataset.gender=data.gender||'male';
  updateReminderLabels(singlePay());
- renderEarlyAlerts();const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.total):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);renderFamilyBalances();
+ renderEarlyAlerts();const m=monthData();const calc=allocation();renderGoalLinkedPanel(calc);const pf=payrollForecast(m);$('salaryCalendarInfo').textContent='Рабочие дни: '+pf.first+' из '+pf.total+'. '+(pf.official?'Учтены праздники и переносы РФ.':'Для этого года учтены только выходные: уточни праздники вручную.')+' Доступна корректировка дней для отпуска и других особенностей.';$('monthName').textContent=new Date(Number(month.slice(0,4)),Number(month.slice(5,7))-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});const actual=actualMoneyToday();$('heroTotal').textContent=actual?rub(actual.available):'—';$('heroAll').textContent=actual?rub(actual.envelopes+actual.reserve):'—';fitTotalMoneyTile();$('heroLabel').textContent=actual?'На текущие расходы · без накоплений и обязательных платежей':'Укажи начальные остатки в настройках, чтобы видеть реальные деньги';showPaydayCountdown(actual);renderFamilyBalances();
 $('envelopes').innerHTML=cats.map(cat=>{
  const row=calc.rows.find(r=>r.id===cat.id);
  const balance=realBalance(cat.id)??(num(row?.a)+num(row?.b)-sumExpenses(cat.id));
@@ -5986,7 +5986,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.154';
+const APP_VERSION='1.5.155';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
