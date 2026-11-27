@@ -1,6 +1,6 @@
 {
   "appId": "app.saldoza.budget",
-  "appName": "Saldoza",
+  "appName": "SaldoZa",
   "webDir": "www",
   "server": {
     "hostname": "localhost",
