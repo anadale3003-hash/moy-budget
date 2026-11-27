@@ -136,6 +136,16 @@ try{
  assert.equal(baseline.mortgageMonthly,55000);
  assert.equal(baseline.ladder.reserve,150000);
  await page.locator('.tab[data-go=card]').click();
+ const creditLayout=()=>page.evaluate(()=>['#creditAdd','.credit-history-disclosure'].map(selector=>{
+  const el=document.querySelector(selector),r=el.getBoundingClientRect();
+  return [r.x,r.y,r.width,r.height].map(value=>Math.round(value*10)/10);
+ }));
+ await page.waitForTimeout(250);
+ const stableLayout=await creditLayout();
+ for(let sample=0;sample<6;sample++){
+  await page.waitForTimeout(100);
+  assert.deepEqual(await creditLayout(),stableLayout,'Credit add button and history must not oscillate');
+ }
  await page.locator('.payment-confirm').filter({has:page.locator('#confirmMortgagePayment')}).locator('.credit-wide-button').click();
  await page.locator('#paymentEntryAmount').fill('400');
  await page.locator('#paymentEntryForm button[type=submit]').click();
