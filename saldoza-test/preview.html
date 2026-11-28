@@ -3687,13 +3687,14 @@ function calendarForecast(keys,opening,daily,events){
    if(e.kind==='credit'){const used=Math.min(Math.max(0,creditReserve),cost);creditReserve-=used;cost-=used;}
    debit(cost);
   }
-  if(daily!==null)debit(daily);
+  const dayCost=daily===null?null:Math.max(0,daily-(date===keys[0]?(events.todaySpent||0):0));
+  if(dayCost!==null)debit(dayCost);
   for(const e of rows.filter(x=>x.kind==='income')){
    if(e.cents===null){balance=null;continue;}
    if(balance!==null){balance+=e.cents;if(!Number.isSafeInteger(balance))balance=null;}
   }
   if(balance!==null&&!Number.isSafeInteger(balance))balance=null;
-  return {date,rows,balance,low,shortfall:low===null?null:Math.max(0,-low)};
+  return {date,rows,balance,low,dayCost,shortfall:low===null?null:Math.max(0,-low)};
  });
 }
 function calendarOverview(days){
@@ -3709,6 +3710,16 @@ function validIncomeSchedule(item){
 function incomeScheduleDate(item,period){
  const day=fromISO(item.date).getDate();
  return iso(dateFor(period,day));
+}
+function calendarDailyActual(now){
+ const today=iso(now),cutoff=iso(calendarAddDays(now,-30));
+ const expenses=(data.expenses||[]).filter(e=>['family','other','utilities'].includes(e.category)&&!e.billId&&!e.creditAccount&&e.type!=='Отправил жене'&&Number.isFinite(Number(e.amount))&&Number(e.amount)>0&&e.date<=today);
+ const past=expenses.filter(e=>e.date<today);
+ const first=past.reduce((a,e)=>!a||e.date<a?e.date:a,null);
+ const start=first?(first>cutoff?first:cutoff):null;
+ const count=start?Array.from({length:30},(_,i)=>iso(calendarAddDays(now,-i-1))).filter(d=>d>=start).length:0;
+ const sum=items=>items.reduce((a,e)=>a+Math.round(Number(e.amount)*100),0);
+ return {daily:count?Math.round(sum(past.filter(e=>e.date>=start))/count)/100:null,count,todaySpent:sum(expenses.filter(e=>e.date===today))/100};
 }
 function calendarSnapshot(now,horizon=30,scenario=null){
  const length=[30,60,90].includes(horizon)?horizon:30;
@@ -3774,8 +3785,8 @@ function calendarSnapshot(now,horizon=30,scenario=null){
  }
  if(snapshot.debt>0&&data.deadline&&fromISO(data.deadline))push(data.deadline<today?today:data.deadline,'credit','Кредитка · погасить долг',cents(snapshot.debt));
  for(const p of data.calendarPurchases||[])if(calendarValidPlan(p))push(p.date<today?today:p.date,'purchase',p.name+(p.date<today?' · просроченный план':''),p.cents);
- const daily=scenario?.daily??dailyBudgetValue(data.usualDailyBudget);
- const days=calendarForecast(keys,actual?cents(actual.available):null,cents(daily),{rows,mortgageReserve:actual?cents(actual.mortgage)??0:0,creditReserve:actual?cents(actual.creditReserve)??0:0});
+ const observed=calendarDailyActual(now),daily=scenario?.daily??observed.daily;
+ const days=calendarForecast(keys,actual?cents(actual.available):null,cents(daily),{rows,todaySpent:cents(observed.todaySpent),mortgageReserve:actual?cents(actual.mortgage)??0:0,creditReserve:actual?cents(actual.creditReserve)??0:0});
  const history=[],start=iso(calendarAddDays(now,-29));
  const addHistory=(items,kind,label)=>{for(const x of items||[])if(x.date>=start&&x.date<=today)history.push({id:x.id,createdAt:x.createdAt||x.recordedAt,date:x.date,kind,name:label(x),cents:cents(num(x.amount))});};
  addHistory(data.receipts,'income',x=>x.type==='advance'?'Аванс':'Зарплата');
@@ -3784,7 +3795,7 @@ function calendarSnapshot(now,horizon=30,scenario=null){
  addHistory(data.regularPayments,'expense',x=>x.target==='mortgage'?'Ипотека':'Кредитка');
  addHistory(data.earlyRepayments,'expense',x=>x.target==='mortgage'?'Досрочная ипотека':'Досрочное погашение кредитки');
  addHistory(data.transfers,'transfer',()=> 'Перевод между конвертами');
- return {today,days,history:sortHistoryRows(history),opening:actual?cents(actual.available):null,daily:cents(daily),unknownCredit:snapshot.debt>0&&(!data.deadline||!fromISO(data.deadline))};
+ return {today,days,history:sortHistoryRows(history),opening:actual?cents(actual.available):null,daily:cents(daily),observedDays:observed.count,todaySpent:cents(observed.todaySpent),safeDaily:cents(snapshot.cash?.daily),unknownCredit:snapshot.debt>0&&(!data.deadline||!fromISO(data.deadline))};
 }
 function setupMoneyCalendar(){
  const dialog=$('moneyCalendarDialog'),form=$('calendarPurchaseForm');
@@ -3844,7 +3855,7 @@ function setupMoneyCalendar(){
   incomeSchedules();scenarioResult();
   const s=calendarSnapshot(new Date(),horizon),summary=$('moneyCalendarSummary'),host=$('moneyCalendarDays'),history=$('calendarActualList'),list=$('calendarPurchaseList');
   const overview=calendarOverview(s.days),risk=overview.first,peak=overview.peak;
-  summary.textContent='Свободный остаток сейчас: '+money(s.opening)+' · обычные расходы в день: '+money(s.daily)+'. '+(overview.unknown||s.unknownCredit?'Прогноз неполный; проверь исходные данные. ':risk?'Возможна нехватка денег. ':'По введённым данным нехватки не видно. ')+(s.unknownCredit?'Срок кредитки неизвестен. ':'')+'Будущие поступления не гарантированы.';
+  summary.textContent='Свободный остаток сейчас: '+money(s.opening)+' · средние расходы: '+money(s.daily)+' / день ('+s.observedDays+' дн. истории) · сегодня потрачено: '+money(s.todaySpent)+' · доступный дневной лимит: '+money(s.safeDaily)+'. '+(overview.unknown||s.unknownCredit?'Прогноз неполный; проверь исходные данные. ':risk?'Возможна нехватка денег. ':'По введённым данным нехватки не видно. ')+(s.unknownCredit?'Срок кредитки неизвестен. ':'')+'Будущие поступления не гарантированы.';
   const cards=$('calendarForecastSummary');cards.replaceChildren();
   const metric=(label,value,warning=false)=>{const card=node('div','');card.append(node('small',label),node('strong',value,warning?'calendar-risk':''));cards.append(card);};
   metric('Первая возможная нехватка',risk?formatBudgetDate(risk.date)+' · '+money(risk.shortfall):overview.unknown||s.unknownCredit?'Неизвестно':'Не выявлена',!!risk);
@@ -3859,7 +3870,7 @@ function setupMoneyCalendar(){
    row.append(head);
    if(d.shortfall>0)row.append(node('div','Возможная нехватка: '+money(d.shortfall),'calendar-risk'));
    for(const e of d.rows)row.append(node('small',e.name+' · '+(e.cents===null?'сумма неизвестна':(e.kind==='income'?'+':'−')+money(e.cents))));
-   if(s.daily!==null)row.append(node('small','Обычные расходы · −'+money(s.daily)));
+   if(d.dayCost!==null)row.append(node('small',(d.date===s.today?'Ожидаемые расходы до конца дня':'Обычные расходы · прогноз')+' · −'+money(d.dayCost)));
    host.append(row);
   }
   for(const e of s.history)history.append(node('div',formatBudgetDate(e.date)+' · '+e.name+' · '+(e.kind==='income'?'+':e.kind==='expense'?'−':'')+money(e.cents),'calendar-day'));
@@ -5972,7 +5983,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.161';
+const APP_VERSION='1.5.162';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
