@@ -1,4 +1,4 @@
-const CACHE='family-budget-v1-5-161';
+const CACHE='family-budget-v1-5-164';
 const ASSETS=['./','./index.html','./manifest.webmanifest','./version.json','./icon.svg','./icon.png','./icon-512.png'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(path=>new Request(path,{cache:'reload'})))).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key.startsWith('family-budget-')&&key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
