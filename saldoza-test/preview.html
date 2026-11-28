@@ -3713,7 +3713,7 @@ function incomeScheduleDate(item,period){
 }
 function calendarDailyActual(now){
  const today=iso(now),cutoff=iso(calendarAddDays(now,-30));
- const expenses=(data.expenses||[]).filter(e=>['family','other','utilities'].includes(e.category)&&!e.billId&&!e.creditAccount&&e.type!=='Отправил жене'&&Number.isFinite(Number(e.amount))&&Number(e.amount)>0&&e.date<=today);
+ const expenses=(data.expenses||[]).filter(e=>(e.category==='family'||(e.category==='other'&&/^(автомобиль|кафе|транспорт|бензин|такси)$/i.test(String(e.type||'').trim())))&&!/ремонт|техник|мебел|разов|крупн|недвижим|покупка автомобиля/i.test(String(e.type||'')+' '+String(e.note||''))&&!e.billId&&!e.creditAccount&&e.type!=='Отправил жене'&&Number.isFinite(Number(e.amount))&&Number(e.amount)>0&&e.date<=today);
  const past=expenses.filter(e=>e.date<today);
  const first=past.reduce((a,e)=>!a||e.date<a?e.date:a,null);
  const start=first?(first>cutoff?first:cutoff):null;
@@ -3795,7 +3795,7 @@ function calendarSnapshot(now,horizon=30,scenario=null){
  addHistory(data.regularPayments,'expense',x=>x.target==='mortgage'?'Ипотека':'Кредитка');
  addHistory(data.earlyRepayments,'expense',x=>x.target==='mortgage'?'Досрочная ипотека':'Досрочное погашение кредитки');
  addHistory(data.transfers,'transfer',()=> 'Перевод между конвертами');
- return {today,days,history:sortHistoryRows(history),opening:actual?cents(actual.available):null,daily:cents(daily),observedDays:observed.count,todaySpent:cents(observed.todaySpent),safeDaily:cents(snapshot.cash?.daily),unknownCredit:snapshot.debt>0&&(!data.deadline||!fromISO(data.deadline))};
+ return {today,days,history:sortHistoryRows(history),opening:actual?cents(actual.available):null,daily:cents(daily),utilitiesUnplanned:(data.expenses||[]).some(e=>e.category==='utilities'&&e.date<=today&&!e.billId)&&!(data.monthlyBills||[]).some(b=>validMonthlyBill(b)&&b.category==='utilities'),observedDays:observed.count,todaySpent:cents(observed.todaySpent),safeDaily:cents(snapshot.cash?.daily),unknownCredit:snapshot.debt>0&&(!data.deadline||!fromISO(data.deadline))};
 }
 function setupMoneyCalendar(){
  const dialog=$('moneyCalendarDialog'),form=$('calendarPurchaseForm');
@@ -3855,7 +3855,7 @@ function setupMoneyCalendar(){
   incomeSchedules();scenarioResult();
   const s=calendarSnapshot(new Date(),horizon),summary=$('moneyCalendarSummary'),host=$('moneyCalendarDays'),history=$('calendarActualList'),list=$('calendarPurchaseList');
   const overview=calendarOverview(s.days),risk=overview.first,peak=overview.peak;
-  summary.textContent='Свободный остаток сейчас: '+money(s.opening)+' · средние расходы: '+money(s.daily)+' / день ('+s.observedDays+' дн. истории) · сегодня потрачено: '+money(s.todaySpent)+' · доступный дневной лимит: '+money(s.safeDaily)+'. '+(overview.unknown||s.unknownCredit?'Прогноз неполный; проверь исходные данные. ':risk?'Возможна нехватка денег. ':'По введённым данным нехватки не видно. ')+(s.unknownCredit?'Срок кредитки неизвестен. ':'')+'Будущие поступления не гарантированы.';
+  summary.textContent='Свободный остаток сейчас: '+money(s.opening)+' · средние расходы: '+money(s.daily)+' / день ('+s.observedDays+' дн. истории) · сегодня потрачено: '+money(s.todaySpent)+' · доступный дневной лимит: '+money(s.safeDaily)+'. '+(overview.unknown||s.unknownCredit?'Прогноз неполный; проверь исходные данные. ':risk?'Возможна нехватка денег. ':'По введённым данным нехватки не видно. ')+(s.unknownCredit?'Срок кредитки неизвестен. ':'')+(s.utilitiesUnplanned?'Коммуналка не включена в прогноз: добавь её в регулярные платежи. ':'')+'Будущие поступления не гарантированы.';
   const cards=$('calendarForecastSummary');cards.replaceChildren();
   const metric=(label,value,warning=false)=>{const card=node('div','');card.append(node('small',label),node('strong',value,warning?'calendar-risk':''));cards.append(card);};
   metric('Первая возможная нехватка',risk?formatBudgetDate(risk.date)+' · '+money(risk.shortfall):overview.unknown||s.unknownCredit?'Неизвестно':'Не выявлена',!!risk);
@@ -5983,7 +5983,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.162';
+const APP_VERSION='1.5.163';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
