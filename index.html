@@ -2660,7 +2660,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
  <label class="field">Задержка плановых выплат, дней<input id="scenarioDelay" type="number" min="0" max="90" value="0" step="1"></label>
  <label class="field">Расходы в день по сценарию, ₽<input id="scenarioDaily" type="number" min="0" step="0.01" placeholder="Как в основном плане"></label>
  <p id="scenarioResult" aria-live="polite"></p></details>
- <details><summary>Прогноз по дням</summary><div id="moneyCalendarDays"></div></details><details id="calendarActualDetails"><summary>Фактические операции · последние 30 дней</summary><div id="calendarActualList"></div></details><p class="foot">Прогноз общего свободного бюджета, не каждого конверта. Учитывает остаток на момент просмотра, полную дневную норму даже сегодня, известные платежи и плановые зарплаты. Сначала расходы, затем поступления. Новые накопления, неподтверждённые доходы кроме зарплат и неизвестные платежи не включены. Минимальный платёж кредитки и сроки сверяй с банком. Подушка не используется.</p></div></dialog>
+ <details><summary>Прогноз по дням</summary><div id="moneyCalendarDays"></div></details><details id="calendarActualDetails"><summary>Фактические операции · последние 30 дней</summary><div id="calendarActualList"></div></details><p class="foot">Прогноз общего свободного бюджета, не каждого конверта. Учитывает остаток на момент просмотра, оставшуюся дневную норму сегодня, известные платежи и плановые зарплаты. Сначала расходы, затем поступления. Новые накопления, неподтверждённые доходы кроме зарплат и неизвестные платежи не включены. Минимальный платёж кредитки и сроки сверяй с банком. Подушка не используется.</p></div></dialog>
 <style>#moneyCalendarDialog{max-height:90dvh;overflow:auto}#calendarHorizon{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:8px 0}#calendarHorizon button{padding:8px 3px;font-size:13px;white-space:nowrap}#calendarHorizon button[aria-pressed="true"]{background:var(--blue);color:var(--accent-text,var(--ink));border-color:var(--blue);font-weight:700}#calendarForecastSummary{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:8px 0 12px}#calendarForecastSummary>div{background:var(--panel);border-radius:12px;padding:9px;min-width:0;overflow-wrap:anywhere}#calendarForecastSummary small,#calendarForecastSummary strong{display:block}#calendarForecastSummary small{color:var(--muted);font-size:12px}#calendarForecastSummary strong{margin-top:5px;font-size:15px}#moneyCalendarDialog summary{cursor:pointer;font-weight:650;padding:10px 0}#moneyCalendarDialog .field{display:grid;gap:4px;margin:8px 0}.calendar-day{padding:9px 4px;border-bottom:1px solid var(--line)}.calendar-day-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.calendar-day small{display:block;color:var(--muted);margin-top:4px;overflow-wrap:anywhere}.calendar-risk{color:var(--red);font-weight:700}.calendar-plan-row{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px solid var(--line);align-items:center;overflow-wrap:anywhere}.calendar-plan-row>div{min-width:0}.calendar-plan-row button{flex-shrink:0}</style>
 <dialog id="purchaseCheckDialog" class="budget-alerts-dialog" aria-labelledby="purchaseCheckTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="purchaseCheckTitle">Могу ли я позволить себе покупку?</h2><button type="button" class="btn light" id="purchaseCheckClose" aria-label="Закрыть">✕</button></div><p class="foot" id="purchaseCheckContext"></p><form id="purchaseCheckForm"><label class="field">Название покупки (по желанию)<input id="purchaseName" maxlength="80" placeholder="Например, зимние ботинки"></label><label class="field">Стоимость дополнительной покупки, ₽<input id="purchasePrice" type="number" inputmode="decimal" min="0.01" step="0.01" required></label><label class="field">Необходимые расходы семьи в день, ₽<input id="purchaseDaily" type="number" inputmode="decimal" min="0" step="0.01" required placeholder="Из настроек или введи вручную"></label><label class="field">Другие разовые расходы до выплаты, ₽<input id="purchaseExtra" type="number" inputmode="decimal" min="0" step="0.01" value="0"></label><p class="foot">Не включай покупку и уже учтённые обязательные платежи в дневной бюджет или разовые расходы. Корм, лекарства и прочие необходимые покупки укажи отдельно, если они ещё не включены.</p><button class="btn full" type="submit">Проверить покупку</button></form><div id="purchaseCheckResult" aria-live="polite"></div><button hidden id="planAfterPayday" type="button" class="btn full">Запланировать после выплаты</button></div></dialog>
 <style>#purchaseCheckOpen{width:100%;min-height:38px;margin:4px 0;font-size:13px;flex-shrink:0}#purchaseCheckDialog .field{display:grid;gap:5px;margin:10px 0}#purchaseCheckResult{margin-top:12px;padding:12px;border-radius:12px;background:var(--panel);overflow-wrap:anywhere}#purchaseCheckResult p{margin:6px 0;font-size:13px}#purchaseCheckResult small{display:block;color:var(--muted);margin-top:8px}.purchase-ok{color:var(--green)}.purchase-bad{color:var(--red)}</style>
@@ -3753,13 +3753,14 @@ function calendarForecast(keys,opening,daily,events){
    if(e.kind==='credit'){const used=Math.min(Math.max(0,creditReserve),cost);creditReserve-=used;cost-=used;}
    debit(cost);
   }
-  if(daily!==null)debit(daily);
+  const dayCost=daily===null?null:Math.max(0,daily-(date===keys[0]?(events.todaySpent||0):0));
+  if(dayCost!==null)debit(dayCost);
   for(const e of rows.filter(x=>x.kind==='income')){
    if(e.cents===null){balance=null;continue;}
    if(balance!==null){balance+=e.cents;if(!Number.isSafeInteger(balance))balance=null;}
   }
   if(balance!==null&&!Number.isSafeInteger(balance))balance=null;
-  return {date,rows,balance,low,shortfall:low===null?null:Math.max(0,-low)};
+  return {date,rows,balance,low,dayCost,shortfall:low===null?null:Math.max(0,-low)};
  });
 }
 function calendarOverview(days){
@@ -3775,6 +3776,16 @@ function validIncomeSchedule(item){
 function incomeScheduleDate(item,period){
  const day=fromISO(item.date).getDate();
  return iso(dateFor(period,day));
+}
+function calendarDailyActual(now){
+ const today=iso(now),cutoff=iso(calendarAddDays(now,-30));
+ const expenses=(data.expenses||[]).filter(e=>(e.category==='family'||(e.category==='other'&&/^(автомобиль|кафе|транспорт|бензин|такси)$/i.test(String(e.type||'').trim())))&&!/ремонт|техник|мебел|разов|крупн|недвижим|покупка автомобиля/i.test(String(e.type||'')+' '+String(e.note||''))&&!e.billId&&!e.creditAccount&&e.type!=='Отправил жене'&&Number.isFinite(Number(e.amount))&&Number(e.amount)>0&&e.date<=today);
+ const past=expenses.filter(e=>e.date<today);
+ const first=past.reduce((a,e)=>!a||e.date<a?e.date:a,null);
+ const start=first?(first>cutoff?first:cutoff):null;
+ const count=start?Array.from({length:30},(_,i)=>iso(calendarAddDays(now,-i-1))).filter(d=>d>=start).length:0;
+ const sum=items=>items.reduce((a,e)=>a+Math.round(Number(e.amount)*100),0);
+ return {daily:count?Math.round(sum(past.filter(e=>e.date>=start))/count)/100:null,count,todaySpent:sum(expenses.filter(e=>e.date===today))/100};
 }
 function calendarSnapshot(now,horizon=30,scenario=null){
  const length=[30,60,90].includes(horizon)?horizon:30;
@@ -3855,8 +3866,8 @@ function calendarSnapshot(now,horizon=30,scenario=null){
  }
  if(snapshot.debt>0&&data.deadline&&fromISO(data.deadline))push(data.deadline<today?today:data.deadline,'credit','Кредитка · погасить долг',cents(snapshot.debt));
  for(const p of data.calendarPurchases||[])if(calendarValidPlan(p))push(p.date<today?today:p.date,'purchase',p.name+(p.date<today?' · просроченный план':''),p.cents);
- const daily=scenario?.daily??dailyBudgetValue(data.usualDailyBudget);
- const days=calendarForecast(keys,actual?cents(actual.available):null,cents(daily),{rows,mortgageReserve:actual?cents(actual.mortgage)??0:0,creditReserve:actual?cents(actual.creditReserve)??0:0});
+ const observed=calendarDailyActual(now),daily=scenario?.daily??observed.daily;
+ const days=calendarForecast(keys,actual?cents(actual.available):null,cents(daily),{rows,todaySpent:cents(observed.todaySpent),mortgageReserve:actual?cents(actual.mortgage)??0:0,creditReserve:actual?cents(actual.creditReserve)??0:0});
  const history=[],start=iso(calendarAddDays(now,-29));
  const addHistory=(items,kind,label)=>{for(const x of items||[])if(x.date>=start&&x.date<=today)history.push({id:x.id,createdAt:x.createdAt||x.recordedAt,date:x.date,kind,name:label(x),cents:cents(num(x.amount))});};
  addHistory(data.receipts,'income',x=>x.type==='advance'?'Аванс':'Зарплата');
@@ -3865,7 +3876,7 @@ function calendarSnapshot(now,horizon=30,scenario=null){
  addHistory(data.regularPayments,'expense',x=>x.target==='mortgage'?'Ипотека':'Кредитка');
  addHistory(data.earlyRepayments,'expense',x=>x.target==='mortgage'?'Досрочная ипотека':'Досрочное погашение кредитки');
  addHistory(data.transfers,'transfer',()=> 'Перевод между конвертами');
- return {today,days,history:sortHistoryRows(history),opening:actual?cents(actual.available):null,daily:cents(daily),unknownCredit:snapshot.debt>0&&(!data.deadline||!fromISO(data.deadline))};
+ return {today,days,history:sortHistoryRows(history),opening:actual?cents(actual.available):null,daily:cents(daily),utilitiesUnplanned:(data.expenses||[]).some(e=>e.category==='utilities'&&e.date<=today&&!e.billId)&&!(data.monthlyBills||[]).some(b=>validMonthlyBill(b)&&b.category==='utilities'),observedDays:observed.count,todaySpent:cents(observed.todaySpent),safeDaily:cents(snapshot.cash?.daily),unknownCredit:snapshot.debt>0&&(!data.deadline||!fromISO(data.deadline))};
 }
 function setupMoneyCalendar(){
  const dialog=$('moneyCalendarDialog'),form=$('calendarPurchaseForm');
@@ -3925,11 +3936,11 @@ function setupMoneyCalendar(){
   incomeSchedules();scenarioResult();
   const s=calendarSnapshot(new Date(),horizon),summary=$('moneyCalendarSummary'),host=$('moneyCalendarDays'),history=$('calendarActualList'),list=$('calendarPurchaseList');
   const overview=calendarOverview(s.days),risk=overview.first,peak=overview.peak;
-  summary.textContent='Свободный остаток сейчас: '+money(s.opening)+' · обычные расходы в день: '+money(s.daily)+'. '+(overview.unknown||s.unknownCredit?'Прогноз неполный; проверь исходные данные. ':risk?'Возможна нехватка денег. ':'По введённым данным нехватки не видно. ')+(s.unknownCredit?'Срок кредитки неизвестен. ':'')+'Будущие поступления не гарантированы.';
+  summary.textContent='Свободный остаток сейчас: '+money(s.opening)+' · средние расходы: '+money(s.daily)+' / день ('+s.observedDays+' дн. истории) · сегодня потрачено: '+money(s.todaySpent)+' · доступный дневной лимит: '+money(s.safeDaily)+'. '+(overview.unknown||s.unknownCredit?'Прогноз неполный; проверь исходные данные. ':risk?'Возможна нехватка денег. ':'По введённым данным нехватки не видно. ')+(s.unknownCredit?'Срок кредитки неизвестен. ':'')+(s.utilitiesUnplanned?'Коммуналка не включена в прогноз: добавь её в регулярные платежи. ':'')+'Будущие поступления не гарантированы.';
   const cards=$('calendarForecastSummary');cards.replaceChildren();
-  const metric=(label,value,warning=false)=>{const card=node('div','');card.append(node('small',label),node('strong',value,warning?'calendar-risk':''));cards.append(card);};
-  metric('Первая возможная нехватка',risk?formatBudgetDate(risk.date)+' · '+money(risk.shortfall):overview.unknown||s.unknownCredit?'Неизвестно':'Не выявлена',!!risk);
-  metric('Наибольшая выявленная нехватка',peak?money(peak.shortfall)+' · '+formatBudgetDate(peak.date):overview.unknown||s.unknownCredit?'Неизвестно':money(0),!!peak);
+  const metric=(label,value,warning=false,date=null)=>{const card=node('div','');card.append(node('small',label));if(date)card.append(node('small',formatBudgetDate(date)));card.append(node('strong',value,warning?'calendar-risk':''));cards.append(card);};
+  metric('Первая возможная нехватка',risk?money(risk.shortfall):overview.unknown||s.unknownCredit?'Неизвестно':'Не выявлена',!!risk,risk?.date);
+  metric('Наибольшая выявленная нехватка',peak?money(peak.shortfall):overview.unknown||s.unknownCredit?'Неизвестно':money(0),!!peak,peak?.date);
   metric('Дней с выявленным дефицитом',String(overview.riskDays)+(overview.unknown||s.unknownCredit?' (неполный прогноз)':''),overview.riskDays>0);
   metric('Остаток на '+formatBudgetDate(s.days.at(-1).date),money(overview.ending),overview.ending!==null&&overview.ending<0);
   for(const b of $('calendarHorizon').querySelectorAll('[data-horizon]'))b.setAttribute('aria-pressed',String(Number(b.dataset.horizon)===horizon));
@@ -3940,7 +3951,7 @@ function setupMoneyCalendar(){
    row.append(head);
    if(d.shortfall>0)row.append(node('div','Возможная нехватка: '+money(d.shortfall),'calendar-risk'));
    for(const e of d.rows)row.append(node('small',e.name+' · '+(e.cents===null?'сумма неизвестна':(e.kind==='income'?'+':'−')+money(e.cents))));
-   if(s.daily!==null)row.append(node('small','Обычные расходы · −'+money(s.daily)));
+   if(d.dayCost!==null)row.append(node('small',(d.date===s.today?'Ожидаемые расходы до конца дня':'Обычные расходы · прогноз')+' · −'+money(d.dayCost)));
    host.append(row);
   }
   for(const e of s.history)history.append(node('div',formatBudgetDate(e.date)+' · '+e.name+' · '+(e.kind==='income'?'+':e.kind==='expense'?'−':'')+money(e.cents),'calendar-day'));
@@ -6153,7 +6164,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.161';
+const APP_VERSION='1.5.164';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
