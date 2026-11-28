@@ -2253,7 +2253,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 #personalGoals .capital-settings-icon{font-size:18px}
 #analyticsModalPlan #goalChoiceField[hidden],#analyticsModalPlan #deletePurpose[hidden]{display:none!important}
 </style><style>
-#goalBalances .goal-row{display:grid;gap:5px;width:100%;padding:10px 0;background:transparent;color:var(--ink);font:inherit;text-align:start;cursor:pointer;border:0;border-bottom:1px solid var(--line)}
+#goalBalances{display:grid;gap:10px;margin:8px 0 4px}#goalBalances .goal-row{display:grid;gap:6px;width:100%;padding:12px;background:var(--panel);color:var(--ink);font:inherit;text-align:start;cursor:pointer;border:1px solid var(--line);border-radius:14px;min-width:0}#goalBalances .goal-row:focus-visible{outline:2px solid var(--blue);outline-offset:2px}#goalBalances .goal-row progress,#goalBalances .goal-row progress::-webkit-progress-bar{background:var(--card)}
 #purposeEditor form{display:grid;gap:8px;margin:12px 0}
 #purposeEditor .field{display:grid;gap:4px}#purposeEditor [hidden]{display:none!important}
 #purposeEditor{max-height:86dvh;overflow:auto}#monthlyGoalPreview:empty{display:none}
@@ -5972,7 +5972,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.160';
+const APP_VERSION='1.5.161';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
