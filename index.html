@@ -2240,6 +2240,18 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 #personalGoals summary{list-style:none;font-weight:600}
 #personalGoals summary::-webkit-details-marker{display:none}
 #personalGoals .field input,#personalGoals select{width:100%;box-sizing:border-box}
+</style><style>
+#goalBalances>div{display:grid;gap:5px;padding:9px 0}
+#goalBalances b{font-size:14px;overflow-wrap:anywhere}
+#goalBalances progress{appearance:none;width:100%;height:5px;border:0;border-radius:4px;overflow:hidden;background:var(--panel);color:var(--blue)}
+#goalBalances progress::-webkit-progress-bar{background:var(--panel)}
+#goalBalances progress::-webkit-progress-value{background:var(--blue)}
+#goalBalances progress::-moz-progress-bar{background:var(--blue)}
+.goal-amounts{display:flex;justify-content:space-between;gap:8px}
+#goalBalances .goal-amounts small{font-size:11px;font-variant-numeric:tabular-nums}
+.goal-amounts small:last-child{text-align:right}
+#personalGoals .capital-settings-icon{font-size:18px}
+#analyticsModalPlan #goalChoiceField[hidden],#analyticsModalPlan #deletePurpose[hidden]{display:none!important}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="daily-summary"><div class="daily-headline"><span id="dailySpendingLimit">—</span><span id="nextPaymentDate">На семейные покупки</span><span id="nextPaymentWhen"></span></div><div hidden><p id="dailySpendingNote"></p><small id="heroLabel"></small></div></div></header>
 <main class="main">
@@ -2412,33 +2424,10 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 
 <section class="view" id="v-analytics">
  <div class="analytics-one-screen">
-  <div class="analytics-capital-unified" aria-label="План накоплений">
-  <div class="analytics-capital-card">
-   <div class="analytics-panel-top"><b>🎯 Лестница капитала</b><button type="button" class="analytics-text-button capital-settings-icon" data-anal-open="plan" aria-label="Настроить цель и срок">⚙</button></div>
-   <div class="analytics-capital-numbers"><strong id="ladderTotal">—</strong><span id="ladderBadge">Цель: 1 млн ₽</span></div>
-   <div class="ladder-track" role="progressbar" aria-label="Прогресс накоплений" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ladderTrack"><div id="ladderFill"></div></div>
-   <div class="analytics-capital-note" id="ladderRemaining">До следующей ступени —</div><div class="analytics-capital-details"><div><span>🛡 Неприкосновенная подушка</span><b id="ladderReserve">—</b></div><div><span>Целевой размер подушки</span><b id="ladderReserveGoal">—</b></div><div><span>🏦 Сверх подушки</span><b id="ladderExtra">—</b></div><div><span>Следующая ступень</span><b id="ladderGoal">1 000 000 ₽</b></div></div>
-     <p class="foot" id="ladderNote"></p>
-  </div>
-  <div class="analytics-goal-overview" aria-label="Сводка цели накоплений">
-   <div class="analytics-goal-top">
-    <div class="analytics-goal-tile"><span>Следующая цель</span><strong id="analyticsGoalAmount">—</strong></div>
-    <div class="analytics-goal-tile"><span>Уже накоплено</span><strong id="analyticsGoalCurrent">—</strong></div>
-   </div>
-   <div class="analytics-goal-rest"><span>Осталось накопить</span><strong id="analyticsGoalRemaining">—</strong></div>
-  </div>
-  <div class="analytics-monthly-save" aria-label="Нужно откладывать в месяц">
-   <span>Нужно откладывать в месяц</span>
-   <strong id="analyticsMonthlySaveAmount">—</strong>
-   <small id="analyticsMonthlySaveDeadline">—</small>
-  </div>
-  </div>
-<div id="personalGoals"><strong>Материальные цели</strong>
+  <div id="personalGoals"><div class="analytics-panel-top"><strong>Цели накоплений</strong><button type="button" class="analytics-text-button capital-settings-icon" data-anal-open="plan" aria-label="Настроить цель и срок">⚙</button></div>
  <div id="goalBalances"></div>
- <label class="field" id="goalChoiceField">Цель для новых пополнений<select id="goalChoice"></select></label>
- <button class="btn secondary" type="button" id="deletePurpose" hidden>Удалить цель</button>
  <details id="newGoal"><summary>＋ Добавить цель</summary><form id="newGoalForm">
- <div class="foot" id="goalReserve"></div><label class="field">Название<input id="purposeName" required maxlength="60" placeholder="Например, ремонт кухни"></label>
+ <div class="foot" id="goalReserve"></div><label class="field">Иконка<select id="purposeIcon" aria-label="Иконка цели"><option value="🎯">🎯 Цель</option><option value="🏠">🏠 Квартира</option><option value="🛠️">🛠️ Ремонт</option><option value="🚗">🚗 Машина</option><option value="✈️">✈️ Поездка</option><option value="🎓">🎓 Учёба</option><option value="🎁">🎁 Подарок</option></select></label><label class="field">Название<input id="purposeName" required maxlength="60" placeholder="Например, ремонт кухни"></label>
  <label class="field">Нужно накопить, ₽<input id="purposeTarget" required type="number" step=".01" min=".01" inputmode="decimal"></label>
  <label class="field">Выделить из свободных накоплений, ₽<input id="purposeStart" type="number" min="0" step=".01" inputmode="decimal" placeholder="0"></label>
  <button class="btn full" type="submit">Создать цель</button></form></details>
@@ -2522,7 +2511,30 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
      <label class="field analytics-plan-input"><span>Целевой размер подушки, ₽</span><input id="ladderReserveTarget" type="number" inputmode="decimal" step="0.01" min="0" max="1000000000" required></label>
      <label class="analytics-plan-included"><input id="ladderIncluded" type="checkbox"><span>Подушка уже входит в остаток категории «Накопления»</span></label>
 
-     <div class="confirmed-savings-card" id="confirmedSavingsCard">
+     <details><summary>Общий план накоплений</summary><div class="analytics-capital-unified" aria-label="План накоплений">
+  <div class="analytics-capital-card">
+   <div class="analytics-panel-top"><b>🎯 Лестница капитала</b></div>
+   <div class="analytics-capital-numbers"><strong id="ladderTotal">—</strong><span id="ladderBadge">Цель: 1 млн ₽</span></div>
+   <div class="ladder-track" role="progressbar" aria-label="Прогресс накоплений" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ladderTrack"><div id="ladderFill"></div></div>
+   <div class="analytics-capital-note" id="ladderRemaining">До следующей ступени —</div><div class="analytics-capital-details"><div><span>🛡 Неприкосновенная подушка</span><b id="ladderReserve">—</b></div><div><span>Целевой размер подушки</span><b id="ladderReserveGoal">—</b></div><div><span>🏦 Сверх подушки</span><b id="ladderExtra">—</b></div><div><span>Следующая ступень</span><b id="ladderGoal">1 000 000 ₽</b></div></div>
+     <p class="foot" id="ladderNote"></p>
+  </div>
+  <div class="analytics-goal-overview" aria-label="Сводка цели накоплений">
+   <div class="analytics-goal-top">
+    <div class="analytics-goal-tile"><span>Следующая цель</span><strong id="analyticsGoalAmount">—</strong></div>
+    <div class="analytics-goal-tile"><span>Уже накоплено</span><strong id="analyticsGoalCurrent">—</strong></div>
+   </div>
+   <div class="analytics-goal-rest"><span>Осталось накопить</span><strong id="analyticsGoalRemaining">—</strong></div>
+  </div>
+  <div class="analytics-monthly-save" aria-label="Нужно откладывать в месяц">
+   <span>Нужно откладывать в месяц</span>
+   <strong id="analyticsMonthlySaveAmount">—</strong>
+   <small id="analyticsMonthlySaveDeadline">—</small>
+  </div>
+  </div>
+</details> <label class="field" id="goalChoiceField">Цель для новых пополнений<select id="goalChoice"></select></label>
+ <button class="btn secondary" type="button" id="deletePurpose" hidden>Удалить цель</button>
+<div class="confirmed-savings-card" id="confirmedSavingsCard">
       <div class="row"><b>🏦 Фактически на накопительном счёте</b><span class="quiet" id="confirmedSavingsState">Не подтверждено</span></div>
       <div class="foot">Для цели используем остаток конверта «Накопления». Пока стартовые остатки не введены, используем указанную здесь сумму по банку.</div>
       <label class="field"><span>Фактический остаток счёта, ₽</span><input id="confirmedSavingsBalanceInput" inputmode="decimal" type="number" min="0" step="0.01" placeholder="Укажи сумму по банку"></label>
@@ -4728,15 +4740,19 @@ function homeGoal(snapshot=capitalSnapshot()){
 function renderPurposes(){
  const snapshot=capitalSnapshot(),{goals,free}=purposeBalances(snapshot);
  $('goalReserve').textContent='Подушка · '+rub(snapshot.reserve)+' · Свободно для целей '+rub(free);
- $('goalBalances').replaceChildren(...goals.map(goal=>{
-  const row=document.createElement('div');
-  const name=document.createElement('b'),progress=document.createElement('div'),remaining=document.createElement('small');
-  name.textContent=goal.name;
-  progress.textContent=rub(goal.saved)+' из '+rub(goal.target);
-  remaining.textContent=goal.saved>=goal.target?'Цель достигнута':'Осталось '+rub(goal.target-goal.saved);
-  row.append(name,progress,remaining);
+ const reserve={name:'Подушка',icon:'🛡️',saved:snapshot.reserve,target:snapshot.settings.reserveTarget};
+ const rows=[reserve,...goals].map(goal=>{
+  const row=document.createElement('div'),heading=document.createElement('b'),bar=document.createElement('progress');
+  const amounts=document.createElement('div'),saved=document.createElement('small'),left=document.createElement('small');
+  heading.textContent=(goal.icon||'🎯')+' '+goal.name+' — цель '+rub(goal.target);
+  bar.setAttribute('aria-label',goal.name);
+  bar.max=goal.target||1;bar.value=goal.target?Math.min(goal.saved,goal.target):0;
+  saved.textContent='Собрано '+rub(goal.saved);
+  left.textContent='Осталось '+rub(Math.max(0,goal.target-goal.saved));
+  amounts.className='goal-amounts';amounts.append(saved,left);row.append(heading,bar,amounts);
   return row;
- }));
+ });
+ $('goalBalances').replaceChildren(...rows);
  const choice=$('goalChoice');
  choice.replaceChildren(new Option('Общие накопления',''),...goals.map(g=>new Option(g.name,g.id)));
  choice.value=data.activePurpose||'';
@@ -4769,7 +4785,7 @@ $('newGoalForm').onsubmit=e=>{
  if(!name||!Number.isFinite(target)||target<=0||!Number.isFinite(start)||start<0||start>Math.min(free,target)){
   alert('Проверь название и суммы. Свободно для цели '+rub(free)+'.');return;
  }
- const goal={id:crypto.randomUUID(),name,target,start};
+ const goal={id:crypto.randomUUID(),name,target,start,icon:$('purposeIcon').value};
  const previousActive=data.activePurpose;
  (data.purposes||=[]).push(goal);
  data.activePurpose=goal.id;
@@ -6044,7 +6060,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.157';
+const APP_VERSION='1.5.158';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
