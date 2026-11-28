@@ -2233,6 +2233,13 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 .budget-date-field>input[type="date"]:not(:focus){color:transparent!important;-webkit-text-fill-color:transparent!important}
 .budget-date-field>input[type="date"]:not(:focus)::-webkit-datetime-edit{color:transparent!important;-webkit-text-fill-color:transparent!important}
 .budget-date-field>input[type="date"]:focus+.budget-date-label{visibility:hidden}
+</style><style>
+#v-analytics #personalGoals{padding:14px;border-radius:18px;background:var(--card);color:var(--ink)}
+#goalBalances>div{padding:8px 0;border-bottom:1px solid var(--line)}
+#goalBalances small{color:var(--muted)}
+#personalGoals summary{list-style:none;font-weight:600}
+#personalGoals summary::-webkit-details-marker{display:none}
+#personalGoals .field input,#personalGoals select{width:100%;box-sizing:border-box}
 </style></head><body>
 <div class="app home-active"><header class="hero"><div class="daily-summary"><div class="daily-headline"><span id="dailySpendingLimit">—</span><span id="nextPaymentDate">На семейные покупки</span><span id="nextPaymentWhen"></span></div><div hidden><p id="dailySpendingNote"></p><small id="heroLabel"></small></div></div></header>
 <main class="main">
@@ -2426,6 +2433,16 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
    <small id="analyticsMonthlySaveDeadline">—</small>
   </div>
   </div>
+<div id="personalGoals"><strong>Материальные цели</strong>
+ <div id="goalBalances"></div>
+ <label class="field" id="goalChoiceField">Цель для новых пополнений<select id="goalChoice"></select></label>
+ <button class="btn secondary" type="button" id="deletePurpose" hidden>Удалить цель</button>
+ <details id="newGoal"><summary>＋ Добавить цель</summary><form id="newGoalForm">
+ <div class="foot" id="goalReserve"></div><label class="field">Название<input id="purposeName" required maxlength="60" placeholder="Например, ремонт кухни"></label>
+ <label class="field">Нужно накопить, ₽<input id="purposeTarget" required type="number" step=".01" min=".01" inputmode="decimal"></label>
+ <label class="field">Выделить из свободных накоплений, ₽<input id="purposeStart" type="number" min="0" step=".01" inputmode="decimal" placeholder="0"></label>
+ <button class="btn full" type="submit">Создать цель</button></form></details>
+ </div>
   <button type="button" class="analytics-economy-card" id="advisorOpen"><span class="advisor-symbol">✦</span><span class="advisor-copy"><strong>Финансовый советник</strong><small>Анализ бюджета и рекомендации</small></span><span class="advisor-arrow">›</span></button><div class="analytics-economy-card">
    <div class="analytics-panel-top"><b>💡 Найденная экономия</b><button type="button" class="analytics-text-button" data-anal-open="economy">Подробнее ›</button></div>
    <div class="analytics-economy-total"><strong id="ladderSaving">—</strong><span id="ladderPeriod">Сравнение с прошлым месяцем</span></div>
@@ -2503,16 +2520,7 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
      <label class="field analytics-plan-input"><span>Фактический остаток подушки, ₽</span><input id="ladderReserveInput" type="number" inputmode="decimal" step="0.01" min="0" max="1000000000" required></label>
      <label class="field analytics-plan-input"><span>Целевой размер подушки, ₽</span><input id="ladderReserveTarget" type="number" inputmode="decimal" step="0.01" min="0" max="1000000000" required></label>
      <label class="analytics-plan-included"><input id="ladderIncluded" type="checkbox"><span>Подушка уже входит в остаток категории «Накопления»</span></label>
-<div id="personalGoals"><strong>Цели накоплений</strong>
- <div id="goalReserve"></div><div id="goalBalances"></div>
- <label class="field" id="goalChoiceField">Цель для новых пополнений<select id="goalChoice"></select></label>
- <button class="btn secondary" type="button" id="deletePurpose" hidden>Удалить цель</button>
- <details id="newGoal"><summary>Новая цель</summary><form id="newGoalForm">
- <label class="field">Название<input id="purposeName" required maxlength="60" placeholder="Например, поездка"></label>
- <label class="field">Нужно накопить, ₽<input id="purposeTarget" required type="number" step=".01" min=".01" inputmode="decimal"></label>
- <label class="field">Выделить из свободных накоплений, ₽<input id="purposeStart" type="number" min="0" step=".01" inputmode="decimal" placeholder="0"></label>
- <button class="btn full" type="submit">Создать цель</button></form></details>
- </div>
+
      <div class="confirmed-savings-card" id="confirmedSavingsCard">
       <div class="row"><b>🏦 Фактически на накопительном счёте</b><span class="quiet" id="confirmedSavingsState">Не подтверждено</span></div>
       <div class="foot">Для цели используем остаток конверта «Накопления». Пока стартовые остатки не введены, используем указанную здесь сумму по банку.</div>
@@ -4633,7 +4641,11 @@ function renderPurposes(){
  $('goalReserve').textContent='Подушка · '+rub(snapshot.reserve)+' · Свободно для целей '+rub(free);
  $('goalBalances').replaceChildren(...goals.map(goal=>{
   const row=document.createElement('div');
-  row.textContent=goal.name+' · '+rub(goal.saved)+' из '+rub(goal.target)+(goal.saved>=goal.target?' ✓':'');
+  const name=document.createElement('b'),progress=document.createElement('div'),remaining=document.createElement('small');
+  name.textContent=goal.name;
+  progress.textContent=rub(goal.saved)+' из '+rub(goal.target);
+  remaining.textContent=goal.saved>=goal.target?'Цель достигнута':'Осталось '+rub(goal.target-goal.saved);
+  row.append(name,progress,remaining);
   return row;
  }));
  const choice=$('goalChoice');
@@ -4644,7 +4656,7 @@ function renderPurposes(){
 }
 $('goalChoice').onchange=e=>{
  data.activePurpose=e.target.value;
- renderAll();renderPurposes();
+ renderAll();
 };
 $('deletePurpose').onclick=()=>{
  const id=$('goalChoice').value;
@@ -4669,9 +4681,10 @@ $('newGoalForm').onsubmit=e=>{
   alert('Проверь название и суммы. Свободно для цели '+rub(free)+'.');return;
  }
  const goal={id:crypto.randomUUID(),name,target,start};
+ const previousActive=data.activePurpose;
  (data.purposes||=[]).push(goal);
  data.activePurpose=goal.id;
- if(!renderAll())return;
+ if(!renderAll()){data.purposes.pop();data.activePurpose=previousActive;refreshBudgetView();return;}
  e.target.reset();$('newGoal').open=false;renderPurposes();
 };
 function nextCapitalMilestone(total,goal){
@@ -4789,8 +4802,6 @@ function savingsPlanRender(){
  $('savingsPlanSplit').textContent='Поровну: с аванса '+rub(fromAdvance)+' · с зарплаты '+rub(fromSalary);
 }
 function savingsPlanOpen(){
- renderPurposes();
- $('newGoal').open=false;
  const settings=ladderSettings();
  renderConfirmedSavings();
  const remaining=savingsPlanMonthsLeft(settings.targetMonth);
@@ -4805,6 +4816,7 @@ function savingsPlanOpen(){
  savingsPlanRender();
 }
 function ladderRender(){
+ renderPurposes();
  const {settings,reserve,savings,extra,total,goal,automatic}=capitalSnapshot();
  const base=automatic&&total>=1000000?goal-500000:0;
  const progress=Math.max(0,Math.min(100,goal>base?Math.round((total-base)/(goal-base)*100):100));
@@ -5849,7 +5861,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.156';
+const APP_VERSION='1.5.157';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;
