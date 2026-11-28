@@ -4513,13 +4513,13 @@ const upcomingIcon=(value,kind)=>['🏠','💳','🚗','💰','🏦','🛒','�
 const homeMortgage=upcomingMortgage(new Date());
 const upcomingRows=[];
 const todayKeyForCredits=iso(new Date());
-const addUpcoming=(name,icon,date,amount,note)=>{if(amount>0)upcomingRows.push({name,icon,date,amount,note});};
+const addUpcoming=(name,icon,date,amount,note,isCard=false)=>{if(amount>0)upcomingRows.push({name,icon,date,amount,note,isCard});};
 const paydayNote=p=>(p.type==='advance'?'С аванса · ':'С зарплаты · ')+upcomingDateLabel(p.date);
 if(homeMortgage.remaining>0)addUpcoming('Ипотека',upcomingIcon(data.legacyCreditIcons?.mortgage,'mortgage'),iso(homeMortgage.due),homeMortgage.remaining,upcomingDateLabel(homeMortgage.due));
 if(!data.closedLegacy?.card&&cc.debt>0){
  const p=cc.pays[0];
  const amount=p?(p.month===month&&planCreditRow?Math.min(cc.debt,num(planCreditRow[p.type==='advance'?'a':'b'])):Math.min(cc.debt,cc.per)):cc.debt;
- addUpcoming('Кредитная карта',upcomingIcon(data.legacyCreditIcons?.card,'card'),p?iso(p.date):(data.deadline||todayKeyForCredits),amount,p?paydayNote(p):'До '+(cc.due?upcomingDateLabel(cc.due):'уточнения срока'));
+ addUpcoming('Кредитная карта',upcomingIcon(data.legacyCreditIcons?.card,'card'),p?iso(p.date):(data.deadline||todayKeyForCredits),amount,p?paydayNote(p):'До '+(cc.due?upcomingDateLabel(cc.due):'уточнения срока'),true);
 }
 const statementRows=monthlyBillRows(todayKeyForCredits);
 for(const a of data.creditAccounts||[]){
@@ -4528,13 +4528,18 @@ for(const a of data.creditAccounts||[]){
   const gap=Math.max(0,a.baseCents-paidPrincipal(a.id)-accountReserveCents(a.id,todayKeyForCredits));
   const pays=a.graceDue?nextPaydays(new Date(),null,a.graceDue):[];
   const p=pays[0];
-  addUpcoming(a.name,upcomingIcon(a.icon,a.kind),p?iso(p.date):(a.graceDue||todayKeyForCredits),(p?Math.ceil(gap/pays.length):gap)/100,p?paydayNote(p):a.graceDue?'До '+upcomingDateLabel(fromISO(a.graceDue)):'Уточни льготный период');
+  addUpcoming(a.name,upcomingIcon(a.icon,a.kind),p?iso(p.date):(a.graceDue||todayKeyForCredits),(p?Math.ceil(gap/pays.length):gap)/100,p?paydayNote(p):a.graceDue?'До '+upcomingDateLabel(fromISO(a.graceDue)):'Уточни льготный период',true);
  }else{
   const row=statementRows.find(r=>r.bill.creditAccount===a.id&&r.nextDue);
   if(row)addUpcoming(a.name,upcomingIcon(a.icon,a.kind),row.nextDue,row.nextCents/100,upcomingDateLabel(fromISO(row.nextDue)));
  }
 }
 upcomingRows.sort((a,b)=>a.date.localeCompare(b.date));
+const nextCard=upcomingRows.find(row=>row.isCard);
+const creditLine=$('milestoneCredit');
+creditLine.hidden=!nextCard;
+creditLine.parentElement.hidden=!nextCard&&$('milestoneTitle').hidden;
+creditLine.textContent=nextCard?'💳 '+nextCard.name+' · осталось отложить '+rub(nextCard.amount)+' · '+nextCard.note:'';
 $('obligations').innerHTML=upcomingRows.map(r=>'<div class="upcoming-credit-row"><span class="upcoming-credit-icon">'+esc(r.icon)+'</span><div class="upcoming-credit-info"><b>'+esc(r.name)+'</b><small>'+esc(r.note)+'</small></div><strong>'+rub(r.amount)+'</strong></div>').join('')||'<div class="upcoming-credit-empty">Предстоящих платежей нет</div>';
 } catch(error){console.error('Upcoming credit payments',error);$('obligations').textContent='Не удалось рассчитать ближайшие платежи.';}
 const visiblePlanRows=displayAllocationRows(calc.rows);
@@ -5007,17 +5012,19 @@ function ladderRender(){
  const base=automatic&&total>=1000000?goal-500000:0;
  const progress=Math.max(0,Math.min(100,goal>base?Math.round((total-base)/(goal-base)*100):100));
  const title=$('milestoneTitle');
- const paid=creditPaidThisMonth(iso(new Date()));
- const creditLine=$('milestoneCredit');
- creditLine.hidden=paid<=0;
- creditLine.textContent=paid>0?'За месяц погашено по кредитке '+rub(paid):'';
- const focus=homeGoal();
- const noGoalBalance=savings===null&&!data.activePurpose;
- title.parentElement.hidden=noGoalBalance&&paid<=0;
- title.hidden=noGoalBalance;
- $('milestoneProgress').hidden=noGoalBalance;
- title.textContent=milestoneText(focus.total,focus.goal);
- $('milestoneProgress').textContent=(focus.name?focus.name+' · собрано ':'Уже собрано ')+rub(focus.total)+' из '+rub(focus.goal);
+ const monthlyPay=payrollForecast(data.months[currentMonth]||{},currentMonth).net;
+ const minimum=Math.max(num(settings.reserveTarget),Math.round(monthlyPay*300)/100);
+ const {active,goals}=purposeBalances();
+ const purpose=active&&active.saved<active.target?active:goals.find(item=>item.saved<item.target);
+ const focus=reserve<minimum?{icon:'🛡️',name:'Подушка',saved:reserve,target:minimum}:purpose;
+ title.parentElement.hidden=!focus&&$('milestoneCredit').hidden;
+ title.hidden=!focus;
+ $('milestoneProgress').hidden=!focus;
+ if(focus){
+  const icon=(!focus.icon||focus.icon==='🎯')&&/ремонт|плитк/iu.test(focus.name)?'🛠️':focus.icon||'🎯';
+  title.textContent=icon+' '+focus.name+' · осталось '+rub(focus.target-focus.saved);
+  $('milestoneProgress').textContent='Собрано '+rub(focus.saved)+' из '+rub(focus.target);
+ }
  $('ladderTotal').textContent=rub(total);
  $('analyticsGoalAmount').textContent=rub(goal);
  $('analyticsGoalCurrent').textContent=rub(total);
