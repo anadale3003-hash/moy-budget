@@ -2622,9 +2622,6 @@ body>details.proportions-modal[open] .proportions-settings-pane>.row{margin-bott
 <dialog id="welcomeDialog" class="budget-alerts-dialog" aria-labelledby="welcomeTitle"><form id="welcomeForm" class="budget-alerts-shell"><h2 id="welcomeTitle" tabindex="-1" autofocus>Настроим твой бюджет</h2><div class="welcome-scroll"><div class="welcome-group-title">💰 Стартовые остатки</div><p class="foot">Укажи суммы на дату начала учёта, а не сегодняшние остатки. Если бюджет уже ведётся, менять их обычно не нужно.</p><label class="field"><span>Деньги на ежедневные покупки, ₽</span><input id="welcomeCash" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><div id="welcomeExtras" class="welcome-start-fields"><label class="field"><span>С какого дня ведём бюджет</span><input id="welcomeDate" type="date" required></label><label class="field"><span>Последний оплаченный месяц ипотеки (если есть)</span><input id="welcomePaid" type="month"></label><label class="field"><span>Отложено на коммунальные услуги, ₽</span><input id="welcomeutilities" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Деньги в накоплениях, ₽</span><input id="welcomesavings" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Другие свободные деньги, ₽</span><input id="welcomeother" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Уже отложено на ипотеку, ₽</span><input id="welcomemortgage" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label></div><div id="welcomeExisting" class="foot" hidden>Начальные суммы уже сохранены. <button id="welcomeEditStart" type="button" class="btn light">Изменить стартовые остатки</button></div><button type="button" class="btn light" id="welcomeCancelStart" hidden>Не менять начальные суммы</button><div class="welcome-group-title">💵 Мой доход</div><label class="field"><span>Зарплата за месяц, ₽ (если есть)</span><input id="welcomeSalary" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>Сумма зарплаты</span><select id="welcomeMode"><option value="net">На руки</option><option value="gross">До налога</option></select></label><div class="two"><label class="field"><span>Число аванса</span><input id="welcomeAdvance" type="number" min="1" max="31" step="1" inputmode="numeric" required></label><label class="field"><span>Число зарплаты</span><input id="welcomePay" type="number" min="1" max="31" step="1" inputmode="numeric" required></label></div><details id="welcomeWork"><summary>Дополнительно: рабочие дни и налог</summary><p class="foot" id="welcomeWorkMonth"></p><label class="field"><span>Рабочих дней за месяц</span><input id="welcomeWorkTotal" type="number" min="1" max="31" step="1" placeholder="По календарю"></label><label class="field"><span>Из них с 1 по 15 число</span><input id="welcomeWorkFirst" type="number" min="0" max="15" step="1" placeholder="По календарю"></label><label class="field"><span>Налог с оклада до вычета, %</span><input id="welcomeTax" type="number" min="0" max="50" step="0.5" required></label></details><div class="welcome-group-title">🛒 Расходы семьи</div><label class="field"><span>Сколько обычно тратим в день, ₽ (необязательно)</span><input id="welcomeDaily" type="number" step="0.01" min="0.01" max="999999999" inputmode="decimal"></label><div class="welcome-group-title">📱 Что показывать в приложении</div><label class="welcome-toggle"><input id="welcomeFamily" type="checkbox"> Показать на главной «У меня» и «У жены»</label><label class="welcome-toggle"><input id="welcomeCredits" type="checkbox"> Показать вкладку «Кредиты»</label><p class="foot">Платежи по кредитам и дополнительные доходы можно добавить отдельно.</p></div><div class="actions"><button type="submit" class="btn">Сохранить</button><button type="button" class="btn light" id="welcomeLater">Позже</button></div></form></dialog><dialog id="legacyCreditEditDialog" class="budget-alerts-dialog" aria-labelledby="legacyCreditEditTitle"><form class="budget-alerts-shell" id="legacyCreditEditForm"><h2 id="legacyCreditEditTitle" tabindex="-1" autofocus style="outline:none">Изменить</h2><label class="field"><span>Иконка</span><select id="legacyCreditIcon"><option value="🏠">🏠</option><option value="💳">💳</option><option value="🚗">🚗</option><option value="💰">💰</option><option value="🏦">🏦</option><option value="🛒">🛒</option><option value="📱">📱</option><option value="🎓">🎓</option><option value="🛠️">🛠️</option><option value="✈️">✈️</option><option value="💻">💻</option><option value="💵">💵</option></select></label><div id="legacyMortgageFields"><label class="field"><span>Ежемесячный платёж, ₽</span><input id="legacyMortgageAmount" type="number" min="0.01" max="999999999" step="0.01" inputmode="decimal"></label><label class="field"><span>Остаток основного долга по данным банка, ₽ (необязательно)</span><input id="legacyMortgageBalance" type="number" min="0" max="999999999" step="0.01" inputmode="decimal"></label><p class="foot">Остаток долга по выписке справочный: ежемесячная оплата включает проценты. Суммы уже подтверждённых выплат не меняются.</p></div><div id="legacyCardFields"><label class="field"><span>Остаток долга по кредитке, ₽</span><input id="legacyCardBalance" type="number" min="0" max="999999999" step="0.01" inputmode="decimal"></label><label class="field"><span>Погасить не позднее</span><input id="legacyCardDeadline" type="date"></label></div><p class="foot" id="legacyCreditEditError" role="alert"></p><button type="submit" class="btn full">Сохранить</button><button type="button" id="legacyCreditEditCancel" class="btn full light">Отмена</button></form></dialog><dialog id="creditActionsDialog" class="budget-alerts-dialog" aria-labelledby="creditActionsTitle"><form class="budget-alerts-shell" id="creditActionsForm"><h2 id="creditActionsTitle">Кредит</h2><p class="foot" id="creditActionsInfo"></p><div id="creditActionsFields"><label class="field"><span>Фактически оплачено сегодня, ₽</span><input type="number" id="creditActualAmount" min="0.01" step="0.01" inputmode="decimal" required></label><label class="field"><span>Из них основной долг по выписке, ₽</span><input type="number" id="creditActualPrincipal" min="0" step="0.01" inputmode="decimal" required></label><p class="foot">Остальное — проценты и комиссии. Проверь суммы в банке перед сохранением.</p></div><p class="foot" role="alert" id="creditActionsError"></p><button type="submit" class="btn full" id="creditActionsSubmit">Отметить оплату</button><button type="button" class="btn full light" id="creditActionsEdit">Уточнить по выписке</button><button type="button" class="btn full secondary" id="creditActionsCloseAccount">Закрыть обязательство</button><button type="button" class="btn full light" id="creditActionsCancel">Отмена</button></form></dialog><dialog id="creditDialog" class="budget-alerts-dialog" aria-labelledby="creditTitle"><form class="budget-alerts-shell" id="creditForm"><h2 id="creditTitle" tabindex="-1" autofocus style="outline:none">Кредит или карта</h2><label class="field"><span>Тип</span><select id="creditKind"><option value="loan">Потребительский кредит</option><option value="card">Кредитная карта</option><option value="mortgage">Ипотека</option></select></label><label class="field"><span>Название</span><input id="creditName" maxlength="80" placeholder="Например, карта банка" required></label><label class="field"><span>Иконка</span><select id="creditIcon"><option value="🏠">🏠</option><option value="💳">💳</option><option value="🚗">🚗</option><option value="💰">💰</option><option value="🏦">🏦</option><option value="🛒">🛒</option><option value="📱">📱</option><option value="🎓">🎓</option><option value="🛠️">🛠️</option><option value="✈️">✈️</option><option value="💻">💻</option><option value="💵">💵</option></select></label><label class="field" id="creditGraceField" hidden><span>Дата окончания льготного периода</span><input id="creditGrace" type="date" min="1900-01-01" max="9999-12-31"></label><label class="field"><span>Остаток основного долга по данным банка, ₽</span><input id="creditBalance" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" required></label><details id="creditStatement"><summary>Ближайший платёж по выписке</summary><p class="foot">Введи сумму и дату из банка. Проценты и комиссии входят в платёж, но не уменьшают основной долг.</p><label class="field"><span>Дата платежа</span><input id="creditDue" type="date" min="1900-01-01" max="9999-12-31"></label><label class="field"><span>Полный платёж, ₽</span><input id="creditDueAmount" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><label class="field"><span>В том числе проценты и комиссии, ₽</span><input id="creditInterest" type="number" step="0.01" min="0" max="999999999" inputmode="decimal" ></label><p class="foot">Резерв автоматически распределяется между двумя ближайшими выплатами до срока; если доступна только одна — с неё.</p></details><div class="actions"><button class="btn" type="submit">Сохранить</button><button type="button" class="btn light" id="creditCancel">Отмена</button></div></form></dialog><dialog id="smartOperationDialog" class="budget-alerts-dialog" aria-labelledby="smartOperationTitle"><div class="budget-alerts-shell"><div class="budget-alerts-top"><h2 id="smartOperationTitle">Умный ввод</h2><button type="button" class="btn light" id="smartOperationClose" aria-label="Закрыть">✕</button></div><p class="foot">Напиши уже совершённую операцию обычными словами. Разбор текста выполняется на устройстве. Голос распознаёт браузер или система — может потребоваться интернет.</p><form id="smartOperationForm"><label class="field"><span id="smartOperationLabel">Что потратили?</span><textarea id="smartOperationText" rows="3" maxlength="240" required placeholder="Вчера купил корм собаке за 1800"></textarea></label><button hidden class="btn full light" id="smartVoiceButton" type="button" aria-pressed="false">🎙 Продиктовать</button><p class="foot" id="smartVoiceStatus" role="status" aria-live="polite"></p><button class="btn full" type="submit">Распознать</button></form><p id="smartOperationPreview" aria-live="polite"></p><button class="btn full secondary" id="smartOperationContinue" type="button" disabled>Перейти к подтверждению</button><button class="btn full light" id="smartOperationManual" type="button" style="margin-top:8px">Ввести вручную</button><p class="foot">Поддерживаются одиночные расходы, дополнительные доходы и переводы между конвертами в рублях. Кредиты и зарплата — через обычные формы.</p></div></dialog><style>#smartOperationText{width:100%;box-sizing:border-box;resize:vertical;background:var(--input);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;font-size:16px}#smartOperationPreview{padding:10px;background:var(--panel);border-radius:12px;overflow-wrap:anywhere}#smartOperationContinue:disabled,#smartVoiceButton:disabled{opacity:.5}#smartVoiceButton{margin-top:6px;min-height:42px}#smartVoiceStatus{margin:5px 0 9px}</style>
 <dialog id="purposeEditor" class="budget-alerts-dialog"><div class="budget-alerts-shell">
  <div class="budget-alerts-top"><h2 id="editGoalTitle"></h2><button type="button" id="closeGoalEditor" class="btn light" aria-label="Закрыть">×</button></div>
- <form id="fundGoalForm"><label class="field">Откуда взять деньги<select id="goalSource"></select></label>
- <label class="field">Сумма пополнения, ₽<input id="goalDeposit" type="number" step=".01" min=".01" inputmode="decimal" required></label>
- <button class="btn full">Пополнить</button></form>
  <form id="editGoalForm"><label class="field" id="editNameField">Название<input id="editGoalName" maxlength="60" required></label>
  <label class="field" id="editIconField">Иконка<select id="editGoalIcon"></select></label>
  <label class="field">Сумма цели, ₽<input id="editGoalTarget" type="number" min=".01" step=".01" required></label>
@@ -4464,7 +4461,7 @@ $('earlyCount').textContent='· '+earlyRows.length;
 $('earlyHistory').innerHTML=earlyRows.length?earlyRows.map(x=>`<div class="transaction"><div><b>${x.target==='credit'?'Кредитная карта':'Ипотека'}</b><small>${esc(formatBudgetDate(x.date))} · Из накоплений${x.note?' · '+esc(x.note):''}</small></div><div class="row"><b>${rub(x.amount)}</b><button class="delete" type="button" data-del-early="${esc(x.id)}" title="Удалить запись">✕</button></div></div>`).join(''):'<div class="empty">Нет досрочных погашений за месяц</div>';
 const transferRows=sortHistoryRows((data.transfers||[]).filter(t=>t.date?.startsWith(month)),'transferList');
 $('transferCount').textContent=String(transferRows.length);
-$('transferList').innerHTML=transferRows.length?transferRows.map(t=>{const from=transferCategories.find(c=>c.id===t.from)?.name||(data.creditAccounts||[]).find(a=>'account-'+a.id===t.from)?.name||({credit:'Кредитная карта',mortgage:'Ипотека'}[t.from])||'Категория',to=transferCategories.find(c=>c.id===t.to)?.name||'Категория';return `<div class="transaction"><div><b>${esc(from)} → ${esc(to)}</b><small>${esc(formatBudgetDate(t.date))}${t.note?' · '+esc(t.note):''}</small></div><div class="row"><b>${rub(t.amount)}</b>${t.closeRelease?'':'<button type="button" class="delete" data-del-transfer="'+esc(t.id)+'" title="Отменить перевод">✕</button>'}</div></div>`}).join(''):'<div class="empty">За этот месяц переводов нет</div>';
+$('transferList').innerHTML=transferRows.length?transferRows.map(t=>{const from=transferCategories.find(c=>c.id===t.from)?.name||(data.creditAccounts||[]).find(a=>'account-'+a.id===t.from)?.name||({credit:'Кредитная карта',mortgage:'Ипотека'}[t.from])||'Категория',to=t.purposeName||transferCategories.find(c=>c.id===t.to)?.name||'Категория';return `<div class="transaction"><div><b>${esc(from)} → ${esc(to)}</b><small>${esc(formatBudgetDate(t.date))}${t.note?' · '+esc(t.note):''}</small></div><div class="row"><b>${rub(t.amount)}</b>${t.closeRelease?'':'<button type="button" class="delete" data-del-transfer="'+esc(t.id)+'" title="Отменить перевод">✕</button>'}</div></div>`}).join(''):'<div class="empty">За этот месяц переводов нет</div>';
 const incomeRows=sortHistoryRows(data.extraIncomes.filter(i=>i.date?.startsWith(month)),'incomeList');
 $('incomeCount').textContent=String(incomeRows.length);
 $('incomeList').innerHTML=incomeRows.length?incomeRows.map(i=>{
@@ -4726,8 +4723,6 @@ function openGoalEditor(id){
  $('editGoalIcon').value=goal.icon||'🎯';
  $('editGoalTarget').value=goal.target;
  $('editGoalMonth').value=goal.targetMonth||'';
- $('goalDeposit').value='';
- $('goalSource').replaceChildren(...cats.map(c=>new Option((c.id==='savings'?'Свободные накопления':c.name)+' · '+rub(fundingAvailable(c.id)),c.id)));
  updateGoalPreview();
  if(!$('purposeEditor').open)$('purposeEditor').showModal();
 }
@@ -4744,25 +4739,6 @@ $('editGoalForm').onsubmit=e=>{
  if(editingGoalId)Object.assign(record,{target,targetMonth,name,icon:$('editGoalIcon').value});
  else Object.assign(record,{reserveTarget:target,reserveMonth:targetMonth});
  if(!renderAll()){Object.keys(record).forEach(k=>delete record[k]);Object.assign(record,previous);refreshBudgetView();return;}
- $('purposeEditor').close();
-};
-$('fundGoalForm').onsubmit=e=>{
- e.preventDefault();
- const goal=editedGoal(),amount=$('goalDeposit').valueAsNumber,source=$('goalSource').value,date=iso(new Date());
- if(!goal||!cats.some(c=>c.id===source)||!(amount>0)||!Number.isSafeInteger(Math.round(amount*100)))return;
- if(amount>fundingAvailable(source)+0.000001){alert('Недостаточно денег в выбранном конверте.');return;}
- if(editingGoalId&&amount>goal.target-goal.saved+0.000001){alert('Сумма превышает остаток до цели.');return;}
- if(editingGoalId&&source==='savings'){
-  const record=data.purposes.find(g=>g.id===editingGoalId),previous=record.start;
-  record.start=Math.round((num(previous)+amount)*100)/100;
-  if(!renderAll()){record.start=previous;refreshBudgetView();return;}
- }else{
-  if(!data.startBalances||date<data.startBalances.date){alert('Укажи стартовые остатки бюджета.');return;}
-  const transfer={id:crypto.randomUUID(),createdAt:new Date().toISOString(),date,from:source,to:editingGoalId?'savings':'reserve',amount,note:'Пополнение цели «'+goal.name+'»'};
-  if(editingGoalId)Object.assign(transfer,{purposeId:editingGoalId,purposeAmount:amount});
-  data.transfers.push(transfer);
-  if(!renderAll()){data.transfers.pop();refreshBudgetView();return;}
- }
  $('purposeEditor').close();
 };
 $('goalChoice').onchange=e=>{
@@ -4809,9 +4785,10 @@ function milestoneText(total,goal){
 function recordEnvelopeTransfer(transfer){
  transfer.createdAt=new Date().toISOString();
  const before=transfer.to==='savings'?homeGoal():null;
- if(before)assignContribution(transfer,transfer.amount);
+ if(before&&!transfer.purposeId)assignContribution(transfer,transfer.amount);
  data.transfers.push(transfer);
  if(!before||!saveFeedbackIntent)return;
+ if(transfer.purposeName){saveFeedbackIntent.message='Цель «'+transfer.purposeName+'» пополнена на '+rub(transfer.amount);return;}
  const after=homeGoal();
  const reached=nextCapitalMilestone(before.total,before.goal);
  const crossed=before.total<reached&&after.total>=reached&&after.total<before.goal;
@@ -5249,8 +5226,9 @@ function showEnvelopeHistory(id){
   if(inc.destination===id)add(inc,'Дополнительный доход',[inc.source,inc.note].filter(Boolean).join(' · '),num(inc.amount));
  }
  for(const tr of data.transfers||[]){
+  if(tr.from===id&&tr.to===id&&tr.purposeName){add(tr,'На цель «'+tr.purposeName+'»',rub(tr.amount)+' из свободных накоплений',0);continue;}
   if(tr.to===id){const source=cats.find(c=>c.id===tr.from)?.name||'другого конверта';add(tr,'Перевод из «'+source+'»',tr.note||'Пополнение конверта',num(tr.amount));}
-  if(tr.from===id){const target=cats.find(c=>c.id===tr.to)?.name||'другого конверта';add(tr,'Перевод в «'+target+'»',tr.note||'Перевод из конверта',-num(tr.amount));}
+  if(tr.from===id){const target=tr.purposeName||cats.find(c=>c.id===tr.to)?.name||'другого конверта';add(tr,'Перевод в «'+target+'»',tr.note||'Перевод из конверта',-num(tr.amount));}
  }
  for(const e of data.expenses||[]){
   if(e.category===id)add(e,e.type||'Расход',e.note||'Расход из конверта',-num(e.amount));
@@ -5773,26 +5751,48 @@ function updateExpenseOptions(){
  labelEnvelopeOptions(['expenseCategory'],$('expenseDate').value);
  toggleNewType();
 }
+function goalTransferAvailable(from,date,forGoal){
+ const available=transferableKopeks(from,date);
+ if(!forGoal||available===null)return available;
+ const own=from==='family'?Math.max(0,available-Math.round(wifeFunds(date)*100)):available;
+ return Math.min(own,Math.round(fundingAvailable(from)*100));
+}
 function updateTransferAvailable(){
+ const receiver=$('transferTo'),previous=receiver.value;
+ receiver.querySelector('optgroup')?.remove();
+ const group=document.createElement('optgroup');
+ group.label='Мои цели';
+ for(const goal of purposeBalances().goals){
+  const option=new Option((goal.icon||'🎯')+' '+goal.name,'goal:'+goal.id);
+  option.disabled=goal.saved>=goal.target;
+  group.append(option);
+ }
+ if(group.children.length)receiver.append(group);
+ if(Array.from(receiver.options).some(option=>option.value===previous&&!option.disabled))receiver.value=previous;
  const from=$('transferFrom').value, date=$('transferDate').value;
  labelEnvelopeOptions(['transferFrom','transferTo'],date);
- const balance=transferableKopeks(from,date);
+ const balance=goalTransferAvailable(from,date,receiver.value.startsWith('goal:')||receiver.value==='reserve');
  $('transferAvailable').textContent='Доступно в категории на эту дату: '+(balance===null?'укажи стартовые остатки и корректную дату':rub(balance/100));
 }
+$('transferTo').addEventListener('change',updateTransferAvailable);
 $('transferFrom').addEventListener('change',updateTransferAvailable);
 $('transferDate').addEventListener('change',updateTransferAvailable);
 $('transferForm').addEventListener('submit',e=>{
  e.preventDefault();
  if(!data.startBalances){alert('Сначала задай стартовые остатки в настройках.');go('settings');return;}
- const from=$('transferFrom').value,to=$('transferTo').value,date=$('transferDate').value,amount=num($('transferAmount').value),note=$('transferNote').value.trim();
+ const from=$('transferFrom').value,destination=$('transferTo').value,date=$('transferDate').value,amount=num($('transferAmount').value),note=$('transferNote').value.trim();
+ const goal=destination.startsWith('goal:')?purposeBalances().goals.find(g=>'goal:'+g.id===destination):null;
+ const to=goal?'savings':destination;
+ if(goal&&Math.round(amount*100)>Math.round((goal.target-goal.saved)*100)){alert('Сумма превышает остаток до цели.');return;}
  if(!transferCategories.some(c=>c.id===from)||!transferCategories.some(c=>c.id===to)||!fromISO(date)||!Number.isSafeInteger(Math.round(amount*100))||amount<=0||amount!==Math.round(amount*100)/100){alert('Проверь поля перевода.');return;}
- if(from===to){alert('Выбери разные категории.');return;}
+ if(from===to&&!goal){alert('Выбери разные категории.');return;}
  if(date>iso(new Date())){alert('Будущие переводы пока не учитываются.');return;}
  if(date<data.startBalances.date){alert('Дата перевода раньше начала учёта.');return;}
- const available=transferableKopeks(from,date);
+ const available=goalTransferAvailable(from,date,goal||to==='reserve');
  if(available===null||Math.round(amount*100)>available){alert('Недостаточно средств в исходной категории. Доступно: '+rub((available||0)/100)+' · Введено: '+rub(amount));return;}
- const fromName=transferCategories.find(c=>c.id===from).name,toName=transferCategories.find(c=>c.id===to).name;
+ const fromName=transferCategories.find(c=>c.id===from).name,toName=goal?.name||transferCategories.find(c=>c.id===to).name;
  const transfer={id:crypto.randomUUID(),from,to,date,amount,note};
+ if(goal)Object.assign(transfer,{purposeId:goal.id,purposeAmount:amount,purposeName:goal.name});
  if(from==='reserve'&&!reserveIsSolvent({...data,transfers:[...data.transfers,transfer]})){
   alert('Этот перевод оставит подушку без средств для более поздних записей. Проверь историю переводов.');return;
  }
@@ -5972,7 +5972,7 @@ $('importData').onchange=async event=>{
  finally{input.value='';}
 };
 
-const APP_VERSION='1.5.159';
+const APP_VERSION='1.5.160';
 let pendingWorker=null;
 $('appVersion').textContent=APP_VERSION;
 const settingsVersionBadge=$('settingsVersionBadge');if(settingsVersionBadge)settingsVersionBadge.textContent='v'+APP_VERSION;

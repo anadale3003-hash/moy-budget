@@ -1,5 +1,5 @@
 const PREFIX='saldoza-test:'+self.registration.scope+':';
-const CACHE=PREFIX+'1-5-159';
+const CACHE=PREFIX+'1-5-160';
 const ASSETS=['./','./index.html','./preview.html','./manifest.webmanifest','./version.json','./icon.svg','./icon.png','./icon-512.png'];
 function matchTestCache(request){return caches.open(CACHE).then(cache=>cache.match(request));}
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'})))).then(()=>self.skipWaiting())));
